@@ -46,6 +46,10 @@ Fix:
 - Set `VANTA_INTEGRATION_LIVE=true`.
 - For mutating live tests, set `VANTA_INTEGRATION_ALLOW_MUTATIONS=true`.
 - Set `VANTA_INTEGRATION_REQUIRE_MUTATION=true` if mutation permission must fail (instead of skip).
+- Provide fixture IDs when needed:
+  - `VANTA_INTEGRATION_TEST_VENDOR_ID`
+  - `VANTA_INTEGRATION_TEST_VULNERABILITY_ID`
+  - `VANTA_INTEGRATION_TEST_REMEDIATION_ID`
 
 ## Live integration cleanup failure
 Cause:

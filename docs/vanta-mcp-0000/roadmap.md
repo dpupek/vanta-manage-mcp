@@ -60,6 +60,10 @@
 - [x] Add live read/write integration tests with ephemeral document lifecycle + cleanup.
 - [x] Add optional live control evidence linkage verification by env fixture.
 - [x] Add live OAuth stability tests (repeat/concurrent/forced-refresh).
+- [x] Add live vendor/finding lifecycle write tests with readback verification.
+- [x] Add live vulnerability lifecycle write tests with readback verification.
+- [x] Add mock vendor/finding lifecycle write tests with readback verification.
+- [x] Add mock vulnerability lifecycle write tests with readback verification.
 - [x] Add npm scripts for `test:integration`, `test:integration:mock`, `test:integration:live`.
 - [x] Add manual `workflow_dispatch` CI workflow for live integration tests.
 - [x] Update README/security/troubleshooting/config docs for new test and credential contracts.

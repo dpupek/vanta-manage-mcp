@@ -81,6 +81,9 @@ Live integration env flags:
 - `VANTA_INTEGRATION_ALLOW_MUTATIONS=true` enables mutating live cases.
 - `VANTA_INTEGRATION_REQUIRE_MUTATION=true|false` controls skip vs fail if mutation permission is missing.
 - `VANTA_INTEGRATION_TEST_CONTROL_ID=<control-id>` optionally enables control-evidence linkage verification.
+- `VANTA_INTEGRATION_TEST_VENDOR_ID=<vendor-id>` optionally targets an existing vendor fixture for vendor/finding write tests.
+- `VANTA_INTEGRATION_TEST_VULNERABILITY_ID=<vulnerability-id>` optionally targets a specific vulnerability for lifecycle write tests.
+- `VANTA_INTEGRATION_TEST_REMEDIATION_ID=<remediation-id>` optionally targets a remediation for SLA-acknowledgement verification.
 - `VANTA_INTEGRATION_TEST_TIMEOUT_MS=<ms>` overrides live test timeout.
 
 ## Bootstrap Cleanup

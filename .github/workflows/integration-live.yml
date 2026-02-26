@@ -23,6 +23,18 @@ on:
         description: "Optional control ID for control-evidence linkage verification"
         required: false
         type: string
+      test_vendor_id:
+        description: "Optional vendor ID fixture for vendor/finding live write tests"
+        required: false
+        type: string
+      test_vulnerability_id:
+        description: "Optional vulnerability ID fixture for vulnerability lifecycle live tests"
+        required: false
+        type: string
+      test_remediation_id:
+        description: "Optional remediation ID fixture for SLA acknowledgement live tests"
+        required: false
+        type: string
       test_timeout_ms:
         description: "Per-test timeout in milliseconds"
         required: true
@@ -66,4 +78,7 @@ jobs:
           VANTA_INTEGRATION_ALLOW_MUTATIONS: ${{ inputs.allow_mutations }}
           VANTA_INTEGRATION_REQUIRE_MUTATION: ${{ inputs.require_mutation }}
           VANTA_INTEGRATION_TEST_CONTROL_ID: ${{ inputs.test_control_id }}
+          VANTA_INTEGRATION_TEST_VENDOR_ID: ${{ inputs.test_vendor_id }}
+          VANTA_INTEGRATION_TEST_VULNERABILITY_ID: ${{ inputs.test_vulnerability_id }}
+          VANTA_INTEGRATION_TEST_REMEDIATION_ID: ${{ inputs.test_remediation_id }}
           VANTA_INTEGRATION_TEST_TIMEOUT_MS: ${{ inputs.test_timeout_ms }}

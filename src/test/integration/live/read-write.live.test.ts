@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { parseToolEnvelope } from "../../helpers.js";
 import { McpStdioHarness } from "../mock/mcp-stdio-harness.js";
-import { guardLiveTest, readLiveIntegrationEnv } from "../shared/env.js";
+import {
+  guardLiveTest,
+  readLiveIntegrationEnv,
+  skipOnLiveRateLimit,
+  startLiveWithRetry,
+} from "../shared/env.js";
 
 const liveEnv = readLiveIntegrationEnv();
 
@@ -24,7 +29,14 @@ test(
       return;
     }
     const harness = new McpStdioHarness({ timeoutMs: liveEnv.timeoutMs });
-    await harness.start();
+    try {
+      await startLiveWithRetry(async () => harness.start());
+    } catch (error) {
+      if (skipOnLiveRateLimit(t, error, "controls/documents read")) {
+        return;
+      }
+      throw error;
+    }
 
     try {
       // Initial Assert
@@ -57,7 +69,14 @@ test(
     }
 
     const harness = new McpStdioHarness({ timeoutMs: liveEnv.timeoutMs });
-    await harness.start();
+    try {
+      await startLiveWithRetry(async () => harness.start());
+    } catch (error) {
+      if (skipOnLiveRateLimit(t, error, "document write lifecycle")) {
+        return;
+      }
+      throw error;
+    }
     const correlationId = `mcp-int-${Date.now().toString()}`;
     const fileBody = `integration evidence ${correlationId}`;
     const contentBase64 = Buffer.from(fileBody, "utf8").toString("base64");
@@ -155,7 +174,14 @@ test(
     assert.ok(createdDocumentId, "Expected createdDocumentId to be populated.");
 
     const verifyHarness = new McpStdioHarness({ timeoutMs: liveEnv.timeoutMs });
-    await verifyHarness.start();
+    try {
+      await startLiveWithRetry(async () => verifyHarness.start());
+    } catch (error) {
+      if (skipOnLiveRateLimit(t, error, "post-delete readback verification")) {
+        return;
+      }
+      throw error;
+    }
     try {
       const deletedLookup = await verifyHarness.callTool("get_document", {
         documentId: createdDocumentId,

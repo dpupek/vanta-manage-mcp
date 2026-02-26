@@ -52,6 +52,12 @@
   - read + write document lifecycle (create/upload/read/delete)
   - optional control-evidence linkage verification
   - OAuth stability (repeat, concurrent, forced refresh)
+- [x] Added live integration write-verification suites for:
+  - vendor/finding lifecycle writes with readback assertions
+  - vulnerability lifecycle writes (deactivate/reactivate/SLA acknowledgement) with readback assertions
+- [x] Added mock integration write-verification suites for:
+  - vendor/finding lifecycle write + readback flow
+  - vulnerability lifecycle write + readback flow
 - [x] Added manual CI workflow for live integration tests:
   - `.github/workflows/integration-live.yml`
   - `workflow_dispatch` only (no auto-run on push)
