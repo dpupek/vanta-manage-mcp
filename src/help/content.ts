@@ -25,6 +25,8 @@ const resourcePurpose: Record<HelpResourceId, string> = {
     "Core onboarding for auth, envelopes, safe writes, and discovery.",
   "resource://vanta-manage/cheatsheet":
     "Fast path from objective to tools and minimal call shapes.",
+  "resource://vanta-manage/recipes":
+    "Task recipes for vulnerability, people, vendor, and policy-evidence workflows.",
   "resource://vanta-manage/tool-catalog":
     "Live catalog of generated endpoint tools plus compat/workflow tools.",
   "resource://vanta-manage/workflow-playbooks":
@@ -48,6 +50,16 @@ export const promptDescriptions: Record<string, string> = {
     "Correlate people/assets/vulnerabilities and apply allowed updates.",
   playbook_information_request_triage:
     "Audit information request comments/evidence/status triage.",
+  playbook_vulnerability_due_soon_triage:
+    "Prioritize vulnerabilities due soon and enrich with scanner context.",
+  playbook_employee_onboarding_verification:
+    "Verify onboarding task status and identify blockers per employee.",
+  playbook_employee_offboarding_tracker:
+    "Track offboarding completion tasks and unresolved risk.",
+  playbook_vendor_risk_assessment:
+    "Assist vendor risk review using findings, docs, and status updates.",
+  playbook_policy_document_evidence_linkage:
+    "Cross-reference policy evidence and document evidence with readback verification.",
 };
 
 const renderDiscoverySection = (): string[] => {
@@ -189,6 +201,46 @@ const renderWorkflowSteps = (): string[] => [
   "",
 ];
 
+const renderRecipeSteps = (): string[] => [
+  "## Recipe: Triaging Vulnerabilities (Next 2 Weeks + Defender Context)",
+  "",
+  "1. Pull upcoming SLA items: `list_vulnerabilities` with `slaDeadlineBeforeDate` set to now + 14 days.",
+  "2. Pull vulnerable assets for each candidate: `list_vulnerable_assets` filtered by `vulnerableAssetId` when available.",
+  "3. Cross-reference scanner/integration context using `integration_resources` (for Defender or connected scanners).",
+  "4. Prioritize by severity + due date + internet-facing/critical asset context.",
+  "5. Generate remediation instructions and execute lifecycle changes with `workflow_people_assets_vuln_triage` (`mode=plan` first, then `mode=execute` + `confirm=true`).",
+  "",
+  "## Recipe: Employee Onboarding Verification",
+  "",
+  "1. Query onboarding status with `people` using `taskTypeMatchesAny` and `taskStatusMatchesAny` filters.",
+  "2. For each person, verify required tasks are complete (`COMPLETED`) and no blocking failures remain (`FAILED`).",
+  "3. For incomplete users, collect missing task types and expected due actions.",
+  "4. Re-check after updates and keep an auditable snapshot of status transitions.",
+  "",
+  "## Recipe: Employee Offboarding Tracker",
+  "",
+  "1. Pull people/tasks scoped to offboarding using `people` with `taskTypeMatchesAny` for offboarding task types.",
+  "2. Segment by status (`NOT_STARTED`, `IN_PROGRESS`, `FAILED`, `COMPLETED`) to surface blockers.",
+  "3. Correlate with asset/vulnerability exposure using `list_vulnerable_assets` and `list_vulnerabilities` where relevant.",
+  "4. Track open actions to completion and re-run read checks on a fixed cadence.",
+  "",
+  "## Recipe: Vendor Risk Assessment Assistance",
+  "",
+  "1. Pull vendors by status and criticality using `vendors`/`list_vendors`.",
+  "2. Pull supporting records: `list_vendor_findings`, `list_vendor_documents`, `get_security_reviews_by_vendor_id`.",
+  "3. Plan updates in `workflow_vendor_triage` (`mode=plan`) with explicit action list.",
+  "4. Execute approved updates (`update_vendor`, `set_status_for_vendor`, findings updates, review document uploads) with `confirm=true`.",
+  "5. Verify by reading vendor status/findings/review documents after execution.",
+  "",
+  "## Recipe: Policy Evidence <-> Document Evidence Cross-Reference",
+  "",
+  "1. Pull policy and evidence set: `list_policies` + `get_policy`, then `list_documents`/`get_document`.",
+  "2. For each policy-backed evidence document, attach a reference link using `create_link_for_document` (policy URL or canonical policy locator).",
+  "3. If needed, map document to controls with `add_document_to_control` so policy-evidence context is traceable in control reviews.",
+  "4. Verify with `document_resources` (`resourceType=links` and `resourceType=controls`) and `list_control_documents` readback.",
+  "",
+];
+
 export const buildHelpResourceMarkdown = (
   resourceId: HelpResourceId,
   context: HelpRenderContext,
@@ -203,8 +255,10 @@ export const buildHelpResourceMarkdown = (
     lines.push("");
     lines.push("## Auth");
     lines.push("");
-    lines.push("- `VANTA_ENV_FILE` points to JSON with `client_id` and `client_secret`.");
-    lines.push("- Or set `VANTA_CLIENT_ID` + `VANTA_CLIENT_SECRET` directly.");
+    lines.push("- Set `VANTA_CLIENT_ID` + `VANTA_CLIENT_SECRET` directly (preferred).");
+    lines.push(
+      "- Or set `VANTA_ENV_FILE` to JSON (`client_id`/`client_secret`) or dotenv (`VANTA_CLIENT_ID`/`VANTA_CLIENT_SECRET`).",
+    );
     lines.push("- Default scope: `vanta-api.all:read vanta-api.all:write`.");
     lines.push("");
     lines.push("## Tool Envelope Contract");
@@ -280,6 +334,10 @@ export const buildHelpResourceMarkdown = (
       }),
     );
     return lines.join("\n");
+  }
+
+  if (resourceId === "resource://vanta-manage/recipes") {
+    return ["# Vanta MCP Recipes", "", ...renderRecipeSteps()].join("\n");
   }
 
   if (resourceId === "resource://vanta-manage/tool-catalog") {
@@ -417,6 +475,7 @@ export const buildResourcesPromptsReferenceMarkdown = (): string => {
   lines.push("");
   lines.push("- `resource://vanta-manage/help`: onboarding, auth, safety, and discovery.");
   lines.push("- `resource://vanta-manage/cheatsheet`: quick mapping from objective to tools.");
+  lines.push("- `resource://vanta-manage/recipes`: step-by-step operational recipes for common compliance tasks.");
   lines.push("- `resource://vanta-manage/tool-catalog`: live endpoint/compat/workflow catalog.");
   lines.push("- `resource://vanta-manage/workflow-playbooks`: workflow-specific plan/execute runbooks.");
   lines.push("- `resource://vanta-manage/safety`: mutation guardrails and confirmation contract.");
@@ -430,6 +489,11 @@ export const buildResourcesPromptsReferenceMarkdown = (): string => {
   lines.push("- `playbook_vendor_triage(objective, vendorId?)`");
   lines.push("- `playbook_people_assets_vuln_triage(objective, vulnerabilityId?)`");
   lines.push("- `playbook_information_request_triage(objective, auditId)`");
+  lines.push("- `playbook_vulnerability_due_soon_triage(objective, dueWindowDays?, integrationHint?)`");
+  lines.push("- `playbook_employee_onboarding_verification(objective, personId?)`");
+  lines.push("- `playbook_employee_offboarding_tracker(objective, personId?)`");
+  lines.push("- `playbook_vendor_risk_assessment(objective, vendorId?)`");
+  lines.push("- `playbook_policy_document_evidence_linkage(objective, policyId?, documentId?)`");
   lines.push("");
   lines.push("## Notes");
   lines.push("");

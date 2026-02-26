@@ -2,10 +2,15 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import {
   ControlEvidencePromptArgs,
+  EmployeeOffboardingPromptArgs,
+  EmployeeOnboardingPromptArgs,
   FailingControlsPromptArgs,
   InformationRequestPromptArgs,
+  PolicyDocumentEvidencePromptArgs,
   PeopleAssetsVulnPromptArgs,
+  VulnerabilityDueSoonPromptArgs,
   ToolSelectorPromptArgs,
+  VendorRiskAssessmentPromptArgs,
   VendorTriagePromptArgs,
   helpPromptNames,
 } from "./types.js";
@@ -171,6 +176,118 @@ const informationRequestPrompt = (
   return toPromptResult("Audit information request playbook.", text);
 };
 
+const vulnerabilityDueSoonPrompt = (
+  args: VulnerabilityDueSoonPromptArgs,
+): ReturnType<typeof toPromptResult> => {
+  const windowDays = args.dueWindowDays ?? "14";
+  const integrationHint = args.integrationHint
+    ? `Integration cross-reference: ${args.integrationHint}`
+    : "Integration cross-reference: Microsoft Defender or connected scanner resources.";
+  const text = [
+    "Build a prioritized vulnerability triage runbook for items due soon.",
+    `Objective: ${args.objective}`,
+    `Due window (days): ${windowDays}`,
+    integrationHint,
+    "",
+    "Required sequence:",
+    "1. Read due-soon vulnerabilities via `list_vulnerabilities` with `slaDeadlineBeforeDate` = now + due window.",
+    "2. Enrich with asset context via `list_vulnerable_assets` and remediation state via `list_vulnerability_remediations`.",
+    "3. Cross-reference scanner metadata with `integration_resources` for Defender/connected source details.",
+    "4. Rank by severity + due date + critical asset exposure.",
+    "5. For approved actions, run `workflow_people_assets_vuln_triage` in `mode=plan` first, then `mode=execute` + `confirm=true`.",
+    "6. Verify with readback of vulnerabilities, remediations, and affected assets.",
+    "",
+    executionReminder,
+  ].join("\n");
+  return toPromptResult("Vulnerability due-soon triage recipe.", text);
+};
+
+const employeeOnboardingPrompt = (
+  args: EmployeeOnboardingPromptArgs,
+): ReturnType<typeof toPromptResult> => {
+  const text = [
+    "Build an onboarding verification runbook.",
+    `Objective: ${args.objective}`,
+    `Person ID focus: ${args.personId ?? "not provided"}`,
+    "",
+    "Required sequence:",
+    "1. Pull onboarding task status using `people` with task-type and status filters.",
+    "2. Segment by `COMPLETED`, `IN_PROGRESS`, `FAILED`, `NOT_STARTED` to identify blockers.",
+    "3. Produce a missing-task checklist for each user not fully onboarded.",
+    "4. Re-read status after remediation to verify completion.",
+    "",
+    "Failure checks:",
+    "- If a person identifier is ambiguous, return candidate matches before any follow-up actions.",
+    "- Preserve a timestamped status snapshot for audit traceability.",
+    "",
+    executionReminder,
+  ].join("\n");
+  return toPromptResult("Employee onboarding verification recipe.", text);
+};
+
+const employeeOffboardingPrompt = (
+  args: EmployeeOffboardingPromptArgs,
+): ReturnType<typeof toPromptResult> => {
+  const text = [
+    "Build an offboarding tracker runbook.",
+    `Objective: ${args.objective}`,
+    `Person ID focus: ${args.personId ?? "not provided"}`,
+    "",
+    "Required sequence:",
+    "1. Pull offboarding tasks using `people` filtered to offboarding task types and status values.",
+    "2. Highlight open/failed items and due sequencing by criticality.",
+    "3. Correlate residual risk context with `list_vulnerabilities` and `list_vulnerable_assets` when needed.",
+    "4. Re-check task completion status until all offboarding requirements are complete.",
+    "",
+    "Failure checks:",
+    "- Flag any failed offboarding controls for manual escalation.",
+    "- Keep a deterministic checklist so reruns are idempotent.",
+    "",
+    executionReminder,
+  ].join("\n");
+  return toPromptResult("Employee offboarding tracker recipe.", text);
+};
+
+const vendorRiskAssessmentPrompt = (
+  args: VendorRiskAssessmentPromptArgs,
+): ReturnType<typeof toPromptResult> => {
+  const text = [
+    "Build a vendor risk assessment assistance runbook.",
+    `Objective: ${args.objective}`,
+    `Vendor ID focus: ${args.vendorId ?? "not provided"}`,
+    "",
+    "Required sequence:",
+    "1. Read baseline vendor set (`vendors`/`list_vendors`) and focused vendor details (`get_vendor`).",
+    "2. Pull findings and evidence (`list_vendor_findings`, `list_vendor_documents`, `get_security_reviews_by_vendor_id`).",
+    "3. Run `workflow_vendor_triage` in `mode=plan` to prepare updates.",
+    "4. Execute approved updates with `mode=execute` and `confirm=true`.",
+    "5. Verify vendor status/findings/review documents with readback calls.",
+    "",
+    executionReminder,
+  ].join("\n");
+  return toPromptResult("Vendor risk assessment recipe.", text);
+};
+
+const policyDocumentEvidencePrompt = (
+  args: PolicyDocumentEvidencePromptArgs,
+): ReturnType<typeof toPromptResult> => {
+  const text = [
+    "Build a policy-to-document evidence linkage runbook.",
+    `Objective: ${args.objective}`,
+    `Policy ID: ${args.policyId ?? "not provided"}`,
+    `Document ID: ${args.documentId ?? "not provided"}`,
+    "",
+    "Required sequence:",
+    "1. Read policy sources (`list_policies`, optional `get_policy`) and candidate documents (`list_documents`, `get_document`).",
+    "2. Add policy reference links to evidence documents using `create_link_for_document`.",
+    "3. If control mapping is required, link documents with `add_document_to_control` (write call needs `confirm=true`).",
+    "4. Verify via `document_resources` (`links`, `controls`) and `list_control_documents` readback.",
+    "",
+    executionReminder,
+  ].join("\n");
+  return toPromptResult("Policy and document evidence linkage recipe.", text);
+};
+
 export const registerHelpPrompts = (server: McpServer): number => {
   server.prompt(
     "playbook_tool_selector",
@@ -232,6 +349,58 @@ export const registerHelpPrompts = (server: McpServer): number => {
       auditId: z.string(),
     },
     args => informationRequestPrompt(args as InformationRequestPromptArgs),
+  );
+
+  server.prompt(
+    "playbook_vulnerability_due_soon_triage",
+    "Vulnerability due-soon triage and enrichment recipe prompt.",
+    {
+      objective: z.string(),
+      dueWindowDays: z.string().optional(),
+      integrationHint: z.string().optional(),
+    },
+    args => vulnerabilityDueSoonPrompt(args as VulnerabilityDueSoonPromptArgs),
+  );
+
+  server.prompt(
+    "playbook_employee_onboarding_verification",
+    "Employee onboarding verification recipe prompt.",
+    {
+      objective: z.string(),
+      personId: z.string().optional(),
+    },
+    args => employeeOnboardingPrompt(args as EmployeeOnboardingPromptArgs),
+  );
+
+  server.prompt(
+    "playbook_employee_offboarding_tracker",
+    "Employee offboarding tracker recipe prompt.",
+    {
+      objective: z.string(),
+      personId: z.string().optional(),
+    },
+    args => employeeOffboardingPrompt(args as EmployeeOffboardingPromptArgs),
+  );
+
+  server.prompt(
+    "playbook_vendor_risk_assessment",
+    "Vendor risk assessment assistance recipe prompt.",
+    {
+      objective: z.string(),
+      vendorId: z.string().optional(),
+    },
+    args => vendorRiskAssessmentPrompt(args as VendorRiskAssessmentPromptArgs),
+  );
+
+  server.prompt(
+    "playbook_policy_document_evidence_linkage",
+    "Policy-to-document evidence linkage recipe prompt.",
+    {
+      objective: z.string(),
+      policyId: z.string().optional(),
+      documentId: z.string().optional(),
+    },
+    args => policyDocumentEvidencePrompt(args as PolicyDocumentEvidencePromptArgs),
   );
 
   return helpPromptNames.length;

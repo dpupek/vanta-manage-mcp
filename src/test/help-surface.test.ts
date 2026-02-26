@@ -125,8 +125,8 @@ test("help surface registers resources prompts and fallback help tool", async ()
   const envelope = parseToolEnvelope(toolResult);
 
   // Assert
-  assert.equal(counts.resources, 6);
-  assert.equal(counts.prompts, 6);
+  assert.equal(counts.resources, helpResourceIds.length);
+  assert.equal(counts.prompts, helpPromptNames.length);
   assert.equal(counts.fallbackHelpTool, 1);
   assert.equal(envelope.success, true);
 });
@@ -149,10 +149,16 @@ test("help markdown builders include required sections", () => {
     "resource://vanta-manage/safety",
     context,
   );
+  const recipesText = buildHelpResourceMarkdown(
+    "resource://vanta-manage/recipes",
+    context,
+  );
   const toolText = buildHelpToolMarkdown(context);
 
   // Assert
   assert.match(resourceText, /Mutation Rules/);
   assert.match(resourceText, /confirmation_required/);
+  assert.match(recipesText, /Triaging Vulnerabilities/);
+  assert.match(recipesText, /Employee Offboarding Tracker/);
   assert.match(toolText, /Vanta MCP Help Index/);
 });

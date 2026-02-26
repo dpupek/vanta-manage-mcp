@@ -22,12 +22,38 @@ Cause:
 - No credentials found or malformed `VANTA_ENV_FILE`.
 
 Resolution order used by server:
-1. `VANTA_ENV_FILE` JSON (`client_id`, `client_secret`)
-2. `VANTA_CLIENT_ID` + `VANTA_CLIENT_SECRET`
+1. `VANTA_CLIENT_ID` + `VANTA_CLIENT_SECRET`
+2. `VANTA_ENV_FILE` (JSON with `client_id`/`client_secret` or dotenv with `VANTA_CLIENT_ID`/`VANTA_CLIENT_SECRET`)
 
 Fix:
 - Set one of the supported credential inputs.
-- Validate JSON shape and path permissions for `VANTA_ENV_FILE`.
+- Validate file shape and path permissions for `VANTA_ENV_FILE`.
+- If only one direct env var is set, add the missing credential env var.
+
+## API reads return `404` on `/controls` or `/documents`
+Cause:
+- API base URL is missing `/v1`, or requests are pointed at a non-v1 root.
+
+Fix:
+- Use `VANTA_API_BASE_URL=https://api.vanta.com/v1`.
+- Keep OAuth on root origin (`VANTA_OAUTH_BASE_URL=https://api.vanta.com`) unless your environment requires a different auth host.
+
+## Live integration tests skip unexpectedly
+Cause:
+- Live test guard flags were not enabled.
+
+Fix:
+- Set `VANTA_INTEGRATION_LIVE=true`.
+- For mutating live tests, set `VANTA_INTEGRATION_ALLOW_MUTATIONS=true`.
+- Set `VANTA_INTEGRATION_REQUIRE_MUTATION=true` if mutation permission must fail (instead of skip).
+
+## Live integration cleanup failure
+Cause:
+- The test created an artifact but could not delete it (permissions, transient API issue, or tenant policy).
+
+Fix:
+- Use the reported document ID to clean up manually in Vanta.
+- Re-run live tests after confirming write permissions for the credential scope.
 
 ## Git-based `npx` fails before execution
 Cause:
@@ -46,4 +72,3 @@ Cause:
 Fix:
 - Remove temp folders like `_upstream/`.
 - Keep ESLint ignore list updated for generated/build directories.
-

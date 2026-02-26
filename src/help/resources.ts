@@ -27,6 +27,11 @@ const helpResourceDefinitions: HelpResourceDefinition[] = [
     description: "Quick objective-to-tool mapping and call shapes.",
   },
   {
+    name: "vanta_manage_recipes",
+    uri: "resource://vanta-manage/recipes",
+    description: "Operational recipes for high-value compliance workflows.",
+  },
+  {
     name: "vanta_manage_tool_catalog",
     uri: "resource://vanta-manage/tool-catalog",
     description: "Generated endpoint and workflow tool catalog.",

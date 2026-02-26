@@ -48,3 +48,18 @@
 - [x] Add main-branch auto-release workflow for tag pattern `v1.0.<buildnumber>`.
 - [x] Add idempotent tag guard and GitHub Release creation in CI.
 - [x] Document tag-pinned Git `npx` usage and release checklist updates.
+
+## Phase 7: Integration Test Program (Live + Mock + OAuth Stability)
+- [x] Add `VANTA_ENV_FILE` dotenv support and direct-env-first credential precedence.
+- [x] Add shared live integration gating helper (`src/test/integration/shared/env.ts`).
+- [x] Add fake Vanta API server for mocked MCP integration tests.
+- [x] Add stdio MCP harness for end-to-end tool envelope assertions.
+- [x] Add mocked integration tests for API 4xx/5xx envelope behavior.
+- [x] Add mocked integration tests for transport failures (`request_failed` envelope).
+- [x] Add mocked integration test for OAuth 401 refresh/retry flow.
+- [x] Add live read/write integration tests with ephemeral document lifecycle + cleanup.
+- [x] Add optional live control evidence linkage verification by env fixture.
+- [x] Add live OAuth stability tests (repeat/concurrent/forced-refresh).
+- [x] Add npm scripts for `test:integration`, `test:integration:mock`, `test:integration:live`.
+- [x] Add manual `workflow_dispatch` CI workflow for live integration tests.
+- [x] Update README/security/troubleshooting/config docs for new test and credential contracts.

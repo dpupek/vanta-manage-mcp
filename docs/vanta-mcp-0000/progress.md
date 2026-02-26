@@ -36,6 +36,25 @@
 - [x] Updated docs/config examples for tag-pinned Git `npx` usage:
   - `npx github:dpupek/vanta-manage-mcp#v1.0.<buildnumber>`
   - `npx git+https://github.com/dpupek/vanta-manage-mcp.git#v1.0.<buildnumber>`
+- [x] Added credential loader support for both `VANTA_ENV_FILE` JSON and dotenv formats.
+- [x] Enforced credential precedence: direct env vars override `VANTA_ENV_FILE`.
+- [x] Added integration test gating helpers for live runs:
+  - `VANTA_INTEGRATION_LIVE`
+  - `VANTA_INTEGRATION_ALLOW_MUTATIONS`
+  - `VANTA_INTEGRATION_REQUIRE_MUTATION`
+  - `VANTA_INTEGRATION_TEST_CONTROL_ID`
+  - `VANTA_INTEGRATION_TEST_TIMEOUT_MS`
+- [x] Added mocked MCP end-to-end integration tests:
+  - API error envelope resilience
+  - OAuth 401 refresh/retry behavior
+  - transport failure envelope behavior (`request_failed`)
+- [x] Added live integration test suites for:
+  - read + write document lifecycle (create/upload/read/delete)
+  - optional control-evidence linkage verification
+  - OAuth stability (repeat, concurrent, forced refresh)
+- [x] Added manual CI workflow for live integration tests:
+  - `.github/workflows/integration-live.yml`
+  - `workflow_dispatch` only (no auto-run on push)
 
 ## Gotchas (Carry Forward)
 - Keep `_upstream/` and other temporary import folders out of lint/build scope.

@@ -7,6 +7,14 @@ const MAX_RETRIES = 2;
 const sleep = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
+const joinUrl = (baseUrl: string, requestPath: string): URL => {
+  const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const normalizedPath = requestPath.startsWith("/")
+    ? requestPath.slice(1)
+    : requestPath;
+  return new URL(normalizedPath, normalizedBase);
+};
+
 export interface VantaRequest {
   method: string;
   path: string;
@@ -62,7 +70,7 @@ export class VantaApiClient {
     let refreshed = false;
 
     while (attempt <= MAX_RETRIES) {
-      const url = new URL(input.path, BASE_API_URL);
+      const url = joinUrl(BASE_API_URL, input.path);
       if (input.query) {
         const query = buildQueryString(input.query);
         query.forEach((value, key) => {
@@ -129,4 +137,3 @@ export class VantaApiClient {
     throw new Error("Request retry policy exhausted without a response.");
   }
 }
-

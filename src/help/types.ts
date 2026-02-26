@@ -3,6 +3,7 @@ import { ApiSource } from "../generated/operations.generated.js";
 export const helpResourceIds = [
   "resource://vanta-manage/help",
   "resource://vanta-manage/cheatsheet",
+  "resource://vanta-manage/recipes",
   "resource://vanta-manage/tool-catalog",
   "resource://vanta-manage/workflow-playbooks",
   "resource://vanta-manage/safety",
@@ -18,6 +19,11 @@ export const helpPromptNames = [
   "playbook_vendor_triage",
   "playbook_people_assets_vuln_triage",
   "playbook_information_request_triage",
+  "playbook_vulnerability_due_soon_triage",
+  "playbook_employee_onboarding_verification",
+  "playbook_employee_offboarding_tracker",
+  "playbook_vendor_risk_assessment",
+  "playbook_policy_document_evidence_linkage",
 ] as const;
 
 export type HelpPromptName = (typeof helpPromptNames)[number];
@@ -90,4 +96,31 @@ export interface PeopleAssetsVulnPromptArgs {
 export interface InformationRequestPromptArgs {
   objective: string;
   auditId: string;
+}
+
+export interface VulnerabilityDueSoonPromptArgs {
+  objective: string;
+  dueWindowDays?: string;
+  integrationHint?: string;
+}
+
+export interface EmployeeOnboardingPromptArgs {
+  objective: string;
+  personId?: string;
+}
+
+export interface EmployeeOffboardingPromptArgs {
+  objective: string;
+  personId?: string;
+}
+
+export interface VendorRiskAssessmentPromptArgs {
+  objective: string;
+  vendorId?: string;
+}
+
+export interface PolicyDocumentEvidencePromptArgs {
+  objective: string;
+  policyId?: string;
+  documentId?: string;
 }

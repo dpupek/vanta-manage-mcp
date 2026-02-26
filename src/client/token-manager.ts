@@ -1,4 +1,4 @@
-import { BASE_API_URL } from "../api.js";
+import { OAUTH_BASE_URL } from "../api.js";
 import { loadCredentials, oauthScope } from "../config.js";
 
 interface TokenResponse {
@@ -12,6 +12,14 @@ export interface TokenInfo {
 }
 
 const DEFAULT_EXPIRY_BUFFER_MS = 60_000;
+const OAUTH_RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
+const MAX_OAUTH_RETRIES = 2;
+
+const sleep = async (ms: number): Promise<void> =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
+const trimTrailingSlash = (value: string): string =>
+  value.endsWith("/") ? value.slice(0, -1) : value;
 
 export class TokenManager {
   private currentToken: TokenInfo | null = null;
@@ -52,39 +60,59 @@ export class TokenManager {
 
   private async fetchNewToken(): Promise<TokenInfo> {
     const credentials = loadCredentials();
+    const oauthUrl = `${trimTrailingSlash(OAUTH_BASE_URL)}/oauth/token`;
 
-    const response = await fetch(`${BASE_API_URL}/oauth/token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_id: credentials.client_id,
-        client_secret: credentials.client_secret,
-        grant_type: "client_credentials",
-        scope: oauthScope,
-      }),
-    });
+    for (let attempt = 0; attempt <= MAX_OAUTH_RETRIES; attempt += 1) {
+      const response = await fetch(oauthUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: credentials.client_id,
+          client_secret: credentials.client_secret,
+          grant_type: "client_credentials",
+          scope: oauthScope,
+        }),
+      });
 
-    if (!response.ok) {
-      const details = await response.text();
-      throw new Error(
-        `OAuth token request failed (${response.status.toString()} ${response.statusText}): ${details}`,
-      );
+      if (
+        !response.ok &&
+        OAUTH_RETRYABLE_STATUS_CODES.has(response.status) &&
+        attempt < MAX_OAUTH_RETRIES
+      ) {
+        const retryAfterSeconds = Number.parseInt(
+          response.headers.get("retry-after") ?? "",
+          10,
+        );
+        const waitMs = Number.isNaN(retryAfterSeconds)
+          ? (attempt + 1) * 500
+          : retryAfterSeconds * 1000;
+        await sleep(waitMs);
+        continue;
+      }
+
+      if (!response.ok) {
+        const details = await response.text();
+        throw new Error(
+          `OAuth token request failed (${response.status.toString()} ${response.statusText}): ${details}`,
+        );
+      }
+
+      const payload = (await response.json()) as Partial<TokenResponse>;
+      if (typeof payload.access_token !== "string") {
+        throw new Error("OAuth response did not include a valid access_token.");
+      }
+      if (typeof payload.expires_in !== "number") {
+        throw new Error("OAuth response did not include a valid expires_in.");
+      }
+
+      return {
+        token: payload.access_token,
+        expiresAt: Date.now() + payload.expires_in * 1000 - DEFAULT_EXPIRY_BUFFER_MS,
+      };
     }
 
-    const payload = (await response.json()) as Partial<TokenResponse>;
-    if (typeof payload.access_token !== "string") {
-      throw new Error("OAuth response did not include a valid access_token.");
-    }
-    if (typeof payload.expires_in !== "number") {
-      throw new Error("OAuth response did not include a valid expires_in.");
-    }
-
-    return {
-      token: payload.access_token,
-      expiresAt: Date.now() + payload.expires_in * 1000 - DEFAULT_EXPIRY_BUFFER_MS,
-    };
+    throw new Error("OAuth token retry policy exhausted without a response.");
   }
 }
-

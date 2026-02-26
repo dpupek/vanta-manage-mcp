@@ -11,9 +11,17 @@
 - Workflow tools require `mode=execute` and `confirm=true`.
 
 ## Secret Handling
-- Use `VANTA_ENV_FILE` or direct env vars (`VANTA_CLIENT_ID`, `VANTA_CLIENT_SECRET`).
+- Use direct env vars (`VANTA_CLIENT_ID`, `VANTA_CLIENT_SECRET`) or `VANTA_ENV_FILE` (JSON or dotenv format).
+- If both direct env vars and `VANTA_ENV_FILE` are set, direct env vars are used.
 - Do not commit credential files.
 - Rotate credentials on exposure or operator turnover.
+
+## Live Integration Test Safety
+- Live integration tests are opt-in and should be run only when explicitly requested.
+- Enable live tests with `VANTA_INTEGRATION_LIVE=true`.
+- Enable mutations only with `VANTA_INTEGRATION_ALLOW_MUTATIONS=true`.
+- Use dedicated non-production credentials whenever possible.
+- If a cleanup step fails, treat reported artifact IDs as sensitive operational data and remediate promptly.
 
 ## Logging and Redaction
 - Do not log raw secrets, bearer tokens, or file content payloads.

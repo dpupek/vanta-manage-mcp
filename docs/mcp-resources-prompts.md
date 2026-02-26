@@ -13,6 +13,7 @@ Quick reference for agents using the Vanta Manage MCP help surface.
 
 - `resource://vanta-manage/help`: onboarding, auth, safety, and discovery.
 - `resource://vanta-manage/cheatsheet`: quick mapping from objective to tools.
+- `resource://vanta-manage/recipes`: step-by-step operational recipes for common compliance tasks.
 - `resource://vanta-manage/tool-catalog`: live endpoint/compat/workflow catalog.
 - `resource://vanta-manage/workflow-playbooks`: workflow-specific plan/execute runbooks.
 - `resource://vanta-manage/safety`: mutation guardrails and confirmation contract.
@@ -26,6 +27,11 @@ Quick reference for agents using the Vanta Manage MCP help surface.
 - `playbook_vendor_triage(objective, vendorId?)`
 - `playbook_people_assets_vuln_triage(objective, vulnerabilityId?)`
 - `playbook_information_request_triage(objective, auditId)`
+- `playbook_vulnerability_due_soon_triage(objective, dueWindowDays?, integrationHint?)`
+- `playbook_employee_onboarding_verification(objective, personId?)`
+- `playbook_employee_offboarding_tracker(objective, personId?)`
+- `playbook_vendor_risk_assessment(objective, vendorId?)`
+- `playbook_policy_document_evidence_linkage(objective, policyId?, documentId?)`
 
 ## Notes
 

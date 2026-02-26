@@ -1,0 +1,69 @@
+name: Integration Live
+
+on:
+  workflow_dispatch:
+    inputs:
+      allow_mutations:
+        description: "Run mutating live integration tests"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      require_mutation:
+        description: "Fail run if mutation tests cannot execute"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      test_control_id:
+        description: "Optional control ID for control-evidence linkage verification"
+        required: false
+        type: string
+      test_timeout_ms:
+        description: "Per-test timeout in milliseconds"
+        required: true
+        default: "180000"
+        type: string
+
+jobs:
+  live-integration:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify credential secrets
+        run: |
+          if [ -z "${VANTA_CLIENT_ID}" ] || [ -z "${VANTA_CLIENT_SECRET}" ]; then
+            echo "VANTA_CLIENT_ID and VANTA_CLIENT_SECRET secrets are required."
+            exit 1
+          fi
+        env:
+          VANTA_CLIENT_ID: ${{ secrets.VANTA_CLIENT_ID }}
+          VANTA_CLIENT_SECRET: ${{ secrets.VANTA_CLIENT_SECRET }}
+
+      - name: Run live integration tests
+        run: npm run test:integration:live
+        env:
+          VANTA_CLIENT_ID: ${{ secrets.VANTA_CLIENT_ID }}
+          VANTA_CLIENT_SECRET: ${{ secrets.VANTA_CLIENT_SECRET }}
+          VANTA_INTEGRATION_LIVE: "true"
+          VANTA_INTEGRATION_ALLOW_MUTATIONS: ${{ inputs.allow_mutations }}
+          VANTA_INTEGRATION_REQUIRE_MUTATION: ${{ inputs.require_mutation }}
+          VANTA_INTEGRATION_TEST_CONTROL_ID: ${{ inputs.test_control_id }}
+          VANTA_INTEGRATION_TEST_TIMEOUT_MS: ${{ inputs.test_timeout_ms }}

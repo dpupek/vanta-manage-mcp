@@ -24,6 +24,7 @@ Canonical reference generated from runtime metadata.
 
 - `resource://vanta-manage/help` - Core onboarding for auth, envelopes, safe writes, and discovery.
 - `resource://vanta-manage/cheatsheet` - Fast path from objective to tools and minimal call shapes.
+- `resource://vanta-manage/recipes` - Task recipes for vulnerability, people, vendor, and policy-evidence workflows.
 - `resource://vanta-manage/tool-catalog` - Live catalog of generated endpoint tools plus compat/workflow tools.
 - `resource://vanta-manage/workflow-playbooks` - Plan-first/execute-confirmed playbooks for high-value workflows.
 - `resource://vanta-manage/safety` - Mutation safety model, write flags, and confirmation behavior.
@@ -37,6 +38,11 @@ Canonical reference generated from runtime metadata.
 - `playbook_vendor_triage` - Vendor lifecycle and findings/security-review evidence updates.
 - `playbook_people_assets_vuln_triage` - Correlate people/assets/vulnerabilities and apply allowed updates.
 - `playbook_information_request_triage` - Audit information request comments/evidence/status triage.
+- `playbook_vulnerability_due_soon_triage` - Prioritize vulnerabilities due soon and enrich with scanner context.
+- `playbook_employee_onboarding_verification` - Verify onboarding task status and identify blockers per employee.
+- `playbook_employee_offboarding_tracker` - Track offboarding completion tasks and unresolved risk.
+- `playbook_vendor_risk_assessment` - Assist vendor risk review using findings, docs, and status updates.
+- `playbook_policy_document_evidence_linkage` - Cross-reference policy evidence and document evidence with readback verification.
 
 ## Workflow Tool Patterns
 

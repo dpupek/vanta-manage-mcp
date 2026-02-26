@@ -8,6 +8,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 const expectedResourceUris = [
   "resource://vanta-manage/help",
   "resource://vanta-manage/cheatsheet",
+  "resource://vanta-manage/recipes",
   "resource://vanta-manage/tool-catalog",
   "resource://vanta-manage/workflow-playbooks",
   "resource://vanta-manage/safety",
@@ -21,6 +22,11 @@ const expectedPromptNames = [
   "playbook_vendor_triage",
   "playbook_people_assets_vuln_triage",
   "playbook_information_request_triage",
+  "playbook_vulnerability_due_soon_triage",
+  "playbook_employee_onboarding_verification",
+  "playbook_employee_offboarding_tracker",
+  "playbook_vendor_risk_assessment",
+  "playbook_policy_document_evidence_linkage",
 ] as const;
 
 const samplePromptArgs: Record<string, Record<string, string>> = {
@@ -49,6 +55,28 @@ const samplePromptArgs: Record<string, Record<string, string>> = {
   playbook_information_request_triage: {
     objective: "triage open info requests",
     auditId: "audit-1",
+  },
+  playbook_vulnerability_due_soon_triage: {
+    objective: "triage due-soon vulnerabilities",
+    dueWindowDays: "14",
+    integrationHint: "Microsoft Defender",
+  },
+  playbook_employee_onboarding_verification: {
+    objective: "verify onboarding status",
+    personId: "person-1",
+  },
+  playbook_employee_offboarding_tracker: {
+    objective: "track offboarding actions",
+    personId: "person-2",
+  },
+  playbook_vendor_risk_assessment: {
+    objective: "assist vendor risk review",
+    vendorId: "vendor-1",
+  },
+  playbook_policy_document_evidence_linkage: {
+    objective: "link policy evidence to document evidence",
+    policyId: "policy-1",
+    documentId: "document-1",
   },
 };
 

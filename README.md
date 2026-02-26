@@ -30,21 +30,32 @@ This project extends the upstream `VantaInc/vanta-mcp-server` baseline to includ
 
 ## Credentials
 Provide one of:
-1. `VANTA_ENV_FILE` pointing to JSON:
+1. Direct env vars:
+- `VANTA_CLIENT_ID`
+- `VANTA_CLIENT_SECRET`
+2. `VANTA_ENV_FILE` pointing to JSON:
 ```json
 {
   "client_id": "YOUR_CLIENT_ID",
   "client_secret": "YOUR_CLIENT_SECRET"
 }
 ```
-2. Direct env vars:
-- `VANTA_CLIENT_ID`
-- `VANTA_CLIENT_SECRET`
+3. `VANTA_ENV_FILE` pointing to dotenv key/value pairs:
+```bash
+VANTA_CLIENT_ID=YOUR_CLIENT_ID
+VANTA_CLIENT_SECRET=YOUR_CLIENT_SECRET
+```
+
+Credential precedence is deterministic:
+1. Direct env vars (`VANTA_CLIENT_ID` + `VANTA_CLIENT_SECRET`)
+2. `VANTA_ENV_FILE` (JSON or dotenv format)
 
 ## Config Flags
 - `VANTA_MCP_SAFE_MODE=true` (default)
 - `VANTA_MCP_ENABLE_WRITE=true` (default)
 - `VANTA_MCP_ENABLED_TOOLS=comma,separated,allowlist` (optional)
+- `VANTA_API_BASE_URL` (default: `https://api.vanta.com/v1`)
+- `VANTA_OAUTH_BASE_URL` (default: origin derived from `VANTA_API_BASE_URL`, usually `https://api.vanta.com`)
 - `VANTA_OAUTH_SCOPE` (default: `vanta-api.all:read vanta-api.all:write`)
 
 ## Build and Verify
@@ -55,9 +66,22 @@ npm test
 npm run lint
 npm run verify:spec-parity
 npm run smoke:help-surface
+npm run test:integration:mock
 ```
 
 `smoke:help-surface` starts the built MCP server over stdio and validates discovery/readability of help resources/prompts. It is credential-gated and skips when Vanta credentials are not configured.
+
+## Integration Tests
+- `npm run test` runs deterministic unit + mock integration tests.
+- `npm run test:integration:mock` runs only mocked MCP end-to-end integration tests.
+- `npm run test:integration:live` runs live Vanta integration tests and is opt-in.
+
+Live integration env flags:
+- `VANTA_INTEGRATION_LIVE=true` enables live tests.
+- `VANTA_INTEGRATION_ALLOW_MUTATIONS=true` enables mutating live cases.
+- `VANTA_INTEGRATION_REQUIRE_MUTATION=true|false` controls skip vs fail if mutation permission is missing.
+- `VANTA_INTEGRATION_TEST_CONTROL_ID=<control-id>` optionally enables control-evidence linkage verification.
+- `VANTA_INTEGRATION_TEST_TIMEOUT_MS=<ms>` overrides live test timeout.
 
 ## Bootstrap Cleanup
 After importing/upgrading from upstream:
