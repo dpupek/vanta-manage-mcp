@@ -1,6 +1,6 @@
 {
-  "name": "@vantasdk/vanta-mcp-server",
-  "version": "1.2.0",
+  "name": "vanta-manage-mcp",
+  "version": "1.0.0",
   "main": "index.js",
   "type": "module",
   "bin": "build/index.js",
@@ -36,16 +36,16 @@
     "security",
     "compliance"
   ],
-  "author": "Vanta Inc (https://www.vanta.com/)",
+  "author": "Dan Pupek",
   "license": "MIT",
-  "description": "Model Context Protocol server for Vanta's security compliance platform",
+  "description": "Full-capability MCP server for managing and auditing Vanta organizations",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VantaInc/vanta-mcp-server.git"
+    "url": "git+https://github.com/dpupek/vanta-manage-mcp.git"
   },
-  "homepage": "https://github.com/VantaInc/vanta-mcp-server#readme",
+  "homepage": "https://github.com/dpupek/vanta-manage-mcp#readme",
   "bugs": {
-    "url": "https://github.com/VantaInc/vanta-mcp-server/blob/main/SECURITY.md"
+    "url": "https://github.com/dpupek/vanta-manage-mcp/issues"
   },
   "engines": {
     "node": ">=20"

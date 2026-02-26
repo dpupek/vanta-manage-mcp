@@ -15,10 +15,11 @@ Use this before tagging or publishing a new server version.
 ## Docs
 - Run `npm run generate:help`.
 - Confirm docs are current:
-- `docs/vanta-mcp-help.md`
-- `docs/migration-read-only-to-full-management.md`
-- `docs/mcp-config-examples.md`
-- `docs/security.md`
+- `docs/dev/help-surface-reference.md`
+- `docs/dev/migration-read-only-to-full-management.md`
+- `docs/user/get-started-codex.md`
+- `docs/user/get-started-claude.md`
+- `docs/dev/security.md`
 
 ## Packaging and Runtime
 - Confirm `package.json` includes:
@@ -30,9 +31,17 @@ Use this before tagging or publishing a new server version.
 - Smoke test local:
 - `node build/index.js`
 - Smoke test Git-based npx:
-- `npx github:<org>/<repo>`
+- `npx github:dpupek/vanta-manage-mcp`
 - Smoke test tag-pinned Git npx:
 - `npx github:dpupek/vanta-manage-mcp#v1.0.<buildnumber>`
+
+## MVP Exit Checks
+- Verify tagged release install in Codex using `npx github:dpupek/vanta-manage-mcp#v1.0.<buildnumber>`.
+- Verify tagged release install in Claude Desktop using the same pinned tag.
+- Confirm both clients can discover tools/resources/prompts and call `help`.
+- Confirm accepted live-test policy:
+- pass with transient OAuth throttle skips allowed, or
+- strict no-skip pass requirement.
 
 ## Main Auto-Release Tag Contract
 - Tag format must match: `^v1\.0\.\d+$`
