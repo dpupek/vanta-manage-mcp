@@ -7,6 +7,35 @@
 - [x] Added test suite for parity, safety, multipart, and workflows.
 - [x] Added docs bundle (`vanta-mcp-help`, migration, config examples, security).
 - [x] Enabled Git-based `npx` execution via package `prepare` script (`npm run build`).
+- [x] Added MCP help surface resources:
+  - `resource://vanta-manage/help`
+  - `resource://vanta-manage/cheatsheet`
+  - `resource://vanta-manage/tool-catalog`
+  - `resource://vanta-manage/workflow-playbooks`
+  - `resource://vanta-manage/safety`
+  - `resource://vanta-manage/troubleshooting`
+- [x] Added playbook prompts:
+  - `playbook_tool_selector`
+  - `playbook_control_evidence`
+  - `playbook_failing_controls_triage`
+  - `playbook_vendor_triage`
+  - `playbook_people_assets_vuln_triage`
+  - `playbook_information_request_triage`
+- [x] Added fallback `help` tool with resource/prompt index.
+- [x] Refactored help generation so runtime help content and `docs/vanta-mcp-help.md` share one content model.
+- [x] Added `npm run smoke:help-surface` to validate live MCP help-surface discovery/readability over stdio.
+- [x] Ran credentialed smoke validation with:
+  - `VANTA_ENV_FILE=C:\Users\dan.pupek\.vanta\vanta-credentials-ast.env`
+  - Result: `PASS: MCP help surface smoke check succeeded.`
+- [x] Added CI main release workflow (`.github/workflows/release-main-tag.yml`) to auto-tag on each `main` push.
+- [x] Locked auto-release versioning contract:
+  - `VERSION=1.0.${{ github.run_number }}`
+  - `TAG=v1.0.<buildnumber>`
+- [x] Added idempotency guard so existing tags skip release creation and exit successfully.
+- [x] Added GitHub Release publication (`softprops/action-gh-release@v2`) for newly created tags.
+- [x] Updated docs/config examples for tag-pinned Git `npx` usage:
+  - `npx github:dpupek/vanta-manage-mcp#v1.0.<buildnumber>`
+  - `npx git+https://github.com/dpupek/vanta-manage-mcp.git#v1.0.<buildnumber>`
 
 ## Gotchas (Carry Forward)
 - Keep `_upstream/` and other temporary import folders out of lint/build scope.
@@ -14,3 +43,4 @@
 - Always run `npm run verify:spec-parity` after OpenAPI or generator changes.
 - Prefer script files over inline `node -e` for large generated markdown/docs to avoid escaping errors.
 - For Git-based `npx`, keep `prepare` aligned with build output and `bin` path.
+- `npm run build` rewrites `src/generated/manifest.generated.json` `generatedAt`; avoid committing timestamp-only churn unless intended.

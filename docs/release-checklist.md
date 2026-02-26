@@ -25,10 +25,21 @@ Use this before tagging or publishing a new server version.
 - `bin` -> `build/index.js`
 - `prepare` -> `npm run build`
 - `engines.node` >= 20
+- Confirm CI main-release workflow exists and targets `main`:
+- `.github/workflows/release-main-tag.yml`
 - Smoke test local:
 - `node build/index.js`
 - Smoke test Git-based npx:
 - `npx github:<org>/<repo>`
+- Smoke test tag-pinned Git npx:
+- `npx github:dpupek/vanta-manage-mcp#v1.0.<buildnumber>`
+
+## Main Auto-Release Tag Contract
+- Tag format must match: `^v1\.0\.\d+$`
+- Build number source: `${{ github.run_number }}`
+- Canonical release source is git tag + GitHub Release (no package.json writeback required).
+- Workflow rerun behavior:
+- If the computed tag already exists, workflow exits successfully as no-op for release creation.
 
 ## Final Review
 - Verify safety defaults:
@@ -36,4 +47,3 @@ Use this before tagging or publishing a new server version.
 - `VANTA_MCP_ENABLE_WRITE=true` (or intentional override)
 - Confirm no credentials/secrets in tracked files.
 - Confirm changelog/release notes are updated.
-

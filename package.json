@@ -13,7 +13,8 @@
   "scripts": {
     "prepare": "npm run build",
     "generate": "tsc -p tsconfig.scripts.json && node build-scripts/generate-tools.js",
-    "generate:help": "tsc -p tsconfig.scripts.json && node build-scripts/generate-help.js",
+    "generate:help": "npm run build && tsc -p tsconfig.scripts.json && node build-scripts/generate-help.js",
+    "smoke:help-surface": "npm run build && tsc -p tsconfig.scripts.json && node build-scripts/smoke-help-surface.js",
     "verify:spec-parity": "tsc -p tsconfig.scripts.json && node build-scripts/verify-spec-parity.js",
     "build": "npm run generate && tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "start": "npm run build && node build/index.js",

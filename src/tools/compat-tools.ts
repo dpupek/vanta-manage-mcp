@@ -17,6 +17,101 @@ interface ConsolidatedReadConfig {
   mapArgs?: (args: Record<string, unknown>) => Record<string, unknown>;
 }
 
+export interface CompatibilityToolMetadata {
+  name: string;
+  description: string;
+  mappingIntent: string;
+}
+
+export const compatibilityToolMetadata: CompatibilityToolMetadata[] = [
+  {
+    name: "controls",
+    description:
+      "Access controls. Provide controlId for a specific control, or omit it to list controls.",
+    mappingIntent: "GetControl/ListControls",
+  },
+  {
+    name: "documents",
+    description:
+      "Access documents. Provide documentId for a specific document, or omit it to list documents.",
+    mappingIntent: "GetDocument/ListDocuments",
+  },
+  {
+    name: "tests",
+    description:
+      "Access tests. Provide testId for a specific test, or omit it to list tests.",
+    mappingIntent: "GetTest/ListTests",
+  },
+  {
+    name: "integrations",
+    description:
+      "Access connected integrations. Provide integrationId for a specific integration, or omit it to list integrations.",
+    mappingIntent: "GetConnectedIntegration/ListConnectedIntegrations",
+  },
+  {
+    name: "frameworks",
+    description:
+      "Access frameworks. Provide frameworkId for a specific framework, or omit it to list frameworks.",
+    mappingIntent: "GetFramework/ListFrameworks",
+  },
+  {
+    name: "vulnerabilities",
+    description:
+      "Access vulnerabilities. Provide vulnerabilityId for a specific vulnerability, or omit it to list vulnerabilities.",
+    mappingIntent: "GetVulnerability/ListVulnerabilities",
+  },
+  {
+    name: "people",
+    description:
+      "Access people. Provide personId for a specific person, or omit it to list people.",
+    mappingIntent: "GetPerson/ListPeople",
+  },
+  {
+    name: "vendors",
+    description:
+      "Access vendors. Provide vendorId for a specific vendor, or omit it to list vendors.",
+    mappingIntent: "GetVendor/ListVendors",
+  },
+  {
+    name: "risks",
+    description:
+      "Access risk scenarios. Provide riskId for a specific scenario, or omit it to list risk scenarios.",
+    mappingIntent: "GetRiskScenario/ListRiskScenario",
+  },
+  {
+    name: "list_control_tests",
+    description: "List tests linked to a specific control.",
+    mappingIntent: "ListTestsForControl",
+  },
+  {
+    name: "list_control_documents",
+    description: "List documents linked to a specific control.",
+    mappingIntent: "ListDocumentsForControl",
+  },
+  {
+    name: "list_framework_controls",
+    description: "List controls linked to a specific framework.",
+    mappingIntent: "ListControlsForFramework",
+  },
+  {
+    name: "list_test_entities",
+    description: "List entities for a specific test.",
+    mappingIntent: "GetTestEntities",
+  },
+  {
+    name: "document_resources",
+    description: "List controls, links, or uploads associated with a document.",
+    mappingIntent:
+      "ListControlsForDocument/ListLinksForDocument/ListFilesForDocument",
+  },
+  {
+    name: "integration_resources",
+    description: "Read integration resource kinds and resources.",
+    mappingIntent:
+      "ListResourceKindSummaries/GetResourceKindDetails/ListResources/GetResource",
+  },
+];
+
 const paginationShape = {
   pageSize: z.number().int().min(1).max(100).optional(),
   pageCursor: z.string().optional(),

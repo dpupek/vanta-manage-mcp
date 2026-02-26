@@ -8,6 +8,45 @@ import {
   invokeGeneratedOperation,
 } from "../tools/endpoint-tools.js";
 
+export interface WorkflowToolMetadata {
+  name: string;
+  description: string;
+  mode: "plan_execute_confirmed";
+}
+
+export const workflowToolMetadata: WorkflowToolMetadata[] = [
+  {
+    name: "workflow_control_evidence",
+    description:
+      "Plan or execute control evidence actions (document linkage and document uploads).",
+    mode: "plan_execute_confirmed",
+  },
+  {
+    name: "workflow_triage_failing_controls",
+    description:
+      "Plan or execute triage for failing controls/tests/documents and optionally set owners.",
+    mode: "plan_execute_confirmed",
+  },
+  {
+    name: "workflow_vendor_triage",
+    description:
+      "Plan or execute vendor lifecycle actions (status updates, findings, and security-review documents).",
+    mode: "plan_execute_confirmed",
+  },
+  {
+    name: "workflow_people_assets_vuln_triage",
+    description:
+      "Plan or execute people/assets/vulnerability triage actions including vulnerability lifecycle updates.",
+    mode: "plan_execute_confirmed",
+  },
+  {
+    name: "workflow_information_request_triage",
+    description:
+      "Plan or execute audit information request triage actions (comments, evidence flag/accept).",
+    mode: "plan_execute_confirmed",
+  },
+];
+
 const workflowModeSchema = z.enum(["plan", "execute"]);
 
 const workflowExecuteGate = (

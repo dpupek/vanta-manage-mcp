@@ -39,3 +39,12 @@
 - [x] Add migration guidance and MCP config examples.
 - [x] Add security guidance (least privilege, write safety, secrets/logging).
 - [x] Ensure Git-based `npx` usage works via package `prepare` build hook.
+- [x] Add MCP help surface resources (`resource://vanta-manage/*`) for agent discoverability.
+- [x] Add task playbook prompts (`playbook_*`) for workflow-guided usage.
+- [x] Add fallback `help` tool for clients that do not consume resources.
+- [x] Add shared help content generation so runtime resources and docs stay aligned.
+- [x] Add live stdio smoke check for help surface (`npm run smoke:help-surface`).
+- [x] Validate help surface against real credentials (`C:\Users\dan.pupek\.vanta\vanta-credentials-ast.env`).
+- [x] Add main-branch auto-release workflow for tag pattern `v1.0.<buildnumber>`.
+- [x] Add idempotent tag guard and GitHub Release creation in CI.
+- [x] Document tag-pinned Git `npx` usage and release checklist updates.

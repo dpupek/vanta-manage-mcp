@@ -1,0 +1,103 @@
+name: Release Main Tag
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify spec parity
+        run: npm run verify:spec-parity
+
+      - name: Generate help docs
+        run: npm run generate:help
+
+      - name: Compute version and tag
+        id: version
+        run: |
+          VERSION="1.0.${GITHUB_RUN_NUMBER}"
+          TAG="v${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Computed VERSION=${VERSION}"
+          echo "Computed TAG=${TAG}"
+
+      - name: Check if tag already exists
+        id: tag_check
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Tag ${TAG} already exists. Skipping tag and release creation."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and push annotated tag
+        if: steps.tag_check.outputs.exists == 'false'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${TAG}" -m "Release ${TAG} for commit ${GITHUB_SHA}"
+          git push origin "${TAG}"
+          echo "Pushed ${TAG}"
+
+      - name: Create GitHub Release
+        if: steps.tag_check.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          target_commitish: ${{ github.sha }}
+          body: |
+            Automated release from main branch.
+            Version: `${{ steps.version.outputs.version }}`
+            Tag: `${{ steps.version.outputs.tag }}`
+
+      - name: Workflow summary
+        run: |
+          {
+            echo "## Main Release Result"
+            echo "- Version: \`${{ steps.version.outputs.version }}\`"
+            echo "- Tag: \`${{ steps.version.outputs.tag }}\`"
+            echo "- Tag already existed: \`${{ steps.tag_check.outputs.exists }}\`"
+            echo "- Canonical Git npx:"
+            echo "  - \`npx github:dpupek/vanta-manage-mcp#${{ steps.version.outputs.tag }}\`"
+            echo "  - \`npx git+https://github.com/dpupek/vanta-manage-mcp.git#${{ steps.version.outputs.tag }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

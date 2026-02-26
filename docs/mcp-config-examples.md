@@ -55,6 +55,38 @@ Use this when you want to run directly from the Git repository instead of a loca
 
 The package uses `prepare` to run `npm run build` during Git-based installs so the executable bin is available to `npx`.
 
+## Git Repo via npx (Version-Pinned Tag)
+Use this for deterministic installs tied to CI release tags (`v1.0.<buildnumber>`).
+
+```json
+{
+  "mcpServers": {
+    "vanta-full": {
+      "command": "npx",
+      "args": ["-y", "github:dpupek/vanta-manage-mcp#v1.0.123"],
+      "env": {
+        "VANTA_CLIENT_ID": "YOUR_CLIENT_ID",
+        "VANTA_CLIENT_SECRET": "YOUR_CLIENT_SECRET",
+        "VANTA_MCP_SAFE_MODE": "true"
+      }
+    }
+  }
+}
+```
+
+Equivalent URL form:
+
+```json
+{
+  "mcpServers": {
+    "vanta-full": {
+      "command": "npx",
+      "args": ["-y", "git+https://github.com/dpupek/vanta-manage-mcp.git#v1.0.123"]
+    }
+  }
+}
+```
+
 ## Optional Tool Allowlist
 ```json
 {

@@ -4,6 +4,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { initializeToken } from "./auth.js";
 import { registerAllTools } from "./registry.js";
+import { registerHelpSurface } from "./help/register-help.js";
 import {
   hasEnabledToolFilter,
   getEnabledToolNames,
@@ -20,6 +21,7 @@ async function main(): Promise<void> {
   try {
     await initializeToken();
     const registration = registerAllTools(server);
+    const helpRegistration = registerHelpSurface(server);
 
     if (hasEnabledToolFilter) {
       console.error(
@@ -31,6 +33,9 @@ async function main(): Promise<void> {
     );
     console.error(
       `Registered tools: ${registration.totalRegistered.toString()} (endpoints=${registration.generatedEndpoints.toString()}, compatibility=${registration.compatibilityReads.toString()}, workflows=${registration.workflows.toString()})`,
+    );
+    console.error(
+      `Registered help surface: ${helpRegistration.totalRegistered.toString()} (resources=${helpRegistration.resources.toString()}, prompts=${helpRegistration.prompts.toString()}, helpTool=${helpRegistration.fallbackHelpTool.toString()})`,
     );
 
     const transport = new StdioServerTransport();

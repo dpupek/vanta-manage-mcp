@@ -22,6 +22,10 @@ This project extends the upstream `VantaInc/vanta-mcp-server` baseline to includ
 - `workflow_vendor_triage`
 - `workflow_people_assets_vuln_triage`
 - `workflow_information_request_triage`
+- MCP help surface with resources + prompts:
+- `resource://vanta-manage/help`
+- `resource://vanta-manage/tool-catalog`
+- `playbook_tool_selector` and 5 workflow playbook prompts
 - JSON envelope responses for all tools.
 
 ## Credentials
@@ -50,7 +54,10 @@ npm run build
 npm test
 npm run lint
 npm run verify:spec-parity
+npm run smoke:help-surface
 ```
+
+`smoke:help-surface` starts the built MCP server over stdio and validates discovery/readability of help resources/prompts. It is credential-gated and skips when Vanta credentials are not configured.
 
 ## Bootstrap Cleanup
 After importing/upgrading from upstream:
@@ -76,6 +83,20 @@ or
 npx git+https://github.com/<org>/<repo>.git
 ```
 
+## Versioned npx via Tag
+Main-branch CI creates release tags using `v1.0.<buildnumber>` (with `<buildnumber>` = GitHub run number).  
+Use the tag suffix for deterministic installs:
+
+```bash
+npx github:dpupek/vanta-manage-mcp#v1.0.<buildnumber>
+```
+
+or
+
+```bash
+npx git+https://github.com/dpupek/vanta-manage-mcp.git#v1.0.<buildnumber>
+```
+
 ## Generated Artifacts
 - `openapi/manage-v1.json`
 - `openapi/audit-v1.json`
@@ -85,6 +106,7 @@ npx git+https://github.com/<org>/<repo>.git
 
 ## Documentation
 - Tool catalog: `docs/vanta-mcp-help.md`
+- MCP resources/prompt reference: `docs/mcp-resources-prompts.md`
 - Migration: `docs/migration-read-only-to-full-management.md`
 - MCP config examples: `docs/mcp-config-examples.md`
 - Security guidance: `docs/security.md`

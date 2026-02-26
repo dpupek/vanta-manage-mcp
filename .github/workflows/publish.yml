@@ -1,4 +1,8 @@
 name: Publish to NPM
+# Manual npm publish path only.
+# This workflow is intentionally separate from main auto-tag release:
+# - Main push auto-release uses `.github/workflows/release-main-tag.yml`
+# - This workflow remains workflow_dispatch for registry publishing when needed.
 
 on:
   workflow_dispatch:
