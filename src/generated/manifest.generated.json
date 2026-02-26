@@ -1,0 +1,1773 @@
+{
+  "generatedAt": "2026-02-26T14:52:10.470Z",
+  "totalOperations": 219,
+  "totalMutations": 112,
+  "stats": {
+    "manage": {
+      "operations": 164,
+      "mutations": 86
+    },
+    "audit": {
+      "operations": 31,
+      "mutations": 14
+    },
+    "connectors": {
+      "operations": 24,
+      "mutations": 12
+    }
+  },
+  "tools": [
+    {
+      "toolName": "create_custom_control",
+      "source": "manage",
+      "method": "post",
+      "path": "/controls",
+      "operationId": "CreateCustomControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_controls",
+      "source": "manage",
+      "method": "get",
+      "path": "/controls",
+      "operationId": "ListControls",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_control_from_library",
+      "source": "manage",
+      "method": "post",
+      "path": "/controls/add-from-library",
+      "operationId": "AddControlFromLibrary",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_library_controls",
+      "source": "manage",
+      "method": "get",
+      "path": "/controls/controls-library",
+      "operationId": "ListLibraryControls",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_control_metadata",
+      "source": "manage",
+      "method": "patch",
+      "path": "/controls/{controlId}",
+      "operationId": "UpdateControlMetadata",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_control",
+      "source": "manage",
+      "method": "delete",
+      "path": "/controls/{controlId}",
+      "operationId": "DeleteControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_control",
+      "source": "manage",
+      "method": "get",
+      "path": "/controls/{controlId}",
+      "operationId": "GetControl",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_document_to_control",
+      "source": "manage",
+      "method": "post",
+      "path": "/controls/{controlId}/add-document-to-control",
+      "operationId": "AddDocumentToControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "add_test_to_control",
+      "source": "manage",
+      "method": "post",
+      "path": "/controls/{controlId}/add-test-to-control",
+      "operationId": "AddTestToControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_documents_for_control",
+      "source": "manage",
+      "method": "get",
+      "path": "/controls/{controlId}/documents",
+      "operationId": "ListDocumentsForControl",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_document_forcontrol",
+      "source": "manage",
+      "method": "delete",
+      "path": "/controls/{controlId}/documents/{documentId}",
+      "operationId": "DeleteDocumentForcontrol",
+      "isMutation": true
+    },
+    {
+      "toolName": "set_owner_for_control",
+      "source": "manage",
+      "method": "post",
+      "path": "/controls/{controlId}/set-owner",
+      "operationId": "SetOwnerForControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_tests_for_control",
+      "source": "manage",
+      "method": "get",
+      "path": "/controls/{controlId}/tests",
+      "operationId": "ListTestsForControl",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_test_for_control",
+      "source": "manage",
+      "method": "delete",
+      "path": "/controls/{controlId}/tests/{testId}",
+      "operationId": "DeleteTestForControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_customer_trust_accounts",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/accounts",
+      "operationId": "ListCustomerTrustAccounts",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_customer_trust_account",
+      "source": "manage",
+      "method": "post",
+      "path": "/customer-trust/accounts",
+      "operationId": "CreateCustomerTrustAccount",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_customer_trust_account",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/accounts/{accountId}",
+      "operationId": "GetCustomerTrustAccount",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_questionnaires",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/questionnaires",
+      "operationId": "ListQuestionnaires",
+      "isMutation": false
+    },
+    {
+      "toolName": "initiate_export",
+      "source": "manage",
+      "method": "post",
+      "path": "/customer-trust/questionnaires/exports",
+      "operationId": "InitiateExport",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_questionnaire_export",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/questionnaires/exports/{id}",
+      "operationId": "GetQuestionnaireExport",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_file_questionnaire",
+      "source": "manage",
+      "method": "post",
+      "path": "/customer-trust/questionnaires/file",
+      "operationId": "CreateFileQuestionnaire",
+      "isMutation": true
+    },
+    {
+      "toolName": "create_website_questionnaire",
+      "source": "manage",
+      "method": "post",
+      "path": "/customer-trust/questionnaires/website",
+      "operationId": "CreateWebsiteQuestionnaire",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_questionnaire",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/questionnaires/{questionnaireId}",
+      "operationId": "GetQuestionnaire",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_questionnaire",
+      "source": "manage",
+      "method": "delete",
+      "path": "/customer-trust/questionnaires/{questionnaireId}",
+      "operationId": "DeleteQuestionnaire",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_questionnaire",
+      "source": "manage",
+      "method": "patch",
+      "path": "/customer-trust/questionnaires/{questionnaireId}",
+      "operationId": "UpdateQuestionnaire",
+      "isMutation": true
+    },
+    {
+      "toolName": "complete_questionnaire",
+      "source": "manage",
+      "method": "post",
+      "path": "/customer-trust/questionnaires/{questionnaireId}/complete",
+      "operationId": "CompleteQuestionnaire",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_discovered_vendors",
+      "source": "manage",
+      "method": "get",
+      "path": "/discovered-vendors",
+      "operationId": "ListDiscoveredVendors",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_discovered_vendor_accounts",
+      "source": "manage",
+      "method": "get",
+      "path": "/discovered-vendors/{discoveredVendorId}/accounts",
+      "operationId": "ListDiscoveredVendorAccounts",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_discovered_vendor_to_managed",
+      "source": "manage",
+      "method": "post",
+      "path": "/discovered-vendors/{discoveredVendorId}/add-to-managed",
+      "operationId": "AddDiscoveredVendorToManaged",
+      "isMutation": true
+    },
+    {
+      "toolName": "create_document",
+      "source": "manage",
+      "method": "post",
+      "path": "/documents",
+      "operationId": "CreateDocument",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_documents",
+      "source": "manage",
+      "method": "get",
+      "path": "/documents",
+      "operationId": "ListDocuments",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_document",
+      "source": "manage",
+      "method": "delete",
+      "path": "/documents/{documentId}",
+      "operationId": "DeleteDocument",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_document",
+      "source": "manage",
+      "method": "get",
+      "path": "/documents/{documentId}",
+      "operationId": "GetDocument",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_controls_for_document",
+      "source": "manage",
+      "method": "get",
+      "path": "/documents/{documentId}/controls",
+      "operationId": "ListControlsForDocument",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_links_for_document",
+      "source": "manage",
+      "method": "get",
+      "path": "/documents/{documentId}/links",
+      "operationId": "ListLinksForDocument",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_link_for_document",
+      "source": "manage",
+      "method": "post",
+      "path": "/documents/{documentId}/links",
+      "operationId": "CreateLinkForDocument",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_link_for_document",
+      "source": "manage",
+      "method": "delete",
+      "path": "/documents/{documentId}/links/{linkId}",
+      "operationId": "DeleteLinkForDocument",
+      "isMutation": true
+    },
+    {
+      "toolName": "set_owner_for_document",
+      "source": "manage",
+      "method": "post",
+      "path": "/documents/{documentId}/set-owner",
+      "operationId": "SetOwnerForDocument",
+      "isMutation": true
+    },
+    {
+      "toolName": "submit_document_collection",
+      "source": "manage",
+      "method": "post",
+      "path": "/documents/{documentId}/submit",
+      "operationId": "SubmitDocumentCollection",
+      "isMutation": true
+    },
+    {
+      "toolName": "upload_file_for_document",
+      "source": "manage",
+      "method": "post",
+      "path": "/documents/{documentId}/uploads",
+      "operationId": "UploadFileForDocument",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_files_for_document",
+      "source": "manage",
+      "method": "get",
+      "path": "/documents/{documentId}/uploads",
+      "operationId": "ListFilesForDocument",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_file_for_document",
+      "source": "manage",
+      "method": "delete",
+      "path": "/documents/{documentId}/uploads/{uploadedFileId}",
+      "operationId": "DeleteFileForDocument",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_uploadedfile_media",
+      "source": "manage",
+      "method": "get",
+      "path": "/documents/{documentId}/uploads/{uploadedFileId}/media",
+      "operationId": "GetUploadedfileMedia",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_frameworks",
+      "source": "manage",
+      "method": "get",
+      "path": "/frameworks",
+      "operationId": "ListFrameworks",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_framework",
+      "source": "manage",
+      "method": "get",
+      "path": "/frameworks/{frameworkId}",
+      "operationId": "GetFramework",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_controls_for_framework",
+      "source": "manage",
+      "method": "get",
+      "path": "/frameworks/{frameworkId}/controls",
+      "operationId": "ListControlsForFramework",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_person_groups",
+      "source": "manage",
+      "method": "get",
+      "path": "/groups",
+      "operationId": "ListPersonGroups",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_group",
+      "source": "manage",
+      "method": "get",
+      "path": "/groups/{groupId}",
+      "operationId": "GetGroup",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_people_to_group",
+      "source": "manage",
+      "method": "post",
+      "path": "/groups/{groupId}/add-people",
+      "operationId": "AddPeopleToGroup",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_group_members",
+      "source": "manage",
+      "method": "get",
+      "path": "/groups/{groupId}/people",
+      "operationId": "GetGroupMembers",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_person_to_group",
+      "source": "manage",
+      "method": "post",
+      "path": "/groups/{groupId}/people",
+      "operationId": "AddPersonToGroup",
+      "isMutation": true
+    },
+    {
+      "toolName": "remove_person_from_group",
+      "source": "manage",
+      "method": "delete",
+      "path": "/groups/{groupId}/people/{personId}",
+      "operationId": "RemovePersonFromGroup",
+      "isMutation": true
+    },
+    {
+      "toolName": "remove_people_from_group",
+      "source": "manage",
+      "method": "post",
+      "path": "/groups/{groupId}/remove-people",
+      "operationId": "RemovePeopleFromGroup",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_connected_integrations",
+      "source": "manage",
+      "method": "get",
+      "path": "/integrations",
+      "operationId": "ListConnectedIntegrations",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_connected_integration",
+      "source": "manage",
+      "method": "get",
+      "path": "/integrations/{integrationId}",
+      "operationId": "GetConnectedIntegration",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_resource_kind_summaries",
+      "source": "manage",
+      "method": "get",
+      "path": "/integrations/{integrationId}/resource-kinds",
+      "operationId": "ListResourceKindSummaries",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_resource_kind_details",
+      "source": "manage",
+      "method": "get",
+      "path": "/integrations/{integrationId}/resource-kinds/{resourceKind}",
+      "operationId": "GetResourceKindDetails",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_resources",
+      "source": "manage",
+      "method": "patch",
+      "path": "/integrations/{integrationId}/resource-kinds/{resourceKind}/resources",
+      "operationId": "UpdateResources",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_resources",
+      "source": "manage",
+      "method": "get",
+      "path": "/integrations/{integrationId}/resource-kinds/{resourceKind}/resources",
+      "operationId": "ListResources",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_resource",
+      "source": "manage",
+      "method": "patch",
+      "path": "/integrations/{integrationId}/resource-kinds/{resourceKind}/resources/{resourceId}",
+      "operationId": "UpdateResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_resource",
+      "source": "manage",
+      "method": "get",
+      "path": "/integrations/{integrationId}/resource-kinds/{resourceKind}/resources/{resourceId}",
+      "operationId": "GetResource",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_monitored_computers",
+      "source": "manage",
+      "method": "get",
+      "path": "/monitored-computers",
+      "operationId": "ListMonitoredComputers",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_monitored_computer",
+      "source": "manage",
+      "method": "get",
+      "path": "/monitored-computers/{computerId}",
+      "operationId": "GetMonitoredComputer",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_people",
+      "source": "manage",
+      "method": "get",
+      "path": "/people",
+      "operationId": "ListPeople",
+      "isMutation": false
+    },
+    {
+      "toolName": "mark_as_not_people",
+      "source": "manage",
+      "method": "post",
+      "path": "/people/mark-as-not-people",
+      "operationId": "MarkAsNotPeople",
+      "isMutation": true
+    },
+    {
+      "toolName": "mark_as_people",
+      "source": "manage",
+      "method": "post",
+      "path": "/people/mark-as-people",
+      "operationId": "MarkAsPeople",
+      "isMutation": true
+    },
+    {
+      "toolName": "offboard_people",
+      "source": "manage",
+      "method": "post",
+      "path": "/people/offboard",
+      "operationId": "OffboardPeople",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_person",
+      "source": "manage",
+      "method": "get",
+      "path": "/people/{personId}",
+      "operationId": "GetPerson",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_person",
+      "source": "manage",
+      "method": "patch",
+      "path": "/people/{personId}",
+      "operationId": "UpdatePerson",
+      "isMutation": true
+    },
+    {
+      "toolName": "clear_leave_for_person",
+      "source": "manage",
+      "method": "post",
+      "path": "/people/{personId}/clear-leave",
+      "operationId": "ClearLeaveForPerson",
+      "isMutation": true
+    },
+    {
+      "toolName": "set_leave_for_person",
+      "source": "manage",
+      "method": "post",
+      "path": "/people/{personId}/set-leave",
+      "operationId": "SetLeaveForPerson",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_policies",
+      "source": "manage",
+      "method": "get",
+      "path": "/policies",
+      "operationId": "ListPolicies",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_policy",
+      "source": "manage",
+      "method": "get",
+      "path": "/policies/{policyId}",
+      "operationId": "GetPolicy",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_risk_scenario",
+      "source": "manage",
+      "method": "get",
+      "path": "/risk-scenarios",
+      "operationId": "ListRiskScenario",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_risk_scenario",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios",
+      "operationId": "CreateRiskScenario",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_risk_scenario",
+      "source": "manage",
+      "method": "get",
+      "path": "/risk-scenarios/{riskScenarioId}",
+      "operationId": "GetRiskScenario",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_risk_scenario",
+      "source": "manage",
+      "method": "patch",
+      "path": "/risk-scenarios/{riskScenarioId}",
+      "operationId": "UpdateRiskScenario",
+      "isMutation": true
+    },
+    {
+      "toolName": "cancel_risk_scenario_approval_request",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios/{riskScenarioId}/cancel-approval-request",
+      "operationId": "CancelRiskScenarioApprovalRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "submit_risk_for_approval",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios/{riskScenarioId}/submit-for-approval",
+      "operationId": "SubmitRiskForApproval",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_tests",
+      "source": "manage",
+      "method": "get",
+      "path": "/tests",
+      "operationId": "ListTests",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_test",
+      "source": "manage",
+      "method": "get",
+      "path": "/tests/{testId}",
+      "operationId": "GetTest",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_test_entities",
+      "source": "manage",
+      "method": "get",
+      "path": "/tests/{testId}/entities",
+      "operationId": "GetTestEntities",
+      "isMutation": false
+    },
+    {
+      "toolName": "deactivate_test_entity",
+      "source": "manage",
+      "method": "post",
+      "path": "/tests/{testId}/entities/{entityId}/deactivate",
+      "operationId": "DeactivateTestEntity",
+      "isMutation": true
+    },
+    {
+      "toolName": "reactivate_test_entity",
+      "source": "manage",
+      "method": "post",
+      "path": "/tests/{testId}/entities/{entityId}/reactivate",
+      "operationId": "ReactivateTestEntity",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}",
+      "operationId": "GetTrustCenter",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_trust_center",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}",
+      "operationId": "UpdateTrustCenter",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_access_requests",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/access-requests",
+      "operationId": "ListTrustCenterAccessRequests",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_trust_center_access_request",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/access-requests/{accessRequestId}",
+      "operationId": "GetTrustCenterAccessRequest",
+      "isMutation": false
+    },
+    {
+      "toolName": "approve_trust_center_access_request",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/access-requests/{accessRequestId}/approve",
+      "operationId": "ApproveTrustCenterAccessRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "deny_trust_center_access_request",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/access-requests/{accessRequestId}/deny",
+      "operationId": "DenyTrustCenterAccessRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_activity_events",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/activity",
+      "operationId": "ListTrustCenterActivityEvents",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_trust_center_control_categories",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/control-categories",
+      "operationId": "GetTrustCenterControlCategories",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_trust_center_control_category",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/control-categories",
+      "operationId": "AddTrustCenterControlCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_control_category",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/control-categories/{categoryId}",
+      "operationId": "GetTrustCenterControlCategory",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_trust_center_control_category",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/control-categories/{categoryId}",
+      "operationId": "UpdateTrustCenterControlCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_trust_center_control_category",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/control-categories/{categoryId}",
+      "operationId": "DeleteTrustCenterControlCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_controls",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/controls",
+      "operationId": "ListTrustCenterControls",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_control_to_trust_center",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/controls",
+      "operationId": "AddControlToTrustCenter",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_control",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/controls/{controlId}",
+      "operationId": "GetTrustCenterControl",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_trust_center_control",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/controls/{controlId}",
+      "operationId": "DeleteTrustCenterControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_faqs",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/faqs",
+      "operationId": "ListTrustCenterFaqs",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_trust_center_faq",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/faqs",
+      "operationId": "CreateTrustCenterFaq",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_faq",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/faqs/{faqId}",
+      "operationId": "GetTrustCenterFaq",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_trust_center_faq",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/faqs/{faqId}",
+      "operationId": "UpdateTrustCenterFaq",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_trust_center_faq",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/faqs/{faqId}",
+      "operationId": "DeleteTrustCenterFaq",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_historical_access_requests",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/historical-access-requests",
+      "operationId": "ListTrustCenterHistoricalAccessRequests",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_trust_center_resources",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/resources",
+      "operationId": "ListTrustCenterResources",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_trust_center_resource",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/resources",
+      "operationId": "CreateTrustCenterResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_resource",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/resources/{resourceId}",
+      "operationId": "GetTrustCenterResource",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_trust_center_resource",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/resources/{resourceId}",
+      "operationId": "UpdateTrustCenterResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_trust_center_resource",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/resources/{resourceId}",
+      "operationId": "DeleteTrustCenterResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_resource_media",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/resources/{resourceId}/media",
+      "operationId": "GetTrustCenterResourceMedia",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_trust_center_subprocessors",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/subprocessors",
+      "operationId": "ListTrustCenterSubprocessors",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_trust_center_subprocessor",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/subprocessors",
+      "operationId": "CreateTrustCenterSubprocessor",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_subprocessor",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/subprocessors/{subprocessorId}",
+      "operationId": "GetTrustCenterSubprocessor",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_trust_center_subprocessor",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/subprocessors/{subprocessorId}",
+      "operationId": "UpdateTrustCenterSubprocessor",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_trust_center_subprocessor",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/subprocessors/{subprocessorId}",
+      "operationId": "DeleteTrustCenterSubprocessor",
+      "isMutation": true
+    },
+    {
+      "toolName": "create_trust_center_subscriber_group",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/subscriber-groups",
+      "operationId": "CreateTrustCenterSubscriberGroup",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_subscriber_groups",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/subscriber-groups",
+      "operationId": "ListTrustCenterSubscriberGroups",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_trust_center_subscriber_group",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/subscriber-groups/{subscriberGroupId}",
+      "operationId": "UpdateTrustCenterSubscriberGroup",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_trust_center_subscriber_group",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/subscriber-groups/{subscriberGroupId}",
+      "operationId": "DeleteTrustCenterSubscriberGroup",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_subscriber_group",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/subscriber-groups/{subscriberGroupId}",
+      "operationId": "GetTrustCenterSubscriberGroup",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_trust_center_subscribers",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/subscribers",
+      "operationId": "ListTrustCenterSubscribers",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_trust_center_subscriber",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/subscribers",
+      "operationId": "CreateTrustCenterSubscriber",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_subscriber",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/subscribers/{subscriberId}",
+      "operationId": "GetTrustCenterSubscriber",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_trust_center_subscriber",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/subscribers/{subscriberId}",
+      "operationId": "DeleteTrustCenterSubscriber",
+      "isMutation": true
+    },
+    {
+      "toolName": "upsert_groups_for_trust_center_subscriber",
+      "source": "manage",
+      "method": "put",
+      "path": "/trust-centers/{slugId}/subscribers/{subscriberId}/groups",
+      "operationId": "UpsertGroupsForTrustCenterSubscriber",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_updates",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/updates",
+      "operationId": "ListTrustCenterUpdates",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_trust_center_update",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/updates",
+      "operationId": "CreateTrustCenterUpdate",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_update",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/updates/{updateId}",
+      "operationId": "GetTrustCenterUpdate",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_trust_center_update",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/updates/{updateId}",
+      "operationId": "UpdateTrustCenterUpdate",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_trust_center_update",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/updates/{updateId}",
+      "operationId": "DeleteTrustCenterUpdate",
+      "isMutation": true
+    },
+    {
+      "toolName": "send_notifications_to_all_subscribers",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/updates/{updateId}/notify-all-subscribers",
+      "operationId": "SendNotificationsToAllSubscribers",
+      "isMutation": true
+    },
+    {
+      "toolName": "send_trust_center_update_notifications",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/updates/{updateId}/notify-specific-subscribers",
+      "operationId": "SendTrustCenterUpdateNotifications",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_viewers",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/viewers",
+      "operationId": "ListTrustCenterViewers",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_trust_center_viewer",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/viewers",
+      "operationId": "AddTrustCenterViewer",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_trust_center_viewer",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/viewers/{viewerId}",
+      "operationId": "GetTrustCenterViewer",
+      "isMutation": false
+    },
+    {
+      "toolName": "remove_trust_center_viewer",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/viewers/{viewerId}",
+      "operationId": "RemoveTrustCenterViewer",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_vendor_risk_attributes",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-risk-attributes",
+      "operationId": "ListVendorRiskAttributes",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_vendor",
+      "source": "manage",
+      "method": "post",
+      "path": "/vendors",
+      "operationId": "CreateVendor",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_vendors",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors",
+      "operationId": "ListVendors",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_vendor",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}",
+      "operationId": "GetVendor",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_by_id",
+      "source": "manage",
+      "method": "delete",
+      "path": "/vendors/{vendorId}",
+      "operationId": "DeleteById",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_vendor",
+      "source": "manage",
+      "method": "patch",
+      "path": "/vendors/{vendorId}",
+      "operationId": "UpdateVendor",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_vendor_documents",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}/documents",
+      "operationId": "ListVendorDocuments",
+      "isMutation": false
+    },
+    {
+      "toolName": "upload_document_to_vendor",
+      "source": "manage",
+      "method": "post",
+      "path": "/vendors/{vendorId}/documents",
+      "operationId": "UploadDocumentToVendor",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_vendor_findings",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}/findings",
+      "operationId": "ListVendorFindings",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_vendor_finding",
+      "source": "manage",
+      "method": "post",
+      "path": "/vendors/{vendorId}/findings",
+      "operationId": "CreateVendorFinding",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_vendor_finding",
+      "source": "manage",
+      "method": "patch",
+      "path": "/vendors/{vendorId}/findings/{findingId}",
+      "operationId": "UpdateVendorFinding",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_finding_by_id",
+      "source": "manage",
+      "method": "delete",
+      "path": "/vendors/{vendorId}/findings/{findingId}",
+      "operationId": "DeleteFindingById",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_security_reviews_by_vendor_id",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}/security-reviews",
+      "operationId": "GetSecurityReviewsByVendorId",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_security_reviews_by_id",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}/security-reviews/{securityReviewId}",
+      "operationId": "GetSecurityReviewsById",
+      "isMutation": false
+    },
+    {
+      "toolName": "upload_document_for_security_review",
+      "source": "manage",
+      "method": "post",
+      "path": "/vendors/{vendorId}/security-reviews/{securityReviewId}/documents",
+      "operationId": "UploadDocumentForSecurityReview",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_security_review_documents",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}/security-reviews/{securityReviewId}/documents",
+      "operationId": "GetSecurityReviewDocuments",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_security_review_document_by_id",
+      "source": "manage",
+      "method": "delete",
+      "path": "/vendors/{vendorId}/security-reviews/{securityReviewId}/documents/{documentId}",
+      "operationId": "DeleteSecurityReviewDocumentById",
+      "isMutation": true
+    },
+    {
+      "toolName": "set_status_for_vendor",
+      "source": "manage",
+      "method": "post",
+      "path": "/vendors/{vendorId}/set-status",
+      "operationId": "SetStatusForVendor",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_vulnerabilities",
+      "source": "manage",
+      "method": "get",
+      "path": "/vulnerabilities",
+      "operationId": "ListVulnerabilities",
+      "isMutation": false
+    },
+    {
+      "toolName": "deactivate_vulnerabilities",
+      "source": "manage",
+      "method": "post",
+      "path": "/vulnerabilities/deactivate",
+      "operationId": "DeactivateVulnerabilities",
+      "isMutation": true
+    },
+    {
+      "toolName": "reactivate_vulnerabilities",
+      "source": "manage",
+      "method": "post",
+      "path": "/vulnerabilities/reactivate",
+      "operationId": "ReactivateVulnerabilities",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_vulnerability",
+      "source": "manage",
+      "method": "get",
+      "path": "/vulnerabilities/{vulnerabilityId}",
+      "operationId": "GetVulnerability",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_vulnerability_remediations",
+      "source": "manage",
+      "method": "get",
+      "path": "/vulnerability-remediations",
+      "operationId": "ListVulnerabilityRemediations",
+      "isMutation": false
+    },
+    {
+      "toolName": "acknowledge_sla_miss_vulnerability_remediations",
+      "source": "manage",
+      "method": "post",
+      "path": "/vulnerability-remediations/acknowledge-sla-miss",
+      "operationId": "AcknowledgeSlaMissVulnerabilityRemediations",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_vulnerable_assets",
+      "source": "manage",
+      "method": "get",
+      "path": "/vulnerable-assets",
+      "operationId": "ListVulnerableAssets",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_vulnerable_asset",
+      "source": "manage",
+      "method": "get",
+      "path": "/vulnerable-assets/{vulnerableAssetId}",
+      "operationId": "GetVulnerableAsset",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_auditor",
+      "source": "audit",
+      "method": "post",
+      "path": "/auditors",
+      "operationId": "CreateAuditor",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_audits",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits",
+      "operationId": "ListAudits",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_audit",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}",
+      "operationId": "GetAudit",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_audit_comments",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/comments",
+      "operationId": "ListAuditComments",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_audit_controls",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/controls",
+      "operationId": "ListAuditControls",
+      "isMutation": false
+    },
+    {
+      "toolName": "audit_create_custom_control",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/{auditId}/controls/custom-controls",
+      "operationId": "CreateCustomControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_audit_evidence",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/evidence",
+      "operationId": "ListAuditEvidence",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_custom_evidence_request",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/{auditId}/evidence/custom-evidence-requests",
+      "operationId": "CreateCustomEvidenceRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_audit_evidence",
+      "source": "audit",
+      "method": "patch",
+      "path": "/audits/{auditId}/evidence/{auditEvidenceId}",
+      "operationId": "UpdateAuditEvidence",
+      "isMutation": true
+    },
+    {
+      "toolName": "create_comment_for_audit_evidence",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/{auditId}/evidence/{auditEvidenceId}/comments",
+      "operationId": "CreateCommentForAuditEvidence",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_audit_evidence_urls",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/evidence/{auditEvidenceId}/urls",
+      "operationId": "ListAuditEvidenceUrls",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_framework_codes",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/framework-codes",
+      "operationId": "GetFrameworkCodes",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_information_requests",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/information-requests",
+      "operationId": "ListInformationRequests",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_information_request",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/{auditId}/information-requests",
+      "operationId": "CreateInformationRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_information_request",
+      "source": "audit",
+      "method": "patch",
+      "path": "/audits/{auditId}/information-requests/{requestId}",
+      "operationId": "UpdateInformationRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_information_request",
+      "source": "audit",
+      "method": "delete",
+      "path": "/audits/{auditId}/information-requests/{requestId}",
+      "operationId": "DeleteInformationRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "accept_information_request_evidence",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/{auditId}/information-requests/{requestId}/accept-evidence",
+      "operationId": "AcceptInformationRequestEvidence",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_information_request_activity",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/information-requests/{requestId}/activity",
+      "operationId": "ListInformationRequestActivity",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_comments_for_information_request",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/information-requests/{requestId}/comments",
+      "operationId": "ListCommentsForInformationRequest",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_comment_for_information_request",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/{auditId}/information-requests/{requestId}/comments",
+      "operationId": "CreateCommentForInformationRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_comment_for_information_request",
+      "source": "audit",
+      "method": "patch",
+      "path": "/audits/{auditId}/information-requests/{requestId}/comments/{commentId}",
+      "operationId": "UpdateCommentForInformationRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_comment_for_information_request",
+      "source": "audit",
+      "method": "delete",
+      "path": "/audits/{auditId}/information-requests/{requestId}/comments/{commentId}",
+      "operationId": "DeleteCommentForInformationRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_information_request_evidence",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/information-requests/{requestId}/evidence",
+      "operationId": "ListInformationRequestEvidence",
+      "isMutation": false
+    },
+    {
+      "toolName": "flag_information_request_evidence",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/{auditId}/information-requests/{requestId}/flag-evidence",
+      "operationId": "FlagInformationRequestEvidence",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_monitored_computers_in_audit_scope",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/monitored-computers",
+      "operationId": "ListMonitoredComputersInAuditScope",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_people_in_audit_scope",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/people",
+      "operationId": "ListPeopleInAuditScope",
+      "isMutation": false
+    },
+    {
+      "toolName": "share_information_request_list",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/{auditId}/share-information-request-list",
+      "operationId": "ShareInformationRequestList",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_vendors_in_audit_scope",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/vendors",
+      "operationId": "ListVendorsInAuditScope",
+      "isMutation": false
+    },
+    {
+      "toolName": "audit_list_vulnerabilities",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/vulnerabilities",
+      "operationId": "ListVulnerabilities",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_vulnerability_remediations_in_audit_scope",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/vulnerability-remediations",
+      "operationId": "ListVulnerabilityRemediationsInAuditScope",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_vulnerable_assets",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/vulnerable-assets",
+      "operationId": "GetVulnerableAssets",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_get_api_endpoint_vulnerability_connectors",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/api_endpoint_vulnerability_connectors",
+      "operationId": "get-ApiEndpointVulnerabilityConnectors",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_api_endpoint_vulnerability_connectors",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/api_endpoint_vulnerability_connectors",
+      "operationId": "put-ApiEndpointVulnerabilityConnectors",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_background_check_connector",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/background_check_connector",
+      "operationId": "get-BackgroundCheckConnector",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_background_check_connector",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/background_check_connector",
+      "operationId": "put-BackgroundCheckConnector",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_custom_resource",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/custom_resource",
+      "operationId": "get-CustomResource",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_custom_resource",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/custom_resource",
+      "operationId": "put-CustomResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_macos_user_computer",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/macos_user_computer",
+      "operationId": "get-MacosUserComputer",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_macos_user_computer",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/macos_user_computer",
+      "operationId": "put-MacosUserComputer",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_package_vulnerability_connectors",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/package_vulnerability_connectors",
+      "operationId": "get-PackageVulnerabilityConnectors",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_package_vulnerability_connectors",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/package_vulnerability_connectors",
+      "operationId": "put-PackageVulnerabilityConnectors",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_secret",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/secret",
+      "operationId": "get-Secret",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_secret",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/secret",
+      "operationId": "put-Secret",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_security_task",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/security_task",
+      "operationId": "get-SecurityTask",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_security_task",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/security_task",
+      "operationId": "put-SecurityTask",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_static_analysis_code_vulnerability_connectors",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/static_analysis_code_vulnerability_connectors",
+      "operationId": "get-StaticAnalysisCodeVulnerabilityConnectors",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_static_analysis_code_vulnerability_connectors",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/static_analysis_code_vulnerability_connectors",
+      "operationId": "put-StaticAnalysisCodeVulnerabilityConnectors",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_user_account",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/user_account",
+      "operationId": "get-UserAccount",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_user_account",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/user_account",
+      "operationId": "put-UserAccount",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_user_security_training_status",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/user_security_training_status",
+      "operationId": "get-UserSecurityTrainingStatus",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_user_security_training_status",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/user_security_training_status",
+      "operationId": "put-UserSecurityTrainingStatus",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_vulnerable_component",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/vulnerable_component",
+      "operationId": "get-VulnerableComponent",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_vulnerable_component",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/vulnerable_component",
+      "operationId": "put-VulnerableComponent",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_get_windows_user_computer",
+      "source": "connectors",
+      "method": "get",
+      "path": "/v1/resources/windows_user_computer",
+      "operationId": "get-WindowsUserComputer",
+      "isMutation": false
+    },
+    {
+      "toolName": "connector_put_windows_user_computer",
+      "source": "connectors",
+      "method": "put",
+      "path": "/v1/resources/windows_user_computer",
+      "operationId": "put-WindowsUserComputer",
+      "isMutation": true
+    }
+  ]
+}

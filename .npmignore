@@ -1,0 +1,34 @@
+# Source files
+src/
+*.ts
+!*.d.ts
+
+# Development files
+.github/
+terraform/
+node_modules/
+*.log
+.env*
+CLAUDE.md
+
+# Build artifacts
+tsconfig.json
+eslint.config.mjs
+.prettierrc*
+
+# Documentation (keep README.md)
+SECURITY.md
+
+# Package manager files
+yarn.lock
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo

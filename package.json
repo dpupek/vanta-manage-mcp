@@ -1,0 +1,65 @@
+{
+  "name": "@vantasdk/vanta-mcp-server",
+  "version": "1.2.0",
+  "main": "index.js",
+  "type": "module",
+  "bin": "build/index.js",
+  "files": [
+    "build/*",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "prepare": "npm run build",
+    "generate": "tsc -p tsconfig.scripts.json && node build-scripts/generate-tools.js",
+    "generate:help": "tsc -p tsconfig.scripts.json && node build-scripts/generate-help.js",
+    "verify:spec-parity": "tsc -p tsconfig.scripts.json && node build-scripts/verify-spec-parity.js",
+    "build": "npm run generate && tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "start": "npm run build && node build/index.js",
+    "eval": "tsc && node build/eval/eval.js",
+    "test": "npm run build && node --test \"build/test/**/*.test.js\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,json,md}\"",
+    "fix": "npm run format && npm run lint:fix"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "vanta",
+    "security",
+    "compliance"
+  ],
+  "author": "Vanta Inc (https://www.vanta.com/)",
+  "license": "MIT",
+  "description": "Model Context Protocol server for Vanta's security compliance platform",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VantaInc/vanta-mcp-server.git"
+  },
+  "homepage": "https://github.com/VantaInc/vanta-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/VantaInc/vanta-mcp-server/blob/main/SECURITY.md"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^8.57.0",
+    "@types/node": "^22.13.17",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "openai": "^4.29.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.0",
+    "zod": ">= 3"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}
