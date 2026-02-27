@@ -35,7 +35,7 @@ jobs:
             HEAD_SHA="${{ github.sha }}"
           fi
 
-          FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- '*.ts' '*.json' '*.md' | tr '\n' ' ')"
+          FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- '*.ts' '*.json' '*.md' | grep -v '^src/generated/manifest.generated.json$' | tr '\n' ' ')"
           if [ -z "$FILES" ]; then
             echo "has_files=false" >> "$GITHUB_OUTPUT"
             echo "files=" >> "$GITHUB_OUTPUT"
