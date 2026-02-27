@@ -1,27 +1,32 @@
 # Roadmap
 
 ## Phase 0: Shaping and Baseline
+
 - [x] Create epic definition, workflows, baseline, edge cases, CRCs, stakeholder summary.
 - [x] Document temporary epic folder and assumptions.
 
 ## Phase 1: Bootstrap
+
 - [x] Import upstream `VantaInc/vanta-mcp-server`.
 - [x] Remove read-only/default tool filtering bias.
 - [x] Update runtime target to Node 20+ baseline.
 
 ## Phase 2: OpenAPI Ingestion + Generation
+
 - [x] Add pinned specs under `openapi/`.
 - [x] Implement generator for all three specs.
 - [x] Emit generated tool metadata + schemas + manifests.
 - [x] Add drift/parity verify command for CI.
 
 ## Phase 3: Client + Safety Layer
+
 - [x] Add shared Vanta API client with token cache/refresh/retry.
 - [x] Add envelope response contract helpers.
 - [x] Enforce `confirm` for all mutating tools.
 - [x] Add multipart base64 adapter.
 
 ## Phase 4: Workflow Tools
+
 - [x] Add control evidence workflow.
 - [x] Add failing controls triage workflow.
 - [x] Add vendor triage workflow.
@@ -29,12 +34,14 @@
 - [x] Add audit information request triage workflow.
 
 ## Phase 5: Tests
+
 - [x] Add generator naming/collision unit tests.
 - [x] Add safe-mode/envelope/multipart tests.
 - [x] Add spec parity test and uniqueness test.
 - [x] Add workflow plan/execute gating tests.
 
 ## Phase 6: Docs + Release
+
 - [x] Generate full tool catalog and examples.
 - [x] Add migration guidance and MCP config examples.
 - [x] Add security guidance (least privilege, write safety, secrets/logging).
@@ -50,6 +57,7 @@
 - [x] Document tag-pinned Git `npx` usage and release checklist updates.
 
 ## Phase 7: Integration Test Program (Live + Mock + OAuth Stability)
+
 - [x] Add `VANTA_ENV_FILE` dotenv support and direct-env-first credential precedence.
 - [x] Add shared live integration gating helper (`src/test/integration/shared/env.ts`).
 - [x] Add fake Vanta API server for mocked MCP integration tests.
@@ -69,6 +77,7 @@
 - [x] Update README/security/troubleshooting/config docs for new test and credential contracts.
 
 ## Phase 8: Agent-Centric Error Guidance
+
 - [x] Extend error envelope contract to support `error.agentHint`.
 - [x] Derive compact actionable hints for common error classes (`confirmation_required`, `api_error`, `request_failed`, `validation_error`, `write_disabled`).
 - [x] Add explicit rate-limit guidance for `rate_limit_exceeded` responses.
@@ -76,6 +85,7 @@
 - [x] Add unit tests validating hint derivation and explicit override behavior.
 
 ## Phase 9: Multipart Upload Contract Hardening
+
 - [x] Replace multipart base64 upload execution contract with `filePath`-based uploads.
 - [x] Add strict per-endpoint upload file policy (extension + MIME allowlist).
 - [x] Add centralized upload preflight validation and map failures to structured envelopes.

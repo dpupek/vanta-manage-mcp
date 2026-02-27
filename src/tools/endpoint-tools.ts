@@ -6,11 +6,7 @@ import {
 import { buildOperationSchema } from "./operation-schema.js";
 import { errorEnvelope, successEnvelope, toToolResult } from "../envelope.js";
 import { VantaApiClient } from "../client/vanta-client.js";
-import {
-  isToolEnabled,
-  safeModeEnabled,
-  writeEnabled,
-} from "../config.js";
+import { isToolEnabled, safeModeEnabled, writeEnabled } from "../config.js";
 import { validateUploadFileInput } from "../uploads/file-validation.js";
 import { appendUploadFile } from "../uploads/multipart.js";
 
@@ -98,7 +94,9 @@ const isConfirmationRequired = (
   return args.confirm !== true;
 };
 
-const stripRuntimeFields = (args: Record<string, unknown>): Record<string, unknown> => {
+const stripRuntimeFields = (
+  args: Record<string, unknown>,
+): Record<string, unknown> => {
   const remaining = { ...args };
   delete remaining.confirm;
   return remaining;
@@ -200,12 +198,19 @@ export async function invokeGeneratedOperation(
     }
 
     return toToolResult(
-      successEnvelope(response.data, `${operation.method.toUpperCase()} ${operation.path}`),
+      successEnvelope(
+        response.data,
+        `${operation.method.toUpperCase()} ${operation.path}`,
+      ),
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return toToolResult(
-      errorEnvelope("request_failed", message, "Verify credentials, scopes, and payload."),
+      errorEnvelope(
+        "request_failed",
+        message,
+        "Verify credentials, scopes, and payload.",
+      ),
     );
   }
 }

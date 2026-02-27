@@ -19,10 +19,7 @@ test("api_error with rate_limit_exceeded includes actionable agentHint", () => {
 
   // Assert
   assert.equal(envelope.success, false);
-  assert.match(
-    envelope.error.agentHint ?? "",
-    /Rate limited\./u,
-  );
+  assert.match(envelope.error.agentHint ?? "", /Rate limited\./u);
   assert.match(
     envelope.error.agentHint ?? "",
     /resource:\/\/vanta-manage\/troubleshooting/u,
@@ -41,10 +38,7 @@ test("confirmation_required includes compact agent guidance", () => {
 
   // Assert
   assert.equal(envelope.success, false);
-  assert.match(
-    envelope.error.agentHint ?? "",
-    /confirm=true/u,
-  );
+  assert.match(envelope.error.agentHint ?? "", /confirm=true/u);
   assert.match(
     envelope.error.agentHint ?? "",
     /resource:\/\/vanta-manage\/safety/u,

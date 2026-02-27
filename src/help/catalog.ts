@@ -34,19 +34,23 @@ export const buildHelpCatalog = (): HelpCatalog => {
     }),
   );
 
-  const workflowEntries: HelpCatalogEntry[] = workflowToolMetadata.map(tool => ({
-    name: tool.name,
-    description: tool.description,
-    category: "workflow",
-    source: "workflow",
-    mode: tool.mode,
-    isMutation: true,
-    enabled: isToolEnabled(tool.name),
-  }));
-
-  const entries = [...generatedEntries, ...compatEntries, ...workflowEntries].sort(
-    byName,
+  const workflowEntries: HelpCatalogEntry[] = workflowToolMetadata.map(
+    tool => ({
+      name: tool.name,
+      description: tool.description,
+      category: "workflow",
+      source: "workflow",
+      mode: tool.mode,
+      isMutation: true,
+      enabled: isToolEnabled(tool.name),
+    }),
   );
+
+  const entries = [
+    ...generatedEntries,
+    ...compatEntries,
+    ...workflowEntries,
+  ].sort(byName);
 
   const summary = {
     total: entries.length,
@@ -57,10 +61,12 @@ export const buildHelpCatalog = (): HelpCatalog => {
       workflow: workflowEntries.length,
     },
     generatedBySource: {
-      manage: generatedEntries.filter(entry => entry.source === "manage").length,
-      audit: generatedEntries.filter(entry => entry.source === "audit").length,
-      connectors: generatedEntries.filter(entry => entry.source === "connectors")
+      manage: generatedEntries.filter(entry => entry.source === "manage")
         .length,
+      audit: generatedEntries.filter(entry => entry.source === "audit").length,
+      connectors: generatedEntries.filter(
+        entry => entry.source === "connectors",
+      ).length,
     },
     mutating: entries.filter(entry => entry.isMutation).length,
   };

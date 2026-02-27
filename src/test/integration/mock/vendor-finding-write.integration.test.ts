@@ -80,20 +80,24 @@ test("mock vendor + finding write lifecycle performs readback assertions", async
     findings.push(finding);
     return { status: 200, body: finding };
   });
-  fakeServer.setRoute("PATCH", "/vendors/vendor-1/findings/finding-1", request => {
-    const body = request.jsonBody as Record<string, unknown>;
-    const finding = findings.find(item => item.id === "finding-1");
-    if (!finding) {
-      return { status: 404, body: { error: "not_found" } };
-    }
-    if (typeof body.content === "string") {
-      finding.content = body.content;
-    }
-    if (typeof body.riskStatus === "string") {
-      finding.riskStatus = body.riskStatus;
-    }
-    return { status: 200, body: finding };
-  });
+  fakeServer.setRoute(
+    "PATCH",
+    "/vendors/vendor-1/findings/finding-1",
+    request => {
+      const body = request.jsonBody as Record<string, unknown>;
+      const finding = findings.find(item => item.id === "finding-1");
+      if (!finding) {
+        return { status: 404, body: { error: "not_found" } };
+      }
+      if (typeof body.content === "string") {
+        finding.content = body.content;
+      }
+      if (typeof body.riskStatus === "string") {
+        finding.riskStatus = body.riskStatus;
+      }
+      return { status: 200, body: finding };
+    },
+  );
   fakeServer.setRoute("DELETE", "/vendors/vendor-1/findings/finding-1", () => {
     const index = findings.findIndex(item => item.id === "finding-1");
     if (index >= 0) {
@@ -140,11 +144,16 @@ test("mock vendor + finding write lifecycle performs readback assertions", async
     });
     const createFindingEnvelope = parseToolEnvelope(createFinding);
 
-    const listFindingsAfterCreate = await harness.callTool("list_vendor_findings", {
-      vendorId: "vendor-1",
-      pageSize: 20,
-    });
-    const findingsAfterCreateEnvelope = parseToolEnvelope(listFindingsAfterCreate);
+    const listFindingsAfterCreate = await harness.callTool(
+      "list_vendor_findings",
+      {
+        vendorId: "vendor-1",
+        pageSize: 20,
+      },
+    );
+    const findingsAfterCreateEnvelope = parseToolEnvelope(
+      listFindingsAfterCreate,
+    );
 
     const updateFinding = await harness.callTool("update_vendor_finding", {
       vendorId: "vendor-1",
@@ -164,11 +173,16 @@ test("mock vendor + finding write lifecycle performs readback assertions", async
     });
     const deleteFindingEnvelope = parseToolEnvelope(deleteFinding);
 
-    const listFindingsAfterDelete = await harness.callTool("list_vendor_findings", {
-      vendorId: "vendor-1",
-      pageSize: 20,
-    });
-    const findingsAfterDeleteEnvelope = parseToolEnvelope(listFindingsAfterDelete);
+    const listFindingsAfterDelete = await harness.callTool(
+      "list_vendor_findings",
+      {
+        vendorId: "vendor-1",
+        pageSize: 20,
+      },
+    );
+    const findingsAfterDeleteEnvelope = parseToolEnvelope(
+      listFindingsAfterDelete,
+    );
 
     // Assert
     assert.equal(updateEnvelope.success, true);
@@ -184,16 +198,22 @@ test("mock vendor + finding write lifecycle performs readback assertions", async
     );
     assert.equal(createFindingEnvelope.success, true);
     assert.equal(findingsAfterCreateEnvelope.success, true);
-    const findingsAfterCreate = (
-      findingsAfterCreateEnvelope.data as { results?: { data?: Record<string, unknown>[] } }
-    ).results?.data ?? [];
+    const findingsAfterCreate =
+      (
+        findingsAfterCreateEnvelope.data as {
+          results?: { data?: Record<string, unknown>[] };
+        }
+      ).results?.data ?? [];
     assert.equal(findingsAfterCreate.length, 1);
     assert.equal(updateFindingEnvelope.success, true);
     assert.equal(deleteFindingEnvelope.success, true);
     assert.equal(findingsAfterDeleteEnvelope.success, true);
-    const findingsAfterDelete = (
-      findingsAfterDeleteEnvelope.data as { results?: { data?: Record<string, unknown>[] } }
-    ).results?.data ?? [];
+    const findingsAfterDelete =
+      (
+        findingsAfterDeleteEnvelope.data as {
+          results?: { data?: Record<string, unknown>[] };
+        }
+      ).results?.data ?? [];
     assert.equal(findingsAfterDelete.length, 0);
   } finally {
     await harness.stop();

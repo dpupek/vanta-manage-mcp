@@ -12,11 +12,14 @@ const CREDENTIAL_ENV_KEYS = [
 ] as const;
 
 const withCredentialEnv = async (
-  env: Partial<Record<(typeof CREDENTIAL_ENV_KEYS)[number], string | undefined>>,
+  env: Partial<
+    Record<(typeof CREDENTIAL_ENV_KEYS)[number], string | undefined>
+  >,
   run: () => Promise<void> | void,
 ): Promise<void> => {
-  const previous: Partial<Record<(typeof CREDENTIAL_ENV_KEYS)[number], string | undefined>> =
-    {};
+  const previous: Partial<
+    Record<(typeof CREDENTIAL_ENV_KEYS)[number], string | undefined>
+  > = {};
   for (const key of CREDENTIAL_ENV_KEYS) {
     previous[key] = process.env[key];
   }

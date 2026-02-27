@@ -35,9 +35,15 @@ const countOperations = (specPath: string): number => {
   const spec = JSON.parse(fs.readFileSync(specPath, "utf8")) as OpenApiSpec;
   let total = 0;
   for (const pathItem of Object.values(spec.paths ?? {})) {
-    total += ["get", "post", "put", "patch", "delete", "options", "head"].filter(
-      method => Boolean(pathItem[method]),
-    ).length;
+    total += [
+      "get",
+      "post",
+      "put",
+      "patch",
+      "delete",
+      "options",
+      "head",
+    ].filter(method => Boolean(pathItem[method])).length;
   }
   return total;
 };
@@ -60,8 +66,12 @@ const main = (): void => {
     fs.readFileSync(manifestPath, "utf8"),
   ) as ManifestFile;
 
-  const manageCount = countOperations(path.join(openApiDirectory, "manage-v1.json"));
-  const auditCount = countOperations(path.join(openApiDirectory, "audit-v1.json"));
+  const manageCount = countOperations(
+    path.join(openApiDirectory, "manage-v1.json"),
+  );
+  const auditCount = countOperations(
+    path.join(openApiDirectory, "audit-v1.json"),
+  );
   const connectorCount = countOperations(
     path.join(openApiDirectory, "connectors-v1.json"),
   );
@@ -91,7 +101,10 @@ const main = (): void => {
       /^[a-z0-9_]+$/.test(tool.toolName),
       `Tool name is invalid for MCP naming: ${tool.toolName}`,
     );
-    assert(!tool.toolName.includes("."), `Tool name contains dot: ${tool.toolName}`);
+    assert(
+      !tool.toolName.includes("."),
+      `Tool name contains dot: ${tool.toolName}`,
+    );
     assert(!names.has(tool.toolName), `Duplicate tool name: ${tool.toolName}`);
     names.add(tool.toolName);
   }
@@ -102,4 +115,3 @@ const main = (): void => {
 };
 
 main();
-

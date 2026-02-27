@@ -1,6 +1,12 @@
 import { logLevelName } from "./config.js";
 import { redactFields } from "./redaction.js";
-import { LogEntry, LogFields, LogLevelName, LogSeverity, MODE_TO_SEVERITIES } from "./types.js";
+import {
+  LogEntry,
+  LogFields,
+  LogLevelName,
+  LogSeverity,
+  MODE_TO_SEVERITIES,
+} from "./types.js";
 
 type LogSink = (line: string) => void;
 
@@ -65,7 +71,7 @@ const normalizeFields = (
   if (!fields) {
     return undefined;
   }
-      const normalized = normalizeValue(fields, includeStack, new WeakSet());
+  const normalized = normalizeValue(fields, includeStack, new WeakSet());
   if (!isObject(normalized)) {
     return { value: normalized };
   }

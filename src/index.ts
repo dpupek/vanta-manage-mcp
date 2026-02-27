@@ -35,24 +35,31 @@ async function main(): Promise<void> {
       safeMode: safeModeEnabled,
       writeEnabled,
     });
-    logger.info("registration_summary", "Registered MCP tools and help surface.", {
-      tools: {
-        total: registration.totalRegistered,
-        endpoints: registration.generatedEndpoints,
-        compatibility: registration.compatibilityReads,
-        workflows: registration.workflows,
+    logger.info(
+      "registration_summary",
+      "Registered MCP tools and help surface.",
+      {
+        tools: {
+          total: registration.totalRegistered,
+          endpoints: registration.generatedEndpoints,
+          compatibility: registration.compatibilityReads,
+          workflows: registration.workflows,
+        },
+        helpSurface: {
+          total: helpRegistration.totalRegistered,
+          resources: helpRegistration.resources,
+          prompts: helpRegistration.prompts,
+          helpTool: helpRegistration.fallbackHelpTool,
+        },
       },
-      helpSurface: {
-        total: helpRegistration.totalRegistered,
-        resources: helpRegistration.resources,
-        prompts: helpRegistration.prompts,
-        helpTool: helpRegistration.fallbackHelpTool,
-      },
-    });
+    );
 
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    logger.info("server_started", "Vanta MCP server started on stdio transport.");
+    logger.info(
+      "server_started",
+      "Vanta MCP server started on stdio transport.",
+    );
   } catch (error) {
     logger.fatal("server_start_failed", "Failed to start Vanta MCP server.", {
       error,

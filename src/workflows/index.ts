@@ -98,7 +98,9 @@ const parseEnvelope = (resultText: string): unknown => {
   }
 };
 
-const getResultPayload = (result: Awaited<ReturnType<typeof executeOperation>>) => {
+const getResultPayload = (
+  result: Awaited<ReturnType<typeof executeOperation>>,
+) => {
   const first = result.content[0];
   if (first.type !== "text") {
     return null;
@@ -163,7 +165,9 @@ const registerControlEvidenceWorkflow = (
               },
               reads: {
                 controls: getResultPayload(controls),
-                control: currentControl ? getResultPayload(currentControl) : null,
+                control: currentControl
+                  ? getResultPayload(currentControl)
+                  : null,
               },
             },
             "Plan generated. No mutations were executed.",
@@ -363,7 +367,10 @@ const registerFailingControlsWorkflow = (
       }
 
       return toToolResult(
-        successEnvelope({ executed: results }, "Failing controls triage executed."),
+        successEnvelope(
+          { executed: results },
+          "Failing controls triage executed.",
+        ),
       );
     },
   );
@@ -555,7 +562,11 @@ const registerPeopleAssetsVulnWorkflow = (
           { pageSize: 50 },
           client,
         );
-        const people = await executeOperation("ListPeople", { pageSize: 50 }, client);
+        const people = await executeOperation(
+          "ListPeople",
+          { pageSize: 50 },
+          client,
+        );
         return toToolResult(
           successEnvelope(
             {

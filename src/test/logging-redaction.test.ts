@@ -30,8 +30,14 @@ test("redaction hides sensitive keys recursively and preserves safe values", () 
 
   // Assert
   assert.equal(redacted.token, "[REDACTED]");
-  assert.equal((redacted.nested as Record<string, unknown>).Authorization, "[REDACTED]");
-  assert.equal((redacted.nested as Record<string, unknown>).password, "[REDACTED]");
+  assert.equal(
+    (redacted.nested as Record<string, unknown>).Authorization,
+    "[REDACTED]",
+  );
+  assert.equal(
+    (redacted.nested as Record<string, unknown>).password,
+    "[REDACTED]",
+  );
   assert.equal((redacted.nested as Record<string, unknown>).plain, "keep");
   const deeper = (redacted.nested as Record<string, unknown>).deeper as Record<
     string,
@@ -53,4 +59,3 @@ test("sensitive-key matcher covers expected fragments", () => {
   assert.equal(shouldRedactKey("cookie"), true);
   assert.equal(shouldRedactKey("safe_key"), false);
 });
-

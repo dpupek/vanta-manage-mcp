@@ -3,16 +3,19 @@
 Use this before tagging or publishing a new server version.
 
 ## Generation and Parity
+
 - Run `npm run generate`.
 - Run `npm run verify:spec-parity`.
 - Confirm expected operation totals (current baseline: 219).
 
 ## Quality Gates
+
 - Run `npm run lint`.
 - Run `npm test`.
 - Run `npm run build`.
 
 ## Docs
+
 - Run `npm run generate:help`.
 - Confirm docs are current:
 - `docs/dev/help-surface-reference.md`
@@ -22,6 +25,7 @@ Use this before tagging or publishing a new server version.
 - `docs/dev/security.md`
 
 ## Breaking Change Callouts
+
 - If multipart upload interfaces changed, add an explicit release note with migration guidance.
 - Current required callout: upload tools no longer accept `contentBase64`/`filename`; use `filePath` (+ optional `mimeType`) instead.
 - Confirm user docs include the same migration note:
@@ -30,6 +34,7 @@ Use this before tagging or publishing a new server version.
 - `docs/user/interface-overview.md`
 
 ## Packaging and Runtime
+
 - Confirm `package.json` includes:
 - `bin` -> `build/index.js`
 - `prepare` -> `npm run build`
@@ -44,6 +49,7 @@ Use this before tagging or publishing a new server version.
 - `npx github:dpupek/vanta-manage-mcp#v1.0.<buildnumber>`
 
 ## MVP Exit Checks
+
 - Verify tagged release install in Codex using `npx github:dpupek/vanta-manage-mcp#v1.0.<buildnumber>`.
 - Verify tagged release install in Claude Desktop using the same pinned tag.
 - Confirm both clients can discover tools/resources/prompts and call `help`.
@@ -52,6 +58,7 @@ Use this before tagging or publishing a new server version.
 - strict no-skip pass requirement.
 
 ## Main Auto-Release Tag Contract
+
 - Tag format must match: `^v1\.0\.\d+$`
 - Build number source: `${{ github.run_number }}`
 - Canonical release source is git tag + GitHub Release (no package.json writeback required).
@@ -61,9 +68,9 @@ Use this before tagging or publishing a new server version.
 - `stable` is still updated on successful reruns and points to the current `main` release commit.
 
 ## Final Review
+
 - Verify safety defaults:
 - `VANTA_MCP_SAFE_MODE=true`
 - `VANTA_MCP_ENABLE_WRITE=true` (or intentional override)
 - Confirm no credentials/secrets in tracked files.
 - Confirm changelog/release notes are updated.
-

@@ -1,6 +1,7 @@
 # Progress Log
 
 ## 2026-02-26
+
 - [x] Implemented full OpenAPI parity generation (Manage + Audit + Connectors, 219 operations).
 - [x] Added safe-mode mutation confirmation and workflow plan/execute gating.
 - [x] Added compatibility read tools and specialized workflow tools.
@@ -68,6 +69,7 @@
   - new unit tests validate hint derivation and override behavior
 
 ## Gotchas (Carry Forward)
+
 - Keep `_upstream/` and other temporary import folders out of lint/build scope.
 - Keep `scripts/*.ts` covered by a dedicated TypeScript config (`tsconfig.scripts.json`) and ESLint project references.
 - Always run `npm run verify:spec-parity` after OpenAPI or generator changes.
@@ -77,6 +79,7 @@
 - For new/updated MCP error surfaces, always include compact `agentHint` guidance when actionable next steps exist.
 
 ## 2026-02-27
+
 - [x] Implemented breaking multipart upload contract migration:
   - Removed `contentBase64`/`filename` upload execution path.
   - Multipart upload tools now require local `filePath` (+ optional `mimeType`).

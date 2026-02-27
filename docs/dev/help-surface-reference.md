@@ -4,11 +4,13 @@ Canonical help-surface docs now live in this file.
 The historical path `docs/vanta-mcp-help.md` is retained as a redirect stub.
 
 Current model (from generated help metadata):
+
 - Resources: 7
 - Prompts: 11
 - Fallback help tool: 1
 
 ## Resource URIs
+
 - `resource://vanta-manage/help`
 - `resource://vanta-manage/cheatsheet`
 - `resource://vanta-manage/recipes`
@@ -18,6 +20,7 @@ Current model (from generated help metadata):
 - `resource://vanta-manage/troubleshooting`
 
 ## Prompt Names
+
 - `playbook_tool_selector`
 - `playbook_control_evidence`
 - `playbook_failing_controls_triage`
@@ -31,5 +34,6 @@ Current model (from generated help metadata):
 - `playbook_policy_document_evidence_linkage`
 
 ## Guidance
+
 - Run `npm run generate:help` whenever generated operations or help metadata changes.
 - Keep this doc synchronized with runtime registration and generated help metadata.

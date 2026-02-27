@@ -251,7 +251,8 @@ const resolveParameter = (
 const resolveRequestBody = (
   spec: OpenApiSpec,
   bodyOrRef: OpenApiRequestBodyOrRef | undefined,
-): OpenApiRequestBody | undefined => resolveRef<OpenApiRequestBody>(spec, bodyOrRef);
+): OpenApiRequestBody | undefined =>
+  resolveRef<OpenApiRequestBody>(spec, bodyOrRef);
 
 const mergeParameters = (
   pathParameters: OpenApiParameterOrRef[] | undefined,
@@ -259,7 +260,10 @@ const mergeParameters = (
   spec: OpenApiSpec,
 ): OpenApiParameter[] => {
   const merged = new Map<string, OpenApiParameter>();
-  for (const candidate of [...(pathParameters ?? []), ...(operationParameters ?? [])]) {
+  for (const candidate of [
+    ...(pathParameters ?? []),
+    ...(operationParameters ?? []),
+  ]) {
     const parameter = resolveParameter(spec, candidate);
     const key = `${parameter.in}:${parameter.name}`;
     merged.set(key, parameter);
@@ -325,20 +329,26 @@ const mapRequestBody = (
 
   if (contentType === "multipart/form-data") {
     const requiredFields = new Set(schema.required ?? []);
-    const fields = Object.entries(schema.properties ?? {}).map(([name, fieldRef]) => {
-      const fieldSchema = resolveSchema(spec, fieldRef);
-      return {
-        name,
-        required: requiredFields.has(name),
-        description: fieldSchema?.description,
-        kind: toPrimitiveKind(fieldSchema),
-      } satisfies GeneratedRequestField;
-    });
+    const fields = Object.entries(schema.properties ?? {}).map(
+      ([name, fieldRef]) => {
+        const fieldSchema = resolveSchema(spec, fieldRef);
+        return {
+          name,
+          required: requiredFields.has(name),
+          description: fieldSchema?.description,
+          kind: toPrimitiveKind(fieldSchema),
+        } satisfies GeneratedRequestField;
+      },
+    );
 
-    const fileField = Object.entries(schema.properties ?? {}).find(([, fieldRef]) => {
-      const fieldSchema = resolveSchema(spec, fieldRef);
-      return fieldSchema?.type === "string" && fieldSchema.format === "binary";
-    });
+    const fileField = Object.entries(schema.properties ?? {}).find(
+      ([, fieldRef]) => {
+        const fieldSchema = resolveSchema(spec, fieldRef);
+        return (
+          fieldSchema?.type === "string" && fieldSchema.format === "binary"
+        );
+      },
+    );
 
     return {
       required: requestBody.required === true,
@@ -351,15 +361,17 @@ const mapRequestBody = (
 
   if (schema.type === "object" || schema.properties) {
     const requiredFields = new Set(schema.required ?? []);
-    const fields = Object.entries(schema.properties ?? {}).map(([name, fieldRef]) => {
-      const fieldSchema = resolveSchema(spec, fieldRef);
-      return {
-        name,
-        required: requiredFields.has(name),
-        description: fieldSchema?.description,
-        kind: toPrimitiveKind(fieldSchema),
-      } satisfies GeneratedRequestField;
-    });
+    const fields = Object.entries(schema.properties ?? {}).map(
+      ([name, fieldRef]) => {
+        const fieldSchema = resolveSchema(spec, fieldRef);
+        return {
+          name,
+          required: requiredFields.has(name),
+          description: fieldSchema?.description,
+          kind: toPrimitiveKind(fieldSchema),
+        } satisfies GeneratedRequestField;
+      },
+    );
 
     return {
       required: requestBody.required === true,
@@ -451,15 +463,17 @@ const generateOperations = (): GenerationOutput => {
       const pathLevelParameters = routeItem.parameters;
       for (const method of Object.keys(routeItem)) {
         const lowerMethod = method.toLowerCase() as HttpMethod;
-        if (![
-          "get",
-          "post",
-          "put",
-          "patch",
-          "delete",
-          "options",
-          "head",
-        ].includes(lowerMethod)) {
+        if (
+          ![
+            "get",
+            "post",
+            "put",
+            "patch",
+            "delete",
+            "options",
+            "head",
+          ].includes(lowerMethod)
+        ) {
           continue;
         }
 
@@ -470,7 +484,11 @@ const generateOperations = (): GenerationOutput => {
 
         const operationId =
           operation.operationId ?? fallbackOperationId(lowerMethod, route);
-        const toolName = computeToolName(descriptor.source, operationId, nameUsage);
+        const toolName = computeToolName(
+          descriptor.source,
+          operationId,
+          nameUsage,
+        );
         const mergedParameters = mergeParameters(
           pathLevelParameters,
           operation.parameters,

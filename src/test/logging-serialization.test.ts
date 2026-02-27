@@ -55,4 +55,3 @@ test("logger outputs JSON lines and controls error stack visibility by mode", ()
   assert.equal(allError.message, "boom");
   assert.equal(typeof allError.stack, "string");
 });
-

@@ -105,12 +105,16 @@ const hasCredentialsConfigured = (): boolean => {
   if (envFile && envFile.trim().length > 0) {
     const fullPath = path.resolve(envFile);
     if (!fs.existsSync(fullPath)) {
-      throw new Error(`VANTA_ENV_FILE was set but file does not exist: ${fullPath}`);
+      throw new Error(
+        `VANTA_ENV_FILE was set but file does not exist: ${fullPath}`,
+      );
     }
     return true;
   }
 
-  return Boolean(process.env.VANTA_CLIENT_ID && process.env.VANTA_CLIENT_SECRET);
+  return Boolean(
+    process.env.VANTA_CLIENT_ID && process.env.VANTA_CLIENT_SECRET,
+  );
 };
 
 const toSpawnEnvironment = (): Record<string, string> => {
@@ -143,7 +147,10 @@ const withTimeout = async <T>(
   }
 };
 
-const expectTextContent = (text: string | undefined, context: string): string => {
+const expectTextContent = (
+  text: string | undefined,
+  context: string,
+): string => {
   if (typeof text !== "string") {
     throw new Error(`${context} missing text content.`);
   }
@@ -167,7 +174,8 @@ const main = async (): Promise<void> => {
 
   const timeoutMs = Number(process.env.VANTA_MCP_SMOKE_TIMEOUT_MS ?? "30000");
   const toolAllowlist = parseToolAllowlist();
-  const helpToolExpected = toolAllowlist.size === 0 || toolAllowlist.has("help");
+  const helpToolExpected =
+    toolAllowlist.size === 0 || toolAllowlist.has("help");
 
   const transport = new StdioClientTransport({
     command: process.execPath,
@@ -192,16 +200,25 @@ const main = async (): Promise<void> => {
   );
 
   try {
-    await withTimeout(client.connect(transport), timeoutMs, "MCP client connect");
+    await withTimeout(
+      client.connect(transport),
+      timeoutMs,
+      "MCP client connect",
+    );
 
     const resources = await withTimeout(
       client.listResources(),
       timeoutMs,
       "listResources",
     );
-    const resourceUris = new Set(resources.resources.map(resource => resource.uri));
+    const resourceUris = new Set(
+      resources.resources.map(resource => resource.uri),
+    );
     for (const expectedUri of expectedResourceUris) {
-      assert.ok(resourceUris.has(expectedUri), `Missing resource URI: ${expectedUri}`);
+      assert.ok(
+        resourceUris.has(expectedUri),
+        `Missing resource URI: ${expectedUri}`,
+      );
     }
 
     for (const expectedUri of expectedResourceUris) {
@@ -210,7 +227,10 @@ const main = async (): Promise<void> => {
         timeoutMs,
         `readResource ${expectedUri}`,
       );
-      assert.ok(readResult.contents.length > 0, `No contents returned for ${expectedUri}`);
+      assert.ok(
+        readResult.contents.length > 0,
+        `No contents returned for ${expectedUri}`,
+      );
       const firstContent = readResult.contents[0] as { text?: string };
       const text = expectTextContent(firstContent.text, expectedUri);
       assert.ok(
@@ -219,7 +239,11 @@ const main = async (): Promise<void> => {
       );
     }
 
-    const prompts = await withTimeout(client.listPrompts(), timeoutMs, "listPrompts");
+    const prompts = await withTimeout(
+      client.listPrompts(),
+      timeoutMs,
+      "listPrompts",
+    );
     const promptNames = new Set(prompts.prompts.map(prompt => prompt.name));
     for (const promptName of expectedPromptNames) {
       assert.ok(promptNames.has(promptName), `Missing prompt: ${promptName}`);
@@ -234,7 +258,10 @@ const main = async (): Promise<void> => {
         timeoutMs,
         `getPrompt ${promptName}`,
       );
-      assert.ok(promptResult.messages.length > 0, `Prompt has no messages: ${promptName}`);
+      assert.ok(
+        promptResult.messages.length > 0,
+        `Prompt has no messages: ${promptName}`,
+      );
       const first = promptResult.messages[0];
       assert.equal(first.content.type, "text");
       const text = expectTextContent(first.content.text, promptName);
@@ -255,8 +282,14 @@ const main = async (): Promise<void> => {
       )) as {
         content?: { type: string; text?: string }[];
       };
-      assert.ok(Array.isArray(toolResult.content), "help tool returned non-array content.");
-      assert.ok(toolResult.content.length > 0, "help tool returned empty content.");
+      assert.ok(
+        Array.isArray(toolResult.content),
+        "help tool returned non-array content.",
+      );
+      assert.ok(
+        toolResult.content.length > 0,
+        "help tool returned empty content.",
+      );
       const first = toolResult.content[0];
       assert.equal(first.type, "text");
       const envelopeText = expectTextContent(first.text, "help tool");
@@ -264,14 +297,20 @@ const main = async (): Promise<void> => {
         success?: boolean;
         data?: { markdown?: string };
       };
-      assert.equal(envelope.success, true, "help tool should return success envelope.");
+      assert.equal(
+        envelope.success,
+        true,
+        "help tool should return success envelope.",
+      );
       assert.equal(
         typeof envelope.data?.markdown,
         "string",
         "help tool envelope missing markdown.",
       );
       assert.ok(
-        String(envelope.data?.markdown).includes("resource://vanta-manage/help"),
+        String(envelope.data?.markdown).includes(
+          "resource://vanta-manage/help",
+        ),
         "help tool markdown should point to resource help index.",
       );
     } else {
@@ -287,7 +326,8 @@ const main = async (): Promise<void> => {
 };
 
 main().catch(error => {
-  const message = error instanceof Error ? error.stack ?? error.message : String(error);
+  const message =
+    error instanceof Error ? (error.stack ?? error.message) : String(error);
   console.error(`FAIL: smoke-help-surface: ${message}`);
   process.exit(1);
 });

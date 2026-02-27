@@ -85,4 +85,3 @@ test("all generated tool names are unique and MCP-safe", () => {
     seen.add(operation.toolName);
   }
 });
-

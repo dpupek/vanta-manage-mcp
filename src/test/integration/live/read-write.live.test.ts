@@ -66,9 +66,14 @@ test(
       const controlsEnvelope = await callLiveTool(t, harness, "list_controls", {
         pageSize: 5,
       });
-      const documentsEnvelope = await callLiveTool(t, harness, "list_documents", {
-        pageSize: 5,
-      });
+      const documentsEnvelope = await callLiveTool(
+        t,
+        harness,
+        "list_documents",
+        {
+          pageSize: 5,
+        },
+      );
 
       // Assert
       assert.equal(controlsEnvelope.success, true);
@@ -110,17 +115,22 @@ test(
       assert.ok((await harness.listTools()).includes("create_document"));
 
       // Act
-      const createdEnvelope = await callLiveTool(t, harness, "create_document", {
-        body: {
-          title: `MCP Integration ${correlationId}`,
-          description: `Automated integration test artifact ${correlationId}`,
-          timeSensitivity: "MOST_RECENT",
-          cadence: "P1Y",
-          reminderWindow: "P1M",
-          isSensitive: false,
+      const createdEnvelope = await callLiveTool(
+        t,
+        harness,
+        "create_document",
+        {
+          body: {
+            title: `MCP Integration ${correlationId}`,
+            description: `Automated integration test artifact ${correlationId}`,
+            timeSensitivity: "MOST_RECENT",
+            cadence: "P1Y",
+            reminderWindow: "P1M",
+            isSensitive: false,
+          },
+          confirm: true,
         },
-        confirm: true,
-      });
+      );
       assert.equal(createdEnvelope.success, true);
       createdDocumentId = extractDocumentId(createdEnvelope);
 
@@ -143,10 +153,15 @@ test(
       );
       assert.equal(uploadedEnvelope.success, true);
 
-      const uploadsEnvelope = await callLiveTool(t, harness, "list_files_for_document", {
-        documentId: createdDocumentId,
-        pageSize: 5,
-      });
+      const uploadsEnvelope = await callLiveTool(
+        t,
+        harness,
+        "list_files_for_document",
+        {
+          documentId: createdDocumentId,
+          pageSize: 5,
+        },
+      );
       assert.equal(uploadsEnvelope.success, true);
 
       if (liveEnv.controlId) {
@@ -155,11 +170,16 @@ test(
           allTools.includes("add_document_to_control") &&
           allTools.includes("list_documents_for_control")
         ) {
-          const linkedEnvelope = await callLiveTool(t, harness, "add_document_to_control", {
-            controlId: liveEnv.controlId,
-            body: { documentId: createdDocumentId },
-            confirm: true,
-          });
+          const linkedEnvelope = await callLiveTool(
+            t,
+            harness,
+            "add_document_to_control",
+            {
+              controlId: liveEnv.controlId,
+              body: { documentId: createdDocumentId },
+              confirm: true,
+            },
+          );
           assert.equal(linkedEnvelope.success, true);
 
           const controlDocsEnvelope = await callLiveTool(
@@ -208,9 +228,14 @@ test(
       throw error;
     }
     try {
-      const deletedLookup = await callLiveTool(t, verifyHarness, "get_document", {
-        documentId: createdDocumentId,
-      });
+      const deletedLookup = await callLiveTool(
+        t,
+        verifyHarness,
+        "get_document",
+        {
+          documentId: createdDocumentId,
+        },
+      );
       const deletedEnvelope = deletedLookup;
       assert.equal(deletedEnvelope.success, false);
       assert.equal(

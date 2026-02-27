@@ -95,7 +95,7 @@ export class VantaApiClient {
       }
 
       const headers: Record<string, string> = {
-        Authorization: `Bearer ${token}`,
+        "Authorization": `Bearer ${token}`,
         "x-vanta-is-mcp": "true",
         ...(input.headers ?? {}),
       };
@@ -118,23 +118,34 @@ export class VantaApiClient {
         headers,
         body,
       });
-      scopedLogger.debug("api_response_received", "Received Vanta API response.", {
-        status: response.status,
-        ok: response.ok,
-        attempt,
-      });
+      scopedLogger.debug(
+        "api_response_received",
+        "Received Vanta API response.",
+        {
+          status: response.status,
+          ok: response.ok,
+          attempt,
+        },
+      );
 
       if (response.status === 401 && !refreshed) {
-        scopedLogger.warn("api_unauthorized_retry", "Received 401, refreshing token.", {
-          attempt,
-        });
+        scopedLogger.warn(
+          "api_unauthorized_retry",
+          "Received 401, refreshing token.",
+          {
+            attempt,
+          },
+        );
         token = await getTokenManager().refreshToken();
         refreshed = true;
         attempt += 1;
         continue;
       }
 
-      if (RETRYABLE_STATUS_CODES.has(response.status) && attempt < MAX_RETRIES) {
+      if (
+        RETRYABLE_STATUS_CODES.has(response.status) &&
+        attempt < MAX_RETRIES
+      ) {
         const retryAfter = response.headers.get("retry-after");
         if (retryAfter) {
           const parsed = Number.parseInt(retryAfter, 10);
@@ -146,11 +157,15 @@ export class VantaApiClient {
         } else {
           await sleep((attempt + 1) * 500);
         }
-        scopedLogger.warn("api_retry_scheduled", "Retrying request after retryable status.", {
-          status: response.status,
-          statusText: response.statusText,
-          attempt,
-        });
+        scopedLogger.warn(
+          "api_retry_scheduled",
+          "Retrying request after retryable status.",
+          {
+            status: response.status,
+            statusText: response.statusText,
+            attempt,
+          },
+        );
         attempt += 1;
         continue;
       }
@@ -159,9 +174,13 @@ export class VantaApiClient {
       response.headers.forEach((value, key) => {
         responseHeaders[key] = value;
       });
-      scopedLogger.trace("api_response_headers", "Response headers metadata captured.", {
-        headers: responseHeaders,
-      });
+      scopedLogger.trace(
+        "api_response_headers",
+        "Response headers metadata captured.",
+        {
+          headers: responseHeaders,
+        },
+      );
 
       return {
         status: response.status,

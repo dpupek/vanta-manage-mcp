@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { buildHelpCatalog } from "../help/catalog.js";
-import { buildHelpResourceMarkdown, buildHelpToolMarkdown } from "../help/content.js";
+import {
+  buildHelpResourceMarkdown,
+  buildHelpToolMarkdown,
+} from "../help/content.js";
 import { registerHelpPrompts } from "../help/prompts.js";
 import { registerHelpResources } from "../help/resources.js";
 import { registerHelpSurface } from "../help/register-help.js";
@@ -10,7 +13,10 @@ import { helpPromptNames, helpResourceIds } from "../help/types.js";
 import { parseToolEnvelope } from "./helpers.js";
 
 type PromptHandler = (args: Record<string, string>) => {
-  messages: { role: "user" | "assistant"; content: { type: "text"; text: string } }[];
+  messages: {
+    role: "user" | "assistant";
+    content: { type: "text"; text: string };
+  }[];
 };
 type ResourceHandler = (uri: URL) => Promise<{
   contents: { uri: string; mimeType?: string; text?: string }[];
@@ -56,8 +62,12 @@ test("help catalog includes generated, compatibility, and workflow families", ()
   const hasGenerated = catalog.entries.some(
     entry => entry.category === "generated_endpoint",
   );
-  const hasCompat = catalog.entries.some(entry => entry.category === "compat_read");
-  const hasWorkflow = catalog.entries.some(entry => entry.category === "workflow");
+  const hasCompat = catalog.entries.some(
+    entry => entry.category === "compat_read",
+  );
+  const hasWorkflow = catalog.entries.some(
+    entry => entry.category === "workflow",
+  );
 
   // Assert
   assert.equal(catalog.summary.byCategory.compat_read, 15);
@@ -76,7 +86,9 @@ test("help resources register all fixed URIs and return markdown", async () => {
 
   // Act
   const registered = registerHelpResources(server as unknown as McpServer);
-  const helpHandler = server.resourceHandlers.get("resource://vanta-manage/help");
+  const helpHandler = server.resourceHandlers.get(
+    "resource://vanta-manage/help",
+  );
   assert.ok(helpHandler);
   const helpResult = await helpHandler(new URL("resource://vanta-manage/help"));
 

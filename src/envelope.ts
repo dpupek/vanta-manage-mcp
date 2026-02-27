@@ -65,12 +65,10 @@ const extractApiErrorCode = (details: unknown): string | null => {
       return null;
     }
   }
-  if (
-    typeof details === "object" &&
-    details !== null &&
-    "error" in details
-  ) {
-    return readString((details as { error?: unknown }).error)?.toLowerCase() ?? null;
+  if (typeof details === "object" && details !== null && "error" in details) {
+    return (
+      readString((details as { error?: unknown }).error)?.toLowerCase() ?? null
+    );
   }
   return null;
 };
@@ -92,7 +90,10 @@ const deriveAgentHint = (
   }
   if (normalizedCode === "api_error") {
     const apiCode = extractApiErrorCode(details);
-    if (apiCode === "rate_limit_exceeded" || message.toLowerCase().includes("429")) {
+    if (
+      apiCode === "rate_limit_exceeded" ||
+      message.toLowerCase().includes("429")
+    ) {
       return "Rate limited. Retry with backoff and prioritize read/plan calls. See resource://vanta-manage/troubleshooting.";
     }
     return "Inspect error.details and choose a matching playbook_ prompt before retrying.";
@@ -115,7 +116,10 @@ const deriveAgentHint = (
   if (normalizedCode === "unsupported_file_type") {
     return "Use a supported file extension/mimeType for this upload tool. See resource://vanta-manage/recipes.";
   }
-  if (normalizedCode === "unknown_tool" || normalizedCode === "missing_generated_operation") {
+  if (
+    normalizedCode === "unknown_tool" ||
+    normalizedCode === "missing_generated_operation"
+  ) {
     return "Discover valid tools via resource://vanta-manage/tool-catalog or run the help tool.";
   }
   return undefined;

@@ -25,9 +25,7 @@ const parseBoolean = (
   return defaultValue;
 };
 
-const parseLogLevelName = (
-  value: string | undefined,
-): LogLevelName | null => {
+const parseLogLevelName = (value: string | undefined): LogLevelName | null => {
   if (!value) {
     return null;
   }

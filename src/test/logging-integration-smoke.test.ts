@@ -20,10 +20,14 @@ test("logger handles startup-style events and cyclic fields without throwing", (
     safeMode: true,
     writeEnabled: true,
   });
-  logger.info("server_started", "Vanta MCP server started on stdio transport.", {
-    transport: "stdio",
-    cycle,
-  });
+  logger.info(
+    "server_started",
+    "Vanta MCP server started on stdio transport.",
+    {
+      transport: "stdio",
+      cycle,
+    },
+  );
 
   // Assert
   assert.equal(lines.length, 2);
@@ -37,4 +41,3 @@ test("logger handles startup-style events and cyclic fields without throwing", (
     "[Circular]",
   );
 });
-

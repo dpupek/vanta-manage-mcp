@@ -8,4 +8,3 @@
 - Keep most entries non-permanent (`isPermanent=false`) unless the user explicitly asks to lock an entry.
 - Use `bodyTypeHint: "markdown"` for most memories and include concise validation notes (commands + outcomes).
 - Suggested tags: `progress`, `decision`, `openapi`, `safety`, `workflow`, `release`.
-

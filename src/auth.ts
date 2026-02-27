@@ -17,4 +17,3 @@ export async function initializeToken(): Promise<void> {
 export function getTokenManager(): TokenManager {
   return tokenManager;
 }
-

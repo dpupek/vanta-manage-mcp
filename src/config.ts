@@ -42,8 +42,14 @@ export const oauthScope = (
   process.env.VANTA_OAUTH_SCOPE ?? "vanta-api.all:read vanta-api.all:write"
 ).trim();
 
-export const safeModeEnabled = parseBoolean(process.env.VANTA_MCP_SAFE_MODE, true);
-export const writeEnabled = parseBoolean(process.env.VANTA_MCP_ENABLE_WRITE, true);
+export const safeModeEnabled = parseBoolean(
+  process.env.VANTA_MCP_SAFE_MODE,
+  true,
+);
+export const writeEnabled = parseBoolean(
+  process.env.VANTA_MCP_ENABLE_WRITE,
+  true,
+);
 
 const enabledToolNames = parseCsv(process.env.VANTA_MCP_ENABLED_TOOLS).map(
   normalizeName,

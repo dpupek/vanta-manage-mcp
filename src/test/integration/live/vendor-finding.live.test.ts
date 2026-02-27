@@ -17,7 +17,9 @@ const liveEnv = readLiveIntegrationEnv();
 const sleep = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
-const readPaginatedData = (envelope: Record<string, unknown>): Record<string, unknown>[] => {
+const readPaginatedData = (
+  envelope: Record<string, unknown>,
+): Record<string, unknown>[] => {
   const data = envelope.data as
     | { results?: { data?: Record<string, unknown>[] } }
     | undefined;
@@ -102,7 +104,8 @@ const waitForFindingState = async (
     const contentMatches =
       expected.content === undefined || finding?.content === expected.content;
     const riskStatusMatches =
-      expected.riskStatus === undefined || finding?.riskStatus === expected.riskStatus;
+      expected.riskStatus === undefined ||
+      finding?.riskStatus === expected.riskStatus;
 
     if (exists === expected.exists && contentMatches && riskStatusMatches) {
       return;
@@ -116,7 +119,9 @@ const waitForFindingState = async (
   );
 };
 
-const discoverVendorId = async (harness: McpStdioHarness): Promise<string | null> => {
+const discoverVendorId = async (
+  harness: McpStdioHarness,
+): Promise<string | null> => {
   const listed = await callToolWithRateLimitRetry(harness, "list_vendors", {
     pageSize: 25,
   });
@@ -185,24 +190,39 @@ test(
         return;
       }
 
-      const currentVendorEnvelope = await callLiveTool(t, harness, "get_vendor", {
-        vendorId,
-      });
+      const currentVendorEnvelope = await callLiveTool(
+        t,
+        harness,
+        "get_vendor",
+        {
+          vendorId,
+        },
+      );
       assert.equal(currentVendorEnvelope.success, true);
 
       const updatedNote = `Updated by integration test ${correlationId}`;
-      const updateVendorEnvelope = await callLiveTool(t, harness, "update_vendor", {
-        vendorId,
-        body: {
-          additionalNotes: updatedNote,
+      const updateVendorEnvelope = await callLiveTool(
+        t,
+        harness,
+        "update_vendor",
+        {
+          vendorId,
+          body: {
+            additionalNotes: updatedNote,
+          },
+          confirm: true,
         },
-        confirm: true,
-      });
+      );
       assert.equal(updateVendorEnvelope.success, true);
 
-      const updatedVendorEnvelope = await callLiveTool(t, harness, "get_vendor", {
-        vendorId,
-      });
+      const updatedVendorEnvelope = await callLiveTool(
+        t,
+        harness,
+        "get_vendor",
+        {
+          vendorId,
+        },
+      );
       assert.equal(updatedVendorEnvelope.success, true);
       const updatedVendorData = updatedVendorEnvelope.data as
         | Record<string, unknown>
@@ -217,13 +237,13 @@ test(
           vendorId,
           body: {
             content: `Missing evidence ${correlationId}`,
-          riskStatus: "REMEDIATE",
-          remediation: {
-            state: "OPEN",
-            requirementNotes: `Follow-up ${correlationId}`,
+            riskStatus: "REMEDIATE",
+            remediation: {
+              state: "OPEN",
+              requirementNotes: `Follow-up ${correlationId}`,
+            },
           },
-        },
-        confirm: true,
+          confirm: true,
         },
       );
       assert.equal(createFindingEnvelope.success, true);
@@ -231,8 +251,13 @@ test(
         | Record<string, unknown>
         | undefined;
       const createdFindingId = createFindingData?.id;
-      if (typeof createdFindingId !== "string" || createdFindingId.length === 0) {
-        throw new Error("Create vendor finding response did not include an id.");
+      if (
+        typeof createdFindingId !== "string" ||
+        createdFindingId.length === 0
+      ) {
+        throw new Error(
+          "Create vendor finding response did not include an id.",
+        );
       }
       findingId = createdFindingId;
 
@@ -264,11 +289,16 @@ test(
       });
 
       const deletedFindingId = findingId;
-      const deleteFindingEnvelope = await callLiveTool(t, harness, "delete_finding_by_id", {
-        vendorId,
-        findingId,
-        confirm: true,
-      });
+      const deleteFindingEnvelope = await callLiveTool(
+        t,
+        harness,
+        "delete_finding_by_id",
+        {
+          vendorId,
+          findingId,
+          confirm: true,
+        },
+      );
       assert.equal(deleteFindingEnvelope.success, true);
       findingId = null;
 

@@ -34,7 +34,9 @@ const executionReminder =
 const toolSelectorPrompt = (
   args: ToolSelectorPromptArgs,
 ): ReturnType<typeof toPromptResult> => {
-  const scopeLine = args.scope ? `Scope: ${args.scope}` : "Scope: not specified";
+  const scopeLine = args.scope
+    ? `Scope: ${args.scope}`
+    : "Scope: not specified";
   const constraintsLine = args.constraints
     ? `Constraints: ${args.constraints}`
     : "Constraints: none provided";
@@ -401,7 +403,8 @@ export const registerHelpPrompts = (server: McpServer): number => {
       policyId: z.string().optional(),
       documentId: z.string().optional(),
     },
-    args => policyDocumentEvidencePrompt(args as PolicyDocumentEvidencePromptArgs),
+    args =>
+      policyDocumentEvidencePrompt(args as PolicyDocumentEvidencePromptArgs),
   );
 
   return helpPromptNames.length;

@@ -20,27 +20,29 @@ const writeMarkdown = (relativePath: string, text: string): void => {
 };
 
 const main = async (): Promise<void> => {
-  const [{ buildHelpCatalog }, contentModule, configModule] = await Promise.all([
-    importBuildModule<{
-      buildHelpCatalog: () => unknown;
-    }>("help/catalog.js"),
-    importBuildModule<{
-      buildVantaMcpHelpMarkdown: (context: {
-        catalog: unknown;
+  const [{ buildHelpCatalog }, contentModule, configModule] = await Promise.all(
+    [
+      importBuildModule<{
+        buildHelpCatalog: () => unknown;
+      }>("help/catalog.js"),
+      importBuildModule<{
+        buildVantaMcpHelpMarkdown: (context: {
+          catalog: unknown;
+          safeModeEnabled: boolean;
+          writeEnabled: boolean;
+          hasEnabledToolFilter: boolean;
+          enabledToolNames: string[];
+        }) => string;
+        buildResourcesPromptsReferenceMarkdown: () => string;
+      }>("help/content.js"),
+      importBuildModule<{
         safeModeEnabled: boolean;
         writeEnabled: boolean;
         hasEnabledToolFilter: boolean;
-        enabledToolNames: string[];
-      }) => string;
-      buildResourcesPromptsReferenceMarkdown: () => string;
-    }>("help/content.js"),
-    importBuildModule<{
-      safeModeEnabled: boolean;
-      writeEnabled: boolean;
-      hasEnabledToolFilter: boolean;
-      getEnabledToolNames: () => string[];
-    }>("config.js"),
-  ]);
+        getEnabledToolNames: () => string[];
+      }>("config.js"),
+    ],
+  );
 
   const context = {
     catalog: buildHelpCatalog(),

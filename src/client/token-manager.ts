@@ -109,12 +109,16 @@ export class TokenManager {
 
       if (!response.ok) {
         const details = await response.text();
-        logger.error("oauth_token_fetch_failed", "OAuth token request failed.", {
-          status: response.status,
-          statusText: response.statusText,
-          attempt,
-          details,
-        });
+        logger.error(
+          "oauth_token_fetch_failed",
+          "OAuth token request failed.",
+          {
+            status: response.status,
+            statusText: response.statusText,
+            attempt,
+            details,
+          },
+        );
         throw new Error(
           `OAuth token request failed (${response.status.toString()} ${response.statusText}): ${details}`,
         );
@@ -127,14 +131,19 @@ export class TokenManager {
       if (typeof payload.expires_in !== "number") {
         throw new Error("OAuth response did not include a valid expires_in.");
       }
-      logger.debug("oauth_token_fetch_succeeded", "OAuth token fetch succeeded.", {
-        expiresInSeconds: payload.expires_in,
-        attempt,
-      });
+      logger.debug(
+        "oauth_token_fetch_succeeded",
+        "OAuth token fetch succeeded.",
+        {
+          expiresInSeconds: payload.expires_in,
+          attempt,
+        },
+      );
 
       return {
         token: payload.access_token,
-        expiresAt: Date.now() + payload.expires_in * 1000 - DEFAULT_EXPIRY_BUFFER_MS,
+        expiresAt:
+          Date.now() + payload.expires_in * 1000 - DEFAULT_EXPIRY_BUFFER_MS,
       };
     }
 

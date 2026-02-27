@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { GeneratedOperation, PrimitiveKind } from "../generated/operations.generated.js";
+import {
+  GeneratedOperation,
+  PrimitiveKind,
+} from "../generated/operations.generated.js";
 
 const schemaForKind = (
   kind: PrimitiveKind,

@@ -1,4 +1,9 @@
-import { createServer, IncomingMessage, Server, ServerResponse } from "node:http";
+import {
+  createServer,
+  IncomingMessage,
+  Server,
+  ServerResponse,
+} from "node:http";
 
 interface FakeRouteResponse {
   status: number;
@@ -85,7 +90,11 @@ export class FakeVantaServer {
     });
   }
 
-  public setRoute(method: string, path: string, handler: FakeRouteHandler): void {
+  public setRoute(
+    method: string,
+    path: string,
+    handler: FakeRouteHandler,
+  ): void {
     this.handlers.set(routeKey(method, path), handler);
   }
 
@@ -187,7 +196,10 @@ export class FakeVantaServer {
     this.writeJson(response, fakeResponse);
   }
 
-  private writeJson(response: ServerResponse, fakeResponse: FakeRouteResponse): void {
+  private writeJson(
+    response: ServerResponse,
+    fakeResponse: FakeRouteResponse,
+  ): void {
     response.statusCode = fakeResponse.status;
     for (const [key, value] of Object.entries(fakeResponse.headers ?? {})) {
       response.setHeader(key, value);

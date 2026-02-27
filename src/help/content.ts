@@ -264,7 +264,9 @@ export const buildHelpResourceMarkdown = (
     lines.push("");
     lines.push("## Auth");
     lines.push("");
-    lines.push("- Set `VANTA_CLIENT_ID` + `VANTA_CLIENT_SECRET` directly (preferred).");
+    lines.push(
+      "- Set `VANTA_CLIENT_ID` + `VANTA_CLIENT_SECRET` directly (preferred).",
+    );
     lines.push(
       "- Or set `VANTA_ENV_FILE` to JSON (`client_id`/`client_secret`) or dotenv (`VANTA_CLIENT_ID`/`VANTA_CLIENT_SECRET`).",
     );
@@ -279,9 +281,15 @@ export const buildHelpResourceMarkdown = (
     lines.push("");
     lines.push("## Write Safety Contract");
     lines.push("");
-    lines.push("- Mutating endpoint tools require `confirm=true` in safe mode.");
-    lines.push("- Workflow execute mode requires `mode=execute` and `confirm=true`.");
-    lines.push("- Without confirmation, server returns `confirmation_required` and no write occurs.");
+    lines.push(
+      "- Mutating endpoint tools require `confirm=true` in safe mode.",
+    );
+    lines.push(
+      "- Workflow execute mode requires `mode=execute` and `confirm=true`.",
+    );
+    lines.push(
+      "- Without confirmation, server returns `confirmation_required` and no write occurs.",
+    );
     lines.push("");
     lines.push(...renderCatalogSummary(context));
     lines.push(...renderSafetySummary(context));
@@ -289,7 +297,9 @@ export const buildHelpResourceMarkdown = (
     lines.push("");
     lines.push("## Fallback Help Tool");
     lines.push("");
-    lines.push("- Call `help` to return this index in tool format if your client does not fetch resources.");
+    lines.push(
+      "- Call `help` to return this index in tool format if your client does not fetch resources.",
+    );
     return lines.join("\n");
   }
 
@@ -301,13 +311,21 @@ export const buildHelpResourceMarkdown = (
     lines.push("");
     lines.push("- Read controls: `controls`");
     lines.push("- Read control evidence links: `list_control_documents`");
-    lines.push("- Upload evidence to a document: `upload_file_for_document` with `filePath`");
+    lines.push(
+      "- Upload evidence to a document: `upload_file_for_document` with `filePath`",
+    );
     lines.push("- Map document to control: `add_document_to_control`");
     lines.push("- Triage failing controls: `workflow_triage_failing_controls`");
     lines.push("- Triage vendor findings/reviews: `workflow_vendor_triage`");
-    lines.push("- Triage vulnerabilities: `workflow_people_assets_vuln_triage`");
-    lines.push("- Top 5 vulnerable devices (fast): `list_vulnerable_assets` first, then targeted `list_vulnerabilities` by `vulnerableAssetId`");
-    lines.push("- Triage audit information requests: `workflow_information_request_triage`");
+    lines.push(
+      "- Triage vulnerabilities: `workflow_people_assets_vuln_triage`",
+    );
+    lines.push(
+      "- Top 5 vulnerable devices (fast): `list_vulnerable_assets` first, then targeted `list_vulnerabilities` by `vulnerableAssetId`",
+    );
+    lines.push(
+      "- Triage audit information requests: `workflow_information_request_triage`",
+    );
     lines.push("");
     lines.push("## Minimal Call Shapes");
     lines.push("");
@@ -380,19 +398,29 @@ export const buildHelpResourceMarkdown = (
     lines.push(...renderSafetySummary(context));
     lines.push("## Mutation Rules");
     lines.push("");
-    lines.push("- Endpoint write tools enforce `confirm=true` when safe mode is enabled.");
-    lines.push("- Workflow tools execute only when `mode=execute` and `confirm=true`.");
+    lines.push(
+      "- Endpoint write tools enforce `confirm=true` when safe mode is enabled.",
+    );
+    lines.push(
+      "- Workflow tools execute only when `mode=execute` and `confirm=true`.",
+    );
     lines.push("- If write mode is disabled, writes return `write_disabled`.");
     lines.push("");
     lines.push("## Preview Behavior");
     lines.push("");
-    lines.push("- Missing confirmation returns `success=false` with `error.code=confirmation_required`.");
-    lines.push("- The response includes operation intent details without applying changes.");
+    lines.push(
+      "- Missing confirmation returns `success=false` with `error.code=confirmation_required`.",
+    );
+    lines.push(
+      "- The response includes operation intent details without applying changes.",
+    );
     lines.push("");
     lines.push("## Operational Guidance");
     lines.push("");
     lines.push("- Use read endpoints first to scope targets before any write.");
-    lines.push("- Prefer workflow tools for multi-step triage because they already enforce plan-first flow.");
+    lines.push(
+      "- Prefer workflow tools for multi-step triage because they already enforce plan-first flow.",
+    );
     lines.push("- Always do readback verification after writes.");
     return lines.join("\n");
   }
@@ -416,13 +444,19 @@ export const buildHelpResourceMarkdown = (
   lines.push("");
   lines.push("- Symptom: missing required IDs or invalid payload structure.");
   lines.push("- Recheck tool schema and required path/body fields.");
-  lines.push("- Validate enum fields and date formats exactly as expected by endpoint.");
+  lines.push(
+    "- Validate enum fields and date formats exactly as expected by endpoint.",
+  );
   lines.push("");
   lines.push("## Multipart Upload Issues");
   lines.push("");
   lines.push("- Ensure `filePath` points to an existing readable local file.");
-  lines.push("- Use a supported extension (`.pdf`, `.docx`, `.xlsx`, `.csv`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.zip`, `.ps`).");
-  lines.push("- Set `mimeType` when known (for example `application/pdf`) and keep it aligned with the file extension.");
+  lines.push(
+    "- Use a supported extension (`.pdf`, `.docx`, `.xlsx`, `.csv`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.zip`, `.ps`).",
+  );
+  lines.push(
+    "- Set `mimeType` when known (for example `application/pdf`) and keep it aligned with the file extension.",
+  );
   lines.push("");
   lines.push("## Pagination and Cursor Flow");
   lines.push("");
@@ -434,8 +468,12 @@ export const buildHelpResourceMarkdown = (
   lines.push("");
   lines.push("## API-side Permission Errors");
   lines.push("");
-  lines.push("- Some objects may be inaccessible in current tenant/audit scope.");
-  lines.push("- Verify object IDs belong to the same scope as your access token.");
+  lines.push(
+    "- Some objects may be inaccessible in current tenant/audit scope.",
+  );
+  lines.push(
+    "- Verify object IDs belong to the same scope as your access token.",
+  );
   return lines.join("\n");
 };
 
@@ -443,7 +481,9 @@ export const buildHelpToolMarkdown = (context: HelpRenderContext): string => {
   const lines: string[] = [];
   lines.push("# Vanta MCP Help Index");
   lines.push("");
-  lines.push("Use resources for detailed guidance and prompts for task-focused runbooks.");
+  lines.push(
+    "Use resources for detailed guidance and prompts for task-focused runbooks.",
+  );
   lines.push("");
   lines.push(...renderDiscoverySection());
   lines.push("");
@@ -474,38 +514,70 @@ export const buildResourcesPromptsReferenceMarkdown = (): string => {
   const lines: string[] = [];
   lines.push("# MCP Resources and Prompts");
   lines.push("");
-  lines.push("Quick reference for agents using the Vanta Manage MCP help surface.");
+  lines.push(
+    "Quick reference for agents using the Vanta Manage MCP help surface.",
+  );
   lines.push("");
   lines.push("## Usage Pattern");
   lines.push("");
   lines.push("1. Read `resource://vanta-manage/help` first.");
-  lines.push("2. Pull `resource://vanta-manage/tool-catalog` to select exact tools.");
-  lines.push("3. Use a `playbook_*` prompt to produce deterministic execution steps.");
-  lines.push("4. Execute writes only with `confirm=true` and verify with readback calls.");
+  lines.push(
+    "2. Pull `resource://vanta-manage/tool-catalog` to select exact tools.",
+  );
+  lines.push(
+    "3. Use a `playbook_*` prompt to produce deterministic execution steps.",
+  );
+  lines.push(
+    "4. Execute writes only with `confirm=true` and verify with readback calls.",
+  );
   lines.push("");
   lines.push("## Resources");
   lines.push("");
-  lines.push("- `resource://vanta-manage/help`: onboarding, auth, safety, and discovery.");
-  lines.push("- `resource://vanta-manage/cheatsheet`: quick mapping from objective to tools.");
-  lines.push("- `resource://vanta-manage/recipes`: step-by-step operational recipes for common compliance tasks.");
-  lines.push("- `resource://vanta-manage/tool-catalog`: live endpoint/compat/workflow catalog.");
-  lines.push("- `resource://vanta-manage/workflow-playbooks`: workflow-specific plan/execute runbooks.");
-  lines.push("- `resource://vanta-manage/safety`: mutation guardrails and confirmation contract.");
-  lines.push("- `resource://vanta-manage/troubleshooting`: common failures and corrective steps.");
+  lines.push(
+    "- `resource://vanta-manage/help`: onboarding, auth, safety, and discovery.",
+  );
+  lines.push(
+    "- `resource://vanta-manage/cheatsheet`: quick mapping from objective to tools.",
+  );
+  lines.push(
+    "- `resource://vanta-manage/recipes`: step-by-step operational recipes for common compliance tasks.",
+  );
+  lines.push(
+    "- `resource://vanta-manage/tool-catalog`: live endpoint/compat/workflow catalog.",
+  );
+  lines.push(
+    "- `resource://vanta-manage/workflow-playbooks`: workflow-specific plan/execute runbooks.",
+  );
+  lines.push(
+    "- `resource://vanta-manage/safety`: mutation guardrails and confirmation contract.",
+  );
+  lines.push(
+    "- `resource://vanta-manage/troubleshooting`: common failures and corrective steps.",
+  );
   lines.push("");
   lines.push("## Prompts");
   lines.push("");
   lines.push("- `playbook_tool_selector(goal, scope?, constraints?)`");
-  lines.push("- `playbook_control_evidence(objective, controlId?, documentId?)`");
+  lines.push(
+    "- `playbook_control_evidence(objective, controlId?, documentId?)`",
+  );
   lines.push("- `playbook_failing_controls_triage(objective, controlId?)`");
   lines.push("- `playbook_vendor_triage(objective, vendorId?)`");
-  lines.push("- `playbook_people_assets_vuln_triage(objective, vulnerabilityId?)`");
+  lines.push(
+    "- `playbook_people_assets_vuln_triage(objective, vulnerabilityId?)`",
+  );
   lines.push("- `playbook_information_request_triage(objective, auditId)`");
-  lines.push("- `playbook_vulnerability_due_soon_triage(objective, dueWindowDays?, integrationHint?)`");
-  lines.push("- `playbook_employee_onboarding_verification(objective, personId?)`");
+  lines.push(
+    "- `playbook_vulnerability_due_soon_triage(objective, dueWindowDays?, integrationHint?)`",
+  );
+  lines.push(
+    "- `playbook_employee_onboarding_verification(objective, personId?)`",
+  );
   lines.push("- `playbook_employee_offboarding_tracker(objective, personId?)`");
   lines.push("- `playbook_vendor_risk_assessment(objective, vendorId?)`");
-  lines.push("- `playbook_policy_document_evidence_linkage(objective, policyId?, documentId?)`");
+  lines.push(
+    "- `playbook_policy_document_evidence_linkage(objective, policyId?, documentId?)`",
+  );
   lines.push("");
   lines.push("## Notes");
   lines.push("");

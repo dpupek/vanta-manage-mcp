@@ -2,7 +2,10 @@ import type { TestContext } from "node:test";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { parseToolEnvelope } from "../../helpers.js";
 
-const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
+const parseBoolean = (
+  value: string | undefined,
+  defaultValue: boolean,
+): boolean => {
   if (value === undefined) {
     return defaultValue;
   }
@@ -56,8 +59,14 @@ interface ErrorEnvelopeLike {
 
 export const readLiveIntegrationEnv = (): LiveIntegrationEnv => ({
   enabled: parseBoolean(process.env.VANTA_INTEGRATION_LIVE, false),
-  allowMutations: parseBoolean(process.env.VANTA_INTEGRATION_ALLOW_MUTATIONS, false),
-  requireMutation: parseBoolean(process.env.VANTA_INTEGRATION_REQUIRE_MUTATION, false),
+  allowMutations: parseBoolean(
+    process.env.VANTA_INTEGRATION_ALLOW_MUTATIONS,
+    false,
+  ),
+  requireMutation: parseBoolean(
+    process.env.VANTA_INTEGRATION_REQUIRE_MUTATION,
+    false,
+  ),
   controlId: (() => {
     const value = process.env.VANTA_INTEGRATION_TEST_CONTROL_ID?.trim();
     if (value === undefined || value.length === 0) {
@@ -86,7 +95,10 @@ export const readLiveIntegrationEnv = (): LiveIntegrationEnv => ({
     }
     return value;
   })(),
-  timeoutMs: parsePositiveInteger(process.env.VANTA_INTEGRATION_TEST_TIMEOUT_MS, 120_000),
+  timeoutMs: parsePositiveInteger(
+    process.env.VANTA_INTEGRATION_TEST_TIMEOUT_MS,
+    120_000,
+  ),
 });
 
 export const guardLiveTest = (
@@ -112,7 +124,9 @@ export const guardLiveTest = (
   const message =
     "Mutation tests require VANTA_INTEGRATION_ALLOW_MUTATIONS=true in this tenant.";
   if (env.requireMutation) {
-    throw new Error(`${message} VANTA_INTEGRATION_REQUIRE_MUTATION=true requested hard failure.`);
+    throw new Error(
+      `${message} VANTA_INTEGRATION_REQUIRE_MUTATION=true requested hard failure.`,
+    );
   }
   t.skip(message);
   return false;
@@ -168,16 +182,16 @@ const extractApiErrorCode = (details: unknown): string | null => {
   return null;
 };
 
-export const isRateLimitedEnvelope = (envelope: Record<string, unknown>): boolean => {
+export const isRateLimitedEnvelope = (
+  envelope: Record<string, unknown>,
+): boolean => {
   const typed = envelope as ErrorEnvelopeLike;
   if (typed.success !== false || !typed.error) {
     return false;
   }
 
   const code =
-    typeof typed.error.code === "string"
-      ? typed.error.code.toLowerCase()
-      : "";
+    typeof typed.error.code === "string" ? typed.error.code.toLowerCase() : "";
   const message =
     typeof typed.error.message === "string"
       ? typed.error.message.toLowerCase()
@@ -229,8 +243,7 @@ export const callToolWithRateLimitRetry = async (
   }
 
   return (
-    lastEnvelope ??
-    {
+    lastEnvelope ?? {
       success: false,
       error: {
         code: "request_failed",
@@ -264,7 +277,7 @@ export const startLiveWithRetry = async (
     }
   }
 
-  throw (lastError instanceof Error ? lastError : new Error(String(lastError)));
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
 };
 
 export const skipOnLiveRateLimit = (

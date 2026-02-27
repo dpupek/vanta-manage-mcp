@@ -63,7 +63,12 @@ test("log mode gating matches quiet/minimal/verbose/all contract", () => {
   // Initial Assert
   assert.equal(captured.length, 0);
   assert.deepEqual(quiet.getEnabledSeverities(), ["fatal"]);
-  assert.deepEqual(minimal.getEnabledSeverities(), ["fatal", "error", "warn", "info"]);
+  assert.deepEqual(minimal.getEnabledSeverities(), [
+    "fatal",
+    "error",
+    "warn",
+    "info",
+  ]);
   assert.deepEqual(verbose.getEnabledSeverities(), [
     "fatal",
     "error",
@@ -107,4 +112,3 @@ test("log mode gating matches quiet/minimal/verbose/all contract", () => {
   assert.equal(verboseCount, 5);
   assert.equal(allCount, 6);
 });
-

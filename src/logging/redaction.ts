@@ -29,7 +29,11 @@ const redactInternal = (
   if (depth >= MAX_DEPTH) {
     return "[MaxDepth]";
   }
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
     return value;
   }
   if (typeof value === "bigint") {
@@ -54,7 +58,9 @@ const redactInternal = (
     }));
   }
   if (value instanceof Set) {
-    return Array.from(value.values()).map(item => redactInternal(item, depth + 1, seen));
+    return Array.from(value.values()).map(item =>
+      redactInternal(item, depth + 1, seen),
+    );
   }
   if (typeof value === "object") {
     if (seen.has(value)) {
@@ -77,5 +83,7 @@ const redactInternal = (
   return String(value);
 };
 
-export const redactFields = (fields: Record<string, unknown>): Record<string, unknown> =>
+export const redactFields = (
+  fields: Record<string, unknown>,
+): Record<string, unknown> =>
   redactInternal(fields, 0, new WeakSet()) as Record<string, unknown>;

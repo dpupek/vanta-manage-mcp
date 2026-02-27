@@ -360,7 +360,11 @@ export function registerCompatibilityReadTools(
       async args => {
         const operation = String(args.operation);
         if (operation === "list_kinds") {
-          return executeByOperationId("ListResourceKindSummaries", args, client);
+          return executeByOperationId(
+            "ListResourceKindSummaries",
+            args,
+            client,
+          );
         }
         if (operation === "get_kind_details") {
           if (!args.resourceKind) {

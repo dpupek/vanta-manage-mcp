@@ -9,4 +9,3 @@ export const parseToolEnvelope = (
   assert.equal(entry.type, "text");
   return JSON.parse(entry.text) as Record<string, unknown>;
 };
-

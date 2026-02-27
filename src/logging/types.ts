@@ -1,6 +1,12 @@
 export type LogLevelName = "quiet" | "minimal" | "verbose" | "all";
 
-export type LogSeverity = "fatal" | "error" | "warn" | "info" | "debug" | "trace";
+export type LogSeverity =
+  | "fatal"
+  | "error"
+  | "warn"
+  | "info"
+  | "debug"
+  | "trace";
 
 export interface LogEntry {
   ts: string;
@@ -19,7 +25,10 @@ export const LOG_LEVEL_NAMES: LogLevelName[] = [
   "all",
 ];
 
-export const MODE_TO_SEVERITIES: Record<LogLevelName, ReadonlySet<LogSeverity>> = {
+export const MODE_TO_SEVERITIES: Record<
+  LogLevelName,
+  ReadonlySet<LogSeverity>
+> = {
   quiet: new Set(["fatal"]),
   minimal: new Set(["fatal", "error", "warn", "info"]),
   verbose: new Set(["fatal", "error", "warn", "info", "debug"]),

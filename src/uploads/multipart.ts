@@ -7,6 +7,8 @@ export const appendUploadFile = async (
   file: ValidatedUploadFile,
 ): Promise<void> => {
   const blob = await openAsBlob(file.absolutePath, { type: file.mimeType });
-  const multipartFile = new File([blob], file.fileName, { type: file.mimeType });
+  const multipartFile = new File([blob], file.fileName, {
+    type: file.mimeType,
+  });
   formData.append(fileFieldName, multipartFile);
 };

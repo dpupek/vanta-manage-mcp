@@ -19,7 +19,9 @@ const successfulControlsPayload = {
   },
 };
 
-const createHarnessEnv = (baseUrl: string): Record<string, string | undefined> => ({
+const createHarnessEnv = (
+  baseUrl: string,
+): Record<string, string | undefined> => ({
   VANTA_API_BASE_URL: baseUrl,
   VANTA_CLIENT_ID: "fake-client-id",
   VANTA_CLIENT_SECRET: "fake-client-secret",
