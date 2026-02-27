@@ -1,14 +1,14 @@
 # Get Started with Claude Desktop
 
 ## 1. Add MCP Server Config
-Add a server entry using `npx` and a pinned tag:
+Add a server entry using `npx` and either `#stable` or a pinned version tag:
 
 ```json
 {
   "mcpServers": {
     "vanta-manage": {
       "command": "npx",
-      "args": ["-y", "github:dpupek/vanta-manage-mcp#v1.0.123"],
+      "args": ["-y", "github:dpupek/vanta-manage-mcp#stable"],
       "env": {
         "VANTA_CLIENT_ID": "YOUR_CLIENT_ID",
         "VANTA_CLIENT_SECRET": "YOUR_CLIENT_SECRET",
@@ -18,6 +18,23 @@ Add a server entry using `npx` and a pinned tag:
   }
 }
 ```
+
+Pinned release example:
+
+```json
+{
+  "mcpServers": {
+    "vanta-manage": {
+      "command": "npx",
+      "args": ["-y", "github:dpupek/vanta-manage-mcp#v1.0.123"]
+    }
+  }
+}
+```
+
+Version guidance:
+- Use `#stable` for latest successful release on `main`.
+- Use `#v1.0.<buildnumber>` for deterministic, reproducible behavior.
 
 ## 2. Credentials
 Supported input:

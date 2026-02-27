@@ -2,12 +2,12 @@
 
 ## 1. Add MCP Server Config
 Codex MCP config uses `mcp_servers` sections (YAML/TOML-style config), not JSON.
-Use a pinned GitHub tag with `npx`:
+Use either a pinned GitHub tag or the moving `stable` tag with `npx`.
 
 ```toml
 [mcp_servers.vanta_manage]
 command = "npx"
-args = ["-y", "github:dpupek/vanta-manage-mcp#v1.0.123"]
+args = ["-y", "github:dpupek/vanta-manage-mcp#stable"]
 startup_timeout_sec = 45.0
 tool_timeout_sec = 45.0
 
@@ -15,6 +15,20 @@ tool_timeout_sec = 45.0
 VANTA_ENV_FILE = "C:\\Users\\dan.pupek\\.vanta\\vanta-credentials-ast.env"
 VANTA_MCP_SAFE_MODE = "true"
 ```
+
+Pinned release example:
+
+```toml
+[mcp_servers.vanta_manage]
+command = "npx"
+args = ["-y", "github:dpupek/vanta-manage-mcp#v1.0.123"]
+startup_timeout_sec = 45.0
+tool_timeout_sec = 45.0
+```
+
+Version guidance:
+- Use `#stable` for latest successful release on `main`.
+- Use `#v1.0.<buildnumber>` for deterministic, reproducible behavior.
 
 ## 2. Credentials
 You can provide credentials either way:
