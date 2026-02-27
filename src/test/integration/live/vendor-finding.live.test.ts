@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseToolEnvelope } from "../../helpers.js";
+import type { TestContext } from "node:test";
 import { McpStdioHarness } from "../mock/mcp-stdio-harness.js";
 import {
+  callToolWithRateLimitRetry,
   guardLiveTest,
+  isRateLimitedEnvelope,
   requireLiveFixture,
   readLiveIntegrationEnv,
   skipOnLiveRateLimit,
@@ -12,6 +14,9 @@ import {
 
 const liveEnv = readLiveIntegrationEnv();
 
+const sleep = async (ms: number): Promise<void> =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
 const readPaginatedData = (envelope: Record<string, unknown>): Record<string, unknown>[] => {
   const data = envelope.data as
     | { results?: { data?: Record<string, unknown>[] } }
@@ -19,11 +24,103 @@ const readPaginatedData = (envelope: Record<string, unknown>): Record<string, un
   return data?.results?.data ?? [];
 };
 
+const readEndCursor = (envelope: Record<string, unknown>): string | null => {
+  const data = envelope.data as
+    | { results?: { pageInfo?: { endCursor?: unknown } } }
+    | undefined;
+  const cursor = data?.results?.pageInfo?.endCursor;
+  if (typeof cursor !== "string" || cursor.length === 0) {
+    return null;
+  }
+  return cursor;
+};
+
+const hasNextPage = (envelope: Record<string, unknown>): boolean => {
+  const data = envelope.data as
+    | { results?: { pageInfo?: { hasNextPage?: unknown } } }
+    | undefined;
+  return data?.results?.pageInfo?.hasNextPage === true;
+};
+
+const callLiveTool = async (
+  t: TestContext,
+  harness: McpStdioHarness,
+  toolName: string,
+  args: Record<string, unknown>,
+): Promise<Record<string, unknown>> => {
+  const envelope = await callToolWithRateLimitRetry(harness, toolName, args);
+  if (isRateLimitedEnvelope(envelope)) {
+    t.skip(`${toolName} was rate-limited after retries.`);
+  }
+  return envelope;
+};
+
+const listAllVendorFindings = async (
+  t: TestContext,
+  harness: McpStdioHarness,
+  vendorId: string,
+): Promise<Record<string, unknown>[]> => {
+  const results: Record<string, unknown>[] = [];
+  let cursor: string | null = null;
+
+  for (let page = 0; page < 25; page += 1) {
+    const envelope = await callLiveTool(t, harness, "list_vendor_findings", {
+      vendorId,
+      pageSize: 100,
+      ...(cursor ? { pageCursor: cursor } : {}),
+    });
+    assert.equal(envelope.success, true);
+    results.push(...readPaginatedData(envelope));
+
+    if (!hasNextPage(envelope)) {
+      return results;
+    }
+    cursor = readEndCursor(envelope);
+    if (!cursor) {
+      return results;
+    }
+  }
+
+  return results;
+};
+
+const waitForFindingState = async (
+  t: TestContext,
+  harness: McpStdioHarness,
+  vendorId: string,
+  findingId: string,
+  expected: {
+    exists: boolean;
+    content?: string;
+    riskStatus?: string;
+  },
+): Promise<void> => {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const findings = await listAllVendorFindings(t, harness, vendorId);
+    const finding = findings.find(item => item.id === findingId);
+    const exists = finding !== undefined;
+    const contentMatches =
+      expected.content === undefined || finding?.content === expected.content;
+    const riskStatusMatches =
+      expected.riskStatus === undefined || finding?.riskStatus === expected.riskStatus;
+
+    if (exists === expected.exists && contentMatches && riskStatusMatches) {
+      return;
+    }
+
+    await sleep(1_000);
+  }
+
+  throw new Error(
+    `Timed out waiting for finding ${findingId} to reach expected state exists=${expected.exists.toString()}.`,
+  );
+};
+
 const discoverVendorId = async (harness: McpStdioHarness): Promise<string | null> => {
-  const listed = await harness.callTool("list_vendors", {
+  const listed = await callToolWithRateLimitRetry(harness, "list_vendors", {
     pageSize: 25,
   });
-  const listedEnvelope = parseToolEnvelope(listed);
+  const listedEnvelope = listed;
   if (listedEnvelope.success !== true) {
     return null;
   }
@@ -88,33 +185,38 @@ test(
         return;
       }
 
-      const currentVendor = await harness.callTool("get_vendor", { vendorId });
-      const currentVendorEnvelope = parseToolEnvelope(currentVendor);
+      const currentVendorEnvelope = await callLiveTool(t, harness, "get_vendor", {
+        vendorId,
+      });
       assert.equal(currentVendorEnvelope.success, true);
 
       const updatedNote = `Updated by integration test ${correlationId}`;
-      const updateVendor = await harness.callTool("update_vendor", {
+      const updateVendorEnvelope = await callLiveTool(t, harness, "update_vendor", {
         vendorId,
         body: {
           additionalNotes: updatedNote,
         },
         confirm: true,
       });
-      const updateVendorEnvelope = parseToolEnvelope(updateVendor);
       assert.equal(updateVendorEnvelope.success, true);
 
-      const updatedVendorRead = await harness.callTool("get_vendor", { vendorId });
-      const updatedVendorEnvelope = parseToolEnvelope(updatedVendorRead);
+      const updatedVendorEnvelope = await callLiveTool(t, harness, "get_vendor", {
+        vendorId,
+      });
       assert.equal(updatedVendorEnvelope.success, true);
       const updatedVendorData = updatedVendorEnvelope.data as
         | Record<string, unknown>
         | undefined;
       assert.equal(updatedVendorData?.additionalNotes, updatedNote);
 
-      const createFinding = await harness.callTool("create_vendor_finding", {
-        vendorId,
-        body: {
-          content: `Missing evidence ${correlationId}`,
+      const createFindingEnvelope = await callLiveTool(
+        t,
+        harness,
+        "create_vendor_finding",
+        {
+          vendorId,
+          body: {
+            content: `Missing evidence ${correlationId}`,
           riskStatus: "REMEDIATE",
           remediation: {
             state: "OPEN",
@@ -122,8 +224,8 @@ test(
           },
         },
         confirm: true,
-      });
-      const createFindingEnvelope = parseToolEnvelope(createFinding);
+        },
+      );
       assert.equal(createFindingEnvelope.success, true);
       const createFindingData = createFindingEnvelope.data as
         | Record<string, unknown>
@@ -134,63 +236,45 @@ test(
       }
       findingId = createdFindingId;
 
-      const findingsRead = await harness.callTool("list_vendor_findings", {
-        vendorId,
-        pageSize: 50,
+      await waitForFindingState(t, harness, vendorId, findingId, {
+        exists: true,
       });
-      const findingsReadEnvelope = parseToolEnvelope(findingsRead);
-      assert.equal(findingsReadEnvelope.success, true);
-      const createdFinding = readPaginatedData(findingsReadEnvelope).find(
-        item => item.id === findingId,
-      );
-      assert.ok(createdFinding);
 
       const updatedContent = `Updated finding ${correlationId}`;
-      const updateFinding = await harness.callTool("update_vendor_finding", {
-        vendorId,
-        findingId,
-        body: {
-          content: updatedContent,
-          riskStatus: "ACCEPT",
+      const updateFindingEnvelope = await callLiveTool(
+        t,
+        harness,
+        "update_vendor_finding",
+        {
+          vendorId,
+          findingId,
+          body: {
+            content: updatedContent,
+            riskStatus: "ACCEPT",
+          },
+          confirm: true,
         },
-        confirm: true,
-      });
-      const updateFindingEnvelope = parseToolEnvelope(updateFinding);
+      );
       assert.equal(updateFindingEnvelope.success, true);
 
-      const findingsReadAfterUpdate = await harness.callTool("list_vendor_findings", {
-        vendorId,
-        pageSize: 50,
+      await waitForFindingState(t, harness, vendorId, findingId, {
+        exists: true,
+        content: updatedContent,
+        riskStatus: "ACCEPT",
       });
-      const findingsAfterUpdateEnvelope = parseToolEnvelope(findingsReadAfterUpdate);
-      assert.equal(findingsAfterUpdateEnvelope.success, true);
-      const updatedFinding = readPaginatedData(findingsAfterUpdateEnvelope).find(
-        item => item.id === findingId,
-      );
-      assert.ok(updatedFinding);
-      assert.equal(updatedFinding.content, updatedContent);
-      assert.equal(updatedFinding.riskStatus, "ACCEPT");
 
       const deletedFindingId = findingId;
-      const deleteFinding = await harness.callTool("delete_finding_by_id", {
+      const deleteFindingEnvelope = await callLiveTool(t, harness, "delete_finding_by_id", {
         vendorId,
         findingId,
         confirm: true,
       });
-      const deleteFindingEnvelope = parseToolEnvelope(deleteFinding);
       assert.equal(deleteFindingEnvelope.success, true);
       findingId = null;
 
-      const findingsReadAfterDelete = await harness.callTool("list_vendor_findings", {
-        vendorId,
-        pageSize: 50,
+      await waitForFindingState(t, harness, vendorId, deletedFindingId, {
+        exists: false,
       });
-      const findingsAfterDeleteEnvelope = parseToolEnvelope(findingsReadAfterDelete);
-      assert.equal(findingsAfterDeleteEnvelope.success, true);
-      const deletedFinding = readPaginatedData(findingsAfterDeleteEnvelope).find(
-        item => item.id === deletedFindingId,
-      );
-      assert.equal(deletedFinding, undefined);
     } finally {
       if (findingId && vendorId) {
         try {

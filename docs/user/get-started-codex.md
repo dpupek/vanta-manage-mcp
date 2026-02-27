@@ -50,6 +50,10 @@ Ask your agent to:
 3. Execute with `mode:"execute"` and `confirm:true`.
 4. Verify with readback call.
 
+Upload migration note:
+- Multipart uploads now use `filePath` only.
+- `contentBase64` and `filename` request fields are no longer accepted.
+
 ## 5. Next Steps
 - [Interface Overview](interface-overview.md)
 - [Capabilities and Recipes](capabilities-and-recipes.md)

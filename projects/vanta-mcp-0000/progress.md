@@ -109,3 +109,13 @@
   - `npm test` passed.
   - `npm run test:integration:mock` passed.
   - `npm run test:integration:live` passed (6/6), with transient OAuth 429 retries observed but recovered.
+- [x] Additional hardening and verification updates:
+  - Added per-call live 429 envelope retry helper and integrated it into live integration suites.
+  - Added vendor/finding convergence polling with paginated readback to reduce eventual-consistency flake.
+  - Added vulnerability remediation pagination discovery for live lifecycle tests.
+  - Added parser-focused Vanta client tests for `204/205`, empty JSON body, text payload, and invalid JSON behavior.
+  - Added explicit release/user-doc breaking-change callouts for upload migration (`filePath` only, no `contentBase64`/`filename`).
+  - Re-ran validations:
+    - `npm run lint` passed.
+    - `npm test` passed (45/45).
+    - `npm run test:integration:live` passed (6/6) using `C:\Users\dan.pupek\.vanta\vanta-credentials-ast.env`.

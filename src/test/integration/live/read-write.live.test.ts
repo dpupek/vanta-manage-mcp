@@ -3,16 +3,31 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { parseToolEnvelope } from "../../helpers.js";
+import type { TestContext } from "node:test";
 import { McpStdioHarness } from "../mock/mcp-stdio-harness.js";
 import {
+  callToolWithRateLimitRetry,
   guardLiveTest,
+  isRateLimitedEnvelope,
   readLiveIntegrationEnv,
   skipOnLiveRateLimit,
   startLiveWithRetry,
 } from "../shared/env.js";
 
 const liveEnv = readLiveIntegrationEnv();
+
+const callLiveTool = async (
+  t: TestContext,
+  harness: McpStdioHarness,
+  toolName: string,
+  args: Record<string, unknown>,
+): Promise<Record<string, unknown>> => {
+  const envelope = await callToolWithRateLimitRetry(harness, toolName, args);
+  if (isRateLimitedEnvelope(envelope)) {
+    t.skip(`${toolName} was rate-limited after retries.`);
+  }
+  return envelope;
+};
 
 const extractDocumentId = (envelope: Record<string, unknown>): string => {
   const data = envelope.data as Record<string, unknown> | undefined;
@@ -48,13 +63,15 @@ test(
       assert.ok(tools.includes("list_documents"));
 
       // Act
-      const controlsResult = await harness.callTool("list_controls", { pageSize: 5 });
-      const documentsResult = await harness.callTool("list_documents", { pageSize: 5 });
+      const controlsEnvelope = await callLiveTool(t, harness, "list_controls", {
+        pageSize: 5,
+      });
+      const documentsEnvelope = await callLiveTool(t, harness, "list_documents", {
+        pageSize: 5,
+      });
 
       // Assert
-      const controlsEnvelope = parseToolEnvelope(controlsResult);
       assert.equal(controlsEnvelope.success, true);
-      const documentsEnvelope = parseToolEnvelope(documentsResult);
       assert.equal(documentsEnvelope.success, true);
     } finally {
       await harness.stop();
@@ -93,7 +110,7 @@ test(
       assert.ok((await harness.listTools()).includes("create_document"));
 
       // Act
-      const created = await harness.callTool("create_document", {
+      const createdEnvelope = await callLiveTool(t, harness, "create_document", {
         body: {
           title: `MCP Integration ${correlationId}`,
           description: `Automated integration test artifact ${correlationId}`,
@@ -104,31 +121,32 @@ test(
         },
         confirm: true,
       });
-      const createdEnvelope = parseToolEnvelope(created);
       assert.equal(createdEnvelope.success, true);
       createdDocumentId = extractDocumentId(createdEnvelope);
 
-      const fetched = await harness.callTool("get_document", {
+      const fetchedEnvelope = await callLiveTool(t, harness, "get_document", {
         documentId: createdDocumentId,
       });
-      const fetchedEnvelope = parseToolEnvelope(fetched);
       assert.equal(fetchedEnvelope.success, true);
 
-      const uploaded = await harness.callTool("upload_file_for_document", {
-        documentId: createdDocumentId,
-        filePath: tempFilePath,
-        mimeType: "text/plain",
-        description: `Evidence upload ${correlationId}`,
-        confirm: true,
-      });
-      const uploadedEnvelope = parseToolEnvelope(uploaded);
+      const uploadedEnvelope = await callLiveTool(
+        t,
+        harness,
+        "upload_file_for_document",
+        {
+          documentId: createdDocumentId,
+          filePath: tempFilePath,
+          mimeType: "text/plain",
+          description: `Evidence upload ${correlationId}`,
+          confirm: true,
+        },
+      );
       assert.equal(uploadedEnvelope.success, true);
 
-      const uploads = await harness.callTool("list_files_for_document", {
+      const uploadsEnvelope = await callLiveTool(t, harness, "list_files_for_document", {
         documentId: createdDocumentId,
         pageSize: 5,
       });
-      const uploadsEnvelope = parseToolEnvelope(uploads);
       assert.equal(uploadsEnvelope.success, true);
 
       if (liveEnv.controlId) {
@@ -137,19 +155,22 @@ test(
           allTools.includes("add_document_to_control") &&
           allTools.includes("list_documents_for_control")
         ) {
-          const linked = await harness.callTool("add_document_to_control", {
+          const linkedEnvelope = await callLiveTool(t, harness, "add_document_to_control", {
             controlId: liveEnv.controlId,
             body: { documentId: createdDocumentId },
             confirm: true,
           });
-          const linkedEnvelope = parseToolEnvelope(linked);
           assert.equal(linkedEnvelope.success, true);
 
-          const controlDocuments = await harness.callTool("list_documents_for_control", {
-            controlId: liveEnv.controlId,
-            pageSize: 20,
-          });
-          const controlDocsEnvelope = parseToolEnvelope(controlDocuments);
+          const controlDocsEnvelope = await callLiveTool(
+            t,
+            harness,
+            "list_documents_for_control",
+            {
+              controlId: liveEnv.controlId,
+              pageSize: 20,
+            },
+          );
           assert.equal(controlDocsEnvelope.success, true);
         }
       }
@@ -187,10 +208,10 @@ test(
       throw error;
     }
     try {
-      const deletedLookup = await verifyHarness.callTool("get_document", {
+      const deletedLookup = await callLiveTool(t, verifyHarness, "get_document", {
         documentId: createdDocumentId,
       });
-      const deletedEnvelope = parseToolEnvelope(deletedLookup);
+      const deletedEnvelope = deletedLookup;
       assert.equal(deletedEnvelope.success, false);
       assert.equal(
         (deletedEnvelope.error as Record<string, unknown>).code,

@@ -1,4 +1,6 @@
 import type { TestContext } from "node:test";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { parseToolEnvelope } from "../../helpers.js";
 
 const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
   if (value === undefined) {
@@ -42,6 +44,15 @@ export interface LiveIntegrationEnv {
 
 const sleep = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
+
+interface ErrorEnvelopeLike {
+  success?: unknown;
+  error?: {
+    code?: unknown;
+    message?: unknown;
+    details?: unknown;
+  };
+}
 
 export const readLiveIntegrationEnv = (): LiveIntegrationEnv => ({
   enabled: parseBoolean(process.env.VANTA_INTEGRATION_LIVE, false),
@@ -133,6 +144,99 @@ export const isRetryableLiveStartError = (error: unknown): boolean => {
     normalized.includes("rate_limit_exceeded") ||
     normalized.includes("oauth token request failed (429") ||
     normalized.includes("connection closed")
+  );
+};
+
+const extractApiErrorCode = (details: unknown): string | null => {
+  if (typeof details === "string") {
+    try {
+      const parsed = JSON.parse(details) as { error?: unknown };
+      if (typeof parsed.error === "string") {
+        return parsed.error.toLowerCase();
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+  if (typeof details === "object" && details !== null) {
+    const candidate = (details as { error?: unknown }).error;
+    if (typeof candidate === "string") {
+      return candidate.toLowerCase();
+    }
+  }
+  return null;
+};
+
+export const isRateLimitedEnvelope = (envelope: Record<string, unknown>): boolean => {
+  const typed = envelope as ErrorEnvelopeLike;
+  if (typed.success !== false || !typed.error) {
+    return false;
+  }
+
+  const code =
+    typeof typed.error.code === "string"
+      ? typed.error.code.toLowerCase()
+      : "";
+  const message =
+    typeof typed.error.message === "string"
+      ? typed.error.message.toLowerCase()
+      : "";
+  const apiCode = extractApiErrorCode(typed.error.details);
+
+  if (apiCode === "rate_limit_exceeded") {
+    return true;
+  }
+
+  return (
+    code === "api_error" &&
+    (message.includes("429") || message.includes("rate_limit_exceeded"))
+  );
+};
+
+interface ToolCaller {
+  callTool: (
+    name: string,
+    args: Record<string, unknown>,
+  ) => Promise<CallToolResult>;
+}
+
+export const callToolWithRateLimitRetry = async (
+  caller: ToolCaller,
+  toolName: string,
+  args: Record<string, unknown>,
+  options?: {
+    attempts?: number;
+    delayMs?: number;
+  },
+): Promise<Record<string, unknown>> => {
+  const attempts = options?.attempts ?? 6;
+  const delayMs = options?.delayMs ?? 750;
+
+  let lastEnvelope: Record<string, unknown> | null = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const result = await caller.callTool(toolName, args);
+    const envelope = parseToolEnvelope(result);
+    lastEnvelope = envelope;
+
+    if (!isRateLimitedEnvelope(envelope)) {
+      return envelope;
+    }
+
+    if (attempt < attempts) {
+      await sleep(delayMs * attempt);
+    }
+  }
+
+  return (
+    lastEnvelope ??
+    {
+      success: false,
+      error: {
+        code: "request_failed",
+        message: `No envelope returned for ${toolName}.`,
+      },
+    }
   );
 };
 

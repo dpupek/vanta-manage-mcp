@@ -21,6 +21,14 @@ Use this before tagging or publishing a new server version.
 - `docs/user/get-started-claude.md`
 - `docs/dev/security.md`
 
+## Breaking Change Callouts
+- If multipart upload interfaces changed, add an explicit release note with migration guidance.
+- Current required callout: upload tools no longer accept `contentBase64`/`filename`; use `filePath` (+ optional `mimeType`) instead.
+- Confirm user docs include the same migration note:
+- `docs/user/get-started-codex.md`
+- `docs/user/get-started-claude.md`
+- `docs/user/interface-overview.md`
+
 ## Packaging and Runtime
 - Confirm `package.json` includes:
 - `bin` -> `build/index.js`

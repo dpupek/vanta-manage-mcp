@@ -52,6 +52,10 @@ Mutating operations require confirmation in safe mode:
 - Endpoint tools: `confirm:true`
 - Workflow tools: `mode:"execute"` plus `confirm:true`
 
+Upload migration note:
+- Multipart uploads now use `filePath` only.
+- `contentBase64` and `filename` request fields are no longer accepted.
+
 ## 5. Next Steps
 - [Interface Overview](interface-overview.md)
 - [Capabilities and Recipes](capabilities-and-recipes.md)
