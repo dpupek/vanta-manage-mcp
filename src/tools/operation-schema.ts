@@ -59,15 +59,10 @@ export const buildOperationSchema = (
     if (requestBody.kind === "multipart") {
       const hasFileField = Boolean(requestBody.fileFieldName);
       if (hasFileField) {
-        shape.filename = withOptional(
+        shape.filePath = withOptional(
           z.string(),
           requestBody.required || Boolean(requestBody.fileFieldName),
-          "File name for multipart upload.",
-        );
-        shape.contentBase64 = withOptional(
-          z.string(),
-          requestBody.required || Boolean(requestBody.fileFieldName),
-          "Base64-encoded file content for multipart upload.",
+          "Local file path for multipart upload.",
         );
         shape.mimeType = z
           .string()

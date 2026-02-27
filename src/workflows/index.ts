@@ -123,8 +123,7 @@ const registerControlEvidenceWorkflow = (
       confirm: z.boolean().optional(),
       controlId: z.string().optional(),
       documentId: z.string().optional(),
-      filename: z.string().optional(),
-      contentBase64: z.string().optional(),
+      filePath: z.string().optional(),
       mimeType: z.string().optional(),
       effectiveAtDate: z.string().optional(),
       description: z.string().optional(),
@@ -156,7 +155,7 @@ const registerControlEvidenceWorkflow = (
               summary: "Control evidence workflow plan.",
               recommendedActions: [
                 "Review selected controls and mapped evidence.",
-                "Attach an existing document via documentId, or upload to an existing document using filename/contentBase64.",
+                "Attach an existing document via documentId, or upload to an existing document using filePath.",
               ],
               context: {
                 selectedControlId: args.controlId ?? null,
@@ -201,13 +200,12 @@ const registerControlEvidenceWorkflow = (
         });
       }
 
-      if (args.documentId && args.filename && args.contentBase64) {
+      if (args.documentId && args.filePath) {
         const uploadResult = await executeOperation(
           "UploadFileForDocument",
           {
             documentId: args.documentId,
-            filename: args.filename,
-            contentBase64: args.contentBase64,
+            filePath: args.filePath,
             mimeType: args.mimeType,
             effectiveAtDate: args.effectiveAtDate,
             description: args.description,
@@ -394,8 +392,7 @@ const registerVendorWorkflow = (
     findingId: z.string().optional(),
     securityReviewId: z.string().optional(),
     payload: z.record(z.string(), z.unknown()).optional(),
-    filename: z.string().optional(),
-    contentBase64: z.string().optional(),
+    filePath: z.string().optional(),
     mimeType: z.string().optional(),
   });
 
@@ -496,8 +493,7 @@ const registerVendorWorkflow = (
           {
             vendorId: action.vendorId,
             securityReviewId: action.securityReviewId,
-            filename: action.filename,
-            contentBase64: action.contentBase64,
+            filePath: action.filePath,
             mimeType: action.mimeType,
             ...action.payload,
             confirm: true,

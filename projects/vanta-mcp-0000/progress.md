@@ -75,3 +75,37 @@
 - For Git-based `npx`, keep `prepare` aligned with build output and `bin` path.
 - `npm run build` rewrites `src/generated/manifest.generated.json` `generatedAt`; avoid committing timestamp-only churn unless intended.
 - For new/updated MCP error surfaces, always include compact `agentHint` guidance when actionable next steps exist.
+
+## 2026-02-27
+- [x] Implemented breaking multipart upload contract migration:
+  - Removed `contentBase64`/`filename` upload execution path.
+  - Multipart upload tools now require local `filePath` (+ optional `mimeType`).
+- [x] Added centralized upload validation and endpoint policy modules:
+  - `src/uploads/types.ts`
+  - `src/uploads/policy.ts`
+  - `src/uploads/file-validation.ts`
+  - `src/uploads/multipart.ts`
+- [x] Enforced strict preflight checks before multipart writes:
+  - path required (`file_path_required`)
+  - file exists (`file_not_found`)
+  - file readable (`file_not_readable`)
+  - regular file only (`file_not_regular`)
+  - allowed extension/MIME policy (`unsupported_file_type`)
+- [x] Updated workflow upload interfaces to `filePath`:
+  - `workflow_control_evidence`
+  - `workflow_vendor_triage`
+- [x] Updated help/prompts/user+dev docs to remove base64 guidance and document `filePath` behavior.
+- [x] Added/updated tests for upload migration:
+  - schema contract (`filePath` required for multipart file tools)
+  - endpoint preflight error envelope tests
+  - endpoint policy coverage (`upload-policy.test.ts`)
+  - live read/write upload test moved to temp file `filePath` usage
+- [x] Diagnosed and fixed live vendor/finding lifecycle failure:
+  - Root cause: empty-body `204` responses with `application/json` caused JSON parse failure (`Unexpected end of JSON input`).
+  - Fix: `parseResponsePayload` now treats `204/205` as `null` and parses JSON only when body text is non-empty.
+  - Added regression in mock vendor/finding lifecycle for `204` + JSON content-type delete.
+- [x] Validation results:
+  - `npm run lint` passed.
+  - `npm test` passed.
+  - `npm run test:integration:mock` passed.
+  - `npm run test:integration:live` passed (6/6), with transient OAuth 429 retries observed but recovered.

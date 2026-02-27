@@ -72,3 +72,24 @@ test("explicit agentHint overrides derived hint", () => {
   assert.equal(envelope.error.agentHint, explicitHint);
 });
 
+test("file upload preflight errors include actionable agentHint", () => {
+  // Arrange
+  const code = "file_not_found";
+
+  // Initial Assert
+  assert.equal(code, "file_not_found");
+
+  // Act
+  const envelope = errorEnvelope(code, "File does not exist.");
+
+  // Assert
+  assert.equal(envelope.success, false);
+  assert.match(
+    envelope.error.agentHint ?? "",
+    /Correct filePath to an existing local file/u,
+  );
+  assert.match(
+    envelope.error.agentHint ?? "",
+    /resource:\/\/vanta-manage\/troubleshooting/u,
+  );
+});

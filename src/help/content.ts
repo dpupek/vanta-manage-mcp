@@ -202,6 +202,15 @@ const renderWorkflowSteps = (): string[] => [
 ];
 
 const renderRecipeSteps = (): string[] => [
+  "## Recipe: Top 5 Vulnerable Devices (Asset-First, Exact)",
+  "",
+  "1. Pull candidate assets first with `list_vulnerable_assets` (use `pageSize` 100 when supported).",
+  "2. If asset rows expose vulnerability rollups, rank directly by `critical` desc, `high` desc, `total` desc, then earliest SLA due date asc.",
+  "3. If rollups are missing, enrich only candidate assets with `list_vulnerabilities` using `vulnerableAssetId` + `isDeactivated=false`.",
+  "4. Compute a deterministic top-5 ranking and return device name, asset ID, and top CVEs per device.",
+  "5. Use `get_vulnerable_asset` for final device metadata when needed (owner, scanner, network identifiers).",
+  "6. Prefer this pattern over full global vulnerability pagination when objective is top devices.",
+  "",
   "## Recipe: Triaging Vulnerabilities (Next 2 Weeks + Defender Context)",
   "",
   "1. Pull upcoming SLA items: `list_vulnerabilities` with `slaDeadlineBeforeDate` set to now + 14 days.",
@@ -292,11 +301,12 @@ export const buildHelpResourceMarkdown = (
     lines.push("");
     lines.push("- Read controls: `controls`");
     lines.push("- Read control evidence links: `list_control_documents`");
-    lines.push("- Upload evidence to a document: `upload_file_for_document` with `filename` + `contentBase64`");
+    lines.push("- Upload evidence to a document: `upload_file_for_document` with `filePath`");
     lines.push("- Map document to control: `add_document_to_control`");
     lines.push("- Triage failing controls: `workflow_triage_failing_controls`");
     lines.push("- Triage vendor findings/reviews: `workflow_vendor_triage`");
     lines.push("- Triage vulnerabilities: `workflow_people_assets_vuln_triage`");
+    lines.push("- Top 5 vulnerable devices (fast): `list_vulnerable_assets` first, then targeted `list_vulnerabilities` by `vulnerableAssetId`");
     lines.push("- Triage audit information requests: `workflow_information_request_triage`");
     lines.push("");
     lines.push("## Minimal Call Shapes");
@@ -327,8 +337,7 @@ export const buildHelpResourceMarkdown = (
         input: {
           documentId: "document-456",
           confirm: true,
-          filename: "evidence.pdf",
-          contentBase64: "<base64>",
+          filePath: "C:\\\\evidence\\\\evidence.pdf",
           mimeType: "application/pdf",
         },
       }),
@@ -411,14 +420,17 @@ export const buildHelpResourceMarkdown = (
   lines.push("");
   lines.push("## Multipart Upload Issues");
   lines.push("");
-  lines.push("- Ensure `filename` and `contentBase64` are present.");
-  lines.push("- Set `mimeType` when known (for example `application/pdf`).");
-  lines.push("- Use valid base64 without URL-safe substitutions.");
+  lines.push("- Ensure `filePath` points to an existing readable local file.");
+  lines.push("- Use a supported extension (`.pdf`, `.docx`, `.xlsx`, `.csv`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.zip`, `.ps`).");
+  lines.push("- Set `mimeType` when known (for example `application/pdf`) and keep it aligned with the file extension.");
   lines.push("");
   lines.push("## Pagination and Cursor Flow");
   lines.push("");
   lines.push("- Carry forward `pageCursor` from previous response.");
   lines.push("- Respect `pageSize` limits (default API constraints apply).");
+  lines.push(
+    "- For `top vulnerable devices` requests, avoid full global vulnerability paging: use asset-first ranking with `list_vulnerable_assets`, then targeted `list_vulnerabilities(vulnerableAssetId=...)`.",
+  );
   lines.push("");
   lines.push("## API-side Permission Errors");
   lines.push("");

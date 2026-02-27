@@ -29,6 +29,7 @@ Use prompts:
 ## Ask Patterns for Agents
 - "Plan a control evidence update for control `<id>` and show only read calls first."
 - "Triage vulnerabilities due in 14 days and propose prioritized actions."
+- "Tell me the top 5 vulnerable devices according to Vanta and show ranking inputs."
 - "Generate a vendor risk triage plan for vendor `<id>` and include readback verification."
 - "Show onboarding status for person `<id>` and list blockers."
 - "Cross-reference policy `<policyId>` with document evidence and propose linkage steps."
@@ -39,3 +40,7 @@ Use prompts:
 3. Run workflow tool in `mode:"plan"`.
 4. Execute approved writes with `confirm:true`.
 5. Verify updates with readback endpoints.
+
+## Upload Notes
+- For evidence/document uploads, pass `filePath` to a local readable file.
+- Use supported file types (`.pdf`, `.docx`, `.xlsx`, `.csv`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.zip`, `.ps`).

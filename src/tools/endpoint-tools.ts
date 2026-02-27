@@ -11,6 +11,8 @@ import {
   safeModeEnabled,
   writeEnabled,
 } from "../config.js";
+import { validateUploadFileInput } from "../uploads/file-validation.js";
+import { appendUploadFile } from "../uploads/multipart.js";
 
 const encodePath = (template: string, args: Record<string, unknown>): string =>
   template.replace(/\{([^}]+)\}/g, (_match: string, key: string) => {
@@ -34,22 +36,38 @@ const extractQuery = (
   return query;
 };
 
-const buildMultipartFormData = (
+const appendMultipartUploadFile = async (
+  toolName: string,
   args: Record<string, unknown>,
   fileFieldName: string,
-): FormData => {
-  const formData = new FormData();
-  const filename = String(args.filename ?? "");
-  const contentBase64 = String(args.contentBase64 ?? "");
-  const mimeType =
-    typeof args.mimeType === "string"
-      ? args.mimeType
-      : "application/octet-stream";
+  formData: FormData,
+): Promise<ReturnType<typeof errorEnvelope> | undefined> => {
+  const validation = validateUploadFileInput(toolName, args);
+  if (!validation.success) {
+    return errorEnvelope(
+      validation.error.code,
+      validation.error.message,
+      validation.error.hint,
+      validation.error.details,
+    );
+  }
 
-  const fileBuffer = Buffer.from(contentBase64, "base64");
-  const file = new File([fileBuffer], filename, { type: mimeType });
-  formData.append(fileFieldName, file);
-  return formData;
+  try {
+    await appendUploadFile(formData, fileFieldName, validation.file);
+    return undefined;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return errorEnvelope(
+      "file_not_readable",
+      `Unable to read file for upload: ${validation.file.absolutePath}`,
+      "Ensure the path is valid and accessible by the MCP process.",
+      {
+        toolName,
+        filePath: validation.file.absolutePath,
+        reason: message,
+      },
+    );
+  }
 };
 
 const addMultipartField = (
@@ -83,9 +101,6 @@ const isConfirmationRequired = (
 const stripRuntimeFields = (args: Record<string, unknown>): Record<string, unknown> => {
   const remaining = { ...args };
   delete remaining.confirm;
-  delete remaining.filename;
-  delete remaining.contentBase64;
-  delete remaining.mimeType;
   return remaining;
 };
 
@@ -140,17 +155,25 @@ export async function invokeGeneratedOperation(
   let formData: FormData | undefined;
   if (bodyDescriptor) {
     if (bodyDescriptor.kind === "multipart") {
+      const multipartFormData = new FormData();
       if (bodyDescriptor.fileFieldName) {
-        formData = buildMultipartFormData(rawArgs, bodyDescriptor.fileFieldName);
-      } else {
-        formData = new FormData();
+        const uploadError = await appendMultipartUploadFile(
+          toolName,
+          rawArgs,
+          bodyDescriptor.fileFieldName,
+          multipartFormData,
+        );
+        if (uploadError) {
+          return toToolResult(uploadError);
+        }
       }
       for (const field of bodyDescriptor.fields) {
         if (field.name === bodyDescriptor.fileFieldName) {
           continue;
         }
-        addMultipartField(formData, field.name, rawArgs[field.name]);
+        addMultipartField(multipartFormData, field.name, rawArgs[field.name]);
       }
+      formData = multipartFormData;
     } else {
       body = rawArgs.body;
     }

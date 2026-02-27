@@ -74,3 +74,15 @@
 - [x] Add explicit rate-limit guidance for `rate_limit_exceeded` responses.
 - [x] Update user/dev contracts and help text to document `agentHint`.
 - [x] Add unit tests validating hint derivation and explicit override behavior.
+
+## Phase 9: Multipart Upload Contract Hardening
+- [x] Replace multipart base64 upload execution contract with `filePath`-based uploads.
+- [x] Add strict per-endpoint upload file policy (extension + MIME allowlist).
+- [x] Add centralized upload preflight validation and map failures to structured envelopes.
+- [x] Update endpoint tool schemas (`filePath`, optional `mimeType`) and remove base64 upload path.
+- [x] Update workflow upload actions to pass `filePath` (`workflow_control_evidence`, `workflow_vendor_triage`).
+- [x] Add upload-specific agent hints for preflight errors.
+- [x] Update help surface and user/dev docs to remove base64 guidance.
+- [x] Add schema/endpoint/mock/live test coverage for `filePath` upload behavior and policy enforcement.
+- [x] Fix live delete-response parsing for empty JSON 204/205 responses and add regression coverage.
+- [x] Re-run lint + deterministic tests + live integration suite and capture results in progress log.

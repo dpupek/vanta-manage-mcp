@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 import { parseToolEnvelope } from "../../helpers.js";
 import { McpStdioHarness } from "../mock/mcp-stdio-harness.js";
@@ -79,7 +82,8 @@ test(
     }
     const correlationId = `mcp-int-${Date.now().toString()}`;
     const fileBody = `integration evidence ${correlationId}`;
-    const contentBase64 = Buffer.from(fileBody, "utf8").toString("base64");
+    const tempFilePath = path.join(os.tmpdir(), `${correlationId}.txt`);
+    fs.writeFileSync(tempFilePath, fileBody, "utf8");
 
     let createdDocumentId: string | null = null;
     let cleanupError: Error | null = null;
@@ -112,8 +116,7 @@ test(
 
       const uploaded = await harness.callTool("upload_file_for_document", {
         documentId: createdDocumentId,
-        filename: `${correlationId}.txt`,
-        contentBase64,
+        filePath: tempFilePath,
         mimeType: "text/plain",
         description: `Evidence upload ${correlationId}`,
         confirm: true,
@@ -151,6 +154,7 @@ test(
         }
       }
     } finally {
+      fs.rmSync(tempFilePath, { force: true });
       if (createdDocumentId) {
         try {
           await harness.callTool("delete_document", {

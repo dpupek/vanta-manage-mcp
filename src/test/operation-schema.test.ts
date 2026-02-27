@@ -42,13 +42,11 @@ test("multipart operations expose MCP-friendly file fields", () => {
   const schema = buildOperationSchema(operation);
   const result = schema.safeParse({
     documentId: "doc-1",
-    filename: "evidence.txt",
-    contentBase64: Buffer.from("hello", "utf8").toString("base64"),
+    filePath: "C:\\evidence\\evidence.txt",
   });
 
   // Assert
   assert.equal(result.success, true);
-  assert.ok("filename" in schema.shape);
-  assert.ok("contentBase64" in schema.shape);
+  assert.ok("filePath" in schema.shape);
+  assert.equal("contentBase64" in schema.shape, false);
 });
-

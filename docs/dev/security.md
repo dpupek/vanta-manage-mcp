@@ -26,7 +26,7 @@
 ## Logging and Redaction
 - Do not log raw secrets, bearer tokens, or file content payloads.
 - Runtime logging uses structured JSON to `stderr` and supports `VANTA_MCP_LOG_LEVEL=quiet|minimal|verbose|all`.
-- Sensitive fields are redacted by key pattern (for example token/authorization/secret/password/contentBase64/apiKey/cookie).
+- Sensitive fields are redacted by key pattern (for example token/authorization/secret/password/apiKey/cookie).
 - Error envelopes may include API-side details; treat output as sensitive in shared channels.
 - Prefer short retention for server stderr/stdout logs.
 

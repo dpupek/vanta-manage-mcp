@@ -52,15 +52,26 @@ const buildQueryString = (query: Record<string, unknown>): URLSearchParams => {
 };
 
 const parseResponsePayload = async (response: Response): Promise<unknown> => {
-  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-  if (contentType.includes("application/json")) {
-    return response.json();
+  if (response.status === 204 || response.status === 205) {
+    return null;
   }
+
+  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
 
   const text = await response.text();
   if (text.length === 0) {
     return null;
   }
+
+  if (contentType.includes("application/json")) {
+    try {
+      return JSON.parse(text) as unknown;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to parse JSON response: ${message}`);
+    }
+  }
+
   return text;
 };
 

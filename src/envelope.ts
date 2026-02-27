@@ -100,6 +100,21 @@ const deriveAgentHint = (
   if (normalizedCode === "validation_error") {
     return "Fix required arguments using tool schema, then retry. Use resource://vanta-manage/cheatsheet for call shapes.";
   }
+  if (normalizedCode === "file_path_required") {
+    return "Provide filePath to a local readable file. See resource://vanta-manage/troubleshooting.";
+  }
+  if (normalizedCode === "file_not_found") {
+    return "Correct filePath to an existing local file, then retry. See resource://vanta-manage/troubleshooting.";
+  }
+  if (normalizedCode === "file_not_readable") {
+    return "Grant read access to the filePath and retry. See resource://vanta-manage/troubleshooting.";
+  }
+  if (normalizedCode === "file_not_regular") {
+    return "Use a regular file path (not a directory). See resource://vanta-manage/troubleshooting.";
+  }
+  if (normalizedCode === "unsupported_file_type") {
+    return "Use a supported file extension/mimeType for this upload tool. See resource://vanta-manage/recipes.";
+  }
   if (normalizedCode === "unknown_tool" || normalizedCode === "missing_generated_operation") {
     return "Discover valid tools via resource://vanta-manage/tool-catalog or run the help tool.";
   }

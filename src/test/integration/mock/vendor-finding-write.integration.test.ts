@@ -99,7 +99,10 @@ test("mock vendor + finding write lifecycle performs readback assertions", async
     if (index >= 0) {
       findings.splice(index, 1);
     }
-    return { status: 204 };
+    return {
+      status: 204,
+      headers: { "content-type": "application/json" },
+    };
   });
 
   try {

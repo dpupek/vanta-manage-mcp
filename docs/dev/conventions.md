@@ -15,6 +15,7 @@ All tools must return envelope-form responses and never crash MCP transport:
 ## Safety Contract
 - Mutations require `confirm:true` in safe mode.
 - Workflow tools use `mode:"plan"|"execute"`; execute requires confirmation.
+- Multipart upload tools require `filePath` (base64 payloads are not accepted).
 
 ## Logging Conventions
 - Use centralized logger (`src/logging/logger.ts`), never ad hoc `console.error` for server/runtime events.

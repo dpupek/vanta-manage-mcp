@@ -17,6 +17,11 @@ All tools return JSON envelopes:
 - Workflow execution requires `mode:"execute"` and `confirm:true`
 - Missing confirmation returns `error.code = "confirmation_required"`
 
+## Upload Contract
+- Multipart upload tools require `filePath` to a local readable file.
+- Optional `mimeType` may be provided, but must match supported file types.
+- Upload preflight failures return structured errors such as `file_path_required`, `file_not_found`, `file_not_readable`, `file_not_regular`, and `unsupported_file_type`.
+
 ## Logging Modes
 - Logs are emitted to `stderr` as structured JSON lines.
 - Control verbosity with `VANTA_MCP_LOG_LEVEL`:

@@ -22,8 +22,7 @@ This document defines the stable contract for endpoint tool generation from pinn
 - Path/query params become top-level tool fields.
 - JSON request bodies map to `body` (object).
 - Multipart request bodies map to MCP-friendly fields:
-- `filename`
-- `contentBase64`
+- `filePath`
 - `mimeType?`
 - plus endpoint metadata fields from OpenAPI.
 

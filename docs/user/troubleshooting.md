@@ -42,6 +42,16 @@ Fix:
 2. Re-list tools/resources.
 3. Call `help` and read `resource://vanta-manage/help`.
 
+## Upload Preflight Errors
+Cause:
+- `filePath` is missing/invalid, not readable, or file type is unsupported.
+
+Fix:
+- Provide `filePath` to an existing readable local file.
+- Ensure the path points to a regular file (not a directory).
+- Use supported file types (`.pdf`, `.docx`, `.xlsx`, `.csv`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.zip`, `.ps`).
+- If set, ensure `mimeType` aligns with the file extension and endpoint policy.
+
 ## Need More Diagnostic Detail
 Cause:
 - An issue is not reproducible from normal user logs.

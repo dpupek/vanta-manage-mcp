@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 import { parseToolEnvelope } from "../../helpers.js";
 import { FakeVantaServer } from "./fake-vanta-server.js";
@@ -106,6 +109,56 @@ test("transport failures return request_failed envelopes and do not crash MCP to
     const recoveryEnvelope = parseToolEnvelope(recoveryResult);
     assert.equal(recoveryEnvelope.success, true);
     assert.equal(fakeServer.getCallCount("GET", "/controls"), 2);
+  } finally {
+    await harness.stop();
+    await fakeServer.stop();
+  }
+});
+
+test("upload preflight errors return envelopes and do not call OAuth or API", async () => {
+  // Arrange
+  const fakeServer = new FakeVantaServer();
+  await fakeServer.start();
+  const harness = new McpStdioHarness({
+    envOverrides: createHarnessEnv(fakeServer.baseUrl),
+  });
+  await harness.start();
+  const missingFilePath = path.join(
+    os.tmpdir(),
+    `vanta-mcp-missing-${Date.now().toString()}.pdf`,
+  );
+  fs.rmSync(missingFilePath, { force: true });
+
+  try {
+    // Initial Assert
+    const oauthCallsBefore = fakeServer.getCallCount("POST", "/oauth/token");
+    const uploadCallsBefore = fakeServer.getCallCount(
+      "POST",
+      "/documents/document-1/uploads",
+    );
+
+    // Act
+    const result = await harness.callTool("upload_file_for_document", {
+      documentId: "document-1",
+      filePath: missingFilePath,
+      confirm: true,
+    });
+    const envelope = parseToolEnvelope(result);
+
+    // Assert
+    assert.equal(envelope.success, false);
+    assert.equal(
+      (envelope.error as Record<string, unknown>).code,
+      "file_not_found",
+    );
+    assert.equal(
+      fakeServer.getCallCount("POST", "/oauth/token"),
+      oauthCallsBefore,
+    );
+    assert.equal(
+      fakeServer.getCallCount("POST", "/documents/document-1/uploads"),
+      uploadCallsBefore,
+    );
   } finally {
     await harness.stop();
     await fakeServer.stop();
