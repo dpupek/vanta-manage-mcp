@@ -10,6 +10,7 @@ Build a TypeScript MCP server in this repository that exposes complete Vanta API
 - specialized workflow tools for common operations (controls/evidence, failing control triage, vendor triage, people/assets/vulnerability triage, information requests)
 - [ ] All mutating tools require explicit confirmation (`confirm: true`) in safe mode.
 - [ ] Tool responses use a consistent JSON envelope for success/error.
+- [ ] Error envelopes include compact actionable `agentHint` guidance when possible (resource/playbook pointers for AI agents).
 - [ ] Generated outputs are committed and checked for drift in CI.
 - [ ] Core scenarios are covered with unit + parity + workflow tests.
 

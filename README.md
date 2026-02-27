@@ -14,6 +14,7 @@ Vanta Manage MCP is a full-capability Model Context Protocol server for operatin
 - Safe mutation contract with `confirm=true` gating.
 - Workflow tools with `mode=plan|execute`.
 - Help surface with resources and playbook prompts.
+- Env-controlled structured logging: `quiet`, `minimal` (default), `verbose`, `all`.
 - Standard JSON envelope responses for success and error handling.
 
 ## Quickstart

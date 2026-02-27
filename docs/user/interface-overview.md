@@ -9,13 +9,22 @@
 All tools return JSON envelopes:
 
 - Success: `{ "success": true, "data": ..., "message"?: ..., "notes"?: ... }`
-- Error: `{ "success": false, "error": { "code": ..., "message": ..., "hint"?: ..., "details"?: ... }, "notes"?: ... }`
+- Error: `{ "success": false, "error": { "code": ..., "message": ..., "hint"?: ..., "agentHint"?: ..., "details"?: ... }, "notes"?: ... }`
 
 ## Safe Mutation Contract
 - Safe mode default: `VANTA_MCP_SAFE_MODE=true`
 - Mutating endpoint calls require `confirm:true`
 - Workflow execution requires `mode:"execute"` and `confirm:true`
 - Missing confirmation returns `error.code = "confirmation_required"`
+
+## Logging Modes
+- Logs are emitted to `stderr` as structured JSON lines.
+- Control verbosity with `VANTA_MCP_LOG_LEVEL`:
+  - `quiet`
+  - `minimal` (default)
+  - `verbose`
+  - `all`
+- Backward-compatible alias: `VANTA_MCP_VERBOSE=true` maps to `verbose` when `VANTA_MCP_LOG_LEVEL` is not set.
 
 ## Discovery Pattern
 1. Read `resource://vanta-manage/help`.

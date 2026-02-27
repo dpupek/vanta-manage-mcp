@@ -1,5 +1,6 @@
 import { BASE_API_URL } from "../api.js";
 import { getTokenManager } from "../auth.js";
+import { logger } from "../logging/logger.js";
 
 const RETRYABLE_STATUS_CODES = new Set([408, 409, 429, 500, 502, 503, 504]);
 const MAX_RETRIES = 2;
@@ -68,6 +69,10 @@ export class VantaApiClient {
     let token = await getTokenManager().getValidToken();
     let attempt = 0;
     let refreshed = false;
+    const scopedLogger = logger.child({
+      method: input.method.toUpperCase(),
+      path: input.path,
+    });
 
     while (attempt <= MAX_RETRIES) {
       const url = joinUrl(BASE_API_URL, input.path);
@@ -91,14 +96,27 @@ export class VantaApiClient {
         headers["Content-Type"] = "application/json";
         body = JSON.stringify(input.body);
       }
+      scopedLogger.debug("api_request_started", "Sending Vanta API request.", {
+        attempt,
+        hasQuery: Boolean(input.query),
+        hasBody: input.body !== undefined || input.formData !== undefined,
+      });
 
       const response = await fetch(url, {
         method: input.method.toUpperCase(),
         headers,
         body,
       });
+      scopedLogger.debug("api_response_received", "Received Vanta API response.", {
+        status: response.status,
+        ok: response.ok,
+        attempt,
+      });
 
       if (response.status === 401 && !refreshed) {
+        scopedLogger.warn("api_unauthorized_retry", "Received 401, refreshing token.", {
+          attempt,
+        });
         token = await getTokenManager().refreshToken();
         refreshed = true;
         attempt += 1;
@@ -117,6 +135,11 @@ export class VantaApiClient {
         } else {
           await sleep((attempt + 1) * 500);
         }
+        scopedLogger.warn("api_retry_scheduled", "Retrying request after retryable status.", {
+          status: response.status,
+          statusText: response.statusText,
+          attempt,
+        });
         attempt += 1;
         continue;
       }
@@ -124,6 +147,9 @@ export class VantaApiClient {
       const responseHeaders: Record<string, string> = {};
       response.headers.forEach((value, key) => {
         responseHeaders[key] = value;
+      });
+      scopedLogger.trace("api_response_headers", "Response headers metadata captured.", {
+        headers: responseHeaders,
       });
 
       return {
@@ -134,6 +160,11 @@ export class VantaApiClient {
       };
     }
 
+    scopedLogger.error(
+      "api_retry_exhausted",
+      "Request retry policy exhausted without success.",
+      { maxRetries: MAX_RETRIES },
+    );
     throw new Error("Request retry policy exhausted without a response.");
   }
 }

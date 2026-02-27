@@ -1,22 +1,19 @@
 # Get Started with Codex
 
 ## 1. Add MCP Server Config
+Codex MCP config uses `mcp_servers` sections (YAML/TOML-style config), not JSON.
 Use a pinned GitHub tag with `npx`:
 
-```json
-{
-  "mcpServers": {
-    "vanta-manage": {
-      "command": "npx",
-      "args": ["-y", "github:dpupek/vanta-manage-mcp#v1.0.123"],
-      "env": {
-        "VANTA_CLIENT_ID": "YOUR_CLIENT_ID",
-        "VANTA_CLIENT_SECRET": "YOUR_CLIENT_SECRET",
-        "VANTA_MCP_SAFE_MODE": "true"
-      }
-    }
-  }
-}
+```toml
+[mcp_servers.vanta_manage]
+command = "npx"
+args = ["-y", "github:dpupek/vanta-manage-mcp#v1.0.123"]
+startup_timeout_sec = 45.0
+tool_timeout_sec = 45.0
+
+[mcp_servers.vanta_manage.env]
+VANTA_ENV_FILE = "C:\\Users\\dan.pupek\\.vanta\\vanta-credentials-ast.env"
+VANTA_MCP_SAFE_MODE = "true"
 ```
 
 ## 2. Credentials

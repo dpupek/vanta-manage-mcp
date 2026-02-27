@@ -61,6 +61,11 @@
 - [x] Added manual CI workflow for live integration tests:
   - `.github/workflows/integration-live.yml`
   - `workflow_dispatch` only (no auto-run on push)
+- [x] Added agent-centric error guidance contract:
+  - error envelopes now support `error.agentHint`
+  - compact actionable hints added for common error codes
+  - explicit `rate_limit_exceeded` guidance points agents to retry/backoff + troubleshooting resource
+  - new unit tests validate hint derivation and override behavior
 
 ## Gotchas (Carry Forward)
 - Keep `_upstream/` and other temporary import folders out of lint/build scope.
@@ -69,3 +74,4 @@
 - Prefer script files over inline `node -e` for large generated markdown/docs to avoid escaping errors.
 - For Git-based `npx`, keep `prepare` aligned with build output and `bin` path.
 - `npm run build` rewrites `src/generated/manifest.generated.json` `generatedAt`; avoid committing timestamp-only churn unless intended.
+- For new/updated MCP error surfaces, always include compact `agentHint` guidance when actionable next steps exist.

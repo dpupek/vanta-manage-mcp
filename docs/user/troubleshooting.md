@@ -41,3 +41,13 @@ Fix:
 1. Restart MCP client.
 2. Re-list tools/resources.
 3. Call `help` and read `resource://vanta-manage/help`.
+
+## Need More Diagnostic Detail
+Cause:
+- An issue is not reproducible from normal user logs.
+
+Fix:
+- Increase log verbosity temporarily:
+  - `VANTA_MCP_LOG_LEVEL=verbose` for request/retry diagnostics
+  - `VANTA_MCP_LOG_LEVEL=all` for full trace metadata
+- Return to `minimal` after troubleshooting.

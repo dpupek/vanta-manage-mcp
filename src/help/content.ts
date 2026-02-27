@@ -265,7 +265,7 @@ export const buildHelpResourceMarkdown = (
     lines.push("");
     lines.push("- Success: `{ success: true, data, message?, notes? }`");
     lines.push(
-      "- Error: `{ success: false, error: { code, message, hint?, details? }, notes? }`",
+      "- Error: `{ success: false, error: { code, message, hint?, agentHint?, details? }, notes? }`",
     );
     lines.push("");
     lines.push("## Write Safety Contract");

@@ -2,6 +2,7 @@ import { getValidToken, refreshToken } from "../../auth.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { BASE_API_URL } from "../../api.js";
+import { logger } from "../../logging/logger.js";
 import {
   PAGE_SIZE_DESCRIPTION,
   PAGE_CURSOR_DESCRIPTION,
@@ -50,7 +51,11 @@ export async function makeAuthenticatedRequest(
       };
       response = await fetch(url, retryOptions);
     } catch (refreshError) {
-      console.error("Failed to refresh token:", refreshError);
+      logger.warn(
+        "auth_refresh_retry_failed",
+        "Token refresh failed after a 401 response.",
+        { error: refreshError },
+      );
       // Return the original 401 response
     }
   }

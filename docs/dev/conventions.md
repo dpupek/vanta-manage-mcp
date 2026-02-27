@@ -10,10 +10,21 @@
 All tools must return envelope-form responses and never crash MCP transport:
 - Success: `success: true`
 - Error: `success: false` with structured `error` object
+- Error objects should include compact actionable `agentHint` guidance whenever a concrete next step can be provided.
 
 ## Safety Contract
 - Mutations require `confirm:true` in safe mode.
 - Workflow tools use `mode:"plan"|"execute"`; execute requires confirmation.
+
+## Logging Conventions
+- Use centralized logger (`src/logging/logger.ts`), never ad hoc `console.error` for server/runtime events.
+- Emit structured events with stable `event` keys and contextual fields.
+- Respect `VANTA_MCP_LOG_LEVEL` modes:
+  - `quiet`: fatal only
+  - `minimal`: error/warn/info
+  - `verbose`: minimal + debug
+  - `all`: verbose + trace
+- Never log request/response payload content, tokens, or secrets.
 
 ## Codegen Boundaries
 Generated artifacts:

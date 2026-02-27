@@ -36,7 +36,7 @@ This document defines the stable contract for endpoint tool generation from pinn
 
 ## Response Envelope
 - Success: `{ success: true, data, message?, notes? }`
-- Error: `{ success: false, error: { code, message, hint?, details? }, notes? }`
+- Error: `{ success: false, error: { code, message, hint?, agentHint?, details? }, notes? }`
 
 ## Required Verification
 - `npm run generate`

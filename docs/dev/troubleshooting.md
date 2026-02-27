@@ -22,3 +22,9 @@
 - OAuth 429 can occur under tenant/API throttling.
 - Live tests include retry and skip semantics for transient startup failures.
 - Re-run tests during lower-traffic windows when needed.
+
+## Runtime Diagnostics
+- Increase server logging verbosity for diagnostics:
+  - `VANTA_MCP_LOG_LEVEL=verbose` for request/retry lifecycle visibility
+  - `VANTA_MCP_LOG_LEVEL=all` for trace-level metadata
+- Backward-compatible alias: `VANTA_MCP_VERBOSE=true` (used only when `VANTA_MCP_LOG_LEVEL` is unset).

@@ -1,5 +1,6 @@
 import { OAUTH_BASE_URL } from "../api.js";
 import { loadCredentials, oauthScope } from "../config.js";
+import { logger } from "../logging/logger.js";
 
 interface TokenResponse {
   access_token: string;
@@ -61,6 +62,10 @@ export class TokenManager {
   private async fetchNewToken(): Promise<TokenInfo> {
     const credentials = loadCredentials();
     const oauthUrl = `${trimTrailingSlash(OAUTH_BASE_URL)}/oauth/token`;
+    logger.debug("oauth_token_fetch_started", "Starting OAuth token fetch.", {
+      oauthUrl,
+      maxRetries: MAX_OAUTH_RETRIES,
+    });
 
     for (let attempt = 0; attempt <= MAX_OAUTH_RETRIES; attempt += 1) {
       const response = await fetch(oauthUrl, {
@@ -88,12 +93,28 @@ export class TokenManager {
         const waitMs = Number.isNaN(retryAfterSeconds)
           ? (attempt + 1) * 500
           : retryAfterSeconds * 1000;
+        logger.warn(
+          "oauth_token_retry_scheduled",
+          "Retrying OAuth token request after retryable response.",
+          {
+            status: response.status,
+            statusText: response.statusText,
+            attempt,
+            waitMs,
+          },
+        );
         await sleep(waitMs);
         continue;
       }
 
       if (!response.ok) {
         const details = await response.text();
+        logger.error("oauth_token_fetch_failed", "OAuth token request failed.", {
+          status: response.status,
+          statusText: response.statusText,
+          attempt,
+          details,
+        });
         throw new Error(
           `OAuth token request failed (${response.status.toString()} ${response.statusText}): ${details}`,
         );
@@ -106,6 +127,10 @@ export class TokenManager {
       if (typeof payload.expires_in !== "number") {
         throw new Error("OAuth response did not include a valid expires_in.");
       }
+      logger.debug("oauth_token_fetch_succeeded", "OAuth token fetch succeeded.", {
+        expiresInSeconds: payload.expires_in,
+        attempt,
+      });
 
       return {
         token: payload.access_token,
@@ -113,6 +138,11 @@ export class TokenManager {
       };
     }
 
+    logger.error(
+      "oauth_token_retry_exhausted",
+      "OAuth token retry policy exhausted without success.",
+      { maxRetries: MAX_OAUTH_RETRIES },
+    );
     throw new Error("OAuth token retry policy exhausted without a response.");
   }
 }

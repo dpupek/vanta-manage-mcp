@@ -67,3 +67,10 @@
 - [x] Add npm scripts for `test:integration`, `test:integration:mock`, `test:integration:live`.
 - [x] Add manual `workflow_dispatch` CI workflow for live integration tests.
 - [x] Update README/security/troubleshooting/config docs for new test and credential contracts.
+
+## Phase 8: Agent-Centric Error Guidance
+- [x] Extend error envelope contract to support `error.agentHint`.
+- [x] Derive compact actionable hints for common error classes (`confirmation_required`, `api_error`, `request_failed`, `validation_error`, `write_disabled`).
+- [x] Add explicit rate-limit guidance for `rate_limit_exceeded` responses.
+- [x] Update user/dev contracts and help text to document `agentHint`.
+- [x] Add unit tests validating hint derivation and explicit override behavior.

@@ -19,6 +19,13 @@ npm run verify:spec-parity
 npm run generate:help
 ```
 
+## Debug Logging During Verification
+Use higher log verbosity when diagnosing runtime issues:
+
+```bash
+VANTA_MCP_LOG_LEVEL=all npm test
+```
+
 ## Integration Test Suites
 - Deterministic unit + mock: `npm test`
 - Mock integration only: `npm run test:integration:mock`

@@ -11,6 +11,7 @@ import {
   safeModeEnabled,
   writeEnabled,
 } from "./config.js";
+import { logger } from "./logging/logger.js";
 
 const server = new McpServer({
   name: "vanta-mcp-full",
@@ -24,35 +25,48 @@ async function main(): Promise<void> {
     const helpRegistration = registerHelpSurface(server);
 
     if (hasEnabledToolFilter) {
-      console.error(
-        `VANTA_MCP_ENABLED_TOOLS active: ${getEnabledToolNames().join(", ")}`,
-      );
+      logger.info("tool_allowlist_active", "Tool allowlist is active.", {
+        enabledTools: getEnabledToolNames(),
+      });
     }
-    console.error(
-      `Safety flags: safeMode=${safeModeEnabled.toString()} writeEnabled=${writeEnabled.toString()}`,
-    );
-    console.error(
-      `Registered tools: ${registration.totalRegistered.toString()} (endpoints=${registration.generatedEndpoints.toString()}, compatibility=${registration.compatibilityReads.toString()}, workflows=${registration.workflows.toString()})`,
-    );
-    console.error(
-      `Registered help surface: ${helpRegistration.totalRegistered.toString()} (resources=${helpRegistration.resources.toString()}, prompts=${helpRegistration.prompts.toString()}, helpTool=${helpRegistration.fallbackHelpTool.toString()})`,
-    );
+    logger.info("config_summary", "Runtime configuration loaded.", {
+      logMode: logger.getMode(),
+      enabledSeverities: logger.getEnabledSeverities(),
+      safeMode: safeModeEnabled,
+      writeEnabled,
+    });
+    logger.info("registration_summary", "Registered MCP tools and help surface.", {
+      tools: {
+        total: registration.totalRegistered,
+        endpoints: registration.generatedEndpoints,
+        compatibility: registration.compatibilityReads,
+        workflows: registration.workflows,
+      },
+      helpSurface: {
+        total: helpRegistration.totalRegistered,
+        resources: helpRegistration.resources,
+        prompts: helpRegistration.prompts,
+        helpTool: helpRegistration.fallbackHelpTool,
+      },
+    });
 
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error("Vanta MCP server started on stdio transport.");
+    logger.info("server_started", "Vanta MCP server started on stdio transport.");
   } catch (error) {
-    console.error("Failed to start Vanta MCP server:", error);
+    logger.fatal("server_start_failed", "Failed to start Vanta MCP server.", {
+      error,
+    });
     process.exit(1);
   }
 }
 
 process.on("SIGINT", () => {
-  console.error("Shutting down Vanta MCP server.");
+  logger.info("server_shutdown", "Shutting down Vanta MCP server.");
   process.exit(0);
 });
 
 main().catch(error => {
-  console.error("Fatal startup error:", error);
+  logger.fatal("fatal_startup_error", "Fatal startup error.", { error });
   process.exit(1);
 });
