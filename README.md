@@ -51,4 +51,7 @@ See: [Interface Overview](docs/user/interface-overview.md)
 - [Epic: vanta-mcp-0000](projects/vanta-mcp-0000/roadmap.md)
 
 ## Release Versioning
-Main-branch CI publishes tags in `v1.0.<buildnumber>` format. Use tag-pinned installs for deterministic `npx` behavior.
+Main-branch CI publishes immutable tags in `v1.0.<buildnumber>` format and also moves a `stable` tag to the latest successful main release commit.
+
+- Use `#v1.0.<buildnumber>` for deterministic installs.
+- Use `#stable` for latest successful release on main.

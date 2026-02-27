@@ -47,8 +47,10 @@ Use this before tagging or publishing a new server version.
 - Tag format must match: `^v1\.0\.\d+$`
 - Build number source: `${{ github.run_number }}`
 - Canonical release source is git tag + GitHub Release (no package.json writeback required).
+- Moving tag: `stable` must be force-updated to the successful main release commit.
 - Workflow rerun behavior:
 - If the computed tag already exists, workflow exits successfully as no-op for release creation.
+- `stable` is still updated on successful reruns and points to the current `main` release commit.
 
 ## Final Review
 - Verify safety defaults:

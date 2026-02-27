@@ -17,6 +17,7 @@
 - Validate tag format `v1.0.<buildnumber>`.
 - Confirm main-release workflow has `contents: write`.
 - Confirm idempotency guard handles existing tags.
+- Confirm moving tag update succeeds (`stable` should point at latest successful main release commit).
 
 ## Live Integration Rate Limits
 - OAuth 429 can occur under tenant/API throttling.

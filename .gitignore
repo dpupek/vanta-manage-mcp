@@ -149,6 +149,7 @@ CLAUDE.md
 
 # local workspace artifacts
 .agents/
+.codex/
 _upstream/
 build-scripts/
 
