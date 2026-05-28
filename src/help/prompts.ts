@@ -8,6 +8,7 @@ import {
   InformationRequestPromptArgs,
   PolicyDocumentEvidencePromptArgs,
   PeopleAssetsVulnPromptArgs,
+  ResourceOwnerAssignmentPromptArgs,
   VulnerabilityDueSoonPromptArgs,
   ToolSelectorPromptArgs,
   VendorRiskAssessmentPromptArgs,
@@ -153,6 +154,32 @@ const peopleAssetsVulnPrompt = (
     executionReminder,
   ].join("\n");
   return toPromptResult("People/assets/vulnerability triage playbook.", text);
+};
+
+const resourceOwnerAssignmentPrompt = (
+  args: ResourceOwnerAssignmentPromptArgs,
+): ReturnType<typeof toPromptResult> => {
+  const text = [
+    "Build a plan for assigning Vanta integration resource owners.",
+    `Objective: ${args.objective}`,
+    `Integration ID: ${args.integrationId ?? "not provided"}`,
+    `Resource kind: ${args.resourceKind ?? "not provided"}`,
+    `Owner email: ${args.ownerEmail ?? "not provided"}`,
+    "",
+    "Required sequence:",
+    "1. Resolve the owner as a CURRENT employee with `list_people` or `workflow_resource_owner_assignment` ownerEmail resolution.",
+    "2. Read target integration resources with `list_resources`, using `hasOwner=false`, `hasDescription=false`, and `isInScope=true` when appropriate.",
+    "3. Run `workflow_resource_owner_assignment` with `mode=plan` and review the generated updates.",
+    "4. Execute approved owner/description/in-scope updates with `mode=execute` and `confirm=true`.",
+    "5. Verify with `list_resources` or `get_resource` readback.",
+    "",
+    "Boundary checks:",
+    "- Integration resource owner is a single `ownerId` field; it is not the same as control owner, document owner, or policy-control linkage.",
+    "- Bulk resource updates are capped at 50 updates per Vanta request.",
+    "",
+    executionReminder,
+  ].join("\n");
+  return toPromptResult("Resource owner assignment playbook.", text);
 };
 
 const informationRequestPrompt = (
@@ -342,6 +369,19 @@ export const registerHelpPrompts = (server: McpServer): number => {
       vulnerabilityId: z.string().optional(),
     },
     args => peopleAssetsVulnPrompt(args as PeopleAssetsVulnPromptArgs),
+  );
+
+  server.prompt(
+    "playbook_resource_owner_assignment",
+    "Integration resource owner assignment workflow prompt.",
+    {
+      objective: z.string(),
+      integrationId: z.string().optional(),
+      resourceKind: z.string().optional(),
+      ownerEmail: z.string().optional(),
+    },
+    args =>
+      resourceOwnerAssignmentPrompt(args as ResourceOwnerAssignmentPromptArgs),
   );
 
   server.prompt(

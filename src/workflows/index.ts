@@ -40,6 +40,12 @@ export const workflowToolMetadata: WorkflowToolMetadata[] = [
     mode: "plan_execute_confirmed",
   },
   {
+    name: "workflow_resource_owner_assignment",
+    description:
+      "Plan or execute integration resource owner and description updates with CURRENT employee validation.",
+    mode: "plan_execute_confirmed",
+  },
+  {
     name: "workflow_information_request_triage",
     description:
       "Plan or execute audit information request triage actions (comments, evidence flag/accept).",
@@ -106,6 +112,307 @@ const getResultPayload = (
     return null;
   }
   return parseEnvelope(first.text);
+};
+
+const readRecord = (value: unknown): Record<string, unknown> | null =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+const readString = (value: unknown): string | null =>
+  typeof value === "string" && value.length > 0 ? value : null;
+
+const readBoolean = (value: unknown): boolean | null =>
+  typeof value === "boolean" ? value : null;
+
+const readArray = (value: unknown): unknown[] =>
+  Array.isArray(value) ? value : [];
+
+const compactRecord = (
+  record: Record<string, unknown>,
+): Record<string, unknown> => {
+  const compacted: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(record)) {
+    if (value !== undefined) {
+      compacted[key] = value;
+    }
+  }
+  return compacted;
+};
+
+const readPaginatedData = (data: unknown): Record<string, unknown>[] => {
+  const root = readRecord(data);
+  const results = readRecord(root?.results);
+  const values = readArray(results?.data).length
+    ? readArray(results?.data)
+    : readArray(root?.results);
+  return values.flatMap(value => {
+    const record = readRecord(value);
+    return record ? [record] : [];
+  });
+};
+
+const readBulkResults = (data: unknown): Record<string, unknown>[] => {
+  const root = readRecord(data);
+  return readArray(root?.results).flatMap(value => {
+    const record = readRecord(value);
+    return record ? [record] : [];
+  });
+};
+
+const readPageInfo = (data: unknown): Record<string, unknown> | null => {
+  const root = readRecord(data);
+  const results = readRecord(root?.results);
+  return readRecord(results?.pageInfo) ?? readRecord(root?.pageInfo);
+};
+
+const readNextPageCursor = (data: unknown): string | null => {
+  const pageInfo = readPageInfo(data);
+  const root = readRecord(data);
+  return (
+    readString(pageInfo?.endCursor) ??
+    readString(pageInfo?.nextCursor) ??
+    readString(root?.nextPageCursor) ??
+    readString(root?.pageCursor)
+  );
+};
+
+const readHasMorePages = (data: unknown): boolean =>
+  readBoolean(readPageInfo(data)?.hasNextPage) ??
+  readBoolean(readPageInfo(data)?.hasMore) ??
+  readBoolean(readRecord(data)?.hasMore) ??
+  false;
+
+const readEmploymentStatus = (person: Record<string, unknown>): string | null =>
+  readString(readRecord(person.employment)?.status);
+
+const readEmailAddress = (person: Record<string, unknown>): string | null =>
+  readString(person.emailAddress)?.toLowerCase() ?? null;
+
+const readPersonName = (person: Record<string, unknown>): string | null =>
+  readString(readRecord(person.name)?.display);
+
+const resourceIdFromRecord = (
+  resource: Record<string, unknown>,
+): string | null => readString(resource.resourceId) ?? readString(resource.id);
+
+const chunk = <T>(values: T[], size: number): T[][] => {
+  const chunks: T[][] = [];
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size));
+  }
+  return chunks;
+};
+
+interface ResolvedOwner {
+  id: string;
+  emailAddress?: string;
+  displayName?: string;
+  employmentStatus: string;
+}
+
+const resolveOwner = async (
+  client: VantaApiClient,
+  args: { ownerId?: string; ownerEmail?: string },
+): Promise<
+  | { success: true; owner: ResolvedOwner }
+  | { success: false; envelope: ReturnType<typeof errorEnvelope> }
+> => {
+  if (!args.ownerId && !args.ownerEmail) {
+    return {
+      success: false,
+      envelope: errorEnvelope(
+        "validation_error",
+        "Provide ownerId or ownerEmail for resource owner assignment.",
+        "Use list_people or ownerEmail to resolve a CURRENT employee before assigning resources.",
+      ),
+    };
+  }
+
+  if (args.ownerId) {
+    const response = await client.request({
+      method: "get",
+      path: `/people/${encodeURIComponent(args.ownerId)}`,
+    });
+    if (!response.ok) {
+      return {
+        success: false,
+        envelope: errorEnvelope(
+          "api_error",
+          `Unable to validate ownerId '${args.ownerId}'.`,
+          "Verify the person ID and Vanta API scopes.",
+          response.data,
+        ),
+      };
+    }
+    const person = readRecord(response.data);
+    const status = person ? readEmploymentStatus(person) : null;
+    if (!person || status !== "CURRENT") {
+      return {
+        success: false,
+        envelope: errorEnvelope(
+          "validation_error",
+          "Resource owners must be CURRENT employees.",
+          "Choose a CURRENT person before assigning integration resources.",
+          {
+            ownerId: args.ownerId,
+            employmentStatus: status,
+          },
+        ),
+      };
+    }
+    return {
+      success: true,
+      owner: {
+        id: args.ownerId,
+        emailAddress: readString(person.emailAddress) ?? undefined,
+        displayName: readPersonName(person) ?? undefined,
+        employmentStatus: status,
+      },
+    };
+  }
+
+  const ownerEmail = args.ownerEmail?.toLowerCase() ?? "";
+  const matches: Record<string, unknown>[] = [];
+  let pageCursor: string | undefined;
+
+  do {
+    const response = await client.request({
+      method: "get",
+      path: "/people",
+      query: compactRecord({
+        pageSize: 100,
+        employmentStatusMatchesAny: "CURRENT",
+        pageCursor,
+      }),
+    });
+    if (!response.ok) {
+      return {
+        success: false,
+        envelope: errorEnvelope(
+          "api_error",
+          `Unable to resolve ownerEmail '${args.ownerEmail ?? ""}'.`,
+          "Verify Vanta API scopes and retry.",
+          response.data,
+        ),
+      };
+    }
+
+    matches.push(
+      ...readPaginatedData(response.data).filter(
+        person => readEmailAddress(person) === ownerEmail,
+      ),
+    );
+
+    const hasMore = readHasMorePages(response.data);
+    const nextCursor = readNextPageCursor(response.data);
+    if (hasMore && !nextCursor) {
+      return {
+        success: false,
+        envelope: errorEnvelope(
+          "api_error",
+          "Unable to continue Vanta people pagination while resolving ownerEmail.",
+          "Retry with ownerId or verify the people list response includes a next cursor.",
+          {
+            ownerEmail: args.ownerEmail,
+            pageInfo: readPageInfo(response.data),
+          },
+        ),
+      };
+    }
+    pageCursor = hasMore ? nextCursor ?? undefined : undefined;
+  } while (pageCursor);
+
+  if (matches.length !== 1) {
+    return {
+      success: false,
+      envelope: errorEnvelope(
+        "validation_error",
+        matches.length === 0
+          ? "No CURRENT Vanta person matched ownerEmail."
+          : "Multiple CURRENT Vanta people matched ownerEmail.",
+        "Resolve the owner manually and retry with ownerId.",
+        {
+          ownerEmail: args.ownerEmail,
+          matches: matches.map(person => ({
+            id: readString(person.id),
+            emailAddress: readString(person.emailAddress),
+            displayName: readPersonName(person),
+          })),
+        },
+      ),
+    };
+  }
+
+  const person = matches[0];
+  const ownerId = readString(person.id);
+  if (!ownerId) {
+    return {
+      success: false,
+      envelope: errorEnvelope(
+        "validation_error",
+        "Matched Vanta person did not include an ID.",
+        "Retry with ownerId copied from Vanta.",
+        { ownerEmail: args.ownerEmail },
+      ),
+    };
+  }
+
+  return {
+    success: true,
+    owner: {
+      id: ownerId,
+      emailAddress: readString(person.emailAddress) ?? undefined,
+      displayName: readPersonName(person) ?? undefined,
+      employmentStatus: readEmploymentStatus(person) ?? "CURRENT",
+    },
+  };
+};
+
+const listIntegrationResourcesForOwnerWorkflow = async (
+  client: VantaApiClient,
+  args: {
+    integrationId: string;
+    resourceKind: string;
+    hasOwner?: boolean;
+    hasDescription?: boolean;
+    isInScope?: boolean;
+    pageSize?: number;
+    pageCursor?: string;
+  },
+): Promise<
+  | { success: true; resources: Record<string, unknown>[]; pageInfo?: unknown }
+  | { success: false; envelope: ReturnType<typeof errorEnvelope> }
+> => {
+  const response = await client.request({
+    method: "get",
+    path: `/integrations/${encodeURIComponent(args.integrationId)}/resource-kinds/${encodeURIComponent(args.resourceKind)}/resources`,
+    query: compactRecord({
+      hasOwner: args.hasOwner ?? false,
+      hasDescription: args.hasDescription,
+      isInScope: args.isInScope ?? true,
+      pageSize: args.pageSize ?? 50,
+      pageCursor: args.pageCursor,
+    }),
+  });
+  if (!response.ok) {
+    return {
+      success: false,
+      envelope: errorEnvelope(
+        "api_error",
+        "Unable to list integration resources for owner assignment.",
+        "Verify integrationId, resourceKind casing, and read scopes.",
+        response.data,
+      ),
+    };
+  }
+  const root = readRecord(response.data);
+  const results = readRecord(root?.results);
+  return {
+    success: true,
+    resources: readPaginatedData(response.data),
+    pageInfo: results?.pageInfo,
+  };
 };
 
 const registerControlEvidenceWorkflow = (
@@ -629,6 +936,252 @@ const registerPeopleAssetsVulnWorkflow = (
   return true;
 };
 
+const registerResourceOwnerAssignmentWorkflow = (
+  server: McpServer,
+  client: VantaApiClient,
+): boolean => {
+  const toolName = "workflow_resource_owner_assignment";
+  if (!isToolEnabled(toolName)) {
+    return false;
+  }
+
+  const resourceOwnerWorkflowSchema = {
+    mode: workflowModeSchema,
+    confirm: z.boolean().optional(),
+    integrationId: z.string(),
+    resourceKind: z.string(),
+    ownerId: z.string().optional(),
+    ownerEmail: z.string().email().optional(),
+    resourceIds: z.array(z.string()).optional(),
+    hasOwner: z.boolean().optional(),
+    hasDescription: z.boolean().optional(),
+    isInScope: z.boolean().optional(),
+    description: z.string().optional(),
+    setInScope: z.boolean().optional(),
+    pageSize: z.number().int().min(1).max(100).optional(),
+    pageCursor: z.string().optional(),
+    batchSize: z.number().int().min(1).max(50).optional(),
+  };
+
+  const buildUpdate = (
+    id: string,
+    ownerId: string,
+    args: {
+      description?: string;
+      setInScope?: boolean;
+    },
+  ): Record<string, unknown> =>
+    compactRecord({
+      id,
+      ownerId,
+      description: args.description,
+      inScope: args.setInScope,
+    });
+
+  const resolveResourceIds = async (args: {
+    integrationId: string;
+    resourceKind: string;
+    resourceIds?: string[];
+    hasOwner?: boolean;
+    hasDescription?: boolean;
+    isInScope?: boolean;
+    pageSize?: number;
+    pageCursor?: string;
+  }): Promise<
+    | {
+        success: true;
+        resources: Record<string, unknown>[];
+        resourceIds: string[];
+        pageInfo?: unknown;
+        warnings: string[];
+      }
+    | { success: false; envelope: ReturnType<typeof errorEnvelope> }
+  > => {
+    if (args.resourceIds && args.resourceIds.length > 0) {
+      return {
+        success: true,
+        resources: [],
+        resourceIds: args.resourceIds,
+        warnings: [],
+      };
+    }
+
+    const listed = await listIntegrationResourcesForOwnerWorkflow(client, args);
+    if (!listed.success) {
+      return listed;
+    }
+
+    const missingIdResources: Record<string, unknown>[] = [];
+    const resourceIds = listed.resources.flatMap(resource => {
+      const id = resourceIdFromRecord(resource);
+      if (!id) {
+        missingIdResources.push(resource);
+        return [];
+      }
+      return [id];
+    });
+    const warnings =
+      missingIdResources.length > 0
+        ? [
+            `${missingIdResources.length.toString()} listed resource(s) did not include resourceId/id and were skipped.`,
+          ]
+        : [];
+
+    return {
+      success: true,
+      resources: listed.resources,
+      resourceIds,
+      pageInfo: listed.pageInfo,
+      warnings,
+    };
+  };
+
+  server.tool(
+    toolName,
+    "Plan or execute integration resource owner and description updates with CURRENT employee validation.",
+    resourceOwnerWorkflowSchema,
+    async args => {
+      const gate = workflowExecuteGate(args.mode, args.confirm);
+      if (gate) {
+        return toToolResult(gate);
+      }
+
+      const ownerResult = await resolveOwner(client, args);
+      if (!ownerResult.success) {
+        return toToolResult(ownerResult.envelope);
+      }
+
+      const resourceResult = await resolveResourceIds(args);
+      if (!resourceResult.success) {
+        return toToolResult(resourceResult.envelope);
+      }
+
+      const batchSize = args.batchSize ?? 50;
+      const actions = resourceResult.resourceIds.map(id =>
+        buildUpdate(id, ownerResult.owner.id, args),
+      );
+      const baseData = {
+        summary:
+          "Assign integration resource owners using Vanta resource metadata.",
+        objectModel:
+          "Integration resources have one ownerId. This is distinct from document owner, control owner, and unsupported policy-control linkage.",
+        owner: ownerResult.owner,
+        filters: compactRecord({
+          integrationId: args.integrationId,
+          resourceKind: args.resourceKind,
+          hasOwner: args.hasOwner ?? false,
+          hasDescription: args.hasDescription,
+          isInScope: args.isInScope ?? true,
+          pageSize: args.pageSize ?? 50,
+          pageCursor: args.pageCursor,
+        }),
+        resources: resourceResult.resources,
+        actions,
+        limits: {
+          maxResourcesPerBatch: 50,
+          batchSize,
+        },
+        pageInfo: resourceResult.pageInfo,
+      };
+
+      if (args.mode === "plan") {
+        return toToolResult(
+          successEnvelope(
+            baseData,
+            "Plan generated. No mutations were executed.",
+            undefined,
+            { warnings: resourceResult.warnings },
+          ),
+        );
+      }
+
+      if (actions.length === 0) {
+        return toToolResult(
+          successEnvelope(
+            {
+              ...baseData,
+              batches: [],
+              succeeded: [],
+              failed: [],
+            },
+            "Resource owner assignment executed.",
+            undefined,
+            { warnings: resourceResult.warnings },
+          ),
+        );
+      }
+
+      const batches: Record<string, unknown>[] = [];
+      const succeeded: Record<string, unknown>[] = [];
+      const failed: Record<string, unknown>[] = [];
+
+      for (const [index, updateBatch] of chunk(actions, batchSize).entries()) {
+        const response = await client.request({
+          method: "patch",
+          path: `/integrations/${encodeURIComponent(args.integrationId)}/resource-kinds/${encodeURIComponent(args.resourceKind)}/resources`,
+          body: {
+            updates: updateBatch,
+          },
+        });
+
+        if (!response.ok) {
+          return toToolResult(
+            errorEnvelope(
+              "api_error",
+              "Unable to update integration resource owners.",
+              "Inspect error details, reduce batch size if needed, then re-plan before retrying.",
+              {
+                batchIndex: index,
+                attempted: updateBatch,
+                response: response.data,
+              },
+            ),
+          );
+        }
+
+        const results = readBulkResults(response.data);
+        batches.push({
+          index,
+          attempted: updateBatch.length,
+          results,
+        });
+
+        for (const result of results) {
+          const status = readString(result.status)?.toLowerCase();
+          if (status === "error" || status === "failed") {
+            failed.push(result);
+          } else {
+            succeeded.push(result);
+          }
+        }
+      }
+
+      const warnings = [...resourceResult.warnings];
+      if (failed.length > 0) {
+        warnings.push(
+          `${failed.length.toString()} resource owner update(s) returned per-resource errors.`,
+        );
+      }
+
+      return toToolResult(
+        successEnvelope(
+          {
+            ...baseData,
+            batches,
+            succeeded,
+            failed,
+          },
+          "Resource owner assignment executed.",
+          undefined,
+          { warnings },
+        ),
+      );
+    },
+  );
+
+  return true;
+};
+
 const registerInformationRequestWorkflow = (
   server: McpServer,
   client: VantaApiClient,
@@ -773,6 +1326,9 @@ export function registerWorkflowTools(
     registered += 1;
   }
   if (registerPeopleAssetsVulnWorkflow(server, client)) {
+    registered += 1;
+  }
+  if (registerResourceOwnerAssignmentWorkflow(server, client)) {
     registered += 1;
   }
   if (registerInformationRequestWorkflow(server, client)) {

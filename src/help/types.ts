@@ -18,6 +18,7 @@ export const helpPromptNames = [
   "playbook_failing_controls_triage",
   "playbook_vendor_triage",
   "playbook_people_assets_vuln_triage",
+  "playbook_resource_owner_assignment",
   "playbook_information_request_triage",
   "playbook_vulnerability_due_soon_triage",
   "playbook_employee_onboarding_verification",
@@ -91,6 +92,13 @@ export interface VendorTriagePromptArgs {
 export interface PeopleAssetsVulnPromptArgs {
   objective: string;
   vulnerabilityId?: string;
+}
+
+export interface ResourceOwnerAssignmentPromptArgs {
+  objective: string;
+  integrationId?: string;
+  resourceKind?: string;
+  ownerEmail?: string;
 }
 
 export interface InformationRequestPromptArgs {

@@ -56,3 +56,21 @@ Validation notes:
 - `npm run verify:spec-parity` passed: 222 operations mapped to 222 unique tools.
 - `npm run test:integration:mock` passed: 8 tests.
 - Live integration was not run in this pass.
+
+## Phase 6: Integration Resource Owner Assignment
+
+- [x] Review Vanta guide for assigning owners to resources.
+- [x] Add plan/execute workflow for integration resource owner, description, and in-scope updates.
+- [x] Validate owners are CURRENT Vanta people before mutation.
+- [x] Split bulk updates into Vanta-compliant batches of 50 or fewer updates.
+- [x] Return partial per-resource failures as structured workflow output with warnings.
+- [x] Update help prompts and user docs to distinguish integration resource ownership from control, document, and policy ownership.
+- [x] Resolve owner email across paginated CURRENT people results before reporting no match.
+
+Validation notes:
+
+- `npm run build; node --test build/test/workflows.test.js` passed: 6 workflow tests.
+- `npm run lint` passed.
+- `npm test` passed: 66 tests.
+- `npm run verify:spec-parity` passed: 222 operations mapped to 222 unique tools.
+- `npm run test:integration:mock` passed: 8 tests.

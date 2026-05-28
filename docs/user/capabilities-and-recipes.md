@@ -6,6 +6,7 @@
 - Failing controls/tests/documents triage.
 - Vendor and finding lifecycle management.
 - People, assets, and vulnerability triage.
+- Integration resource owner and description assignment.
 - Audit information-request operations.
 - Capability discovery with the `capabilities` tool.
 - Agent-safe unsupported-operation fallbacks for API surfaces Vanta does not publicly expose.
@@ -25,6 +26,7 @@ Use prompts:
 - `playbook_failing_controls_triage`
 - `playbook_vendor_triage`
 - `playbook_people_assets_vuln_triage`
+- `playbook_resource_owner_assignment`
 - `playbook_information_request_triage`
 - `playbook_vulnerability_due_soon_triage`
 - `playbook_employee_onboarding_verification`
@@ -38,6 +40,7 @@ Use prompts:
 - "Triage vulnerabilities due in 14 days and propose prioritized actions."
 - "Tell me the top 5 vulnerable devices according to Vanta and show ranking inputs."
 - "Generate a vendor risk triage plan for vendor `<id>` and include readback verification."
+- "Assign missing Snowflake database resource owners to `<owner@example.com>` and add a description."
 - "Show onboarding status for person `<id>` and list blockers."
 - "Cross-reference policy `<policyId>` with document evidence and propose linkage steps."
 
@@ -61,5 +64,7 @@ Use prompts:
 
 - Policy objects and policy approval tests are not Vanta Document objects.
 - `latestApprovedVersion.documents[*].slugId` policy slugs cannot be used with `get_document` or `add_document_to_control`.
+- Integration resource owners are assigned through resource metadata (`ownerId`) and must be CURRENT Vanta employees.
+- Integration resources support one owner field. Use descriptions/notes outside the resource owner field for business owner, reviewer, coordinator, or support-department context.
 - Control-test mappings are not policy-control mappings.
 - True policy-control linkage and direct Manage test comments are unsupported by the current public API; unsupported tools return Vanta UI/control-note fallback batches.

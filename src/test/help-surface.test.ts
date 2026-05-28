@@ -71,7 +71,7 @@ test("help catalog includes generated, compatibility, and workflow families", ()
 
   // Assert
   assert.equal(catalog.summary.byCategory.compat_read, 15);
-  assert.equal(catalog.summary.byCategory.workflow, 5);
+  assert.equal(catalog.summary.byCategory.workflow, 6);
   assert.equal(hasGenerated, true);
   assert.equal(hasCompat, true);
   assert.equal(hasWorkflow, true);

@@ -48,6 +48,8 @@ export const promptDescriptions: Record<string, string> = {
     "Vendor lifecycle and findings/security-review evidence updates.",
   playbook_people_assets_vuln_triage:
     "Correlate people/assets/vulnerabilities and apply allowed updates.",
+  playbook_resource_owner_assignment:
+    "Assign integration resource owners/descriptions with current-employee validation.",
   playbook_information_request_triage:
     "Audit information request comments/evidence/status triage.",
   playbook_vulnerability_due_soon_triage:
@@ -192,6 +194,14 @@ const renderWorkflowSteps = (): string[] => [
   "3. Execute approved lifecycle actions with `confirm=true`.",
   "4. Re-read vulnerability and remediation state.",
   "",
+  "### workflow_resource_owner_assignment",
+  "",
+  "1. Resolve the owner as a CURRENT employee (`people`, `list_people`).",
+  "2. Read target resources (`list_resources`) with owner/description/scope filters.",
+  "3. Run `workflow_resource_owner_assignment` with `mode=plan`.",
+  "4. Execute approved resource owner/description/in-scope updates with `confirm=true`.",
+  "5. Verify resource owner readback (`list_resources`, `get_resource`).",
+  "",
   "### workflow_information_request_triage",
   "",
   "1. Read open audit information requests and evidence.",
@@ -321,6 +331,9 @@ export const buildHelpResourceMarkdown = (
       "- Triage vulnerabilities: `workflow_people_assets_vuln_triage`",
     );
     lines.push(
+      "- Assign integration resource owners: `workflow_resource_owner_assignment`",
+    );
+    lines.push(
       "- Top 5 vulnerable devices (fast): `list_vulnerable_assets` first, then targeted `list_vulnerabilities` by `vulnerableAssetId`",
     );
     lines.push(
@@ -357,6 +370,21 @@ export const buildHelpResourceMarkdown = (
           confirm: true,
           filePath: "C:\\\\evidence\\\\evidence.pdf",
           mimeType: "application/pdf",
+        },
+      }),
+    );
+    lines.push("");
+    lines.push(
+      jsonBlock({
+        tool: "workflow_resource_owner_assignment",
+        input: {
+          mode: "plan",
+          integrationId: "snowflake",
+          resourceKind: "SnowflakeDatabase",
+          ownerEmail: "owner@example.com",
+          hasOwner: false,
+          hasDescription: false,
+          isInScope: true,
         },
       }),
     );
