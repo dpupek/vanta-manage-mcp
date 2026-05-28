@@ -455,7 +455,22 @@ export const buildHelpResourceMarkdown = (
     "- Use a supported extension (`.pdf`, `.docx`, `.xlsx`, `.csv`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.zip`, `.ps`).",
   );
   lines.push(
+    "- `.md` and `.markdown` inputs are converted before upload; raw Markdown is never silently sent to Vanta.",
+  );
+  lines.push(
+    "- Markdown conversion defaults to PDF with a footer containing the document name and page numbering.",
+  );
+  lines.push(
     "- Set `mimeType` when known (for example `application/pdf`) and keep it aligned with the file extension.",
+  );
+  lines.push("");
+  lines.push("## Unsupported Vanta API Surfaces");
+  lines.push("");
+  lines.push(
+    "- Policy-control linkage and direct Manage test comments return `unsupported_operation` with a fallback action batch.",
+  );
+  lines.push(
+    "- Control-test mapping tools do not relink policies to controls.",
   );
   lines.push("");
   lines.push("## Pagination and Cursor Flow");

@@ -69,6 +69,31 @@ Fix:
 - Ensure the path points to a regular file (not a directory).
 - Use supported file types (`.pdf`, `.docx`, `.xlsx`, `.csv`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.zip`, `.ps`).
 - If set, ensure `mimeType` aligns with the file extension and endpoint policy.
+- For Markdown evidence, install Pandoc and a Playwright/Chromium renderer, or convert to PDF/DOCX before upload.
+- If `markdown_converter_unavailable` is returned, retry with `markdownConversionTarget:"docx"` when Pandoc is available, or upload an already converted PDF.
+
+## Policy Slug Versus Document ID
+
+Cause:
+
+- A policy-derived slug was passed to a Document endpoint or control-document mapping endpoint.
+
+Fix:
+
+- Use a real Vanta Document ID for `get_document` and `add_document_to_control`.
+- For policy-control linkage, use the unsupported tool fallback batch and complete the action in the Vanta UI.
+- Do not treat control-test remaps as policy relinks.
+
+## Unsupported Operation
+
+Cause:
+
+- The requested Vanta UI behavior is not exposed by the current public Vanta API.
+
+Fix:
+
+- Follow the returned `fallbackActionBatch`.
+- For direct Manage test progress comments, add a control note that references the test ID.
 
 ## Need More Diagnostic Detail
 

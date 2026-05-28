@@ -71,6 +71,26 @@ export const buildOperationSchema = (
           .string()
           .optional()
           .describe("Optional MIME type for multipart upload.");
+        shape.markdownConversionTarget = z
+          .enum(["pdf", "docx"])
+          .optional()
+          .describe(
+            "When filePath is Markdown, convert to this upload format. Defaults to pdf.",
+          );
+        shape.markdownFooterDocumentName = z
+          .string()
+          .optional()
+          .describe("Document name shown in converted PDF footer.");
+        shape.markdownConversionRenderer = z
+          .enum(["auto", "playwright", "typst", "docx"])
+          .optional()
+          .describe("Renderer for Markdown conversion. Defaults to auto.");
+        shape.markdownReferenceDocPath = z
+          .string()
+          .optional()
+          .describe(
+            "Optional Pandoc reference.docx path for Markdown to DOCX conversion.",
+          );
       }
 
       for (const field of requestBody.fields) {

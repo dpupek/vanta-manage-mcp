@@ -12,9 +12,13 @@ import { parseToolEnvelope } from "./helpers.js";
 
 class FakeClient {
   public calls: Record<string, unknown>[] = [];
+  public nextResponse: VantaResponse | null = null;
 
   public async request(input: Record<string, unknown>): Promise<VantaResponse> {
     this.calls.push(input);
+    if (this.nextResponse) {
+      return this.nextResponse;
+    }
     return {
       status: 200,
       ok: true,
@@ -51,6 +55,161 @@ test("mutating endpoint requires confirmation in safe mode", async () => {
     "confirmation_required",
   );
   assert.equal(fakeClient.calls.length, 0);
+});
+
+test("add document to control rejects policy document slugs before API call", async () => {
+  // Arrange
+  const toolName = getGeneratedToolNameByOperationId(
+    "AddDocumentToControl",
+    "manage",
+  );
+  assert.ok(toolName);
+  const fakeClient = new FakeClient();
+
+  // Initial Assert
+  assert.equal(fakeClient.calls.length, 0);
+
+  // Act
+  const result = await invokeGeneratedOperation(
+    toolName,
+    {
+      controlId: "control-1",
+      body: { documentId: "Policy-a1b2c3d4e5" },
+      confirm: true,
+    },
+    fakeClient as never,
+  );
+  const envelope = parseToolEnvelope(result);
+
+  // Assert
+  assert.equal(envelope.success, false);
+  assert.equal(
+    (envelope.error as Record<string, unknown>).code,
+    "validation_error",
+  );
+  assert.match(
+    String((envelope.error as Record<string, unknown>).message),
+    /policy document slug/i,
+  );
+  assert.equal(fakeClient.calls.length, 0);
+});
+
+test("already mapped API responses are translated to idempotent success", async () => {
+  // Arrange
+  const toolName = getGeneratedToolNameByOperationId(
+    "AddTestToControl",
+    "manage",
+  );
+  assert.ok(toolName);
+  const fakeClient = new FakeClient();
+  fakeClient.nextResponse = {
+    status: 422,
+    ok: false,
+    data: {
+      error: "already_mapped",
+      message: "Test is already mapped to this control.",
+    },
+    headers: {},
+  };
+
+  // Initial Assert
+  assert.equal(fakeClient.calls.length, 0);
+
+  // Act
+  const result = await invokeGeneratedOperation(
+    toolName,
+    {
+      controlId: "control-1",
+      body: { testId: "test-1" },
+      confirm: true,
+    },
+    fakeClient as never,
+  );
+  const envelope = parseToolEnvelope(result);
+
+  // Assert
+  assert.equal(envelope.success, true);
+  assert.equal((envelope.data as Record<string, unknown>).alreadyExisted, true);
+  assert.equal(fakeClient.calls.length, 1);
+});
+
+test("risk scenario control links use idempotent mapping behavior", async () => {
+  // Arrange
+  const toolName = getGeneratedToolNameByOperationId(
+    "LinkControlsToRiskScenario",
+    "manage",
+  );
+  assert.ok(toolName);
+  const fakeClient = new FakeClient();
+  fakeClient.nextResponse = {
+    status: 422,
+    ok: false,
+    data: {
+      error: "already_linked",
+      message: "Control is already linked to this risk scenario.",
+    },
+    headers: {},
+  };
+
+  // Initial Assert
+  assert.equal(fakeClient.calls.length, 0);
+
+  // Act
+  const result = await invokeGeneratedOperation(
+    toolName,
+    {
+      riskScenarioId: "risk-1",
+      body: {
+        controlLinks: [{ controlId: "AC-1", linkType: "TREATMENT" }],
+      },
+      confirm: true,
+    },
+    fakeClient as never,
+  );
+  const envelope = parseToolEnvelope(result);
+
+  // Assert
+  assert.equal(envelope.success, true);
+  assert.equal((envelope.data as Record<string, unknown>).alreadyExisted, true);
+  assert.equal(fakeClient.calls.length, 1);
+});
+
+test("already exists API responses stay errors for non-mapping operations", async () => {
+  // Arrange
+  const toolName = getGeneratedToolNameByOperationId(
+    "CreateCustomControl",
+    "manage",
+  );
+  assert.ok(toolName);
+  const fakeClient = new FakeClient();
+  fakeClient.nextResponse = {
+    status: 422,
+    ok: false,
+    data: {
+      error: "already_exists",
+      message: "A control with this external ID already exists.",
+    },
+    headers: {},
+  };
+
+  // Initial Assert
+  assert.equal(fakeClient.calls.length, 0);
+
+  // Act
+  const result = await invokeGeneratedOperation(
+    toolName,
+    {
+      body: { externalId: "AC-1", name: "Access Control" },
+      confirm: true,
+    },
+    fakeClient as never,
+  );
+  const envelope = parseToolEnvelope(result);
+
+  // Assert
+  assert.equal(envelope.success, false);
+  assert.equal((envelope.error as Record<string, unknown>).code, "api_error");
+  assert.equal(fakeClient.calls.length, 1);
 });
 
 test("multipart endpoint maps filePath payload to form data", async () => {

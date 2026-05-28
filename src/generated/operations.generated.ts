@@ -2297,6 +2297,48 @@ export const generatedOperations: GeneratedOperation[] = [
     }
   },
   {
+    "toolName": "list_users",
+    "source": "manage",
+    "method": "get",
+    "path": "/users",
+    "operationId": "ListUsers",
+    "summary": "List active users",
+    "description": "List active users",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer"
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "get_user",
+    "source": "manage",
+    "method": "get",
+    "path": "/users/{userId}",
+    "operationId": "GetUser",
+    "summary": "Get user by ID",
+    "description": "Get user by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "userId",
+        "in": "path",
+        "required": true,
+        "kind": "string"
+      }
+    ]
+  },
+  {
     "toolName": "list_policies",
     "source": "manage",
     "method": "get",
@@ -2670,6 +2712,37 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "customFields",
           "required": false,
           "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields",
+          "kind": "array"
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "link_controls_to_risk_scenario",
+    "source": "manage",
+    "method": "post",
+    "path": "/risk-scenarios/{riskScenarioId}/controls",
+    "operationId": "LinkControlsToRiskScenario",
+    "summary": "Link controls to a risk scenario",
+    "description": "Link controls to a risk scenario",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "fields": [
+        {
+          "name": "controlLinks",
+          "required": true,
+          "description": "List of control links to create for the risk scenario. Control links that\nalready exist on the scenario are a no-op; unknown identifiers cause the\nrequest to fail.",
           "kind": "array"
         }
       ]
@@ -7916,8 +7989,8 @@ export const generatedOperations: GeneratedOperation[] = [
 ];
 export const generatedStats = {
   "manage": {
-    "operations": 164,
-    "mutations": 86
+    "operations": 167,
+    "mutations": 87
   },
   "audit": {
     "operations": 31,

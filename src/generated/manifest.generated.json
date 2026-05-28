@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-02-27T21:06:04.419Z",
-  "totalOperations": 219,
-  "totalMutations": 112,
+  "generatedAt": "2026-05-28T03:57:41.671Z",
+  "totalOperations": 222,
+  "totalMutations": 113,
   "stats": {
     "manage": {
-      "operations": 164,
-      "mutations": 86
+      "operations": 167,
+      "mutations": 87
     },
     "audit": {
       "operations": 31,
@@ -586,6 +586,22 @@
       "isMutation": true
     },
     {
+      "toolName": "list_users",
+      "source": "manage",
+      "method": "get",
+      "path": "/users",
+      "operationId": "ListUsers",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_user",
+      "source": "manage",
+      "method": "get",
+      "path": "/users/{userId}",
+      "operationId": "GetUser",
+      "isMutation": false
+    },
+    {
       "toolName": "list_policies",
       "source": "manage",
       "method": "get",
@@ -631,6 +647,14 @@
       "method": "patch",
       "path": "/risk-scenarios/{riskScenarioId}",
       "operationId": "UpdateRiskScenario",
+      "isMutation": true
+    },
+    {
+      "toolName": "link_controls_to_risk_scenario",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios/{riskScenarioId}/controls",
+      "operationId": "LinkControlsToRiskScenario",
       "isMutation": true
     },
     {

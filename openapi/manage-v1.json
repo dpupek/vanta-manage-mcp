@@ -2170,18 +2170,29 @@
       "User": {
         "properties": {
           "id": { "type": "string" },
-          "organizationId": { "type": "string" },
           "email": { "type": "string" },
-          "givenName": { "type": "string", "nullable": true },
-          "familyName": { "type": "string", "nullable": true }
+          "displayName": { "type": "string" },
+          "isActive": { "type": "boolean" }
         },
-        "required": [
-          "id",
-          "organizationId",
-          "email",
-          "givenName",
-          "familyName"
-        ],
+        "required": ["id", "email", "displayName", "isActive"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "PaginatedResponse_User_": {
+        "properties": {
+          "results": {
+            "properties": {
+              "data": {
+                "items": { "$ref": "#/components/schemas/User" },
+                "type": "array"
+              },
+              "pageInfo": { "$ref": "#/components/schemas/PageInfo" }
+            },
+            "required": ["data", "pageInfo"],
+            "type": "object"
+          }
+        },
+        "required": ["results"],
         "type": "object",
         "additionalProperties": false
       },
@@ -3663,6 +3674,40 @@
           }
         },
         "required": ["results"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "LinkControlsToRiskScenarioLinkType": {
+        "type": "string",
+        "enum": ["TREATMENT"],
+        "nullable": false
+      },
+      "ControlLinkToRiskScenarioInput": {
+        "properties": {
+          "controlId": {
+            "type": "string",
+            "description": "Control to link to the risk scenario.\nAccepts Vanta control shorthands (e.g. `\"A.12.2.1\"`), custom-control\nshorthand names, or object IDs."
+          },
+          "linkType": {
+            "$ref": "#/components/schemas/LinkControlsToRiskScenarioLinkType",
+            "description": "How to link this control to the risk scenario.\nCurrently only `TREATMENT` links are supported."
+          }
+        },
+        "required": ["controlId", "linkType"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "LinkControlsToRiskScenarioInput": {
+        "properties": {
+          "controlLinks": {
+            "items": {
+              "$ref": "#/components/schemas/ControlLinkToRiskScenarioInput"
+            },
+            "type": "array",
+            "description": "List of control links to create for the risk scenario. Control links that\nalready exist on the scenario are a no-op; unknown identifiers cause the\nrequest to fail."
+          }
+        },
+        "required": ["controlLinks"],
         "type": "object",
         "additionalProperties": false
       },
@@ -13284,6 +13329,68 @@
         }
       }
     },
+    "/users": {
+      "get": {
+        "operationId": "ListUsers",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_User_"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns a list of all active users.",
+        "summary": "List active users",
+        "tags": ["Users"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": { "$ref": "#/components/schemas/PageSize" }
+          },
+          {
+            "in": "query",
+            "name": "pageCursor",
+            "required": false,
+            "schema": { "$ref": "#/components/schemas/PageCursor" }
+          }
+        ]
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "operationId": "GetUser",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          }
+        },
+        "description": "Returns a user by ID.",
+        "summary": "Get user by ID",
+        "tags": ["Users"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ]
+      }
+    },
     "/policies": {
       "get": {
         "operationId": "ListPolicies",
@@ -13725,6 +13832,43 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateRiskScenarioInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/risk-scenarios/{riskScenarioId}/controls": {
+      "post": {
+        "operationId": "LinkControlsToRiskScenario",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RiskScenario" }
+              }
+            }
+          }
+        },
+        "description": "Link one or more controls to a risk scenario.\n\nControls already linked to the scenario are a no-op; the full set of\nlinked controls is returned on the updated scenario.\n\nEach control link must include `linkType: \"TREATMENT\"`. Control identifiers\nmay be Vanta control shorthands (e.g. `\"A.12.2.1\"`), custom-control\nshorthand names, or object IDs. Unknown identifiers cause the whole request\nto fail — no partial links.",
+        "summary": "Link controls to a risk scenario",
+        "tags": ["Risk Scenarios"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "riskScenarioId",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkControlsToRiskScenarioInput"
               }
             }
           }

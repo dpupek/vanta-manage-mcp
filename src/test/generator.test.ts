@@ -14,7 +14,7 @@ test("generated parity count matches per-spec totals", () => {
     generatedStats.connectors.operations;
 
   // Initial Assert
-  assert.equal(generatedStats.manage.operations, 164);
+  assert.equal(generatedStats.manage.operations, 167);
   assert.equal(generatedStats.audit.operations, 31);
   assert.equal(generatedStats.connectors.operations, 24);
 
@@ -23,7 +23,51 @@ test("generated parity count matches per-spec totals", () => {
 
   // Assert
   assert.equal(actualTotal, expectedTotal);
-  assert.equal(actualTotal, 219);
+  assert.equal(actualTotal, 222);
+});
+
+test("requested latest Manage operations are generated with expected tool names", () => {
+  // Arrange
+  const expected = [
+    {
+      operationId: "LinkControlsToRiskScenario",
+      toolName: "link_controls_to_risk_scenario",
+      method: "post",
+      path: "/risk-scenarios/{riskScenarioId}/controls",
+      isMutation: true,
+    },
+    {
+      operationId: "ListUsers",
+      toolName: "list_users",
+      method: "get",
+      path: "/users",
+      isMutation: false,
+    },
+    {
+      operationId: "GetUser",
+      toolName: "get_user",
+      method: "get",
+      path: "/users/{userId}",
+      isMutation: false,
+    },
+  ] as const;
+
+  // Initial Assert
+  assert.equal(expected.length, 3);
+
+  // Act + Assert
+  for (const expectation of expected) {
+    const operation = generatedOperations.find(
+      candidate =>
+        candidate.source === "manage" &&
+        candidate.operationId === expectation.operationId,
+    );
+    assert.ok(operation);
+    assert.equal(operation.toolName, expectation.toolName);
+    assert.equal(operation.method, expectation.method);
+    assert.equal(operation.path, expectation.path);
+    assert.equal(operation.isMutation, expectation.isMutation);
+  }
 });
 
 test("collision operationIds map to deterministic names", () => {

@@ -7,8 +7,9 @@ import { buildOperationSchema } from "./operation-schema.js";
 import { errorEnvelope, successEnvelope, toToolResult } from "../envelope.js";
 import { VantaApiClient } from "../client/vanta-client.js";
 import { isToolEnabled, safeModeEnabled, writeEnabled } from "../config.js";
-import { validateUploadFileInput } from "../uploads/file-validation.js";
+import { prepareUploadFileInput } from "../uploads/file-validation.js";
 import { appendUploadFile } from "../uploads/multipart.js";
+import { cleanupMarkdownConversionArtifacts } from "../uploads/markdown-conversion.js";
 
 const encodePath = (template: string, args: Record<string, unknown>): string =>
   template.replace(/\{([^}]+)\}/g, (_match: string, key: string) => {
@@ -37,32 +38,48 @@ const appendMultipartUploadFile = async (
   args: Record<string, unknown>,
   fileFieldName: string,
   formData: FormData,
-): Promise<ReturnType<typeof errorEnvelope> | undefined> => {
-  const validation = validateUploadFileInput(toolName, args);
+): Promise<
+  | {
+      error?: ReturnType<typeof errorEnvelope>;
+      warnings?: string[];
+      metadata?: Record<string, unknown>;
+    }
+  | undefined
+> => {
+  const validation = await prepareUploadFileInput(toolName, args);
   if (!validation.success) {
-    return errorEnvelope(
-      validation.error.code,
-      validation.error.message,
-      validation.error.hint,
-      validation.error.details,
-    );
+    return {
+      error: errorEnvelope(
+        validation.error.code,
+        validation.error.message,
+        validation.error.hint,
+        validation.error.details,
+      ),
+    };
   }
 
   try {
     await appendUploadFile(formData, fileFieldName, validation.file);
-    return undefined;
+    return {
+      warnings: validation.warnings,
+      metadata: validation.metadata,
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return errorEnvelope(
-      "file_not_readable",
-      `Unable to read file for upload: ${validation.file.absolutePath}`,
-      "Ensure the path is valid and accessible by the MCP process.",
-      {
-        toolName,
-        filePath: validation.file.absolutePath,
-        reason: message,
-      },
-    );
+    return {
+      error: errorEnvelope(
+        "file_not_readable",
+        `Unable to read file for upload: ${validation.file.absolutePath}`,
+        "Ensure the path is valid and accessible by the MCP process.",
+        {
+          toolName,
+          filePath: validation.file.absolutePath,
+          reason: message,
+        },
+      ),
+    };
+  } finally {
+    await cleanupMarkdownConversionArtifacts(validation.cleanupPaths);
   }
 };
 
@@ -99,8 +116,90 @@ const stripRuntimeFields = (
 ): Record<string, unknown> => {
   const remaining = { ...args };
   delete remaining.confirm;
+  delete remaining.markdownConversionTarget;
+  delete remaining.markdownFooterDocumentName;
+  delete remaining.markdownConversionRenderer;
+  delete remaining.markdownReferenceDocPath;
   return remaining;
 };
+
+const readObject = (value: unknown): Record<string, unknown> | null =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+const readString = (value: unknown): string | null =>
+  typeof value === "string" && value.length > 0 ? value : null;
+
+const looksLikePolicyDocumentSlug = (value: string): boolean =>
+  /^policy[-_]/iu.test(value);
+
+const validateDocumentIdArgs = (
+  toolName: string,
+  args: Record<string, unknown>,
+): ReturnType<typeof errorEnvelope> | null => {
+  const documentId =
+    readString(args.documentId) ??
+    readString(readObject(args.body)?.documentId);
+  if (!documentId || !looksLikePolicyDocumentSlug(documentId)) {
+    return null;
+  }
+
+  return errorEnvelope(
+    "validation_error",
+    "This is a policy document slug, not a Vanta Document ID.",
+    "Use policy-control UI fallback tools, or upload/link a real Vanta Document.",
+    {
+      toolName,
+      suppliedDocumentId: documentId,
+      objectModel:
+        "Policy latestApprovedVersion.documents[*].slugId is not usable with /documents or control-document endpoints.",
+    },
+  );
+};
+
+const buildWriteDisabledFallback = (
+  toolName: string,
+  operation: { path: string; method: string },
+  args: Record<string, unknown>,
+): Record<string, unknown> => ({
+  fallbackActionBatch: [
+    {
+      objectId:
+        readString(args.controlId) ??
+        readString(args.documentId) ??
+        readString(args.testId) ??
+        null,
+      uiLocation: `Vanta UI matching ${operation.method.toUpperCase()} ${operation.path}`,
+      proposedAction: stripRuntimeFields(args),
+      reason: "MCP write-disabled mode is active.",
+      verificationQuery: `Run the matching read endpoint after the UI action for ${toolName}.`,
+    },
+  ],
+});
+
+const isAlreadyMappedResponse = (status: number, data: unknown): boolean => {
+  if (status !== 422) {
+    return false;
+  }
+  const raw =
+    typeof data === "string"
+      ? data.toLowerCase()
+      : JSON.stringify(data ?? "").toLowerCase();
+  return (
+    raw.includes("already") &&
+    (raw.includes("mapped") || raw.includes("linked") || raw.includes("exist"))
+  );
+};
+
+const idempotentMappingToolNames = new Set([
+  "add_document_to_control",
+  "add_test_to_control",
+  "link_controls_to_risk_scenario",
+]);
+
+const canTreatAlreadyMappedAsSuccess = (toolName: string): boolean =>
+  idempotentMappingToolNames.has(toolName);
 
 export async function invokeGeneratedOperation(
   toolName: string,
@@ -122,6 +221,8 @@ export async function invokeGeneratedOperation(
       errorEnvelope(
         "write_disabled",
         "Mutating operations are disabled by VANTA_MCP_ENABLE_WRITE=false.",
+        "Use the returned fallbackActionBatch to perform the action manually in Vanta UI.",
+        buildWriteDisabledFallback(toolName, operation, rawArgs),
       ),
     );
   }
@@ -142,6 +243,11 @@ export async function invokeGeneratedOperation(
     );
   }
 
+  const documentIdValidation = validateDocumentIdArgs(toolName, rawArgs);
+  if (documentIdValidation) {
+    return toToolResult(documentIdValidation);
+  }
+
   const path = encodePath(operation.path, rawArgs);
   const queryNames = operation.parameters
     .filter(parameter => parameter.in === "query")
@@ -151,19 +257,23 @@ export async function invokeGeneratedOperation(
   const bodyDescriptor = operation.requestBody;
   let body: unknown;
   let formData: FormData | undefined;
+  let uploadWarnings: string[] = [];
+  let uploadMetadata: Record<string, unknown> | undefined;
   if (bodyDescriptor) {
     if (bodyDescriptor.kind === "multipart") {
       const multipartFormData = new FormData();
       if (bodyDescriptor.fileFieldName) {
-        const uploadError = await appendMultipartUploadFile(
+        const uploadResult = await appendMultipartUploadFile(
           toolName,
           rawArgs,
           bodyDescriptor.fileFieldName,
           multipartFormData,
         );
-        if (uploadError) {
-          return toToolResult(uploadError);
+        if (uploadResult?.error) {
+          return toToolResult(uploadResult.error);
         }
+        uploadWarnings = uploadResult?.warnings ?? [];
+        uploadMetadata = uploadResult?.metadata;
       }
       for (const field of bodyDescriptor.fields) {
         if (field.name === bodyDescriptor.fileFieldName) {
@@ -187,6 +297,25 @@ export async function invokeGeneratedOperation(
     });
 
     if (!response.ok) {
+      if (
+        canTreatAlreadyMappedAsSuccess(toolName) &&
+        isAlreadyMappedResponse(response.status, response.data)
+      ) {
+        return toToolResult(
+          successEnvelope(
+            {
+              alreadyExisted: true,
+              apiResponse: response.data,
+              operation: {
+                toolName,
+                method: operation.method.toUpperCase(),
+                path: operation.path,
+              },
+            },
+            "Mapping already existed; treated as idempotent success.",
+          ),
+        );
+      }
       return toToolResult(
         errorEnvelope(
           "api_error",
@@ -201,6 +330,11 @@ export async function invokeGeneratedOperation(
       successEnvelope(
         response.data,
         `${operation.method.toUpperCase()} ${operation.path}`,
+        undefined,
+        {
+          warnings: uploadWarnings,
+          metadata: uploadMetadata,
+        },
       ),
     );
   } catch (error) {

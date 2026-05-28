@@ -10,8 +10,10 @@
 
 All tools return JSON envelopes:
 
-- Success: `{ "success": true, "data": ..., "message"?: ..., "notes"?: ... }`
-- Error: `{ "success": false, "error": { "code": ..., "message": ..., "hint"?: ..., "agentHint"?: ..., "details"?: ... }, "notes"?: ... }`
+- Success: `{ "success": true, "data": ..., "warnings": [], "correlationId": ..., "tenant": ..., "pagination"?: ..., "metadata"?: ... }`
+- Error: `{ "success": false, "error": { "code": ..., "message": ..., "hint"?: ..., "agentHint"?: ..., "details"?: ... }, "warnings": [], "correlationId": ..., "tenant": ... }`
+
+Use the `capabilities` tool to inspect MCP version, tenant label, write/safe-mode flags, available tools, upload support, and unsupported API surfaces.
 
 ## Safe Mutation Contract
 
@@ -24,7 +26,16 @@ All tools return JSON envelopes:
 
 - Multipart upload tools require `filePath` to a local readable file.
 - Optional `mimeType` may be provided, but must match supported file types.
+- Markdown files are not uploaded raw. When `filePath` points to `.md` or `.markdown`, the MCP converts the file before upload.
+- Markdown conversion defaults to PDF with a footer: document name on the left and page numbering on the right.
+- Optional Markdown args: `markdownConversionTarget`, `markdownFooterDocumentName`, `markdownConversionRenderer`, and `markdownReferenceDocPath`.
 - Upload preflight failures return structured errors such as `file_path_required`, `file_not_found`, `file_not_readable`, `file_not_regular`, and `unsupported_file_type`.
+
+## Unsupported Public API Surfaces
+
+- Policy-control linkage read/write tools return `unsupported_operation` with a Vanta UI fallback because current public docs do not expose official policy-control endpoints.
+- Direct Manage test comments return `unsupported_operation`; use a control note that references the test ID.
+- Control-test remapping tools only change control-test mappings. They do not relink policies to controls.
 
 ## Logging Modes
 

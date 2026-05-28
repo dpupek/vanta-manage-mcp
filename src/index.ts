@@ -12,10 +12,11 @@ import {
   writeEnabled,
 } from "./config.js";
 import { logger } from "./logging/logger.js";
+import { MCP_NAME, MCP_VERSION } from "./version.js";
 
 const server = new McpServer({
-  name: "vanta-mcp-full",
-  version: "2.0.0",
+  name: MCP_NAME,
+  version: MCP_VERSION,
 });
 
 async function main(): Promise<void> {
@@ -44,6 +45,8 @@ async function main(): Promise<void> {
           endpoints: registration.generatedEndpoints,
           compatibility: registration.compatibilityReads,
           workflows: registration.workflows,
+          capabilities: registration.capabilities,
+          unsupported: registration.unsupported,
         },
         helpSurface: {
           total: helpRegistration.totalRegistered,

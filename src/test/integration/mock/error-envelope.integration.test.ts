@@ -166,3 +166,115 @@ test("upload preflight errors return envelopes and do not call OAuth or API", as
     await fakeServer.stop();
   }
 });
+
+test("capabilities and unsupported tools return agent-safe envelopes", async () => {
+  // Arrange
+  const fakeServer = new FakeVantaServer();
+  await fakeServer.start();
+  const harness = new McpStdioHarness({
+    envOverrides: createHarnessEnv(fakeServer.baseUrl),
+  });
+  await harness.start();
+
+  try {
+    // Initial Assert
+    const tools = await harness.listTools();
+    assert.ok(tools.includes("capabilities"));
+    assert.ok(tools.includes("add_policy_to_control"));
+
+    // Act
+    const capabilities = parseToolEnvelope(
+      await harness.callTool("capabilities", {}),
+    );
+    const unsupported = parseToolEnvelope(
+      await harness.callTool("add_policy_to_control", {
+        controlId: "control-1",
+        policyId: "policy-1",
+      }),
+    );
+
+    // Assert
+    assert.equal(capabilities.success, true);
+    assert.equal(typeof capabilities.correlationId, "string");
+    assert.equal(unsupported.success, false);
+    assert.equal(
+      (unsupported.error as Record<string, unknown>).code,
+      "unsupported_operation",
+    );
+    assert.equal(typeof unsupported.correlationId, "string");
+  } finally {
+    await harness.stop();
+    await fakeServer.stop();
+  }
+});
+
+test("markdown upload path is converted or fails before raw markdown upload", async () => {
+  // Arrange
+  const fakeServer = new FakeVantaServer();
+  fakeServer.setRoute("POST", "/documents/document-1/uploads", () => ({
+    status: 200,
+    body: { uploadId: "upload-1" },
+  }));
+  await fakeServer.start();
+  const harness = new McpStdioHarness({
+    envOverrides: createHarnessEnv(fakeServer.baseUrl),
+    timeoutMs: 30_000,
+  });
+  await harness.start();
+  const markdownPath = path.join(
+    os.tmpdir(),
+    `vanta-mcp-upload-${Date.now().toString()}.md`,
+  );
+  fs.writeFileSync(markdownPath, "# Evidence\n\nFormatted **body**.", "utf8");
+
+  try {
+    // Initial Assert
+    assert.equal(
+      fakeServer.getCallCount("POST", "/documents/document-1/uploads"),
+      0,
+    );
+
+    // Act
+    const result = await harness.callTool("upload_file_for_document", {
+      documentId: "document-1",
+      filePath: markdownPath,
+      markdownFooterDocumentName: "Evidence",
+      confirm: true,
+    });
+    const envelope = parseToolEnvelope(result);
+
+    // Assert
+    if (envelope.success) {
+      assert.equal(
+        fakeServer.getCallCount("POST", "/documents/document-1/uploads"),
+        1,
+      );
+      assert.match(
+        fakeServer.getCalls("POST", "/documents/document-1/uploads")[0].rawBody,
+        /filename="[^"]+\.pdf"/,
+      );
+      assert.equal(
+        (
+          (envelope.metadata as Record<string, unknown>).conversion as Record<
+            string,
+            unknown
+          >
+        ).convertedFrom,
+        "markdown",
+      );
+    } else {
+      assert.equal(
+        (envelope.error as Record<string, unknown>).code,
+        "markdown_converter_unavailable",
+      );
+      assert.equal(
+        fakeServer.getCallCount("POST", "/documents/document-1/uploads"),
+        0,
+      );
+    }
+  } finally {
+    fs.rmSync(markdownPath, { force: true });
+    await harness.stop();
+    await fakeServer.stop();
+  }
+});

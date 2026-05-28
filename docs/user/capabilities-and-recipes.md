@@ -7,6 +7,8 @@
 - Vendor and finding lifecycle management.
 - People, assets, and vulnerability triage.
 - Audit information-request operations.
+- Capability discovery with the `capabilities` tool.
+- Agent-safe unsupported-operation fallbacks for API surfaces Vanta does not publicly expose.
 
 ## Built-in Recipes and Prompts
 
@@ -51,3 +53,13 @@ Use prompts:
 
 - For evidence/document uploads, pass `filePath` to a local readable file.
 - Use supported file types (`.pdf`, `.docx`, `.xlsx`, `.csv`, `.txt`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.zip`, `.ps`).
+- `.md` and `.markdown` inputs are converted before upload; raw Markdown is never silently sent to Vanta.
+- Default conversion is PDF. The generated PDF footer includes the document name on the left and `Page X of Y` on the right.
+- Use `markdownConversionTarget:"docx"` for editable evidence. Use `markdownReferenceDocPath` to provide a Pandoc reference document.
+
+## Object Boundary Notes
+
+- Policy objects and policy approval tests are not Vanta Document objects.
+- `latestApprovedVersion.documents[*].slugId` policy slugs cannot be used with `get_document` or `add_document_to_control`.
+- Control-test mappings are not policy-control mappings.
+- True policy-control linkage and direct Manage test comments are unsupported by the current public API; unsupported tools return Vanta UI/control-note fallback batches.

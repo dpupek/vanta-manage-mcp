@@ -51,6 +51,21 @@ export const writeEnabled = parseBoolean(
   true,
 );
 
+export interface TenantIdentity {
+  label: string;
+  apiBaseUrl: string;
+}
+
+export const tenantIdentity: TenantIdentity = {
+  label: (
+    process.env.VANTA_MCP_TENANT_LABEL ??
+    process.env.VANTA_TENANT_LABEL ??
+    process.env.VANTA_TENANT ??
+    "unknown"
+  ).trim(),
+  apiBaseUrl: baseApiUrl,
+};
+
 const enabledToolNames = parseCsv(process.env.VANTA_MCP_ENABLED_TOOLS).map(
   normalizeName,
 );
