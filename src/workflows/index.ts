@@ -320,7 +320,7 @@ const resolveOwner = async (
         ),
       };
     }
-    pageCursor = hasMore ? nextCursor ?? undefined : undefined;
+    pageCursor = hasMore ? (nextCursor ?? undefined) : undefined;
   } while (pageCursor);
 
   if (matches.length !== 1) {
