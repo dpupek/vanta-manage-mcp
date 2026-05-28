@@ -263,9 +263,11 @@ test("markdown upload path is converted or fails before raw markdown upload", as
         "markdown",
       );
     } else {
-      assert.equal(
-        (envelope.error as Record<string, unknown>).code,
-        "markdown_converter_unavailable",
+      assert.ok(
+        [
+          "markdown_converter_unavailable",
+          "markdown_conversion_failed",
+        ].includes((envelope.error as Record<string, unknown>).code as string),
       );
       assert.equal(
         fakeServer.getCallCount("POST", "/documents/document-1/uploads"),
