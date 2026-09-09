@@ -35,6 +35,9 @@ Use the `capabilities` tool to inspect MCP version, tenant label, write/safe-mod
 
 - Policy-control linkage read/write tools return `unsupported_operation` with a Vanta UI fallback because current public docs do not expose official policy-control endpoints.
 - Direct Manage test comments return `unsupported_operation`; use a control note that references the test ID.
+- Document deactivation/reactivation tools return `unsupported_operation`; use the Vanta UI and verify `deactivatedStatus` with `get_document`.
+- If a `/tests/{slug}` UI route is actually a policy/document alias, API test tools return a `validation_error` with `get_document`, `document_resources`, and `list_tests_for_control` guidance.
+- `deactivate_test_entity` requires `body.deactivateReason`; `deactivatedReason` is rejected before calling Vanta.
 - Control-test remapping tools only change control-test mappings. They do not relink policies to controls.
 
 ## Logging Modes

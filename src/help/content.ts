@@ -495,7 +495,16 @@ export const buildHelpResourceMarkdown = (
   lines.push("## Unsupported Vanta API Surfaces");
   lines.push("");
   lines.push(
-    "- Policy-control linkage and direct Manage test comments return `unsupported_operation` with a fallback action batch.",
+    "- Policy-control linkage, direct Manage test comments, and document deactivation/reactivation writes return `unsupported_operation` with a fallback action batch.",
+  );
+  lines.push(
+    "- Document `deactivatedStatus` is readable with `get_document`, but deactivation/reactivation requires Vanta UI fallback.",
+  );
+  lines.push(
+    "- Some UI `/tests/{slug}` routes alias to policy/document pages; API test endpoints require generated test IDs found through `document_resources` and `list_tests_for_control`.",
+  );
+  lines.push(
+    "- `deactivate_test_entity` requires `body.deactivateReason`; `deactivatedReason` is rejected locally with a validation hint.",
   );
   lines.push(
     "- Control-test mapping tools do not relink policies to controls.",

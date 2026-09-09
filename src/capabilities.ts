@@ -160,6 +160,13 @@ export const buildCapabilitiesPayload = (): CapabilitiesPayload => {
           "Write a control note that references the Vanta test ID, then verify the related control/test reads.",
       },
       {
+        id: "document-deactivation",
+        reason:
+          "Current public Manage API exposes document deactivatedStatus reads but not document deactivation/reactivation writes.",
+        fallback:
+          "Use the Vanta UI to deactivate or reactivate the document, then verify with get_document deactivatedStatus.",
+      },
+      {
         id: "typst-pdf-renderer",
         reason:
           "Typst PDF rendering is a future optional renderer and is not required for v1 Markdown uploads.",
@@ -183,12 +190,16 @@ export const buildCapabilitiesPayload = (): CapabilitiesPayload => {
         "Test representing policy approval state; control-test mappings do not relink policies.",
       document:
         "Manage API Document object addressable by /documents/{documentId} and document upload endpoints.",
+      policyDocumentUiAlias:
+        "Some Vanta UI /tests/{slug} routes can alias to policy/document pages, but public Manage API /tests endpoints require API Test IDs.",
       controlTestMapping:
         "Association between a control and a test exposed by add/list/delete control test endpoints.",
       controlDocumentMapping:
         "Association between a control and a document exposed by add/list/delete control document endpoints.",
       policyControlMapping:
         "Unsupported public API surface; use Vanta UI fallback.",
+      documentDeactivation:
+        "Unsupported write surface; deactivatedStatus is readable on documents, but deactivation/reactivation writes require Vanta UI fallback.",
     },
   };
 };

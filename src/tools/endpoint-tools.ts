@@ -158,6 +158,43 @@ const validateDocumentIdArgs = (
   );
 };
 
+const validateDeactivateTestEntityArgs = (
+  toolName: string,
+  args: Record<string, unknown>,
+): ReturnType<typeof errorEnvelope> | null => {
+  if (toolName !== "deactivate_test_entity") {
+    return null;
+  }
+
+  const body = readObject(args.body);
+  if (body && "deactivatedReason" in body && !("deactivateReason" in body)) {
+    return errorEnvelope(
+      "validation_error",
+      "Use body.deactivateReason for deactivate_test_entity; body.deactivatedReason is not accepted by Vanta.",
+      "Rename deactivatedReason to deactivateReason and retry with confirm=true.",
+      {
+        toolName,
+        suppliedField: "deactivatedReason",
+        expectedField: "deactivateReason",
+      },
+    );
+  }
+
+  if (!readString(body?.deactivateReason)) {
+    return errorEnvelope(
+      "validation_error",
+      "deactivate_test_entity requires body.deactivateReason.",
+      "Provide a short reason in body.deactivateReason and retry with confirm=true.",
+      {
+        toolName,
+        expectedShape: { body: { deactivateReason: "reason" } },
+      },
+    );
+  }
+
+  return null;
+};
+
 const buildWriteDisabledFallback = (
   toolName: string,
   operation: { path: string; method: string },
@@ -200,6 +237,87 @@ const idempotentMappingToolNames = new Set([
 
 const canTreatAlreadyMappedAsSuccess = (toolName: string): boolean =>
   idempotentMappingToolNames.has(toolName);
+
+const buildDeleteDocumentNotFoundError = (
+  toolName: string,
+  status: number,
+  args: Record<string, unknown>,
+  apiResponse: unknown,
+): ReturnType<typeof errorEnvelope> | null => {
+  if (toolName !== "delete_document" || status !== 404) {
+    return null;
+  }
+
+  return errorEnvelope(
+    "api_error",
+    "This document cannot be deleted through the public Vanta API, or the API could not find a deletable document with that ID.",
+    "If your goal is UI document deactivation, use deactivate_document to get an executable Vanta UI fallback. Then verify with get_document and deactivatedStatus.",
+    {
+      toolName,
+      documentId: readString(args.documentId),
+      apiResponse,
+      uiFallbackTool: "deactivate_document",
+      objectModel:
+        "Vanta UI document deactivation is distinct from the public API delete_document endpoint.",
+    },
+  );
+};
+
+const isPublicTestEndpoint = (operation: { path: string }): boolean =>
+  operation.path.startsWith("/tests/{testId}");
+
+const buildTestDocumentAliasError = async (
+  toolName: string,
+  operation: { path: string },
+  status: number,
+  args: Record<string, unknown>,
+  apiResponse: unknown,
+  client: VantaApiClient,
+): Promise<ReturnType<typeof errorEnvelope> | null> => {
+  if (!isPublicTestEndpoint(operation) || status !== 404) {
+    return null;
+  }
+
+  const testId = readString(args.testId);
+  if (!testId) {
+    return null;
+  }
+
+  let documentResponse: Awaited<ReturnType<VantaApiClient["request"]>>;
+  try {
+    documentResponse = await client.request({
+      method: "GET",
+      path: `/documents/${encodeURIComponent(testId)}`,
+    });
+  } catch {
+    return null;
+  }
+
+  if (!documentResponse.ok) {
+    return null;
+  }
+
+  const document = readObject(documentResponse.data);
+  return errorEnvelope(
+    "validation_error",
+    "This test ID resolves as a Vanta document/policy UI slug, not a public API Test ID.",
+    "The Vanta UI may alias /tests/{slug} and /documents/{slug}, but the public API requires generated test IDs. Use get_document/document_resources, then list_tests_for_control to find API test IDs.",
+    {
+      toolName,
+      suppliedTestId: testId,
+      testEndpointResponse: apiResponse,
+      resolvedDocument: document
+        ? {
+            id: readString(document.id),
+            title: readString(document.title),
+            url: readString(document.url),
+          }
+        : documentResponse.data,
+      objectModel:
+        "Vanta policy/document UI slugs can route through /tests in the UI, but Manage API /tests endpoints require API Test IDs.",
+    },
+  );
+};
 
 export async function invokeGeneratedOperation(
   toolName: string,
@@ -246,6 +364,14 @@ export async function invokeGeneratedOperation(
   const documentIdValidation = validateDocumentIdArgs(toolName, rawArgs);
   if (documentIdValidation) {
     return toToolResult(documentIdValidation);
+  }
+
+  const deactivateTestEntityValidation = validateDeactivateTestEntityArgs(
+    toolName,
+    rawArgs,
+  );
+  if (deactivateTestEntityValidation) {
+    return toToolResult(deactivateTestEntityValidation);
   }
 
   const path = encodePath(operation.path, rawArgs);
@@ -315,6 +441,26 @@ export async function invokeGeneratedOperation(
             "Mapping already existed; treated as idempotent success.",
           ),
         );
+      }
+      const testDocumentAliasError = await buildTestDocumentAliasError(
+        toolName,
+        operation,
+        response.status,
+        rawArgs,
+        response.data,
+        client,
+      );
+      if (testDocumentAliasError) {
+        return toToolResult(testDocumentAliasError);
+      }
+      const translatedError = buildDeleteDocumentNotFoundError(
+        toolName,
+        response.status,
+        rawArgs,
+        response.data,
+      );
+      if (translatedError) {
+        return toToolResult(translatedError);
       }
       return toToolResult(
         errorEnvelope(

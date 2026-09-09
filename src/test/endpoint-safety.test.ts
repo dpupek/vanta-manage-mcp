@@ -13,9 +13,14 @@ import { parseToolEnvelope } from "./helpers.js";
 class FakeClient {
   public calls: Record<string, unknown>[] = [];
   public nextResponse: VantaResponse | null = null;
+  public responseQueue: VantaResponse[] = [];
 
   public async request(input: Record<string, unknown>): Promise<VantaResponse> {
     this.calls.push(input);
+    const queuedResponse = this.responseQueue.shift();
+    if (queuedResponse) {
+      return queuedResponse;
+    }
     if (this.nextResponse) {
       return this.nextResponse;
     }
@@ -210,6 +215,130 @@ test("already exists API responses stay errors for non-mapping operations", asyn
   assert.equal(envelope.success, false);
   assert.equal((envelope.error as Record<string, unknown>).code, "api_error");
   assert.equal(fakeClient.calls.length, 1);
+});
+
+test("delete document 404 explains UI deactivation is not API delete", async () => {
+  // Arrange
+  const toolName = getGeneratedToolNameByOperationId(
+    "DeleteDocument",
+    "manage",
+  );
+  assert.ok(toolName);
+  const fakeClient = new FakeClient();
+  fakeClient.nextResponse = {
+    status: 404,
+    ok: false,
+    data: {
+      message:
+        "document with id: nist-800-53-Information-security-program-plan not found",
+    },
+    headers: {},
+  };
+
+  // Initial Assert
+  assert.equal(fakeClient.calls.length, 0);
+
+  // Act
+  const result = await invokeGeneratedOperation(
+    toolName,
+    {
+      documentId: "nist-800-53-Information-security-program-plan",
+      confirm: true,
+    },
+    fakeClient as never,
+  );
+  const envelope = parseToolEnvelope(result);
+  const error = envelope.error as Record<string, unknown>;
+
+  // Assert
+  assert.equal(envelope.success, false);
+  assert.equal(error.code, "api_error");
+  assert.match(String(error.hint), /deactivate_document/i);
+  assert.match(String(error.message), /cannot be deleted/i);
+  assert.equal(fakeClient.calls.length, 1);
+});
+
+test("test endpoint 404 explains policy document UI slug alias", async () => {
+  // Arrange
+  const toolName = getGeneratedToolNameByOperationId("GetTest", "manage");
+  assert.ok(toolName);
+  const fakeClient = new FakeClient();
+  fakeClient.responseQueue = [
+    {
+      status: 404,
+      ok: false,
+      data: {
+        message: "Test with id: fedramp-access-control-policy not found",
+      },
+      headers: {},
+    },
+    {
+      status: 200,
+      ok: true,
+      data: {
+        id: "fedramp-access-control-policy",
+        title: "Access Control Policy",
+        url: "https://app.vanta.com/documents/fedramp-access-control-policy",
+      },
+      headers: {},
+    },
+  ];
+
+  // Initial Assert
+  assert.equal(fakeClient.calls.length, 0);
+
+  // Act
+  const result = await invokeGeneratedOperation(
+    toolName,
+    { testId: "fedramp-access-control-policy" },
+    fakeClient as never,
+  );
+  const envelope = parseToolEnvelope(result);
+  const error = envelope.error as Record<string, unknown>;
+
+  // Assert
+  assert.equal(envelope.success, false);
+  assert.equal(error.code, "validation_error");
+  assert.match(String(error.message), /document\/policy UI slug/i);
+  assert.match(String(error.hint), /list_tests_for_control/i);
+  assert.equal(fakeClient.calls.length, 2);
+  assert.deepEqual(fakeClient.calls[1], {
+    method: "GET",
+    path: "/documents/fedramp-access-control-policy",
+  });
+});
+
+test("deactivate test entity rejects deactivatedReason typo before API call", async () => {
+  // Arrange
+  const toolName = getGeneratedToolNameByOperationId(
+    "DeactivateTestEntity",
+    "manage",
+  );
+  assert.ok(toolName);
+  const fakeClient = new FakeClient();
+
+  // Initial Assert
+  assert.equal(fakeClient.calls.length, 0);
+
+  // Act
+  const result = await invokeGeneratedOperation(
+    toolName,
+    {
+      testId: "test-1",
+      entityId: "entity-1",
+      confirm: true,
+      body: { deactivatedReason: "Not applicable" },
+    },
+    fakeClient as never,
+  );
+  const envelope = parseToolEnvelope(result);
+  const error = envelope.error as Record<string, unknown>;
+
+  // Assert
+  assert.equal(envelope.success, false);
+  assert.equal(error.code, "validation_error");
+  assert.match(String(error.message), /deactivateReason/i);
+  assert.equal(fakeClient.calls.length, 0);
 });
 
 test("multipart endpoint maps filePath payload to form data", async () => {

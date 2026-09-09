@@ -64,7 +64,9 @@ Use prompts:
 
 - Policy objects and policy approval tests are not Vanta Document objects.
 - `latestApprovedVersion.documents[*].slugId` policy slugs cannot be used with `get_document` or `add_document_to_control`.
+- Some Vanta UI `/tests/{slug}` routes alias to policy/document pages. Public API test endpoints still require API test IDs; use `document_resources` and `list_tests_for_control` to find generated test IDs.
 - Integration resource owners are assigned through resource metadata (`ownerId`) and must be CURRENT Vanta employees.
 - Integration resources support one owner field. Use descriptions/notes outside the resource owner field for business owner, reviewer, coordinator, or support-department context.
 - Control-test mappings are not policy-control mappings.
-- True policy-control linkage and direct Manage test comments are unsupported by the current public API; unsupported tools return Vanta UI/control-note fallback batches.
+- True policy-control linkage, direct Manage test comments, and document deactivation/reactivation writes are unsupported by the current public API; unsupported tools return Vanta UI/control-note fallback batches.
+- Document `deactivatedStatus` is readable through `get_document`, but deactivation/reactivation must be performed in the Vanta UI and verified with readback.

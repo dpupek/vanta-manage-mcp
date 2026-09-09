@@ -49,3 +49,32 @@ test("unsupported test comments recommend the control-note fallback", () => {
   assert.equal(envelope.error.code, "unsupported_operation");
   assert.match(envelope.error.hint ?? "", /control note/i);
 });
+
+test("unsupported document deactivation returns UI fallback guidance", () => {
+  // Arrange
+  const tool = unsupportedToolMetadata.find(
+    candidate => candidate.name === "deactivate_document",
+  );
+  assert.ok(tool);
+  const reactivationTool = unsupportedToolMetadata.find(
+    candidate => candidate.name === "reactivate_document",
+  );
+
+  // Initial Assert
+  assert.equal(tool.surfaceId, "document-deactivation");
+  assert.equal(reactivationTool?.surfaceId, "document-deactivation");
+
+  // Act
+  const envelope = buildUnsupportedOperationEnvelope(tool, {
+    documentId: "document-1",
+    reason: "Not applicable",
+  });
+
+  // Assert
+  assert.equal(envelope.success, false);
+  assert.equal(envelope.error.code, "unsupported_operation");
+  assert.match(envelope.error.hint ?? "", /document deactivation/i);
+  const fallbackActionBatch = envelope.error.details
+    ?.fallbackActionBatch as Record<string, unknown>[];
+  assert.equal(fallbackActionBatch[0]?.objectId, "document-1");
+});
