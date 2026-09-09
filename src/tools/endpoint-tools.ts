@@ -10,6 +10,7 @@ import { isToolEnabled, safeModeEnabled, writeEnabled } from "../config.js";
 import { prepareUploadFileInput } from "../uploads/file-validation.js";
 import { appendUploadFile } from "../uploads/multipart.js";
 import { cleanupMarkdownConversionArtifacts } from "../uploads/markdown-conversion.js";
+import { withRequestSignal } from "../client/request-context.js";
 
 const encodePath = (template: string, args: Record<string, unknown>): string =>
   template.replace(/\{([^}]+)\}/g, (_match: string, key: string) => {
@@ -38,15 +39,17 @@ const appendMultipartUploadFile = async (
   args: Record<string, unknown>,
   fileFieldName: string,
   formData: FormData,
+  prepareUpload: typeof prepareUploadFileInput,
 ): Promise<
   | {
       error?: ReturnType<typeof errorEnvelope>;
       warnings?: string[];
       metadata?: Record<string, unknown>;
+      cleanupPaths?: string[];
     }
   | undefined
 > => {
-  const validation = await prepareUploadFileInput(toolName, args);
+  const validation = await prepareUpload(toolName, args);
   if (!validation.success) {
     return {
       error: errorEnvelope(
@@ -63,8 +66,10 @@ const appendMultipartUploadFile = async (
     return {
       warnings: validation.warnings,
       metadata: validation.metadata,
+      cleanupPaths: validation.cleanupPaths,
     };
   } catch (error) {
+    await cleanupMarkdownConversionArtifacts(validation.cleanupPaths);
     const message = error instanceof Error ? error.message : String(error);
     return {
       error: errorEnvelope(
@@ -78,8 +83,6 @@ const appendMultipartUploadFile = async (
         },
       ),
     };
-  } finally {
-    await cleanupMarkdownConversionArtifacts(validation.cleanupPaths);
   }
 };
 
@@ -323,6 +326,7 @@ export async function invokeGeneratedOperation(
   toolName: string,
   rawArgs: Record<string, unknown>,
   client: VantaApiClient,
+  prepareUpload: typeof prepareUploadFileInput = prepareUploadFileInput,
 ): Promise<ReturnType<typeof toToolResult>> {
   const operation = generatedOperationByToolName[toolName];
   if (!operation) {
@@ -374,47 +378,77 @@ export async function invokeGeneratedOperation(
     return toToolResult(deactivateTestEntityValidation);
   }
 
+  const fileRequired =
+    operation.requestBody?.fileRequired ?? operation.requestBody?.required;
+  if (
+    operation.requestBody?.fileFieldName &&
+    fileRequired &&
+    !readString(rawArgs.filePath)
+  ) {
+    return toToolResult(
+      errorEnvelope(
+        "file_path_required",
+        "filePath is required for multipart upload tools.",
+      ),
+    );
+  }
+  const parsed = buildOperationSchema(operation).safeParse(rawArgs);
+  if (!parsed.success)
+    return toToolResult(
+      errorEnvelope(
+        "validation_error",
+        "Arguments do not match the Vanta API input schema.",
+        "Correct the indicated fields and retry.",
+        { issues: parsed.error.issues },
+      ),
+    );
+  rawArgs = parsed.data;
+
   const path = encodePath(operation.path, rawArgs);
   const queryNames = operation.parameters
     .filter(parameter => parameter.in === "query")
     .map(parameter => parameter.name);
   const query = extractQuery(rawArgs, queryNames);
 
-  const bodyDescriptor = operation.requestBody;
-  let body: unknown;
-  let formData: FormData | undefined;
-  let uploadWarnings: string[] = [];
-  let uploadMetadata: Record<string, unknown> | undefined;
-  if (bodyDescriptor) {
-    if (bodyDescriptor.kind === "multipart") {
-      const multipartFormData = new FormData();
-      if (bodyDescriptor.fileFieldName) {
-        const uploadResult = await appendMultipartUploadFile(
-          toolName,
-          rawArgs,
-          bodyDescriptor.fileFieldName,
-          multipartFormData,
-        );
-        if (uploadResult?.error) {
-          return toToolResult(uploadResult.error);
-        }
-        uploadWarnings = uploadResult?.warnings ?? [];
-        uploadMetadata = uploadResult?.metadata;
-      }
-      for (const field of bodyDescriptor.fields) {
-        if (field.name === bodyDescriptor.fileFieldName) {
-          continue;
-        }
-        addMultipartField(multipartFormData, field.name, rawArgs[field.name]);
-      }
-      formData = multipartFormData;
-    } else {
-      body = rawArgs.body;
-    }
-  }
-
+  let cleanupPaths: string[] | undefined;
   try {
+    const bodyDescriptor = operation.requestBody;
+    let body: unknown;
+    let formData: FormData | undefined;
+    let uploadWarnings: string[] = [];
+    let uploadMetadata: Record<string, unknown> | undefined;
+    if (bodyDescriptor) {
+      if (bodyDescriptor.kind === "multipart") {
+        const multipartFormData = new FormData();
+        if (bodyDescriptor.fileFieldName && rawArgs.filePath !== undefined) {
+          const uploadResult = await appendMultipartUploadFile(
+            toolName,
+            rawArgs,
+            bodyDescriptor.fileFieldName,
+            multipartFormData,
+            prepareUpload,
+          );
+          if (uploadResult?.error) {
+            return toToolResult(uploadResult.error);
+          }
+          uploadWarnings = uploadResult?.warnings ?? [];
+          uploadMetadata = uploadResult?.metadata;
+          cleanupPaths = uploadResult?.cleanupPaths;
+        }
+        for (const field of bodyDescriptor.fields) {
+          if (field.name === bodyDescriptor.fileFieldName) {
+            continue;
+          }
+          addMultipartField(multipartFormData, field.name, rawArgs[field.name]);
+        }
+        formData = multipartFormData;
+      } else {
+        body = rawArgs.body;
+      }
+    }
+
     const response = await client.request({
+      source: operation.source,
       method: operation.method,
       path,
       query,
@@ -492,6 +526,8 @@ export async function invokeGeneratedOperation(
         "Verify credentials, scopes, and payload.",
       ),
     );
+  } finally {
+    await cleanupMarkdownConversionArtifacts(cleanupPaths);
   }
 }
 
@@ -526,7 +562,10 @@ export function registerGeneratedEndpointTools(
       operation.toolName,
       operation.description,
       schema.shape,
-      async args => invokeGeneratedOperation(operation.toolName, args, client),
+      async (args, extra) =>
+        withRequestSignal(extra.signal, () =>
+          invokeGeneratedOperation(operation.toolName, args, client),
+        ),
     );
     registered += 1;
   }

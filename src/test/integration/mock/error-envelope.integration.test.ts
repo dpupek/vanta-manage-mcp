@@ -84,6 +84,8 @@ test("transport failures return request_failed envelopes and do not crash MCP to
   const fakeServer = new FakeVantaServer();
   fakeServer.queueRoute("GET", "/controls", [
     { status: 200, closeConnection: true },
+    { status: 200, closeConnection: true },
+    { status: 200, closeConnection: true },
     { status: 200, body: successfulControlsPayload },
   ]);
   await fakeServer.start();
@@ -110,7 +112,7 @@ test("transport failures return request_failed envelopes and do not crash MCP to
 
     const recoveryEnvelope = parseToolEnvelope(recoveryResult);
     assert.equal(recoveryEnvelope.success, true);
-    assert.equal(fakeServer.getCallCount("GET", "/controls"), 2);
+    assert.equal(fakeServer.getCallCount("GET", "/controls"), 4);
   } finally {
     await harness.stop();
     await fakeServer.stop();

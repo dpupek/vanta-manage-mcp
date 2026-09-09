@@ -5,6 +5,7 @@ import { UploadValidationResult } from "./types.js";
 import {
   convertMarkdownEvidence,
   MarkdownConversionError,
+  cleanupMarkdownConversionArtifacts,
 } from "./markdown-conversion.js";
 
 export const extensionToMimeType: Record<string, string> = {
@@ -227,11 +228,13 @@ export const prepareUploadFileInput = async (
     return validateUploadFileInput(toolName, args);
   }
 
+  let cleanupPaths: string[] | undefined;
   try {
     const conversion = await convertMarkdownEvidence(
       baseValidation.file.absolutePath,
       args,
     );
+    cleanupPaths = conversion.cleanupPaths;
     const convertedArgs = {
       ...args,
       filePath: conversion.outputPath,
@@ -245,6 +248,7 @@ export const prepareUploadFileInput = async (
       convertedArgs,
     );
     if (!convertedValidation.success) {
+      await cleanupMarkdownConversionArtifacts(cleanupPaths);
       return convertedValidation;
     }
     return {
@@ -260,6 +264,7 @@ export const prepareUploadFileInput = async (
       cleanupPaths: conversion.cleanupPaths,
     };
   } catch (error) {
+    await cleanupMarkdownConversionArtifacts(cleanupPaths);
     const code =
       error instanceof MarkdownConversionError
         ? error.code

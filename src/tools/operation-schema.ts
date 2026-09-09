@@ -2,7 +2,9 @@ import { z } from "zod";
 import {
   GeneratedOperation,
   PrimitiveKind,
+  generatedSchemaDefinitions,
 } from "../generated/operations.generated.js";
+import { buildInputSchema } from "./input-schema.js";
 
 const schemaForKind = (
   kind: PrimitiveKind,
@@ -48,10 +50,13 @@ export const buildOperationSchema = (
   operation: GeneratedOperation,
 ): z.ZodObject<z.ZodRawShape> => {
   const shape: z.ZodRawShape = {};
+  const definitions = generatedSchemaDefinitions[operation.source];
 
   for (const parameter of operation.parameters) {
     shape[parameter.name] = withOptional(
-      schemaForKind(parameter.kind, parameter.itemKind),
+      parameter.schema
+        ? buildInputSchema(parameter.schema, definitions)
+        : schemaForKind(parameter.kind, parameter.itemKind),
       parameter.required,
       parameter.description,
     );
@@ -64,7 +69,7 @@ export const buildOperationSchema = (
       if (hasFileField) {
         shape.filePath = withOptional(
           z.string(),
-          requestBody.required || Boolean(requestBody.fileFieldName),
+          requestBody.fileRequired ?? requestBody.required,
           "Local file path for multipart upload.",
         );
         shape.mimeType = z
@@ -98,14 +103,18 @@ export const buildOperationSchema = (
           continue;
         }
         shape[field.name] = withOptional(
-          schemaForKind(field.kind),
+          field.schema
+            ? buildInputSchema(field.schema, definitions)
+            : schemaForKind(field.kind),
           field.required,
           field.description,
         );
       }
     } else {
       shape.body = withOptional(
-        z.record(z.string(), z.unknown()),
+        requestBody.schema
+          ? buildInputSchema(requestBody.schema, definitions)
+          : z.unknown(),
         requestBody.required,
         `Request body for ${requestBody.contentType}.`,
       );

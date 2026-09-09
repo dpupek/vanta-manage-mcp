@@ -2,12 +2,36 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import promises from "node:fs/promises";
 import test from "node:test";
 import {
   buildPdfFooterTemplate,
   cleanupMarkdownConversionArtifacts,
   resolveMarkdownConversionOptions,
+  convertMarkdownEvidence,
 } from "../uploads/markdown-conversion.js";
+
+test("failed conversion removes its temporary directory", async context => {
+  // Arrange
+  const original = promises.mkdtemp;
+  let directory = "";
+  context.mock.method(promises, "mkdtemp", async (prefix: string) => {
+    directory = await original(prefix);
+    return directory;
+  });
+  // Initial Assert
+  assert.equal(directory, "");
+  // Act: A nonexistent source fails after allocating output.
+  await assert.rejects(
+    convertMarkdownEvidence(
+      path.join(os.tmpdir(), `missing-vanta-${crypto.randomUUID()}.md`),
+      { markdownConversionRenderer: "typst" },
+    ),
+  );
+  // Assert
+  assert.notEqual(directory, "");
+  assert.equal(fs.existsSync(directory), false);
+});
 import { buildOperationSchema } from "../tools/operation-schema.js";
 import { generatedOperations } from "../generated/operations.generated.js";
 

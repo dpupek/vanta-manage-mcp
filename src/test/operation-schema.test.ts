@@ -18,7 +18,13 @@ test("mutating operations include optional confirm in schema", () => {
   // Act
   const schema = buildOperationSchema(operation);
   const result = schema.safeParse({
-    body: {},
+    body: {
+      externalId: "AC-1",
+      name: "Access control",
+      description: "Access management",
+      effectiveDate: "2026-09-09T00:00:00Z",
+      domain: "TECHNICAL",
+    },
   });
 
   // Assert

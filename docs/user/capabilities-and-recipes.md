@@ -70,3 +70,13 @@ Use prompts:
 - Control-test mappings are not policy-control mappings.
 - True policy-control linkage, direct Manage test comments, and document deactivation/reactivation writes are unsupported by the current public API; unsupported tools return Vanta UI/control-note fallback batches.
 - Document `deactivatedStatus` is readable through `get_document`, but deactivation/reactivation must be performed in the Vanta UI and verified with readback.
+
+## Workflow validation and partial results
+
+Execute mode validates the entire action batch before its first write. Test entity deactivation requires `deactivateReason` (and optionally an ISO timestamp `deactivateUntilDate`). Payload requirements follow the pinned API schema, including nested fields. An evidence upload is skipped if linking its document to the control fails.
+
+On batch success, `data` contains action outcomes and succeeded/failed/skipped counts. On failure, `success:false` and `isError:true` accompany `error.details` containing those outcomes and counts. Inspect individual outcomes and re-plan before retrying. Resource batches retain confirmed successes and flag missing API results for verification.
+
+Plan inventories accept `pageSize` (default 100), `maxPages` (default 10), and `pageCursor`. Both numeric limits are 1–100. Plans that reach a limit carry a top-level warning and `metadata.complete:false`; each affected inventory includes `collection.nextPageCursor`. Resume the affected inventory, or increase maxPages. Cursors belong to their own inventory; for workflows with several lists, use the corresponding endpoint tool to resume each independently. Missing/repeated cursors or page failures return an error with partial results. Resource owner lookup requires complete people results; resource execution requires complete discovery or explicit reviewed resourceIds.
+
+Requests time out after 60 seconds by default, including authentication waits and retry backoff. Configure `VANTA_REQUEST_TIMEOUT_MS` up to 300000 ms. Cancelling a request stops further workflow actions. After a write times out or loses its connection, read back Vanta state before retrying: the server may have applied the write even though no response arrived.

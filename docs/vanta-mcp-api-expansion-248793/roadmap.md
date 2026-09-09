@@ -12,9 +12,8 @@ FogBugz epic: https://darwin-global.fogbugz.com/f/cases/248793/
 Notes:
 
 - Current pinned specs generate 222 operations after adding selected Manage parity endpoints for risk-scenario control linking and users.
-- Current Vanta public docs index at `https://developer.vanta.com/llms.txt` lists 262 API reference entries.
-- `https://developer.vanta.com/api-reference/openapi.json` currently returns a placeholder "OpenAPI Plant Store" spec, not Vanta Manage/Audit/Connectors specs.
-- `https://api.vanta.com/openapi.json` and `/v1/openapi.json` require authorization, so public refresh is blocked until Vanta publishes or grants authoritative specs.
+- September 9, 2026 review: authoritative public downloads are available at the [Manage](https://developer.vanta.com/reference/manage-vanta.json), [Audit](https://developer.vanta.com/reference/auditor-api.json), and [Integrations](https://developer.vanta.com/reference/build-integrations.json) reference URLs. The earlier download blocker is obsolete.
+- Published operation counts are 240 Manage, 57 Audit, and 25 Integrations (322 total), versus 222 pinned operations. Contract refresh and the 100 additional operations remain planned separately from urgent runtime corrections.
 
 ## Phase 2: Agent-Safe Response Contract
 
@@ -74,3 +73,30 @@ Validation notes:
 - `npm test` passed: 66 tests.
 - `npm run verify:spec-parity` passed: 222 operations mapped to 222 unique tools.
 - `npm run test:integration:mock` passed: 8 tests.
+
+## Phase 7: Focused urgent runtime improvements
+
+See [baseline, workflow/CRC decomposition, decisions, and implementation evidence](urgent-improvements.md).
+
+- [x] Correct API-family URL construction and prepared-upload lifetime.
+- [x] Validate workflow batches and report failed/skipped outcomes.
+- [x] Enforce nested generated request contracts for all callers.
+- [x] Add operation-aware retries, request deadlines, and cancellation.
+- [x] Bound workflow pagination and expose completeness/resume metadata.
+
+This phase preserves the 222-operation pinned surface. Live tenant validation and the full public-contract refresh remain outstanding.
+
+### September 9 completion checkpoint
+
+- [x] Fix the review finding: vulnerability deactivation, reactivation, and SLA acknowledgement inspect every bulk result before declaring action success.
+- [x] Validate the final implementation with all 124 unit/mock integration tests passing, including 15 bulk-outcome regression cases.
+- [x] Verify pinned parity: 222 operations mapped to 222 unique tools.
+
+### Next iteration
+
+1. [ ] Validate this checkpoint against an authorized test tenant: read-only calls across API families, then controlled upload and mutation readback. Record scope/permission failures separately from code defects.
+2. [ ] Refresh all three public OpenAPI contracts and record source URLs, retrieval timestamps, hashes, operation identities, and request-schema differences before regeneration. The September 9 comparison identified 100 additional operations.
+3. [ ] Regenerate tools and help, review breaking input changes, and add regression coverage for changed contracts; rerun parity and mock integration checks.
+4. [ ] Prioritize workflow expansion after contract refresh: issues/event logs and vendor assessments first, followed by risk/control and audit lifecycle capabilities.
+
+Engineering implementation is complete; live tenant acceptance, deployment, and the broader contract refresh remain open.

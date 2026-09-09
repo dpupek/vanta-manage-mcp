@@ -64,6 +64,7 @@ interface OpenApiRequestBody {
 }
 
 interface OpenApiSchema {
+  [key: string]: unknown;
   type?: string;
   format?: string;
   description?: string;
@@ -93,6 +94,7 @@ interface GeneratedParameter {
   kind: PrimitiveKind;
   itemKind?: PrimitiveKind;
   enumValues?: string[];
+  schema?: Record<string, unknown>;
 }
 
 interface GeneratedRequestField {
@@ -100,6 +102,7 @@ interface GeneratedRequestField {
   required: boolean;
   description?: string;
   kind: PrimitiveKind;
+  schema?: Record<string, unknown>;
 }
 
 interface GeneratedRequestBody {
@@ -108,6 +111,8 @@ interface GeneratedRequestBody {
   kind: "json" | "multipart" | "raw";
   fields: GeneratedRequestField[];
   fileFieldName?: string;
+  fileRequired?: boolean;
+  schema?: Record<string, unknown>;
 }
 
 interface GeneratedOperation {
@@ -129,6 +134,7 @@ interface SpecDescriptor {
 }
 
 interface GenerationOutput {
+  schemas: Record<ApiSource, Record<string, unknown>>;
   operations: GeneratedOperation[];
   stats: Record<ApiSource, { operations: number; mutations: number }>;
 }
@@ -289,6 +295,7 @@ const mapParameters = (
         required: param.in === "path" ? true : param.required === true,
         description: param.description,
         kind,
+        schema: param.schema as Record<string, unknown> | undefined,
       };
 
       if (kind === "array") {
@@ -337,6 +344,7 @@ const mapRequestBody = (
           required: requiredFields.has(name),
           description: fieldSchema?.description,
           kind: toPrimitiveKind(fieldSchema),
+          schema: fieldRef as Record<string, unknown>,
         } satisfies GeneratedRequestField;
       },
     );
@@ -356,6 +364,8 @@ const mapRequestBody = (
       kind: "multipart",
       fields,
       fileFieldName: fileField?.[0],
+      fileRequired: fileField ? requiredFields.has(fileField[0]) : false,
+      schema: selectedContent.schema as Record<string, unknown>,
     };
   }
 
@@ -369,6 +379,7 @@ const mapRequestBody = (
           required: requiredFields.has(name),
           description: fieldSchema?.description,
           kind: toPrimitiveKind(fieldSchema),
+          schema: fieldRef as Record<string, unknown>,
         } satisfies GeneratedRequestField;
       },
     );
@@ -377,6 +388,7 @@ const mapRequestBody = (
       required: requestBody.required === true,
       contentType,
       kind: "json",
+      schema: selectedContent.schema as Record<string, unknown>,
       fields,
     };
   }
@@ -385,6 +397,7 @@ const mapRequestBody = (
     required: requestBody.required === true,
     contentType,
     kind: "raw",
+    schema: selectedContent.schema as Record<string, unknown>,
     fields: [],
   };
 };
@@ -448,6 +461,11 @@ const isMutatingMethod = (method: HttpMethod): boolean => method !== "get";
 
 const generateOperations = (): GenerationOutput => {
   const operations: GeneratedOperation[] = [];
+  const schemas: GenerationOutput["schemas"] = {
+    manage: {},
+    audit: {},
+    connectors: {},
+  };
   const nameUsage = new Map<string, number>();
   const stats: Record<ApiSource, { operations: number; mutations: number }> = {
     manage: { operations: 0, mutations: 0 },
@@ -458,6 +476,22 @@ const generateOperations = (): GenerationOutput => {
   for (const descriptor of specDescriptors) {
     const fullPath = path.join(openApiDirectory, descriptor.filename);
     const spec = JSON.parse(fs.readFileSync(fullPath, "utf8")) as OpenApiSpec;
+    const retainReferences = (value: unknown): void => {
+      if (typeof value !== "object" || value === null) return;
+      const ref = (value as { $ref?: string }).$ref;
+      if (ref) {
+        const name = ref.replace("#/components/schemas/", "");
+        if (!ref.startsWith("#/components/schemas/"))
+          throw new Error(`Unsupported input schema reference: ${ref}`);
+        if (!(name in schemas[descriptor.source])) {
+          const target = resolveSchema(spec, { $ref: ref });
+          if (!target) throw new Error(`Missing schema: ${ref}`);
+          schemas[descriptor.source][name] = target;
+          retainReferences(target);
+        }
+      }
+      for (const child of Object.values(value)) retainReferences(child);
+    };
 
     for (const [route, routeItem] of Object.entries(spec.paths ?? {})) {
       const pathLevelParameters = routeItem.parameters;
@@ -514,6 +548,10 @@ const generateOperations = (): GenerationOutput => {
           ),
         };
 
+        retainReferences(
+          mappedOperation.parameters.map(parameter => parameter.schema),
+        );
+        retainReferences(mappedOperation.requestBody?.schema);
         operations.push(mappedOperation);
         stats[descriptor.source].operations += 1;
         if (mappedOperation.isMutation) {
@@ -523,10 +561,14 @@ const generateOperations = (): GenerationOutput => {
     }
   }
 
-  return { operations, stats };
+  return { operations, stats, schemas };
 };
 
-const writeGeneratedFiles = ({ operations, stats }: GenerationOutput): void => {
+const writeGeneratedFiles = ({
+  operations,
+  stats,
+  schemas,
+}: GenerationOutput): void => {
   fs.mkdirSync(generatedDirectory, { recursive: true });
 
   const operationPayload = JSON.stringify(operations, null, 2);
@@ -547,6 +589,7 @@ export interface GeneratedParameter {
   kind: PrimitiveKind;
   itemKind?: PrimitiveKind;
   enumValues?: string[];
+  schema?: Record<string, unknown>;
 }
 
 export interface GeneratedRequestField {
@@ -554,6 +597,7 @@ export interface GeneratedRequestField {
   required: boolean;
   description?: string;
   kind: PrimitiveKind;
+  schema?: Record<string, unknown>;
 }
 
 export interface GeneratedRequestBody {
@@ -562,6 +606,8 @@ export interface GeneratedRequestBody {
   kind: "json" | "multipart" | "raw";
   fields: GeneratedRequestField[];
   fileFieldName?: string;
+  fileRequired?: boolean;
+  schema?: Record<string, unknown>;
 }
 
 export interface GeneratedOperation {
@@ -576,6 +622,8 @@ export interface GeneratedOperation {
   parameters: GeneratedParameter[];
   requestBody?: GeneratedRequestBody;
 }
+
+export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record<string, unknown>>> = ${JSON.stringify(schemas, null, 2)};
 
 export const generatedOperations: GeneratedOperation[] = ${operationPayload};
 export const generatedStats = ${statsPayload} as const;

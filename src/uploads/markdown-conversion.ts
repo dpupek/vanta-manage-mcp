@@ -99,24 +99,29 @@ export const convertMarkdownEvidence = async (
   const baseName = path.basename(inputPath, path.extname(inputPath));
   const outputPath = path.join(tempDir, `${baseName}.${options.target}`);
 
-  if (options.target === "docx") {
-    await convertMarkdownToDocx(inputPath, outputPath, options);
-    return buildResult(inputPath, outputPath, tempDir, options, [
-      "Converted Markdown to DOCX before Vanta upload.",
-    ]);
-  }
+  try {
+    if (options.target === "docx") {
+      await convertMarkdownToDocx(inputPath, outputPath, options);
+      return buildResult(inputPath, outputPath, tempDir, options, [
+        "Converted Markdown to DOCX before Vanta upload.",
+      ]);
+    }
 
-  if (options.renderer === "typst") {
-    await convertMarkdownToTypstPdf(inputPath, outputPath);
-    return buildResult(inputPath, outputPath, tempDir, options, [
-      "Converted Markdown to PDF using Typst before Vanta upload.",
-    ]);
-  }
+    if (options.renderer === "typst") {
+      await convertMarkdownToTypstPdf(inputPath, outputPath);
+      return buildResult(inputPath, outputPath, tempDir, options, [
+        "Converted Markdown to PDF using Typst before Vanta upload.",
+      ]);
+    }
 
-  await convertMarkdownToPlaywrightPdf(inputPath, outputPath, options);
-  return buildResult(inputPath, outputPath, tempDir, options, [
-    "Converted Markdown to PDF before Vanta upload.",
-  ]);
+    await convertMarkdownToPlaywrightPdf(inputPath, outputPath, options);
+    return buildResult(inputPath, outputPath, tempDir, options, [
+      "Converted Markdown to PDF before Vanta upload.",
+    ]);
+  } catch (error) {
+    await cleanupMarkdownConversionArtifacts([tempDir]);
+    throw error;
+  }
 };
 
 const buildResult = (

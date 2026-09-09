@@ -204,7 +204,13 @@ test("already exists API responses stay errors for non-mapping operations", asyn
   const result = await invokeGeneratedOperation(
     toolName,
     {
-      body: { externalId: "AC-1", name: "Access Control" },
+      body: {
+        externalId: "AC-1",
+        name: "Access Control",
+        description: "Access management",
+        effectiveDate: "2026-09-09T00:00:00Z",
+        domain: "TECHNICAL",
+      },
       confirm: true,
     },
     fakeClient as never,

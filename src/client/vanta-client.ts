@@ -2,14 +2,39 @@ import { BASE_API_URL } from "../api.js";
 import { getTokenManager } from "../auth.js";
 import { logger } from "../logging/logger.js";
 
-const RETRYABLE_STATUS_CODES = new Set([408, 409, 429, 500, 502, 503, 504]);
+const RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
 const MAX_RETRIES = 2;
 
-const sleep = async (ms: number): Promise<void> =>
-  new Promise(resolve => setTimeout(resolve, ms));
+import {
+  abortable,
+  configuredRequestTimeout,
+  currentRequestSignal,
+  retryDelayMs,
+  waitForRetry,
+  withDeadline,
+} from "./request-context.js";
 
-const joinUrl = (baseUrl: string, requestPath: string): URL => {
-  const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+export interface VantaClientOptions {
+  timeoutMs?: number;
+  fetch?: typeof fetch;
+  wait?: typeof waitForRetry;
+  tokenManager?: {
+    getValidToken: () => Promise<string>;
+    refreshToken: () => Promise<string>;
+  };
+}
+
+export const resolveVantaUrl = (
+  baseUrl: string,
+  requestPath: string,
+  source: VantaRequest["source"] = "manage",
+): URL => {
+  // Connector specs include /v1 in paths; Manage/Audit put it in servers.url.
+  const familyBase =
+    source === "connectors" ? baseUrl.replace(/\/v1\/?$/u, "") : baseUrl;
+  const normalizedBase = familyBase.endsWith("/")
+    ? familyBase
+    : `${familyBase}/`;
   const normalizedPath = requestPath.startsWith("/")
     ? requestPath.slice(1)
     : requestPath;
@@ -17,12 +42,14 @@ const joinUrl = (baseUrl: string, requestPath: string): URL => {
 };
 
 export interface VantaRequest {
+  source?: "manage" | "audit" | "connectors";
   method: string;
   path: string;
   query?: Record<string, unknown>;
   body?: unknown;
   headers?: Record<string, string>;
   formData?: FormData;
+  signal?: AbortSignal;
 }
 
 export interface VantaResponse {
@@ -76,125 +103,107 @@ const parseResponsePayload = async (response: Response): Promise<unknown> => {
 };
 
 export class VantaApiClient {
+  public constructor(private readonly options: VantaClientOptions = {}) {}
+
   public async request(input: VantaRequest): Promise<VantaResponse> {
-    let token = await getTokenManager().getValidToken();
-    let attempt = 0;
+    return withDeadline(
+      this.options.timeoutMs ?? configuredRequestTimeout(),
+      input.signal ?? currentRequestSignal(),
+      signal => this.requestWithinDeadline(input, signal),
+    );
+  }
+
+  private async requestWithinDeadline(
+    input: VantaRequest,
+    signal: AbortSignal,
+  ): Promise<VantaResponse> {
+    const tokens = this.options.tokenManager ?? getTokenManager();
+    const send = this.options.fetch ?? fetch;
+    const wait = this.options.wait ?? waitForRetry;
+    const method = input.method.toUpperCase();
+    const retrySafe = ["GET", "HEAD", "OPTIONS"].includes(method);
+    let token = await abortable(signal, () => tokens.getValidToken());
     let refreshed = false;
-    const scopedLogger = logger.child({
-      method: input.method.toUpperCase(),
-      path: input.path,
-    });
+    const url = resolveVantaUrl(BASE_API_URL, input.path, input.source);
+    if (input.query)
+      buildQueryString(input.query).forEach((value, key) => {
+        url.searchParams.append(key, value);
+      });
+    const scopedLogger = logger.child({ method, path: input.path });
 
-    while (attempt <= MAX_RETRIES) {
-      const url = joinUrl(BASE_API_URL, input.path);
-      if (input.query) {
-        const query = buildQueryString(input.query);
-        query.forEach((value, key) => {
-          url.searchParams.append(key, value);
-        });
-      }
-
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+      signal.throwIfAborted();
       const headers: Record<string, string> = {
         "Authorization": `Bearer ${token}`,
         "x-vanta-is-mcp": "true",
-        ...(input.headers ?? {}),
+        ...input.headers,
       };
-
-      let body: BodyInit | undefined;
-      if (input.formData) {
-        body = input.formData;
-      } else if (input.body !== undefined) {
+      let body: BodyInit | undefined = input.formData;
+      if (!body && input.body !== undefined) {
         headers["Content-Type"] = "application/json";
         body = JSON.stringify(input.body);
       }
-      scopedLogger.debug("api_request_started", "Sending Vanta API request.", {
-        attempt,
-        hasQuery: Boolean(input.query),
-        hasBody: input.body !== undefined || input.formData !== undefined,
-      });
-
-      const response = await fetch(url, {
-        method: input.method.toUpperCase(),
-        headers,
-        body,
-      });
+      let response: Response;
+      try {
+        response = await abortable(signal, () =>
+          send(url, { method, headers, body, signal }),
+        );
+      } catch (error) {
+        signal.throwIfAborted();
+        if (!retrySafe || attempt === MAX_RETRIES) throw error;
+        scopedLogger.warn(
+          "api_transport_retry",
+          "Retrying a read after transport failure.",
+          { attempt },
+        );
+        await abortable(signal, () =>
+          wait(retryDelayMs(null, attempt), signal),
+        );
+        continue;
+      }
       scopedLogger.debug(
         "api_response_received",
         "Received Vanta API response.",
-        {
-          status: response.status,
-          ok: response.ok,
-          attempt,
-        },
+        { status: response.status, attempt },
       );
-
-      if (response.status === 401 && !refreshed) {
-        scopedLogger.warn(
-          "api_unauthorized_retry",
-          "Received 401, refreshing token.",
-          {
-            attempt,
-          },
-        );
-        token = await getTokenManager().refreshToken();
+      if (response.status === 401 && !refreshed && attempt < MAX_RETRIES) {
+        await response.body?.cancel();
+        token = await abortable(signal, () => tokens.refreshToken());
         refreshed = true;
-        attempt += 1;
         continue;
       }
-
+      // 429 rejects the request before execution. Other ambiguous write failures
+      // require caller readback, not a blind replay of create/upload/patch actions.
       if (
-        RETRYABLE_STATUS_CODES.has(response.status) &&
-        attempt < MAX_RETRIES
+        attempt < MAX_RETRIES &&
+        (response.status === 429 ||
+          (retrySafe && RETRYABLE_STATUS_CODES.has(response.status)))
       ) {
-        const retryAfter = response.headers.get("retry-after");
-        if (retryAfter) {
-          const parsed = Number.parseInt(retryAfter, 10);
-          if (!Number.isNaN(parsed)) {
-            await sleep(parsed * 1000);
-          } else {
-            await sleep((attempt + 1) * 500);
-          }
-        } else {
-          await sleep((attempt + 1) * 500);
-        }
+        const waitMs = retryDelayMs(
+          response.headers.get("retry-after"),
+          attempt,
+        );
+        await response.body?.cancel();
         scopedLogger.warn(
           "api_retry_scheduled",
-          "Retrying request after retryable status.",
-          {
-            status: response.status,
-            statusText: response.statusText,
-            attempt,
-          },
+          "Retrying a rejected request or transient read failure.",
+          { status: response.status, attempt, waitMs },
         );
-        attempt += 1;
+        // Do not shorten Retry-After; the overall deadline aborts long waits.
+        await abortable(signal, () => wait(waitMs, signal));
         continue;
       }
-
-      const responseHeaders: Record<string, string> = {};
+      const headersOut: Record<string, string> = {};
       response.headers.forEach((value, key) => {
-        responseHeaders[key] = value;
+        headersOut[key] = value;
       });
-      scopedLogger.trace(
-        "api_response_headers",
-        "Response headers metadata captured.",
-        {
-          headers: responseHeaders,
-        },
-      );
-
       return {
         status: response.status,
         ok: response.ok,
-        data: await parseResponsePayload(response),
-        headers: responseHeaders,
+        headers: headersOut,
+        data: await abortable(signal, () => parseResponsePayload(response)),
       };
     }
-
-    scopedLogger.error(
-      "api_retry_exhausted",
-      "Request retry policy exhausted without success.",
-      { maxRetries: MAX_RETRIES },
-    );
     throw new Error("Request retry policy exhausted without a response.");
   }
 }

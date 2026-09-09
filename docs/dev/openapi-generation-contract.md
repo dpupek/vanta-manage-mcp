@@ -25,9 +25,12 @@ This document defines the stable contract for endpoint tool generation from pinn
 ## Schema Mapping Rules
 
 - Path/query params become top-level tool fields.
-- JSON request bodies map to `body` (object).
+- JSON request bodies map to `body`, retaining their schema.
+- Referenced input schemas are retained per API family in `generatedSchemaDefinitions`. Runtime validators enforce nested required properties, enums, bounds, string formats, nullable values, arrays, and compositions.
+- Direct MCP calls and internal workflow calls share `buildOperationSchema`; invalid arguments return `validation_error` before HTTP.
+- Unknown body properties follow the pinned `additionalProperties` contract.
 - Multipart request bodies map to MCP-friendly fields:
-- `filePath`
+- `filePath` is required only when the file property is required by the contract.
 - `mimeType?`
 - plus endpoint metadata fields from OpenAPI.
 
@@ -50,3 +53,15 @@ This document defines the stable contract for endpoint tool generation from pinn
 - `npm run verify:spec-parity`
 - `npm run lint`
 - `npm test`
+
+## Runtime contract
+
+Connector operation paths already contain `/v1`; URL resolution removes the duplicate version from the configured base. Manage and Audit retain their base version, and custom proxy path prefixes are preserved.
+
+Endpoint invocation owns prepared upload files until the HTTP request settles, including retry attempts. Conversion/preflight failures clean their own artifacts; caller-owned sources are preserved.
+
+`VANTA_REQUEST_TIMEOUT_MS` bounds an API request including its OAuth wait, fetch, response body, and retry delays (default 60000, accepted range greater than zero through 300000 ms). MCP cancellation propagates through endpoint, compatibility, and workflow calls. OAuth refresh is single-flight and has its own deadline; cancelling one waiter does not cancel a refresh shared by other requests.
+
+Reads (GET/HEAD/OPTIONS) retry transient transport failures and HTTP 408/429/500/502/503/504 at most twice. All methods may retry authentication rejection once and rate-limit rejection within the same attempt budget. Conflicts and ambiguous mutation failures are returned without replay. Retry-After seconds and HTTP dates are honored; a delay beyond the deadline causes timeout rather than an early retry.
+
+Workflow collections default to 100 items per page and ten pages per inventory. Explicit pageSize/maxPages accept 1–100. Missing completion indicators/cursors, repeated cursors, and failed pages return errors with partial evidence. A page limit returns an incomplete collection with a resume cursor and warning. Resource discovery must be complete before bulk mutation; explicitly reviewed resourceIds can be supplied instead.

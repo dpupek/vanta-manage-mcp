@@ -7,6 +7,7 @@ import {
   invokeGeneratedOperation,
 } from "./endpoint-tools.js";
 import { isToolEnabled } from "../config.js";
+import { withRequestSignal } from "../client/request-context.js";
 
 interface ConsolidatedReadConfig {
   name: string;
@@ -122,6 +123,7 @@ const executeByOperationId = async (
   args: Record<string, unknown>,
   client: VantaApiClient,
   source: "manage" | "audit" | "connectors" = "manage",
+  signal?: AbortSignal,
 ) => {
   const toolName = getGeneratedToolNameByOperationId(operationId, source);
   if (!toolName) {
@@ -132,7 +134,11 @@ const executeByOperationId = async (
       ),
     );
   }
-  return invokeGeneratedOperation(toolName, args, client);
+  return signal
+    ? withRequestSignal(signal, () =>
+        invokeGeneratedOperation(toolName, args, client),
+      )
+    : invokeGeneratedOperation(toolName, args, client);
 };
 
 const registerConsolidatedReadTool = (
@@ -154,19 +160,36 @@ const registerConsolidatedReadTool = (
     ...paginationShape,
   };
 
-  server.tool(config.name, config.description, shape, async rawArgs => {
-    const args = rawArgs as Record<string, unknown>;
-    const mapped = config.mapArgs ? config.mapArgs(args) : args;
-    const idValue = mapped[config.idParam];
-    if (typeof idValue === "string" && idValue.length > 0) {
-      return executeByOperationId(config.getOperationId, mapped, client);
-    }
+  server.tool(
+    config.name,
+    config.description,
+    shape,
+    async (rawArgs, extra) => {
+      const args = rawArgs as Record<string, unknown>;
+      const mapped = config.mapArgs ? config.mapArgs(args) : args;
+      const idValue = mapped[config.idParam];
+      if (typeof idValue === "string" && idValue.length > 0) {
+        return executeByOperationId(
+          config.getOperationId,
+          mapped,
+          client,
+          "manage",
+          extra.signal,
+        );
+      }
 
-    const listArgs = Object.fromEntries(
-      Object.entries(mapped).filter(([key]) => key !== config.idParam),
-    ) as Record<string, unknown>;
-    return executeByOperationId(config.listOperationId, listArgs, client);
-  });
+      const listArgs = Object.fromEntries(
+        Object.entries(mapped).filter(([key]) => key !== config.idParam),
+      ) as Record<string, unknown>;
+      return executeByOperationId(
+        config.listOperationId,
+        listArgs,
+        client,
+        "manage",
+        extra.signal,
+      );
+    },
+  );
 
   return true;
 };
@@ -272,7 +295,14 @@ export function registerCompatibilityReadTools(
         controlId: z.string(),
         ...paginationShape,
       },
-      args => executeByOperationId("ListTestsForControl", args, client),
+      (args, extra) =>
+        executeByOperationId(
+          "ListTestsForControl",
+          args,
+          client,
+          "manage",
+          extra.signal,
+        ),
     );
     registered += 1;
   }
@@ -285,7 +315,14 @@ export function registerCompatibilityReadTools(
         controlId: z.string(),
         ...paginationShape,
       },
-      args => executeByOperationId("ListDocumentsForControl", args, client),
+      (args, extra) =>
+        executeByOperationId(
+          "ListDocumentsForControl",
+          args,
+          client,
+          "manage",
+          extra.signal,
+        ),
     );
     registered += 1;
   }
@@ -298,7 +335,14 @@ export function registerCompatibilityReadTools(
         frameworkId: z.string(),
         ...paginationShape,
       },
-      args => executeByOperationId("ListControlsForFramework", args, client),
+      (args, extra) =>
+        executeByOperationId(
+          "ListControlsForFramework",
+          args,
+          client,
+          "manage",
+          extra.signal,
+        ),
     );
     registered += 1;
   }
@@ -311,7 +355,14 @@ export function registerCompatibilityReadTools(
         testId: z.string(),
         ...paginationShape,
       },
-      args => executeByOperationId("GetTestEntities", args, client),
+      (args, extra) =>
+        executeByOperationId(
+          "GetTestEntities",
+          args,
+          client,
+          "manage",
+          extra.signal,
+        ),
     );
     registered += 1;
   }
@@ -325,7 +376,7 @@ export function registerCompatibilityReadTools(
         resourceType: z.enum(["controls", "links", "uploads"]),
         ...paginationShape,
       },
-      async args => {
+      async (args, extra) => {
         const mapping: Record<string, string> = {
           controls: "ListControlsForDocument",
           links: "ListLinksForDocument",
@@ -335,6 +386,8 @@ export function registerCompatibilityReadTools(
           mapping[String(args.resourceType)],
           args,
           client,
+          "manage",
+          extra.signal,
         );
       },
     );
@@ -357,13 +410,15 @@ export function registerCompatibilityReadTools(
         resourceId: z.string().optional(),
         ...paginationShape,
       },
-      async args => {
+      async (args, extra) => {
         const operation = String(args.operation);
         if (operation === "list_kinds") {
           return executeByOperationId(
             "ListResourceKindSummaries",
             args,
             client,
+            "manage",
+            extra.signal,
           );
         }
         if (operation === "get_kind_details") {
@@ -375,7 +430,13 @@ export function registerCompatibilityReadTools(
               ),
             );
           }
-          return executeByOperationId("GetResourceKindDetails", args, client);
+          return executeByOperationId(
+            "GetResourceKindDetails",
+            args,
+            client,
+            "manage",
+            extra.signal,
+          );
         }
         if (operation === "list_resources") {
           if (!args.resourceKind) {
@@ -386,7 +447,13 @@ export function registerCompatibilityReadTools(
               ),
             );
           }
-          return executeByOperationId("ListResources", args, client);
+          return executeByOperationId(
+            "ListResources",
+            args,
+            client,
+            "manage",
+            extra.signal,
+          );
         }
         if (!args.resourceKind || !args.resourceId) {
           return toToolResult(
@@ -396,7 +463,13 @@ export function registerCompatibilityReadTools(
             ),
           );
         }
-        return executeByOperationId("GetResource", args, client);
+        return executeByOperationId(
+          "GetResource",
+          args,
+          client,
+          "manage",
+          extra.signal,
+        );
       },
     );
     registered += 1;

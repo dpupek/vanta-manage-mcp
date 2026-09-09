@@ -3,6 +3,17 @@ import { z } from "zod";
 import { VantaApiClient } from "../client/vanta-client.js";
 import { errorEnvelope, successEnvelope, toToolResult } from "../envelope.js";
 import { isToolEnabled, writeEnabled } from "../config.js";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { generatedOperationByToolName } from "../generated/operations.generated.js";
+import { buildOperationSchema } from "../tools/operation-schema.js";
+import { prepareUploadFileInput } from "../uploads/file-validation.js";
+import { cleanupMarkdownConversionArtifacts } from "../uploads/markdown-conversion.js";
+import { UploadValidationResult } from "../uploads/types.js";
+import {
+  currentRequestSignal,
+  withRequestSignal,
+} from "../client/request-context.js";
+import { collectInventory, CollectionOptions } from "./pagination.js";
 import {
   getGeneratedToolNameByOperationId,
   invokeGeneratedOperation,
@@ -55,6 +66,287 @@ export const workflowToolMetadata: WorkflowToolMetadata[] = [
 
 const workflowModeSchema = z.enum(["plan", "execute"]);
 
+const registerWorkflow = <Shape extends z.ZodRawShape>(
+  server: McpServer,
+  name: string,
+  description: string,
+  shape: Shape,
+  handler: (args: z.infer<z.ZodObject<Shape>>) => Promise<CallToolResult>,
+): void => {
+  const schema = z.object(shape);
+  server.tool<z.ZodRawShape>(name, description, shape, async (raw, extra) => {
+    const parsed = schema.safeParse(raw);
+    if (!parsed.success)
+      return toToolResult(
+        errorEnvelope(
+          "validation_error",
+          "Invalid workflow arguments.",
+          "Correct the indicated fields before executing.",
+          { issues: parsed.error.issues },
+        ),
+      );
+    try {
+      return await withRequestSignal(extra.signal, () => handler(parsed.data));
+    } catch (error) {
+      return toToolResult(
+        errorEnvelope(
+          "request_failed",
+          error instanceof Error ? error.message : String(error),
+        ),
+      );
+    }
+  });
+};
+
+interface PlannedAction {
+  action: unknown;
+  operationId: string;
+  args: Record<string, unknown>;
+  source?: "manage" | "audit" | "connectors";
+  dependsOnPrevious?: boolean;
+  bulkUpdates?: boolean;
+}
+
+const actionArguments = (
+  operationId: string,
+  ids: Record<string, unknown>,
+  payload?: Record<string, unknown>,
+  source: PlannedAction["source"] = "manage",
+): Record<string, unknown> => {
+  const name = getGeneratedToolNameByOperationId(operationId, source);
+  const operation = name ? generatedOperationByToolName[name] : undefined;
+  return operation?.requestBody?.kind === "multipart"
+    ? { ...payload, ...ids, confirm: true }
+    : {
+        ...ids,
+        ...(operation?.requestBody ? { body: payload ?? {} } : {}),
+        confirm: true,
+      };
+};
+
+const batchEnvelope = (
+  executed: {
+    action?: unknown;
+    step?: string;
+    result: unknown;
+    skipped?: boolean;
+  }[],
+  message: string,
+) => {
+  const counts = { succeeded: 0, failed: 0, skipped: 0 };
+  const outcomes = executed.map(item => {
+    const status = item.skipped
+      ? "skipped"
+      : readRecord(item.result)?.success === true
+        ? "succeeded"
+        : "failed";
+    counts[status] += 1;
+    return { ...item, status };
+  });
+  const data = { executed: outcomes, counts };
+  return counts.failed || counts.skipped
+    ? errorEnvelope(
+        "workflow_failed",
+        "Workflow did not complete successfully.",
+        "Inspect per-action outcomes; re-plan before retrying failed work.",
+        data,
+      )
+    : successEnvelope(data, message);
+};
+
+const executeActionBatch = async (
+  actions: PlannedAction[],
+  client: VantaApiClient,
+  message: string,
+): Promise<CallToolResult> => {
+  const uploads = new Map<number, UploadValidationResult>();
+  try {
+    // Validate the complete batch before applying its first write.
+    for (const [index, action] of actions.entries()) {
+      const name = getGeneratedToolNameByOperationId(
+        action.operationId,
+        action.source ?? "manage",
+      );
+      const operation = name ? generatedOperationByToolName[name] : undefined;
+      const parsed = operation
+        ? buildOperationSchema(operation).safeParse(action.args)
+        : undefined;
+      if (!parsed?.success)
+        return toToolResult(
+          errorEnvelope(
+            "validation_error",
+            "Workflow batch validation failed; no actions were executed.",
+            undefined,
+            {
+              index,
+              operationId: action.operationId,
+              issues: parsed?.error.issues,
+            },
+          ),
+        );
+      if (
+        operation?.requestBody?.fileFieldName &&
+        action.args.filePath !== undefined
+      ) {
+        const upload = await prepareUploadFileInput(
+          name ?? action.operationId,
+          action.args,
+        );
+        uploads.set(index, upload);
+        if (!upload.success)
+          return toToolResult(
+            errorEnvelope(
+              "validation_error",
+              "Workflow upload preflight failed; no actions were executed.",
+              upload.error.hint,
+              { index, error: upload.error },
+            ),
+          );
+      }
+    }
+    const executed: { action: unknown; result: unknown; skipped?: boolean }[] =
+      [];
+    for (const [index, action] of actions.entries()) {
+      if (currentRequestSignal()?.aborted) {
+        executed.push({
+          action: action.action,
+          result: { reason: "Workflow cancelled." },
+          skipped: true,
+        });
+        continue;
+      }
+      if (
+        action.dependsOnPrevious &&
+        readRecord(executed[index - 1]?.result)?.success !== true
+      ) {
+        executed.push({
+          action: action.action,
+          result: { reason: "Prerequisite action failed." },
+          skipped: true,
+        });
+        continue;
+      }
+      const upload = uploads.get(index);
+      const result = await executeOperation(
+        action.operationId,
+        action.args,
+        client,
+        action.source,
+        upload ? () => Promise.resolve(upload) : undefined,
+      );
+      let payload = getResultPayload(result);
+      if (action.bulkUpdates && readRecord(payload)?.success === true) {
+        const envelope = readRecord(payload);
+        const updates = readRecord(action.args.body)?.updates as Record<
+          string,
+          unknown
+        >[];
+        const results = readBulkResults(envelope?.data);
+        const succeeded: Record<string, unknown>[] = [];
+        const failed: Record<string, unknown>[] = [];
+        for (const [index, update] of updates.entries()) {
+          const item = results.at(index);
+          if (item && item.id === update.id && item.status === "SUCCESS") {
+            succeeded.push(item);
+          } else {
+            failed.push(
+              item && item.id === update.id
+                ? item
+                : {
+                    id: update.id,
+                    status: "ERROR",
+                    message:
+                      "Missing or mismatched bulk result; verify before retrying.",
+                    received: item,
+                  },
+            );
+          }
+        }
+        if (failed.length > 0 || results.length !== updates.length) {
+          payload = errorEnvelope(
+            "bulk_update_failed",
+            "Bulk action did not confirm success for every requested update.",
+            "Inspect per-item results and read back unconfirmed updates before retrying.",
+            { succeeded, failed, apiResponse: envelope?.data },
+          );
+        }
+      }
+      executed.push({
+        action: action.action,
+        result: payload,
+      });
+    }
+    return toToolResult(batchEnvelope(executed, message));
+  } finally {
+    for (const upload of uploads.values())
+      if (upload.success)
+        await cleanupMarkdownConversionArtifacts(upload.cleanupPaths);
+  }
+};
+
+const planEnvelope = (data: Record<string, unknown>) => {
+  const state = { failed: false, incomplete: false };
+  const inspect = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      value.forEach(inspect);
+      return;
+    }
+    const record = readRecord(value);
+    if (!record) return;
+    if (record.success === false) state.failed = true;
+    if (readRecord(record.collection)?.complete === false)
+      state.incomplete = true;
+    Object.values(record).forEach(inspect);
+  };
+  inspect(data);
+  return state.failed
+    ? errorEnvelope(
+        "workflow_read_failed",
+        "Unable to complete workflow planning reads.",
+        "Inspect failed reads before executing any actions.",
+        { plan: data },
+      )
+    : successEnvelope(
+        data,
+        "Plan generated. No mutations were executed.",
+        undefined,
+        {
+          warnings: state.incomplete
+            ? [
+                "Plan uses an incomplete inventory. Inspect collection.nextPageCursor and resume each affected inventory before treating this plan as exhaustive.",
+              ]
+            : [],
+          metadata: { complete: !state.incomplete },
+        },
+      );
+};
+
+const collectionShape = {
+  pageSize: z.number().int().min(1).max(100).optional(),
+  pageCursor: z.string().min(1).optional(),
+  maxPages: z.number().int().min(1).max(100).optional(),
+};
+
+const readInventory = (
+  operationId: string,
+  args: Record<string, unknown>,
+  client: VantaApiClient,
+  options: CollectionOptions,
+  source: PlannedAction["source"] = "manage",
+) =>
+  collectInventory(
+    async pagination =>
+      getResultPayload(
+        await executeOperation(
+          operationId,
+          compactRecord({ ...args, ...pagination }),
+          client,
+          source,
+        ),
+      ),
+    options,
+  );
+
 const workflowExecuteGate = (
   mode: "plan" | "execute",
   confirm: boolean | undefined,
@@ -83,6 +375,7 @@ const executeOperation = async (
   args: Record<string, unknown>,
   client: VantaApiClient,
   source: "manage" | "audit" | "connectors" = "manage",
+  prepareUpload?: typeof prepareUploadFileInput,
 ) => {
   const toolName = getGeneratedToolNameByOperationId(operationId, source);
   if (!toolName) {
@@ -93,7 +386,7 @@ const executeOperation = async (
       ),
     );
   }
-  return invokeGeneratedOperation(toolName, args, client);
+  return invokeGeneratedOperation(toolName, args, client, prepareUpload);
 };
 
 const parseEnvelope = (resultText: string): unknown => {
@@ -121,9 +414,6 @@ const readRecord = (value: unknown): Record<string, unknown> | null =>
 
 const readString = (value: unknown): string | null =>
   typeof value === "string" && value.length > 0 ? value : null;
-
-const readBoolean = (value: unknown): boolean | null =>
-  typeof value === "boolean" ? value : null;
 
 const readArray = (value: unknown): unknown[] =>
   Array.isArray(value) ? value : [];
@@ -160,29 +450,6 @@ const readBulkResults = (data: unknown): Record<string, unknown>[] => {
   });
 };
 
-const readPageInfo = (data: unknown): Record<string, unknown> | null => {
-  const root = readRecord(data);
-  const results = readRecord(root?.results);
-  return readRecord(results?.pageInfo) ?? readRecord(root?.pageInfo);
-};
-
-const readNextPageCursor = (data: unknown): string | null => {
-  const pageInfo = readPageInfo(data);
-  const root = readRecord(data);
-  return (
-    readString(pageInfo?.endCursor) ??
-    readString(pageInfo?.nextCursor) ??
-    readString(root?.nextPageCursor) ??
-    readString(root?.pageCursor)
-  );
-};
-
-const readHasMorePages = (data: unknown): boolean =>
-  readBoolean(readPageInfo(data)?.hasNextPage) ??
-  readBoolean(readPageInfo(data)?.hasMore) ??
-  readBoolean(readRecord(data)?.hasMore) ??
-  false;
-
 const readEmploymentStatus = (person: Record<string, unknown>): string | null =>
   readString(readRecord(person.employment)?.status);
 
@@ -213,7 +480,7 @@ interface ResolvedOwner {
 
 const resolveOwner = async (
   client: VantaApiClient,
-  args: { ownerId?: string; ownerEmail?: string },
+  args: { ownerId?: string; ownerEmail?: string; maxPages?: number },
 ): Promise<
   | { success: true; owner: ResolvedOwner }
   | { success: false; envelope: ReturnType<typeof errorEnvelope> }
@@ -273,55 +540,26 @@ const resolveOwner = async (
   }
 
   const ownerEmail = args.ownerEmail?.toLowerCase() ?? "";
-  const matches: Record<string, unknown>[] = [];
-  let pageCursor: string | undefined;
-
-  do {
-    const response = await client.request({
-      method: "get",
-      path: "/people",
-      query: compactRecord({
-        pageSize: 100,
-        employmentStatusMatchesAny: "CURRENT",
-        pageCursor,
-      }),
-    });
-    if (!response.ok) {
-      return {
-        success: false,
-        envelope: errorEnvelope(
-          "api_error",
-          `Unable to resolve ownerEmail '${args.ownerEmail ?? ""}'.`,
-          "Verify Vanta API scopes and retry.",
-          response.data,
-        ),
-      };
-    }
-
-    matches.push(
-      ...readPaginatedData(response.data).filter(
-        person => readEmailAddress(person) === ownerEmail,
+  const inventory = await readInventory("ListPeople", {}, client, {
+    maxPages: args.maxPages,
+  });
+  if (!inventory.success) return { success: false, envelope: inventory };
+  const payload = readRecord(inventory.data);
+  if (readRecord(payload?.collection)?.complete !== true)
+    return {
+      success: false,
+      envelope: errorEnvelope(
+        "workflow_read_incomplete",
+        "Owner lookup reached its page limit.",
+        "Increase maxPages or supply ownerId before executing.",
+        payload,
       ),
-    );
-
-    const hasMore = readHasMorePages(response.data);
-    const nextCursor = readNextPageCursor(response.data);
-    if (hasMore && !nextCursor) {
-      return {
-        success: false,
-        envelope: errorEnvelope(
-          "api_error",
-          "Unable to continue Vanta people pagination while resolving ownerEmail.",
-          "Retry with ownerId or verify the people list response includes a next cursor.",
-          {
-            ownerEmail: args.ownerEmail,
-            pageInfo: readPageInfo(response.data),
-          },
-        ),
-      };
-    }
-    pageCursor = hasMore ? (nextCursor ?? undefined) : undefined;
-  } while (pageCursor);
+    };
+  const matches = readPaginatedData(inventory.data).filter(
+    person =>
+      readEmailAddress(person) === ownerEmail &&
+      readEmploymentStatus(person) === "CURRENT",
+  );
 
   if (matches.length !== 1) {
     return {
@@ -371,47 +609,41 @@ const resolveOwner = async (
 
 const listIntegrationResourcesForOwnerWorkflow = async (
   client: VantaApiClient,
-  args: {
+  args: CollectionOptions & {
     integrationId: string;
     resourceKind: string;
     hasOwner?: boolean;
     hasDescription?: boolean;
     isInScope?: boolean;
-    pageSize?: number;
-    pageCursor?: string;
   },
 ): Promise<
-  | { success: true; resources: Record<string, unknown>[]; pageInfo?: unknown }
+  | {
+      success: true;
+      resources: Record<string, unknown>[];
+      pageInfo?: unknown;
+      collection?: Record<string, unknown>;
+    }
   | { success: false; envelope: ReturnType<typeof errorEnvelope> }
 > => {
-  const response = await client.request({
-    method: "get",
-    path: `/integrations/${encodeURIComponent(args.integrationId)}/resource-kinds/${encodeURIComponent(args.resourceKind)}/resources`,
-    query: compactRecord({
+  const inventory = await readInventory(
+    "ListResources",
+    compactRecord({
+      integrationId: args.integrationId,
+      resourceKind: args.resourceKind,
       hasOwner: args.hasOwner ?? false,
       hasDescription: args.hasDescription,
       isInScope: args.isInScope ?? true,
-      pageSize: args.pageSize ?? 50,
-      pageCursor: args.pageCursor,
     }),
-  });
-  if (!response.ok) {
-    return {
-      success: false,
-      envelope: errorEnvelope(
-        "api_error",
-        "Unable to list integration resources for owner assignment.",
-        "Verify integrationId, resourceKind casing, and read scopes.",
-        response.data,
-      ),
-    };
-  }
-  const root = readRecord(response.data);
-  const results = readRecord(root?.results);
+    client,
+    args,
+  );
+  if (!inventory.success) return { success: false, envelope: inventory };
+  const payload = readRecord(inventory.data);
   return {
     success: true,
-    resources: readPaginatedData(response.data),
-    pageInfo: results?.pageInfo,
+    resources: readPaginatedData(inventory.data),
+    pageInfo: readRecord(payload?.results)?.pageInfo,
+    collection: readRecord(payload?.collection) ?? undefined,
   };
 };
 
@@ -424,10 +656,12 @@ const registerControlEvidenceWorkflow = (
     return false;
   }
 
-  server.tool(
+  registerWorkflow(
+    server,
     toolName,
     "Plan or execute control evidence actions (document linkage and document uploads).",
     {
+      ...collectionShape,
       mode: workflowModeSchema,
       confirm: z.boolean().optional(),
       controlId: z.string().optional(),
@@ -444,11 +678,7 @@ const registerControlEvidenceWorkflow = (
       }
 
       if (args.mode === "plan") {
-        const controls = await executeOperation(
-          "ListControls",
-          { pageSize: 25 },
-          client,
-        );
+        const controls = await readInventory("ListControls", {}, client, args);
         const currentControl =
           args.controlId !== undefined
             ? await executeOperation(
@@ -459,26 +689,21 @@ const registerControlEvidenceWorkflow = (
             : null;
 
         return toToolResult(
-          successEnvelope(
-            {
-              summary: "Control evidence workflow plan.",
-              recommendedActions: [
-                "Review selected controls and mapped evidence.",
-                "Attach an existing document via documentId, or upload to an existing document using filePath.",
-              ],
-              context: {
-                selectedControlId: args.controlId ?? null,
-                selectedDocumentId: args.documentId ?? null,
-              },
-              reads: {
-                controls: getResultPayload(controls),
-                control: currentControl
-                  ? getResultPayload(currentControl)
-                  : null,
-              },
+          planEnvelope({
+            summary: "Control evidence workflow plan.",
+            recommendedActions: [
+              "Review selected controls and mapped evidence.",
+              "Attach an existing document via documentId, or upload to an existing document using filePath.",
+            ],
+            context: {
+              selectedControlId: args.controlId ?? null,
+              selectedDocumentId: args.documentId ?? null,
             },
-            "Plan generated. No mutations were executed.",
-          ),
+            reads: {
+              controls,
+              control: currentControl ? getResultPayload(currentControl) : null,
+            },
+          }),
         );
       }
 
@@ -491,52 +716,42 @@ const registerControlEvidenceWorkflow = (
         );
       }
 
-      const executionResults: { step: string; result: unknown }[] = [];
-
-      if (args.documentId) {
-        const attachResult = await executeOperation(
-          "AddDocumentToControl",
-          {
+      if (!args.documentId)
+        return toToolResult(
+          errorEnvelope(
+            "validation_error",
+            "documentId is required in execute mode.",
+          ),
+        );
+      const actions: PlannedAction[] = [
+        {
+          action: { type: "attach_document_to_control" },
+          operationId: "AddDocumentToControl",
+          args: {
             controlId: args.controlId,
-            body: {
-              documentId: args.documentId,
-            },
+            body: { documentId: args.documentId },
             confirm: true,
           },
-          client,
-        );
-        executionResults.push({
-          step: "attach_document_to_control",
-          result: getResultPayload(attachResult),
-        });
-      }
-
-      if (args.documentId && args.filePath) {
-        const uploadResult = await executeOperation(
-          "UploadFileForDocument",
-          {
+        },
+      ];
+      if (args.filePath !== undefined)
+        actions.push({
+          action: { type: "upload_file_for_document" },
+          operationId: "UploadFileForDocument",
+          dependsOnPrevious: true,
+          args: compactRecord({
             documentId: args.documentId,
             filePath: args.filePath,
             mimeType: args.mimeType,
             effectiveAtDate: args.effectiveAtDate,
             description: args.description,
             confirm: true,
-          },
-          client,
-        );
-        executionResults.push({
-          step: "upload_file_for_document",
-          result: getResultPayload(uploadResult),
+          }),
         });
-      }
-
-      return toToolResult(
-        successEnvelope(
-          {
-            executed: executionResults,
-          },
-          "Control evidence workflow executed.",
-        ),
+      return executeActionBatch(
+        actions,
+        client,
+        "Control evidence workflow executed.",
       );
     },
   );
@@ -553,22 +768,32 @@ const registerFailingControlsWorkflow = (
     return false;
   }
 
-  const actionSchema = z.object({
-    type: z.enum([
-      "deactivate_test_entity",
-      "reactivate_test_entity",
-      "update_control_metadata",
-    ]),
-    controlId: z.string().optional(),
-    testId: z.string().optional(),
-    entityId: z.string().optional(),
-    metadata: z.record(z.string(), z.unknown()).optional(),
-  });
+  const actionSchema = z.discriminatedUnion("type", [
+    z.object({
+      type: z.literal("deactivate_test_entity"),
+      testId: z.string().min(1),
+      entityId: z.string().min(1),
+      deactivateReason: z.string().min(1),
+      deactivateUntilDate: z.string().datetime({ offset: true }).optional(),
+    }),
+    z.object({
+      type: z.literal("reactivate_test_entity"),
+      testId: z.string().min(1),
+      entityId: z.string().min(1),
+    }),
+    z.object({
+      type: z.literal("update_control_metadata"),
+      controlId: z.string().min(1),
+      metadata: z.record(z.string(), z.unknown()),
+    }),
+  ]);
 
-  server.tool(
+  registerWorkflow(
+    server,
     toolName,
     "Plan or execute triage actions for failing controls/tests/entities.",
     {
+      ...collectionShape,
       mode: workflowModeSchema,
       confirm: z.boolean().optional(),
       actions: z.array(actionSchema).optional(),
@@ -580,104 +805,60 @@ const registerFailingControlsWorkflow = (
       }
 
       if (args.mode === "plan") {
-        const tests = await executeOperation(
+        const tests = await readInventory(
           "ListTests",
-          { pageSize: 50, statusFilter: "NEEDS_ATTENTION" },
+          { statusFilter: "NEEDS_ATTENTION" },
           client,
+          args,
         );
         return toToolResult(
-          successEnvelope(
-            {
-              summary: "Failing controls triage plan.",
-              recommendations: [
-                "Inspect failing tests and affected entities.",
-                "Choose actions to deactivate/reactivate entities or update control metadata.",
-              ],
-              failingTests: getResultPayload(tests),
-            },
-            "Plan generated. No mutations were executed.",
-          ),
+          planEnvelope({
+            summary: "Failing controls triage plan.",
+            recommendations: [
+              "Inspect failing tests and affected entities.",
+              "Choose actions to deactivate/reactivate entities or update control metadata.",
+            ],
+            failingTests: tests,
+          }),
         );
       }
 
-      const actions = args.actions ?? [];
-      const results: { action: unknown; result: unknown }[] = [];
-      for (const action of actions) {
-        if (action.type === "deactivate_test_entity") {
-          if (!action.testId || !action.entityId) {
-            results.push({
-              action,
-              result: errorEnvelope(
-                "validation_error",
-                "testId and entityId are required for deactivate_test_entity.",
-              ),
-            });
-            continue;
-          }
-          const result = await executeOperation(
-            "DeactivateTestEntity",
-            {
-              testId: action.testId,
-              entityId: action.entityId,
-              confirm: true,
-            },
-            client,
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-
-        if (action.type === "reactivate_test_entity") {
-          if (!action.testId || !action.entityId) {
-            results.push({
-              action,
-              result: errorEnvelope(
-                "validation_error",
-                "testId and entityId are required for reactivate_test_entity.",
-              ),
-            });
-            continue;
-          }
-          const result = await executeOperation(
-            "ReactivateTestEntity",
-            {
-              testId: action.testId,
-              entityId: action.entityId,
-              confirm: true,
-            },
-            client,
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-
-        if (!action.controlId || !action.metadata) {
-          results.push({
+      const actions = (args.actions ?? []).map((action): PlannedAction => {
+        if (action.type === "update_control_metadata")
+          return {
             action,
-            result: errorEnvelope(
-              "validation_error",
-              "controlId and metadata are required for update_control_metadata.",
-            ),
-          });
-          continue;
-        }
-        const result = await executeOperation(
-          "UpdateControlMetadata",
-          {
-            controlId: action.controlId,
-            body: action.metadata,
+            operationId: "UpdateControlMetadata",
+            args: {
+              controlId: action.controlId,
+              body: action.metadata,
+              confirm: true,
+            },
+          };
+        return {
+          action,
+          operationId:
+            action.type === "deactivate_test_entity"
+              ? "DeactivateTestEntity"
+              : "ReactivateTestEntity",
+          args: {
+            testId: action.testId,
+            entityId: action.entityId,
             confirm: true,
+            ...(action.type === "deactivate_test_entity"
+              ? {
+                  body: compactRecord({
+                    deactivateReason: action.deactivateReason,
+                    deactivateUntilDate: action.deactivateUntilDate,
+                  }),
+                }
+              : {}),
           },
-          client,
-        );
-        results.push({ action, result: getResultPayload(result) });
-      }
-
-      return toToolResult(
-        successEnvelope(
-          { executed: results },
-          "Failing controls triage executed.",
-        ),
+        };
+      });
+      return executeActionBatch(
+        actions,
+        client,
+        "Failing controls triage executed.",
       );
     },
   );
@@ -694,26 +875,35 @@ const registerVendorWorkflow = (
     return false;
   }
 
-  const actionSchema = z.object({
-    type: z.enum([
-      "update_vendor",
-      "set_vendor_status",
-      "create_finding",
-      "update_finding",
-      "upload_security_review_document",
-    ]),
-    vendorId: z.string(),
-    findingId: z.string().optional(),
-    securityReviewId: z.string().optional(),
-    payload: z.record(z.string(), z.unknown()).optional(),
-    filePath: z.string().optional(),
-    mimeType: z.string().optional(),
-  });
+  const vendorFields = {
+    vendorId: z.string().min(1),
+    payload: z.record(z.string(), z.unknown()),
+  };
+  const actionSchema = z.discriminatedUnion("type", [
+    z.object({ type: z.literal("update_vendor"), ...vendorFields }),
+    z.object({ type: z.literal("set_vendor_status"), ...vendorFields }),
+    z.object({ type: z.literal("create_finding"), ...vendorFields }),
+    z.object({
+      type: z.literal("update_finding"),
+      ...vendorFields,
+      findingId: z.string().min(1),
+    }),
+    z.object({
+      type: z.literal("upload_security_review_document"),
+      vendorId: z.string().min(1),
+      securityReviewId: z.string().min(1),
+      filePath: z.string().min(1),
+      mimeType: z.string().optional(),
+      payload: z.record(z.string(), z.unknown()).optional(),
+    }),
+  ]);
 
-  server.tool(
+  registerWorkflow(
+    server,
     toolName,
     "Plan or execute vendor lifecycle triage actions.",
     {
+      ...collectionShape,
       mode: workflowModeSchema,
       confirm: z.boolean().optional(),
       vendorId: z.string().optional(),
@@ -726,100 +916,43 @@ const registerVendorWorkflow = (
       }
 
       if (args.mode === "plan") {
-        const vendors = await executeOperation(
-          "ListVendors",
-          { pageSize: 25 },
-          client,
-        );
+        const vendors = await readInventory("ListVendors", {}, client, args);
         return toToolResult(
-          successEnvelope(
-            {
-              summary: "Vendor triage plan.",
-              recommendations: [
-                "Review vendor statuses and open findings.",
-                "Execute targeted vendor/finding/document updates.",
-              ],
-              vendors: getResultPayload(vendors),
-            },
-            "Plan generated. No mutations were executed.",
-          ),
+          planEnvelope({
+            summary: "Vendor triage plan.",
+            recommendations: [
+              "Review vendor statuses and open findings.",
+              "Execute targeted vendor/finding/document updates.",
+            ],
+            vendors,
+          }),
         );
       }
 
-      const results: { action: unknown; result: unknown }[] = [];
-      for (const action of args.actions ?? []) {
-        if (action.type === "update_vendor") {
-          const result = await executeOperation(
-            "UpdateVendor",
-            {
-              vendorId: action.vendorId,
-              body: action.payload ?? {},
-              confirm: true,
-            },
-            client,
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-        if (action.type === "set_vendor_status") {
-          const result = await executeOperation(
-            "SetStatusForVendor",
-            {
-              vendorId: action.vendorId,
-              body: action.payload ?? {},
-              confirm: true,
-            },
-            client,
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-        if (action.type === "create_finding") {
-          const result = await executeOperation(
-            "CreateVendorFinding",
-            {
-              vendorId: action.vendorId,
-              body: action.payload ?? {},
-              confirm: true,
-            },
-            client,
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-        if (action.type === "update_finding") {
-          const result = await executeOperation(
-            "UpdateVendorFinding",
-            {
-              vendorId: action.vendorId,
-              findingId: action.findingId,
-              body: action.payload ?? {},
-              confirm: true,
-            },
-            client,
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-
-        const result = await executeOperation(
-          "UploadDocumentForSecurityReview",
-          {
-            vendorId: action.vendorId,
-            securityReviewId: action.securityReviewId,
-            filePath: action.filePath,
-            mimeType: action.mimeType,
-            ...action.payload,
-            confirm: true,
-          },
-          client,
-        );
-        results.push({ action, result: getResultPayload(result) });
-      }
-
-      return toToolResult(
-        successEnvelope({ executed: results }, "Vendor triage executed."),
-      );
+      const operationIds = {
+        update_vendor: "UpdateVendor",
+        set_vendor_status: "SetStatusForVendor",
+        create_finding: "CreateVendorFinding",
+        update_finding: "UpdateVendorFinding",
+        upload_security_review_document: "UploadDocumentForSecurityReview",
+      };
+      const actions = (args.actions ?? []).map((action): PlannedAction => {
+        const operationId = operationIds[action.type];
+        const ids = compactRecord({
+          vendorId: action.vendorId,
+          findingId: "findingId" in action ? action.findingId : undefined,
+          securityReviewId:
+            "securityReviewId" in action ? action.securityReviewId : undefined,
+          filePath: "filePath" in action ? action.filePath : undefined,
+          mimeType: "mimeType" in action ? action.mimeType : undefined,
+        });
+        return {
+          action,
+          operationId,
+          args: actionArguments(operationId, ids, action.payload),
+        };
+      });
+      return executeActionBatch(actions, client, "Vendor triage executed.");
     },
   );
 
@@ -844,10 +977,12 @@ const registerPeopleAssetsVulnWorkflow = (
     payload: z.record(z.string(), z.unknown()),
   });
 
-  server.tool(
+  registerWorkflow(
+    server,
     toolName,
     "Plan or execute people/assets/vulnerability triage actions.",
     {
+      ...collectionShape,
       mode: workflowModeSchema,
       confirm: z.boolean().optional(),
       actions: z.array(actionSchema).optional(),
@@ -859,76 +994,46 @@ const registerPeopleAssetsVulnWorkflow = (
       }
 
       if (args.mode === "plan") {
-        const vulnerabilities = await executeOperation(
+        const vulnerabilities = await readInventory(
           "ListVulnerabilities",
-          { pageSize: 50, severity: "HIGH" },
+          { severity: "HIGH" },
           client,
+          args,
         );
-        const assets = await executeOperation(
+        const assets = await readInventory(
           "ListVulnerableAssets",
-          { pageSize: 50 },
+          {},
           client,
+          args,
         );
-        const people = await executeOperation(
-          "ListPeople",
-          { pageSize: 50 },
-          client,
-        );
+        const people = await readInventory("ListPeople", {}, client, args);
         return toToolResult(
-          successEnvelope(
-            {
-              summary: "People/assets/vulnerabilities triage plan.",
-              vulnerabilities: getResultPayload(vulnerabilities),
-              vulnerableAssets: getResultPayload(assets),
-              people: getResultPayload(people),
-            },
-            "Plan generated. No mutations were executed.",
-          ),
+          planEnvelope({
+            summary: "People/assets/vulnerabilities triage plan.",
+            vulnerabilities,
+            vulnerableAssets: assets,
+            people,
+          }),
         );
       }
 
-      const results: { action: unknown; result: unknown }[] = [];
-      for (const action of args.actions ?? []) {
-        if (action.type === "deactivate_vulnerabilities") {
-          const result = await executeOperation(
-            "DeactivateVulnerabilities",
-            {
-              body: action.payload,
-              confirm: true,
-            },
-            client,
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-        if (action.type === "reactivate_vulnerabilities") {
-          const result = await executeOperation(
-            "ReactivateVulnerabilities",
-            {
-              body: action.payload,
-              confirm: true,
-            },
-            client,
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-        const result = await executeOperation(
-          "AcknowledgeSlaMissVulnerabilityRemediations",
-          {
-            body: action.payload,
-            confirm: true,
-          },
-          client,
-        );
-        results.push({ action, result: getResultPayload(result) });
-      }
-
-      return toToolResult(
-        successEnvelope(
-          { executed: results },
-          "People/assets/vulnerability triage executed.",
-        ),
+      const operationIds = {
+        deactivate_vulnerabilities: "DeactivateVulnerabilities",
+        reactivate_vulnerabilities: "ReactivateVulnerabilities",
+        acknowledge_sla_miss: "AcknowledgeSlaMissVulnerabilityRemediations",
+      };
+      const actions = (args.actions ?? []).map(
+        (action): PlannedAction => ({
+          action,
+          operationId: operationIds[action.type],
+          args: { body: action.payload, confirm: true },
+          bulkUpdates: true,
+        }),
+      );
+      return executeActionBatch(
+        actions,
+        client,
+        "People/assets/vulnerability triage executed.",
       );
     },
   );
@@ -946,6 +1051,7 @@ const registerResourceOwnerAssignmentWorkflow = (
   }
 
   const resourceOwnerWorkflowSchema = {
+    ...collectionShape,
     mode: workflowModeSchema,
     confirm: z.boolean().optional(),
     integrationId: z.string(),
@@ -987,12 +1093,14 @@ const registerResourceOwnerAssignmentWorkflow = (
     isInScope?: boolean;
     pageSize?: number;
     pageCursor?: string;
+    maxPages?: number;
   }): Promise<
     | {
         success: true;
         resources: Record<string, unknown>[];
         resourceIds: string[];
         pageInfo?: unknown;
+        collection?: Record<string, unknown>;
         warnings: string[];
       }
     | { success: false; envelope: ReturnType<typeof errorEnvelope> }
@@ -1032,11 +1140,13 @@ const registerResourceOwnerAssignmentWorkflow = (
       resources: listed.resources,
       resourceIds,
       pageInfo: listed.pageInfo,
+      collection: listed.collection,
       warnings,
     };
   };
 
-  server.tool(
+  registerWorkflow(
+    server,
     toolName,
     "Plan or execute integration resource owner and description updates with CURRENT employee validation.",
     resourceOwnerWorkflowSchema,
@@ -1056,6 +1166,23 @@ const registerResourceOwnerAssignmentWorkflow = (
         return toToolResult(resourceResult.envelope);
       }
 
+      if (
+        args.mode === "execute" &&
+        resourceResult.collection?.complete === false
+      ) {
+        return toToolResult(
+          errorEnvelope(
+            "workflow_read_incomplete",
+            "Resource inventory is incomplete; no writes were executed.",
+            "Increase maxPages or provide explicit resourceIds from the reviewed plan.",
+            {
+              collection: resourceResult.collection,
+              resources: resourceResult.resources,
+            },
+          ),
+        );
+      }
+
       const batchSize = args.batchSize ?? 50;
       const actions = resourceResult.resourceIds.map(id =>
         buildUpdate(id, ownerResult.owner.id, args),
@@ -1072,7 +1199,7 @@ const registerResourceOwnerAssignmentWorkflow = (
           hasOwner: args.hasOwner ?? false,
           hasDescription: args.hasDescription,
           isInScope: args.isInScope ?? true,
-          pageSize: args.pageSize ?? 50,
+          pageSize: args.pageSize ?? 100,
           pageCursor: args.pageCursor,
         }),
         resources: resourceResult.resources,
@@ -1082,6 +1209,7 @@ const registerResourceOwnerAssignmentWorkflow = (
           batchSize,
         },
         pageInfo: resourceResult.pageInfo,
+        collection: resourceResult.collection,
       };
 
       if (args.mode === "plan") {
@@ -1090,7 +1218,19 @@ const registerResourceOwnerAssignmentWorkflow = (
             baseData,
             "Plan generated. No mutations were executed.",
             undefined,
-            { warnings: resourceResult.warnings },
+            {
+              warnings: [
+                ...resourceResult.warnings,
+                ...(resourceResult.collection?.complete === false
+                  ? [
+                      "Resource inventory is incomplete; resume with collection.nextPageCursor or increase maxPages.",
+                    ]
+                  : []),
+              ],
+              metadata: {
+                complete: resourceResult.collection?.complete !== false,
+              },
+            },
           ),
         );
       }
@@ -1103,10 +1243,24 @@ const registerResourceOwnerAssignmentWorkflow = (
               batches: [],
               succeeded: [],
               failed: [],
+              skipped: [],
+              counts: { succeeded: 0, failed: 0, skipped: 0 },
             },
             "Resource owner assignment executed.",
             undefined,
-            { warnings: resourceResult.warnings },
+            {
+              warnings: [
+                ...resourceResult.warnings,
+                ...(resourceResult.collection?.complete === false
+                  ? [
+                      "Resource inventory is incomplete; resume with collection.nextPageCursor or increase maxPages.",
+                    ]
+                  : []),
+              ],
+              metadata: {
+                complete: resourceResult.collection?.complete !== false,
+              },
+            },
           ),
         );
       }
@@ -1114,67 +1268,79 @@ const registerResourceOwnerAssignmentWorkflow = (
       const batches: Record<string, unknown>[] = [];
       const succeeded: Record<string, unknown>[] = [];
       const failed: Record<string, unknown>[] = [];
-
-      for (const [index, updateBatch] of chunk(actions, batchSize).entries()) {
-        const response = await client.request({
-          method: "patch",
-          path: `/integrations/${encodeURIComponent(args.integrationId)}/resource-kinds/${encodeURIComponent(args.resourceKind)}/resources`,
-          body: {
-            updates: updateBatch,
+      const skipped: Record<string, unknown>[] = [];
+      const updateBatches = chunk(actions, batchSize);
+      for (const [index, updateBatch] of updateBatches.entries()) {
+        const call = await executeOperation(
+          "UpdateResources",
+          {
+            integrationId: args.integrationId,
+            resourceKind: args.resourceKind,
+            body: { updates: updateBatch },
+            confirm: true,
           },
-        });
-
-        if (!response.ok) {
-          return toToolResult(
-            errorEnvelope(
-              "api_error",
-              "Unable to update integration resource owners.",
-              "Inspect error details, reduce batch size if needed, then re-plan before retrying.",
-              {
-                batchIndex: index,
-                attempted: updateBatch,
-                response: response.data,
-              },
-            ),
-          );
-        }
-
-        const results = readBulkResults(response.data);
+          client,
+        );
+        const envelope = readRecord(getResultPayload(call));
+        const results = readBulkResults(envelope?.data);
         batches.push({
           index,
           attempted: updateBatch.length,
           results,
+          error: envelope?.error,
         });
-
-        for (const result of results) {
-          const status = readString(result.status)?.toLowerCase();
-          if (status === "error" || status === "failed") {
-            failed.push(result);
-          } else {
+        if (envelope?.success !== true) {
+          failed.push(
+            ...updateBatch.map(action => ({
+              ...action,
+              error: envelope?.error,
+            })),
+          );
+          skipped.push(...updateBatches.slice(index + 1).flat());
+          break;
+        }
+        for (const action of updateBatch) {
+          const matches = results.filter(result => result.id === action.id);
+          const result =
+            matches.length === 1
+              ? matches[0]
+              : {
+                  id: action.id,
+                  status: "ERROR",
+                  message:
+                    "Missing or duplicate per-resource result; verify before retrying.",
+                };
+          if (readString(result.status)?.toLowerCase() === "success")
             succeeded.push(result);
-          }
+          else failed.push(result);
         }
       }
-
-      const warnings = [...resourceResult.warnings];
-      if (failed.length > 0) {
-        warnings.push(
-          `${failed.length.toString()} resource owner update(s) returned per-resource errors.`,
-        );
-      }
-
+      const report = {
+        ...baseData,
+        batches,
+        succeeded,
+        failed,
+        skipped,
+        counts: {
+          succeeded: succeeded.length,
+          failed: failed.length,
+          skipped: skipped.length,
+        },
+      };
       return toToolResult(
-        successEnvelope(
-          {
-            ...baseData,
-            batches,
-            succeeded,
-            failed,
-          },
-          "Resource owner assignment executed.",
-          undefined,
-          { warnings },
-        ),
+        failed.length || skipped.length
+          ? errorEnvelope(
+              "workflow_failed",
+              "Some resource owner updates did not complete successfully.",
+              "Inspect per-resource outcomes before retrying.",
+              report,
+            )
+          : successEnvelope(
+              report,
+              "Resource owner assignment executed.",
+              undefined,
+              { warnings: resourceResult.warnings },
+            ),
       );
     },
   );
@@ -1202,10 +1368,12 @@ const registerInformationRequestWorkflow = (
     payload: z.record(z.string(), z.unknown()).optional(),
   });
 
-  server.tool(
+  registerWorkflow(
+    server,
     toolName,
     "Plan or execute audit information request triage actions.",
     {
+      ...collectionShape,
       mode: workflowModeSchema,
       confirm: z.boolean().optional(),
       auditId: z.string(),
@@ -1218,92 +1386,44 @@ const registerInformationRequestWorkflow = (
       }
 
       if (args.mode === "plan") {
-        const list = await executeOperation(
+        const list = await readInventory(
           "ListInformationRequests",
-          {
-            auditId: args.auditId,
-            pageSize: 100,
-          },
+          { auditId: args.auditId },
           client,
+          args,
           "audit",
         );
         return toToolResult(
-          successEnvelope(
-            {
-              summary: "Information request triage plan.",
-              openRequests: getResultPayload(list),
-            },
-            "Plan generated. No mutations were executed.",
+          planEnvelope({
+            summary: "Information request triage plan.",
+            openRequests: list,
+          }),
+        );
+      }
+
+      const operationIds = {
+        update_request: "UpdateInformationRequest",
+        create_comment: "CreateCommentForInformationRequest",
+        flag_evidence: "FlagInformationRequestEvidence",
+        accept_evidence: "AcceptInformationRequestEvidence",
+      };
+      const actions = (args.actions ?? []).map(
+        (action): PlannedAction => ({
+          action,
+          operationId: operationIds[action.type],
+          source: "audit",
+          args: actionArguments(
+            operationIds[action.type],
+            { auditId: args.auditId, requestId: action.requestId },
+            action.payload,
+            "audit",
           ),
-        );
-      }
-
-      const results: { action: unknown; result: unknown }[] = [];
-      for (const action of args.actions ?? []) {
-        if (action.type === "update_request") {
-          const result = await executeOperation(
-            "UpdateInformationRequest",
-            {
-              auditId: args.auditId,
-              requestId: action.requestId,
-              body: action.payload ?? {},
-              confirm: true,
-            },
-            client,
-            "audit",
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-        if (action.type === "create_comment") {
-          const result = await executeOperation(
-            "CreateCommentForInformationRequest",
-            {
-              auditId: args.auditId,
-              requestId: action.requestId,
-              body: action.payload ?? {},
-              confirm: true,
-            },
-            client,
-            "audit",
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-        if (action.type === "flag_evidence") {
-          const result = await executeOperation(
-            "FlagInformationRequestEvidence",
-            {
-              auditId: args.auditId,
-              requestId: action.requestId,
-              body: action.payload ?? {},
-              confirm: true,
-            },
-            client,
-            "audit",
-          );
-          results.push({ action, result: getResultPayload(result) });
-          continue;
-        }
-        const result = await executeOperation(
-          "AcceptInformationRequestEvidence",
-          {
-            auditId: args.auditId,
-            requestId: action.requestId,
-            body: action.payload ?? {},
-            confirm: true,
-          },
-          client,
-          "audit",
-        );
-        results.push({ action, result: getResultPayload(result) });
-      }
-
-      return toToolResult(
-        successEnvelope(
-          { executed: results },
-          "Information request triage executed.",
-        ),
+        }),
+      );
+      return executeActionBatch(
+        actions,
+        client,
+        "Information request triage executed.",
       );
     },
   );

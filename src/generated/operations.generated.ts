@@ -13,6 +13,7 @@ export interface GeneratedParameter {
   kind: PrimitiveKind;
   itemKind?: PrimitiveKind;
   enumValues?: string[];
+  schema?: Record<string, unknown>;
 }
 
 export interface GeneratedRequestField {
@@ -20,6 +21,7 @@ export interface GeneratedRequestField {
   required: boolean;
   description?: string;
   kind: PrimitiveKind;
+  schema?: Record<string, unknown>;
 }
 
 export interface GeneratedRequestBody {
@@ -28,6 +30,8 @@ export interface GeneratedRequestBody {
   kind: "json" | "multipart" | "raw";
   fields: GeneratedRequestField[];
   fileFieldName?: string;
+  fileRequired?: boolean;
+  schema?: Record<string, unknown>;
 }
 
 export interface GeneratedOperation {
@@ -42,6 +46,3041 @@ export interface GeneratedOperation {
   parameters: GeneratedParameter[];
   requestBody?: GeneratedRequestBody;
 }
+
+export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record<string, unknown>>> = {
+  "manage": {
+    "CreateControlInput": {
+      "properties": {
+        "externalId": {
+          "type": "string",
+          "description": "The control's external ID."
+        },
+        "name": {
+          "type": "string",
+          "nullable": true,
+          "description": "The control's name."
+        },
+        "description": {
+          "type": "string",
+          "description": "The control's description."
+        },
+        "effectiveDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The effective date of the control."
+        },
+        "domain": {
+          "$ref": "#/components/schemas/ControlDomain",
+          "description": "The control's category."
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/components/schemas/FrameworkSection"
+          },
+          "type": "array",
+          "nullable": true,
+          "description": "The framework sections that the control maps to."
+        },
+        "role": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/GdprRole"
+            }
+          ],
+          "nullable": true,
+          "description": "The GDPR role of the control, which specifies whether the data is being \"collected\" or \"processed\".\nThis field should only be included for controls that are to be mapped to the GDPR framework."
+        },
+        "customFields": {
+          "items": {
+            "$ref": "#/components/schemas/CustomField"
+          },
+          "type": "array",
+          "description": "The control's values for custom fields."
+        }
+      },
+      "required": [
+        "externalId",
+        "name",
+        "description",
+        "effectiveDate",
+        "domain"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ControlDomain": {
+      "enum": [
+        "ARTIFICIAL_&_AUTONOMOUS_TECHNOLOGY",
+        "ASSET_MANAGEMENT",
+        "BUSINESS_CONTINUITY_&_DISASTER_RECOVERY",
+        "CAPACITY_&_PERFORMANCE_PLANNING",
+        "CHANGE_MANAGEMENT",
+        "CLOUD_SECURITY",
+        "COMPLIANCE",
+        "CONFIGURATION_MANAGEMENT",
+        "CONTINUOUS_MONITORING",
+        "CRYPTOGRAPHIC_PROTECTIONS",
+        "DATA_CLASSIFICATION_&_HANDLING",
+        "EMBEDDED_TECHNOLOGY",
+        "ENDPOINT_SECURITY",
+        "HUMAN_RESOURCES_SECURITY",
+        "IDENTIFICATION_&_AUTHENTICATION",
+        "INCIDENT_RESPONSE",
+        "INFORMATION_ASSURANCE",
+        "MAINTENANCE",
+        "MOBILE_DEVICE_MANAGEMENT",
+        "NETWORK SECURITY",
+        "PHYSICAL_&_ENVIRONMENTAL_SECURITY",
+        "PRIVACY",
+        "PROJECT_&_RESOURCE MANAGEMENT",
+        "RISK_MANAGEMENT",
+        "SECURE_ENGINEERING_&_ARCHITECTURE",
+        "SECURITY_AWARENESS_&_TRAINING",
+        "SECURITY_OPERATIONS",
+        "SECURITY_&_PRIVACY_GOVERNANCE",
+        "TECHNOLOGY_DEVELOPMENT_&_ACQUISITION",
+        "THIRD-PARTY_MANAGEMENT",
+        "THREAT_MANAGEMENT",
+        "VULNERABILITY_&_PATCH_MANAGEMENT",
+        "WEB_SECURITY",
+        "ADMINISTRATIVE",
+        "PHYSICAL",
+        "TECHNICAL",
+        "BASIC",
+        "DERIVED"
+      ],
+      "type": "string"
+    },
+    "FrameworkSection": {
+      "properties": {
+        "frameworkId": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/FrameworkId"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "sectionId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frameworkId",
+        "sectionId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "FrameworkId": {
+      "enum": [
+        "AU_E_8",
+        "AWS_FTR",
+        "CCPA",
+        "CIS_V8",
+        "CPS_234",
+        "DORA",
+        "FEDRAMP",
+        "GDPR",
+        "HIPAA",
+        "HITRUST_E1",
+        "ISO_27001",
+        "ISO_27001_2022",
+        "ISO_27017",
+        "ISO_27018",
+        "ISO_27701",
+        "ISO_42001",
+        "ISO_9001",
+        "MSFT_SSPA",
+        "MVSP",
+        "NIS_2D",
+        "NIST_171",
+        "NIST_53",
+        "NIST_AI_RMF",
+        "NIST_CSF",
+        "NIST_CSF_2",
+        "OFDSS",
+        "PCI_SAQ_A",
+        "PCI_SAQ_A_EP",
+        "PCI_SAQ_D_MERCHANT",
+        "PCI_SAQ_D_SP",
+        "PCI_DDS_4",
+        "SOC_2",
+        "SOX_ITGC",
+        "UK_CYBER_ESSENTIALS",
+        "US_DATA_PRIVACY"
+      ],
+      "type": "string"
+    },
+    "GdprRole": {
+      "enum": [
+        "BOTH",
+        "CONTROLLER",
+        "PROCESSOR"
+      ],
+      "type": "string"
+    },
+    "CustomField": {
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "PageSize": {
+      "type": "integer",
+      "format": "int32",
+      "default": 10,
+      "description": "Controls the maximum number of items returned in one response from the API.",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "PageCursor": {
+      "type": "string",
+      "description": "A marker or pointer, telling the API where to start fetching items for the subsequent page in a paginated dataset.\nNote that the requested page will not include the item that corresponds to this cursor but will start from the one immediately\nafter this cursor."
+    },
+    "AddControlFromLibraryInput": {
+      "properties": {
+        "controlId": {
+          "type": "string",
+          "description": "The ID of the control to be added."
+        }
+      },
+      "required": [
+        "controlId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditControlMetadataInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "A new name for the control."
+        },
+        "externalId": {
+          "type": "string",
+          "description": "The new external ID for the control."
+        },
+        "description": {
+          "type": "string",
+          "description": "The new description for the control."
+        },
+        "domain": {
+          "$ref": "#/components/schemas/ControlDomain",
+          "description": "The new category for the control."
+        },
+        "note": {
+          "type": "string",
+          "description": "The new note for the control."
+        },
+        "customFields": {
+          "items": {
+            "$ref": "#/components/schemas/CustomField"
+          },
+          "type": "array",
+          "description": "The control's new values for custom fields."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddControlDocumentMappingInput": {
+      "properties": {
+        "documentId": {
+          "type": "string",
+          "description": "The ID of the document to add to the control."
+        }
+      },
+      "required": [
+        "documentId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddControlTestMappingInput": {
+      "properties": {
+        "testId": {
+          "type": "string",
+          "description": "The ID of the test to add to the control."
+        }
+      },
+      "required": [
+        "testId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SetOwnerForControlInput": {
+      "properties": {
+        "userId": {
+          "type": "string",
+          "nullable": true,
+          "description": "The new owner's ID."
+        }
+      },
+      "required": [
+        "userId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CreateCustomerTrustAccountInput": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "emailDomain": {
+          "type": "string"
+        },
+        "ndaDetails": {
+          "$ref": "#/components/schemas/CustomerTrustAccountNDADetailsInput"
+        },
+        "accessConfig": {
+          "$ref": "#/components/schemas/CustomerTrustAccountAccessConfigInput"
+        }
+      },
+      "required": [
+        "name",
+        "emailDomain"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomerTrustAccountNDADetailsInput": {
+      "properties": {
+        "markNdaNotRequired": {
+          "type": "boolean",
+          "description": "Whether NDA requirement should be bypassed for access requests matching this account"
+        }
+      },
+      "required": [
+        "markNdaNotRequired"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomerTrustAccountAccessConfigInput": {
+      "properties": {
+        "autoApprovalEnabled": {
+          "type": "boolean",
+          "description": "Whether access requests matching this account's email domain should be auto-approved"
+        }
+      },
+      "required": [
+        "autoApprovalEnabled"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "QuestionnaireStatus": {
+      "type": "string",
+      "enum": [
+        "APPROVED",
+        "IN_PROGRESS",
+        "IN_REVIEW",
+        "READY_FOR_REVIEW",
+        "WAITING_ON_ANSWERS",
+        "ON_HOLD",
+        "NO_LONGER_NEEDED",
+        "COMPLETE",
+        "ERROR",
+        "EXTRACTING_QUESTIONS",
+        "QUEUED_FOR_EXTRACTION",
+        "PROCESSING",
+        "QUEUED_FOR_PROCESSING",
+        "WAITING_ON_COLUMN_SELECTION",
+        "WAITING_ON_COLUMN_APPROVAL",
+        "QUEUED_FOR_COLUMN_DETECTION",
+        "DETECTING_COLUMNS"
+      ]
+    },
+    "QuestionnaireType": {
+      "type": "string",
+      "enum": [
+        "FILE",
+        "PORTAL",
+        "DOCUMENT"
+      ]
+    },
+    "CustomerTrustExportInput": {
+      "description": "Request body for initiating a questionnaire export.",
+      "properties": {
+        "questionnaireId": {
+          "type": "string",
+          "description": "Unique identifier for the questionnaire to trigger an export for.",
+          "example": "65a5d6e2f1a2b3c4d5e6f7a8"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "original",
+            "csv"
+          ],
+          "description": "The output format for the exported questionnaire.\n- `\"original\"`: Exports in the questionnaire's native format (XLSX for spreadsheets, DOCX for documents).\n- `\"csv\"`: Exports as a CSV file, suitable for data analysis or import into other systems.",
+          "example": "original"
+        }
+      },
+      "required": [
+        "questionnaireId",
+        "format"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CreateWebsiteQuestionnaireInput": {
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "ownerAssignment": {
+          "$ref": "#/components/schemas/ActorAssignmentInput"
+        },
+        "approverAssignment": {
+          "$ref": "#/components/schemas/ActorAssignmentInput"
+        },
+        "companyUrl": {
+          "type": "string"
+        },
+        "customerTrustAccountId": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "items": {
+            "$ref": "#/components/schemas/QuestionnaireMetadata"
+          },
+          "type": "array"
+        },
+        "tagAndCategoryIds": {
+          "items": {
+            "$ref": "#/components/schemas/TagInput"
+          },
+          "type": "array"
+        },
+        "includeUntagged": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "displayName",
+        "url"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ActorAssignmentInput": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "User",
+            "Team"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "QuestionnaireMetadata": {
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "TagInput": {
+      "properties": {
+        "categoryId": {
+          "type": "string"
+        },
+        "tagId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "categoryId",
+        "tagId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateQuestionnaireArgs": {
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "Display name of the questionnaire"
+        },
+        "dueDate": {
+          "type": "string",
+          "nullable": true,
+          "description": "Due date for questionnaire completion (ISO 8601 string, null to clear)"
+        },
+        "status": {
+          "$ref": "#/components/schemas/SettableQuestionnaireStatus",
+          "description": "Status transition (limited to settable statuses)"
+        },
+        "ownerAssignment": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/UpdateActorAssignment"
+            }
+          ],
+          "nullable": true,
+          "description": "Owner assignment as Actor (null to unassign)"
+        },
+        "approverAssignment": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/UpdateActorAssignment"
+            }
+          ],
+          "nullable": true,
+          "description": "Approver assignment as Actor (null to unassign, requires QuestionnaireAutomationAdvanced)"
+        },
+        "metadata": {
+          "items": {
+            "$ref": "#/components/schemas/QuestionnaireMetadata"
+          },
+          "type": "array",
+          "description": "Metadata key-value pairs"
+        },
+        "tagAndCategoryIds": {
+          "items": {
+            "$ref": "#/components/schemas/TagInput"
+          },
+          "type": "array",
+          "description": "Tag and category ID pairs"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SettableQuestionnaireStatus": {
+      "type": "string",
+      "enum": [
+        "IN_PROGRESS",
+        "IN_REVIEW",
+        "READY_FOR_REVIEW",
+        "WAITING_ON_ANSWERS",
+        "ON_HOLD",
+        "NO_LONGER_NEEDED"
+      ]
+    },
+    "UpdateActorAssignment": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "User",
+            "Team"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CompleteQuestionnaireRequest": {
+      "description": "Request body for completing a questionnaire.",
+      "properties": {
+        "shouldSyncApprovedToAnswerLibrary": {
+          "type": "boolean",
+          "description": "Whether to sync approved answers to the answer library.\nDefaults to true. Silently set to false for non-English FILE/DOCUMENT questionnaires."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "DiscoveredVendorScope": {
+      "description": "The scope of a discovered vendor.\nNEEDS_REVIEW: The vendor needs review\nIGNORED: The vendor was ignored\nREJECTED: The vendor was rejected",
+      "enum": [
+        "NEEDS_REVIEW",
+        "IGNORED",
+        "REJECTED"
+      ],
+      "type": "string"
+    },
+    "CreateDocumentInput": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The document's title."
+        },
+        "description": {
+          "type": "string",
+          "description": "The document's description."
+        },
+        "timeSensitivity": {
+          "$ref": "#/components/schemas/TimeSensitivity",
+          "description": "When to upload the document.\nMust be one of: \"Most recent\", \"During audit window\""
+        },
+        "cadence": {
+          "$ref": "#/components/schemas/RecurrenceDuration",
+          "description": "How often the document needs to be renewed.\n\nNever: P0D - The document does not need to be renewed.\nDaily: P1D - The document needs to be renewed daily.\nWeekly: P1W - The document needs to be renewed weekly.\nMonthly: P1M - The document needs to be renewed monthly.\nQuarterly: P3M - The document needs to be renewed quarterly.\nBiannually: P6M - The document needs to be renewed biannually.\nAnnually: P1Y - The document needs to be renewed annually."
+        },
+        "reminderWindow": {
+          "$ref": "#/components/schemas/ReminderWindow",
+          "description": "The number of days before the renewal date to send a reminder.\nNote that reminderWindow should be smaller than the cadence.\n\nOptions are:\nNever: P0D - No reminder will be sent.\nDay: P1D - A reminder will be sent one day before the renewal date.\nWeek: P1W - A reminder will be sent one week before the renewal date.\nMonth: P1M - A reminder will be sent one month before the renewal date.\nQuarter: P3M - A reminder will be sent one quarter before the renewal date."
+        },
+        "isSensitive": {
+          "type": "boolean",
+          "description": "Determines whether or not the document is sensitive.\nThis restricts which users can access or upload files to the document.\nOnly admins are able to view or upload sensitive documents."
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "timeSensitivity",
+        "cadence",
+        "reminderWindow",
+        "isSensitive"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "TimeSensitivity": {
+      "enum": [
+        "MOST_RECENT",
+        "DURING_AUDIT_WINDOW"
+      ],
+      "type": "string"
+    },
+    "RecurrenceDuration": {
+      "enum": [
+        "P0D",
+        "P1D",
+        "P1W",
+        "P1M",
+        "P3M",
+        "P6M",
+        "P1Y"
+      ],
+      "type": "string"
+    },
+    "ReminderWindow": {
+      "enum": [
+        "P0D",
+        "P1D",
+        "P1W",
+        "P1M",
+        "P3M"
+      ],
+      "type": "string"
+    },
+    "DocumentStatus": {
+      "type": "string",
+      "enum": [
+        "Needs document",
+        "Needs update",
+        "Not relevant",
+        "OK"
+      ]
+    },
+    "CreateLinkForDocumentInput": {
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "The link's URL"
+        },
+        "title": {
+          "type": "string",
+          "description": "The link's title."
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "The link's description."
+        },
+        "effectiveDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "The link's effective date."
+        }
+      },
+      "required": [
+        "url",
+        "title"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SetOwnerForDocumentInput": {
+      "properties": {
+        "userId": {
+          "type": "string",
+          "nullable": true,
+          "description": "The new owner ID"
+        }
+      },
+      "required": [
+        "userId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateResourceRequest": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of the resource to update."
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Owner ID to update for the resource."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description to update for the resource."
+        },
+        "inScope": {
+          "type": "boolean",
+          "description": "Determines whether resources should be marked in scope or not."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ComputerStatusFilter": {
+      "description": "Enum representing computer compliance statuses that can be utilized as a filter. The meanings are as follows:\nAV_NOT_INSTALLED: The computer does not have antivirus software installed.\nHD_NOT_ENCRYPTED: The computer's harddrive is not encrypted.\nLAST_CHECK_OVER_14_DAYS: No data has been received from computer for over 14 days.\nPWM_NOT_INSTALLED: The computer does not have a password manager installed.\nSCREENLOCK_NOT_CONFIGURED: The computer does not have screenlock configured appropriately.",
+      "enum": [
+        "PWM_NOT_INSTALLED",
+        "HD_NOT_ENCRYPTED",
+        "AV_NOT_INSTALLED",
+        "SCREENLOCK_NOT_CONFIGURED",
+        "LAST_CHECK_OVER_14_DAYS"
+      ],
+      "type": "string"
+    },
+    "TasksSummaryStatus": {
+      "description": "The overall status of a person's outstanding tasks:\n- NONE: There are no tasks.\n- DUE_SOON: At least one task is due soon.\n- OVERDUE: At least one task is overdue. Has a higher priority than DUE_SOON.\n- COMPLETE: All tasks are complete.\n- PAUSED: All tasks are paused.\n- OFFBOARDING_DUE_SOON: At least one offboarding task is due soon.\n- OFFBOARDING_OVERDUE: At least one offboarding task is overdue. Has a higher priority than OFFBOARDING_DUE_SOON.\n- OFFBOARDING_COMPLETE: All offboarding tasks are complete.",
+      "enum": [
+        "COMPLETE",
+        "DUE_SOON",
+        "NONE",
+        "OFFBOARDING_COMPLETE",
+        "OFFBOARDING_DUE_SOON",
+        "OFFBOARDING_OVERDUE",
+        "OVERDUE",
+        "PAUSED"
+      ],
+      "type": "string"
+    },
+    "TaskType": {
+      "description": "The type a task summary falls into.\nCOMPLETE_TRAININGS: The task summary containing security trainings.\nACCEPT_POLICIES: The task summary containing policy acceptance.\nCOMPLETE_CUSTOM_TASKS: The task summary containing custom tasks.\nINSTALL_DEVICE_MONITORING: The task summary containing device monitoring installation.\nCOMPLETE_BACKGROUND_CHECKS: The task summary containing background checks.",
+      "enum": [
+        "COMPLETE_TRAININGS",
+        "ACCEPT_POLICIES",
+        "COMPLETE_CUSTOM_TASKS",
+        "COMPLETE_CUSTOM_OFFBOARDING_TASKS",
+        "INSTALL_DEVICE_MONITORING",
+        "COMPLETE_BACKGROUND_CHECKS"
+      ],
+      "type": "string"
+    },
+    "TaskStatus": {
+      "description": "The status of a task.\n- COMPLETE: The task has been completed.\n- DUE_SOON: The task is due soon.\n- OVERDUE: The task is overdue.\n- NONE: The task is not assigned.",
+      "enum": [
+        "COMPLETE",
+        "DUE_SOON",
+        "OVERDUE",
+        "NONE"
+      ],
+      "type": "string"
+    },
+    "CIA": {
+      "type": "string",
+      "enum": [
+        "Confidentiality",
+        "Integrity",
+        "Availability"
+      ]
+    },
+    "UNCATEGORIZED": {
+      "type": "string",
+      "enum": [
+        "Uncategorized"
+      ],
+      "nullable": false
+    },
+    "Treatment": {
+      "type": "string",
+      "enum": [
+        "Mitigate",
+        "Transfer",
+        "Avoid",
+        "Accept"
+      ]
+    },
+    "NO_TREATMENT_TYPE": {
+      "type": "string",
+      "enum": [
+        "No treatment type"
+      ],
+      "nullable": false
+    },
+    "ScoreGroup": {
+      "type": "string",
+      "enum": [
+        "Very low",
+        "Low",
+        "Med",
+        "High",
+        "Critical"
+      ]
+    },
+    "ReviewStatus": {
+      "type": "string",
+      "enum": [
+        "APPROVED",
+        "DRAFT",
+        "NOT_REVIEWED",
+        "AWAITING_SUBMISSION",
+        "PENDING_APPROVAL",
+        "REQUESTED_CHANGES"
+      ]
+    },
+    "RiskScenarioType": {
+      "type": "string",
+      "enum": [
+        "Risk Scenario",
+        "Enterprise Risk"
+      ]
+    },
+    "CreateRiskScenarioInput": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "This describes an actual or potential risk to your organization's people, processes, technology, data, and facilities.\nDocument actual issues or likely scenarios based on your specific environment or a potential vulnerability."
+        },
+        "riskId": {
+          "type": "string",
+          "description": "The unique ID of the risk. Used to reference and update existing risks.\nWe will auto-generate one if one isn't specified."
+        },
+        "isSensitive": {
+          "type": "boolean",
+          "description": "If set to true this risk can only be seen by its owner or users with Admin, RiskSensitiveManage or RiskSensitiveView permissions.",
+          "deprecated": true
+        },
+        "likelihood": {
+          "type": "number",
+          "format": "double",
+          "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings."
+        },
+        "impact": {
+          "type": "number",
+          "format": "double",
+          "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings."
+        },
+        "residualLikelihood": {
+          "type": "number",
+          "format": "double",
+          "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
+        },
+        "residualImpact": {
+          "type": "number",
+          "format": "double",
+          "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
+        },
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "The list of categories this risk scenario belongs to.\nEach element in the list will become a new custom category if it doesn't match an existing one.\nYou can reference the current category options in the Risk Management settings and/or enter new values."
+        },
+        "ciaCategories": {
+          "items": {
+            "$ref": "#/components/schemas/CIA"
+          },
+          "type": "array",
+          "description": "Enter a list of the following for the type of risk documented:\n- Confidentiality: Risk to data stores, customer/sensitive information, etc.\n- Integrity: Risk to accuracy or integrity of system settings and/or data\n- Availability: Risk to normal service operations and critical system functionality"
+        },
+        "treatment": {
+          "$ref": "#/components/schemas/Treatment",
+          "description": "Indicate how your leadership team wants to address an identified risk. Please note: not all risks need to be addressed immediately (or at all). Your Risk Treatment decision will depend on multiple factors, such as your organization's risk tolerance and the value of the asset that the risk is associated with. The options are:\n- Mitigate: Identify controls to put in place or tasks to be done that will reduce the risk score.\n- Transfer: Move risk outside of your organization's set of responsibilities e.g. get cyber liability insurance.\n- Avoid: Stop doing the activity which is causing the risk to your organization and its assets.\n- Accept: Decide to live with the risk and take no further actions. - Accept: decide to live with the risk; this may be because it is highly unlikely, has a low financial or operational impact, or the cost and effort to treat the risk far exceeds the value of the asset"
+        },
+        "owner": {
+          "type": "string",
+          "description": "The person responsible for tracking and mitigating this risk scenario. This should be the email address of a valid Vanta user."
+        },
+        "note": {
+          "type": "string",
+          "description": "Additional context about the risk scenario and why it has specific impact and likelihood scores."
+        },
+        "riskRegister": {
+          "type": "string",
+          "description": "Name of the risk register to associate with this scenario.\n\nThis field must be set if the organization has multiple registers."
+        },
+        "customFields": {
+          "items": {
+            "$ref": "#/components/schemas/CustomAttribute"
+          },
+          "type": "array",
+          "description": "The list of custom attributes.\nYou can reference existing custom attributes in the Risk Management settings and/or create new ones.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
+        },
+        "type": {
+          "$ref": "#/components/schemas/RiskScenarioType",
+          "description": "The type of risk scenario to create.\n- \"Risk Scenario\": Standard risk scenario (default)\n- \"Enterprise Risk\": Enterprise-level risk (requires Enterprise Risk Management SKU)\n\nEnterprise risks cannot be associated with a risk register.\nDefaults to \"Risk Scenario\" if not specified."
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomAttribute": {
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateRiskScenarioInput": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "This describes an actual or potential risk to your organization's people, processes, technology, data, and facilities.\nDocument actual issues or likely scenarios based on your specific environment or a potential vulnerability."
+        },
+        "isSensitive": {
+          "type": "boolean",
+          "description": "If set to true this risk can only be seen by its owner or users with Admin, RiskSensitiveManage or RiskSensitiveView permissions.",
+          "deprecated": true
+        },
+        "likelihood": {
+          "type": "number",
+          "format": "double",
+          "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings."
+        },
+        "impact": {
+          "type": "number",
+          "format": "double",
+          "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings."
+        },
+        "residualLikelihood": {
+          "type": "number",
+          "format": "double",
+          "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
+        },
+        "residualImpact": {
+          "type": "number",
+          "format": "double",
+          "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
+        },
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "The list of categories this risk scenario belongs to.\nEach element in the list will become a new custom category if it doesn't match an existing one.\nYou can reference the current category options in the Risk Management settings and/or enter new values."
+        },
+        "ciaCategories": {
+          "items": {
+            "$ref": "#/components/schemas/CIA"
+          },
+          "type": "array",
+          "description": "Enter a list of the following for the type of risk documented:\n- Confidentiality: Risk to data stores, customer/sensitive information, etc.\n- Integrity: Risk to accuracy or integrity of system settings and/or data\n- Availability: Risk to normal service operations and critical system functionality"
+        },
+        "treatment": {
+          "$ref": "#/components/schemas/Treatment",
+          "description": "Indicate how your leadership team wants to address an identified risk. Please note: not all risks need to be addressed immediately (or at all). Your Risk Treatment decision will depend on multiple factors, such as your organization's risk tolerance and the value of the asset that the risk is associated with. The options are:\n- Mitigate: Identify controls to put in place or tasks to be done that will reduce the risk score.\n- Transfer: Move risk outside of your organization's set of responsibilities e.g. get cyber liability insurance.\n- Avoid: Stop doing the activity which is causing the risk to your organization and its assets.\n- Accept: Decide to live with the risk and take no further actions. - Accept: decide to live with the risk; this may be because it is highly unlikely, has a low financial or operational impact, or the cost and effort to treat the risk far exceeds the value of the asset"
+        },
+        "owner": {
+          "type": "string",
+          "nullable": true,
+          "description": "The person responsible for tracking and mitigating this risk scenario. This should be the email address of a valid Vanta user."
+        },
+        "note": {
+          "type": "string",
+          "description": "Additional context about the risk scenario and why it has specific impact and likelihood scores."
+        },
+        "riskRegister": {
+          "type": "string",
+          "description": "Name of the risk register to associate with this scenario."
+        },
+        "customFields": {
+          "items": {
+            "$ref": "#/components/schemas/CustomAttribute"
+          },
+          "type": "array",
+          "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "LinkControlsToRiskScenarioInput": {
+      "properties": {
+        "controlLinks": {
+          "items": {
+            "$ref": "#/components/schemas/ControlLinkToRiskScenarioInput"
+          },
+          "type": "array",
+          "description": "List of control links to create for the risk scenario. Control links that\nalready exist on the scenario are a no-op; unknown identifiers cause the\nrequest to fail."
+        }
+      },
+      "required": [
+        "controlLinks"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ControlLinkToRiskScenarioInput": {
+      "properties": {
+        "controlId": {
+          "type": "string",
+          "description": "Control to link to the risk scenario.\nAccepts Vanta control shorthands (e.g. `\"A.12.2.1\"`), custom-control\nshorthand names, or object IDs."
+        },
+        "linkType": {
+          "$ref": "#/components/schemas/LinkControlsToRiskScenarioLinkType",
+          "description": "How to link this control to the risk scenario.\nCurrently only `TREATMENT` links are supported."
+        }
+      },
+      "required": [
+        "controlId",
+        "linkType"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "LinkControlsToRiskScenarioLinkType": {
+      "type": "string",
+      "enum": [
+        "TREATMENT"
+      ],
+      "nullable": false
+    },
+    "SubmitRiskForApprovalInput": {
+      "properties": {
+        "comment": {
+          "type": "string",
+          "description": "Optional comment to include with the approval request."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "TestStatus": {
+      "enum": [
+        "OK",
+        "DEACTIVATED",
+        "NEEDS_ATTENTION",
+        "IN_PROGRESS",
+        "INVALID",
+        "NOT_APPLICABLE"
+      ],
+      "type": "string"
+    },
+    "TestCategory": {
+      "description": "Categories for tests.",
+      "enum": [
+        "ACCOUNTS_ACCESS",
+        "ACCOUNT_SECURITY",
+        "ACCOUNT_SETUP",
+        "COMPUTERS",
+        "CUSTOM",
+        "DATA_STORAGE",
+        "EMPLOYEES",
+        "INFRASTRUCTURE",
+        "IT",
+        "LOGGING",
+        "MONITORING_ALERTS",
+        "PEOPLE",
+        "POLICIES",
+        "RISK_ANALYSIS",
+        "SECURITY_ALERT_MANAGEMENT",
+        "SOFTWARE_DEVELOPMENT",
+        "VENDORS",
+        "VULNERABILITY_MANAGEMENT"
+      ],
+      "type": "string"
+    },
+    "EntityStatus": {
+      "enum": [
+        "FAILING",
+        "DEACTIVATED"
+      ],
+      "type": "string"
+    },
+    "UpdateTrustCenterInput": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "nullable": true,
+          "description": "Custom title for the Trust Center. If null is passed in, the current\ncustom title is unset and the default title is restored."
+        },
+        "companyDescription": {
+          "type": "string",
+          "nullable": true,
+          "description": "Company description displayed in the Trust Center header. If null is passed\nin, the current company description is unset."
+        },
+        "bannerSetting": {
+          "properties": {
+            "endColor": {
+              "type": "string",
+              "description": "End color of the banner. Only applies if setting is GRADIENT."
+            },
+            "startColor": {
+              "type": "string",
+              "description": "Start color of the banner. Only applies if setting is GRADIENT."
+            },
+            "setting": {
+              "$ref": "#/components/schemas/ApiSelectableBannerSetting",
+              "description": "The banner style to use. Must be one of \"GRADIENT\" or \"MINIMAL\"."
+            }
+          },
+          "required": [
+            "setting"
+          ],
+          "type": "object",
+          "description": "The banner configuration of the Trust Center."
+        },
+        "customTheme": {
+          "properties": {
+            "secondary": {
+              "type": "string",
+              "nullable": true,
+              "description": "Secondary color for the theme. If null is passed in, resets to default."
+            },
+            "primary": {
+              "type": "string",
+              "nullable": true,
+              "description": "Primary color for the theme. If null is passed in, resets to default."
+            }
+          },
+          "type": "object",
+          "description": "The custom theme configuration for the Trust Center."
+        },
+        "privacyPolicy": {
+          "type": "string",
+          "nullable": true,
+          "description": "Privacy policy URL to set on the Trust Center. If null is passed in, unsets\nthe current privacy policy."
+        },
+        "isPublic": {
+          "type": "boolean",
+          "description": "Whether the Trust Center is public or not."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ApiSelectableBannerSetting": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/BannerSetting.GRADIENT"
+        },
+        {
+          "$ref": "#/components/schemas/BannerSetting.MINIMAL"
+        }
+      ]
+    },
+    "BannerSetting.GRADIENT": {
+      "enum": [
+        "GRADIENT"
+      ],
+      "type": "string"
+    },
+    "BannerSetting.MINIMAL": {
+      "enum": [
+        "MINIMAL"
+      ],
+      "type": "string"
+    },
+    "ApproveTrustCenterAccessRequestInput": {
+      "properties": {
+        "expirationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date access should expire for this viewer. If a date isn't provided,\naccess will not expire."
+        },
+        "isNdaRequired": {
+          "type": "boolean",
+          "description": "Whether to require an NDA for the viewer. Defaults to true."
+        },
+        "resourceIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Identifiers for the resources that this viewer should have access to. If\nthis field is omitted, the viewer will have access to all resources that\nthey requested."
+        },
+        "accessLevel": {
+          "$ref": "#/components/schemas/ViewerAccessLevel",
+          "description": "Approved access level of the viewer. If this field is omitted, the viewer\nwill have the access level they requested."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ViewerAccessLevel": {
+      "description": "The access level of the viewer.\nFULL_ACCESS means having access to all resources on the trust center.\nPARTIAL_ACCESS means having access to all public resources and a select list of requestable resources.",
+      "enum": [
+        "FULL_ACCESS",
+        "PARTIAL_ACCESS"
+      ],
+      "type": "string"
+    },
+    "ActivityEventType": {
+      "enum": [
+        "PAGE_VIEW",
+        "RESOURCE_DOWNLOAD",
+        "RESOURCE_VIEW",
+        "VIDEO_PLAY"
+      ],
+      "type": "string"
+    },
+    "AddOrEditTrustCenterControlCategoryInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the category."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddControlToTrustCenterInput": {
+      "properties": {
+        "controlId": {
+          "type": "string",
+          "description": "ID of the control to add to the Trust Center."
+        },
+        "categoryIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "IDs of the categories to add the control to. This cannot be empty.",
+          "minItems": 1
+        }
+      },
+      "required": [
+        "controlId",
+        "categoryIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddOrEditTrustCenterFaqInput": {
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "The FAQ question."
+        },
+        "answer": {
+          "type": "string",
+          "description": "The FAQ answer."
+        }
+      },
+      "required": [
+        "question",
+        "answer"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditTrustCenterResourceInput": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title of the Trust Center document."
+        },
+        "isPublic": {
+          "type": "boolean",
+          "description": "Boolean determining whether the document is publicly available."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the uploaded document."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddTrustCenterSubprocessorInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the subprocessor."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL of the subprocessor."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the subprocessor."
+        },
+        "location": {
+          "type": "string",
+          "description": "Where this subprocessor is deployed."
+        },
+        "purpose": {
+          "type": "string",
+          "description": "The purpose that the subprocessor serves."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditTrustCenterSubprocessorInput": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "What to set the subprocessor description to. If null is passed in, the\nsubprocessor's current description is unset."
+        },
+        "location": {
+          "type": "string",
+          "nullable": true,
+          "description": "What to set the subprocessor location to. If null is passed in, the\nsubprocessor's current description is unset."
+        },
+        "purpose": {
+          "type": "string",
+          "nullable": true,
+          "description": "What to set the subprocessor purpose to. If null is passed in, the\nsubprocessor's current description is unset."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CreateTrustCenterSubscriberGroupInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the subscriber group."
+        },
+        "subscriberIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of subscriber IDs in the group."
+        }
+      },
+      "required": [
+        "name",
+        "subscriberIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditTrustCenterSubscriberGroupInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Updated name of the subscriber group."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddTrustCenterSubscriberInput": {
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email of the subscriber."
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SetGroupsForTrustCenterSubscriberInput": {
+      "properties": {
+        "groupIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Group IDs to set for the subscriber. The subscriber will be removed from\nany groups not included in this list."
+        }
+      },
+      "required": [
+        "groupIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddTrustCenterUpdateInput": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title of the update."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the update."
+        },
+        "category": {
+          "$ref": "#/components/schemas/UpdateCategory",
+          "description": "Category of the update."
+        },
+        "visibilityType": {
+          "$ref": "#/components/schemas/UpdateVisibilityType",
+          "description": "Visibility type of the update. This field is in Beta and not widely used yet."
+        },
+        "notifiedEmails": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Emails to notify about the update. This field is in Beta and not widely used yet."
+        },
+        "notificationTarget": {
+          "$ref": "#/components/schemas/UpdateNotificationTarget",
+          "description": "Target audience for notifications. Can hold a value of ALL, GROUPS, or NONE. This field is in Beta and not widely used yet."
+        },
+        "subscriberGroupIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "IDs of subscriber groups to notify. Required if notificationTarget is GROUPS. This field is in Beta and not widely used yet."
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "category"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateCategory": {
+      "description": "The possible categories for a Trust Center update.",
+      "enum": [
+        "GENERAL",
+        "COMPLIANCE",
+        "SECURITY",
+        "PRIVACY",
+        "INCIDENT",
+        "ROADMAP"
+      ],
+      "type": "string"
+    },
+    "UpdateVisibilityType": {
+      "description": "Visibility of a Trust Center update.",
+      "enum": [
+        "PUBLIC",
+        "PRIVATE"
+      ],
+      "type": "string"
+    },
+    "UpdateNotificationTarget": {
+      "description": "Target recipients for notifications",
+      "enum": [
+        "ALL",
+        "GROUPS",
+        "NONE"
+      ],
+      "type": "string"
+    },
+    "EditTrustCenterUpdateInput": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title of the update."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the update."
+        },
+        "category": {
+          "$ref": "#/components/schemas/UpdateCategory",
+          "description": "Category of the update."
+        },
+        "visibilityType": {
+          "$ref": "#/components/schemas/UpdateVisibilityType",
+          "description": "Visibility type of the update. This field is in Beta and not widely used yet."
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "category"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SendTrustCenterUpdateNotificationsInput": {
+      "properties": {
+        "emails": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Additional email addresses to notify about this Trust Center update in addition to the existing Trust Center subscribers.\nDuplicate emails are deduplicated to ensure each recipient gets only one notification.",
+          "maxItems": 10
+        },
+        "subscriberGroupIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "IDs of subscriber groups to notify.",
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "emails",
+        "subscriberGroupIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddTrustCenterViewerInput": {
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email of the viewer."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the viewer."
+        },
+        "companyName": {
+          "type": "string",
+          "description": "Name of the viewer's company."
+        },
+        "isNdaRequired": {
+          "type": "boolean",
+          "description": "Whether to require an NDA for the viewer."
+        },
+        "expirationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date access should expire for this viewer. If a date isn't provided,\naccess will not expire."
+        },
+        "resourceIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Identifiers for the resources that this viewer should have access to. If\nthis field is omitted, the viewer will have access to all resources on the\nTrust Center."
+        },
+        "accessLevel": {
+          "$ref": "#/components/schemas/ViewerAccessLevel",
+          "description": "Access level for the viewer."
+        }
+      },
+      "required": [
+        "email",
+        "name",
+        "companyName",
+        "isNdaRequired",
+        "accessLevel"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CreateVendorInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the vendor.",
+          "maxLength": 2000
+        },
+        "websiteUrl": {
+          "type": "string",
+          "description": "The url of the vendor's website.",
+          "maxLength": 2000
+        },
+        "accountManagerName": {
+          "type": "string",
+          "description": "Name of the external account manager for this vendor.",
+          "maxLength": 2000
+        },
+        "accountManagerEmail": {
+          "type": "string",
+          "description": "Email of the external account manager for this vendor.",
+          "maxLength": 2000
+        },
+        "securityOwnerUserId": {
+          "type": "string",
+          "description": "The Vanta user ID of the security owner of this vendor."
+        },
+        "servicesProvided": {
+          "type": "string",
+          "description": "Services provided by the vendor."
+        },
+        "additionalNotes": {
+          "type": "string",
+          "description": "Miscellaneous notes about the vendor",
+          "maxLength": 2000
+        },
+        "businessOwnerUserId": {
+          "type": "string",
+          "description": "The Vanta user ID of the business owner of this vendor."
+        },
+        "contractStartDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the contract with the vendor is up for renewal."
+        },
+        "contractRenewalDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the contract with the vendor is up for renewal."
+        },
+        "contractTerminationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the contract with the vendor was terminated."
+        },
+        "isVisibleToAuditors": {
+          "type": "boolean",
+          "description": "Whether or not auditors can view this vendor."
+        },
+        "authDetails": {
+          "properties": {
+            "passwordMinimumLength": {
+              "type": "number",
+              "format": "double",
+              "description": "Minimum number for chacters required for passwords for this vendor."
+            },
+            "passwordRequiresSymbol": {
+              "type": "boolean",
+              "description": "Whether or not the vendor requires passwords to have a symbol."
+            },
+            "passwordRequiresNumber": {
+              "type": "boolean",
+              "description": "Whether or not the vendor requires passwords to have a number."
+            },
+            "passwordMFA": {
+              "type": "boolean",
+              "description": "Whether or not the vendor requires password multi factor authentication."
+            },
+            "method": {
+              "$ref": "#/components/schemas/VendorAuthenticationMethod",
+              "description": "The authentication method the vendor uses."
+            }
+          },
+          "type": "object",
+          "description": "The authentication details about the vendor."
+        },
+        "status": {
+          "$ref": "#/components/schemas/VendorStatus",
+          "description": "The current status of the vendor."
+        },
+        "category": {
+          "type": "string",
+          "description": "The vendor's category."
+        },
+        "inherentRiskLevel": {
+          "$ref": "#/components/schemas/VendorRiskLevel",
+          "description": "The inherent risk level of the vendor."
+        },
+        "residualRiskLevel": {
+          "$ref": "#/components/schemas/VendorRiskLevel",
+          "description": "The residual risk level of the vendor."
+        },
+        "vendorHeadquarters": {
+          "$ref": "#/components/schemas/CountryCode",
+          "description": "The vendor's headquarters."
+        },
+        "contractAmount": {
+          "$ref": "#/components/schemas/VendorContractAmount",
+          "description": "The contract amount for the vendor."
+        },
+        "customFields": {
+          "items": {
+            "$ref": "#/components/schemas/CustomField"
+          },
+          "type": "array",
+          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors"
+        },
+        "frameworkScope": {
+          "$ref": "#/components/schemas/VendorFrameworkScope",
+          "description": "Framework scoping configuration for this vendor.\nDetermines which compliance frameworks the vendor applies to."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VendorAuthenticationMethod": {
+      "description": "The authentication method a vendor uses:\n- AUTH_0: The vendor authenticates using Auth0\n- AZURE_AD: The vendor authenticates using Azure Active Directory\n- G_SUITE: The vendor authenticates using Google Workspace\n- O_AUTH: The vendor authenticates using OAuth\n- O365: The vendor authenticates using Office 365\n- OKTA: The vendor authenticates using Okta\n- ONE_LOGIN: The vendor authenticates using OneLogin\n- OWA: The vendor authenticates using OWA\n- SSO: The vendor authenticates using SSO\n- USERNAME_PASSWORD: The vendor authenticates using usernames and passwords",
+      "enum": [
+        "AUTH_0",
+        "AZURE_AD",
+        "GOOGLE_WORKSPACE",
+        "O_AUTH",
+        "O365",
+        "OKTA",
+        "ONE_LOGIN",
+        "OWA",
+        "SSO",
+        "USERNAME_PASSWORD"
+      ],
+      "type": "string"
+    },
+    "VendorStatus": {
+      "description": "The current state of a vendor:\n- MANAGED: The vendor is actively managed.\n- ARCHIVED: The vendor has been archived\n- IN_PROCUREMENT: The vendor is in the procurement process",
+      "enum": [
+        "MANAGED",
+        "ARCHIVED",
+        "IN_PROCUREMENT"
+      ],
+      "type": "string"
+    },
+    "VendorRiskLevel": {
+      "description": "The risk level of a vendor:\n- CRITICAL: The vendor has a critical security risk\n- HIGH: The vendor has a high security risk\n- MEDIUM: The vendor has a medium security risk\n- LOW: The vendor has a low security risk\n- UNSCORED: The vendor has not been given a risk level",
+      "enum": [
+        "CRITICAL",
+        "HIGH",
+        "LOW",
+        "MEDIUM",
+        "UNSCORED"
+      ],
+      "type": "string"
+    },
+    "CountryCode": {
+      "enum": [
+        "EUE",
+        "AND",
+        "ARE",
+        "AFG",
+        "ATG",
+        "AIA",
+        "ALB",
+        "ARM",
+        "AGO",
+        "ATA",
+        "ARG",
+        "ASM",
+        "AUT",
+        "AUS",
+        "ABW",
+        "ALA",
+        "AZE",
+        "BIH",
+        "BRB",
+        "BGD",
+        "BEL",
+        "BFA",
+        "BGR",
+        "BHR",
+        "BDI",
+        "BEN",
+        "BLM",
+        "BMU",
+        "BRN",
+        "BOL",
+        "BES",
+        "BRA",
+        "BHS",
+        "BTN",
+        "BVT",
+        "BWA",
+        "BLR",
+        "BLZ",
+        "CAN",
+        "CCK",
+        "COD",
+        "CAF",
+        "COG",
+        "CHE",
+        "CIV",
+        "COK",
+        "CHL",
+        "CMR",
+        "CHN",
+        "COL",
+        "CRI",
+        "CUB",
+        "CPV",
+        "CUW",
+        "CXR",
+        "CYP",
+        "CZE",
+        "DEU",
+        "DJI",
+        "DNK",
+        "DMA",
+        "DOM",
+        "DZA",
+        "ECU",
+        "EST",
+        "EGY",
+        "ESH",
+        "ERI",
+        "ESP",
+        "ETH",
+        "FIN",
+        "FJI",
+        "FLK",
+        "FSM",
+        "FRO",
+        "FRA",
+        "GAB",
+        "ENG",
+        "SCT",
+        "GBR",
+        "WAL",
+        "NIR",
+        "GRD",
+        "GEO",
+        "GUF",
+        "GGY",
+        "GHA",
+        "GIB",
+        "GRL",
+        "GMB",
+        "GIN",
+        "GLP",
+        "GNQ",
+        "GRC",
+        "SGS",
+        "GTM",
+        "GUM",
+        "GNB",
+        "GUY",
+        "HKG",
+        "HMD",
+        "HND",
+        "HRV",
+        "HTI",
+        "HUN",
+        "IDN",
+        "IRL",
+        "ISR",
+        "IMN",
+        "IND",
+        "IOT",
+        "IRQ",
+        "IRN",
+        "ISL",
+        "ITA",
+        "JEY",
+        "JAM",
+        "JOR",
+        "JPN",
+        "KEN",
+        "KGZ",
+        "KHM",
+        "KIR",
+        "COM",
+        "KNA",
+        "PRK",
+        "KOR",
+        "KWT",
+        "CYM",
+        "KAZ",
+        "LAO",
+        "LBN",
+        "LCA",
+        "LIE",
+        "LKA",
+        "LBR",
+        "LSO",
+        "LTU",
+        "LUX",
+        "LVA",
+        "LBY",
+        "MAR",
+        "MCO",
+        "MDA",
+        "MNE",
+        "MAF",
+        "MDG",
+        "MHL",
+        "MKD",
+        "MLI",
+        "MMR",
+        "MNG",
+        "MAC",
+        "MNP",
+        "MTQ",
+        "MRT",
+        "MSR",
+        "MLT",
+        "MUS",
+        "MDV",
+        "MWI",
+        "MEX",
+        "MYS",
+        "MOZ",
+        "NAM",
+        "NCL",
+        "NER",
+        "NFK",
+        "NGA",
+        "NIC",
+        "NLD",
+        "NOR",
+        "NPL",
+        "NRU",
+        "NIU",
+        "NZL",
+        "OMN",
+        "PAN",
+        "PER",
+        "PYF",
+        "PNG",
+        "PHL",
+        "PAK",
+        "POL",
+        "SPM",
+        "PCN",
+        "PRI",
+        "PSE",
+        "PRT",
+        "PLW",
+        "PRY",
+        "QAT",
+        "REU",
+        "ROU",
+        "SRB",
+        "RUS",
+        "RWA",
+        "SAU",
+        "SLB",
+        "SYC",
+        "SDN",
+        "SWE",
+        "SGP",
+        "SHN",
+        "SVN",
+        "SJM",
+        "SVK",
+        "SLE",
+        "SMR",
+        "SEN",
+        "SOM",
+        "SUR",
+        "SSD",
+        "STP",
+        "SLV",
+        "SXM",
+        "SYR",
+        "SWZ",
+        "TCA",
+        "TCD",
+        "ATF",
+        "TGO",
+        "THA",
+        "TJK",
+        "TKL",
+        "TLS",
+        "TKM",
+        "TUN",
+        "TON",
+        "TUR",
+        "TTO",
+        "TUV",
+        "TWN",
+        "TZA",
+        "UKR",
+        "UGA",
+        "UMI",
+        "USA",
+        "URY",
+        "UZB",
+        "VAT",
+        "VCT",
+        "VEN",
+        "VGB",
+        "VIR",
+        "VNM",
+        "VUT",
+        "WLF",
+        "WSM",
+        "YEM",
+        "MYT",
+        "ZAF",
+        "ZMB",
+        "ZWE"
+      ],
+      "type": "string"
+    },
+    "VendorContractAmount": {
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "description": "The amount of the contract."
+        },
+        "currency": {
+          "$ref": "#/components/schemas/CurrencyCode",
+          "description": "The currency of the contract."
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CurrencyCode": {
+      "enum": [
+        "ARS",
+        "AUD",
+        "BRL",
+        "CAD",
+        "COP",
+        "CZK",
+        "DKK",
+        "EUR",
+        "GBP",
+        "ILS",
+        "INR",
+        "JPY",
+        "MXN",
+        "NOK",
+        "NZD",
+        "PHP",
+        "PKR",
+        "PLN",
+        "RSD",
+        "SEK",
+        "SGD",
+        "UAH",
+        "USD",
+        "ZAR"
+      ],
+      "type": "string"
+    },
+    "VendorFrameworkScope": {
+      "description": "Framework scoping configuration for a vendor.\nDetermines which compliance frameworks the vendor applies to.",
+      "properties": {
+        "scopeType": {
+          "type": "string",
+          "enum": [
+            "ALL",
+            "PARTIAL",
+            "NONE"
+          ],
+          "description": "The scope type:\n- ALL: Vendor applies to all frameworks\n- PARTIAL: Vendor applies to specific frameworks (requires frameworkIds)\n- NONE: Vendor excluded from all frameworks"
+        },
+        "frameworkIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Framework IDs the vendor applies to. Required when scopeType is PARTIAL.",
+          "example": [
+            "soc2",
+            "hipaa"
+          ]
+        }
+      },
+      "required": [
+        "scopeType"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateVendorInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the vendor.",
+          "maxLength": 2000
+        },
+        "websiteUrl": {
+          "type": "string",
+          "nullable": true,
+          "description": "The url of the vendor's website.",
+          "maxLength": 2000
+        },
+        "accountManagerName": {
+          "type": "string",
+          "nullable": true,
+          "description": "Name of the external account manager for this vendor.",
+          "maxLength": 2000
+        },
+        "accountManagerEmail": {
+          "type": "string",
+          "description": "Email of the external account manager for this vendor.",
+          "maxLength": 2000
+        },
+        "securityOwnerUserId": {
+          "type": "string",
+          "nullable": true,
+          "description": "The Vanta user ID of the security owner of this vendor."
+        },
+        "servicesProvided": {
+          "type": "string",
+          "nullable": true,
+          "description": "Services provided by the vendor."
+        },
+        "additionalNotes": {
+          "type": "string",
+          "nullable": true,
+          "description": "Miscellaneous notes about the vendor"
+        },
+        "businessOwnerUserId": {
+          "type": "string",
+          "nullable": true,
+          "description": "The Vanta user ID of the business owner of this vendor."
+        },
+        "contractStartDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "When the contract with the vendor is up for renewal."
+        },
+        "contractRenewalDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "When the contract with the vendor is up for renewal."
+        },
+        "contractTerminationDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "When the contract with the vendor was terminated."
+        },
+        "isVisibleToAuditors": {
+          "type": "boolean",
+          "description": "Whether or not auditors can view this vendor."
+        },
+        "authDetails": {
+          "properties": {
+            "passwordMinimumLength": {
+              "type": "number",
+              "format": "double",
+              "description": "Minimum number for chacters required for passwords for this vendor."
+            },
+            "passwordRequiresSymbol": {
+              "type": "boolean",
+              "description": "Whether or not the vendor requires passwords to have a symbol."
+            },
+            "passwordRequiresNumber": {
+              "type": "boolean",
+              "description": "Whether or not the vendor requires passwords to have a number."
+            },
+            "passwordMFA": {
+              "type": "boolean",
+              "description": "Whether or not the vendor requires password multi factor authentication."
+            },
+            "method": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/VendorAuthenticationMethod"
+                }
+              ],
+              "nullable": true,
+              "description": "The authentication method the vendor uses."
+            }
+          },
+          "type": "object",
+          "description": "The authentication details about the vendor."
+        },
+        "status": {
+          "$ref": "#/components/schemas/VendorStatus",
+          "description": "The current status of the vendor."
+        },
+        "category": {
+          "type": "string",
+          "description": "The vendor's category."
+        },
+        "inherentRiskLevel": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorRiskLevel"
+            }
+          ],
+          "nullable": true,
+          "description": "The inherent risk level of the vendor.\nSetting it to null means it will be auto-scored by Vanta based on the risk attributes and rubric"
+        },
+        "residualRiskLevel": {
+          "$ref": "#/components/schemas/VendorRiskLevel",
+          "description": "The residual risk level of the vendor."
+        },
+        "riskAttributeIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "A list of risk attribute ids the vendor has been assigned."
+        },
+        "vendorHeadquarters": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/CountryCode"
+            }
+          ],
+          "nullable": true,
+          "description": "The vendor's headquarters."
+        },
+        "contractAmount": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorContractAmount"
+            }
+          ],
+          "nullable": true,
+          "description": "The contract amount for the vendor."
+        },
+        "customFields": {
+          "items": {
+            "$ref": "#/components/schemas/CustomField"
+          },
+          "type": "array",
+          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors"
+        },
+        "frameworkScope": {
+          "$ref": "#/components/schemas/VendorFrameworkScope",
+          "description": "Framework scoping configuration for this vendor.\nDetermines which compliance frameworks the vendor applies to."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CreateFindingInput": {
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "The content of the finding."
+        },
+        "riskStatus": {
+          "$ref": "#/components/schemas/FindingRiskStatus",
+          "description": "The risk status of the finding."
+        },
+        "remediation": {
+          "properties": {
+            "state": {
+              "$ref": "#/components/schemas/FindingRemediationState",
+              "description": "The state of the remediation."
+            },
+            "requirementNotes": {
+              "type": "string",
+              "description": "A string containing the information needed to properly remediate the finding."
+            }
+          },
+          "type": "object",
+          "description": "Remediation information about the finding. Will only be populated if riskStatus is set to \"REMEDIATE\"."
+        },
+        "securityReviewId": {
+          "type": "string",
+          "description": "Unique identifier for a security review."
+        },
+        "documentId": {
+          "type": "string",
+          "description": "Unique identifier for a document."
+        }
+      },
+      "required": [
+        "content",
+        "riskStatus"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "FindingRiskStatus": {
+      "description": "The status of the finding:\n- ACCEPT: The finding and its risk has been accepted and no follow up is required.\n- REMEDIATE: The finding needs to be remediated in some way.\n- NONE: The finding is not related to an observed risk that needs to be accepted or remediated.",
+      "enum": [
+        "ACCEPT",
+        "REMEDIATE",
+        "NONE"
+      ],
+      "type": "string"
+    },
+    "FindingRemediationState": {
+      "description": "The current state of a finding remediation:\n- OPEN: The finding has not been remediated and still needs to be addressed.\n- CLOSED: The finding has been remediated and no further action is needed.",
+      "enum": [
+        "OPEN",
+        "CLOSED"
+      ],
+      "type": "string"
+    },
+    "UpdateFindingInput": {
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "The content of the finding."
+        },
+        "riskStatus": {
+          "$ref": "#/components/schemas/FindingRiskStatus",
+          "description": "The risk status of the finding."
+        },
+        "remediation": {
+          "properties": {
+            "state": {
+              "$ref": "#/components/schemas/FindingRemediationState",
+              "description": "The state of the remediation."
+            },
+            "requirementNotes": {
+              "type": "string",
+              "description": "A string containing the information needed to properly remediate the finding."
+            }
+          },
+          "type": "object",
+          "description": "Remediation information about the finding. Will only be populated if riskStatus is set to \"REMEDIATE\"."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ExternalFindingSeverity": {
+      "description": "ExternalFindingSeverity describes the severity of an external finding (Vulnerability or Security Alert)",
+      "enum": [
+        "CRITICAL",
+        "HIGH",
+        "LOW",
+        "MEDIUM"
+      ],
+      "type": "string"
+    },
+    "VulnerabilityDeactivateRequest": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of the vulnerability to deactivate."
+        },
+        "deactivateUntilDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date until which the vulnerability should be deactivated."
+        },
+        "deactivateReason": {
+          "type": "string",
+          "description": "Reason for deactivating the vulnerability.",
+          "minLength": 1
+        },
+        "shouldReactivateWhenFixable": {
+          "type": "boolean",
+          "description": "Determines whether or not vulnerabilities should reactivate when they become fixable."
+        }
+      },
+      "required": [
+        "id",
+        "deactivateReason",
+        "shouldReactivateWhenFixable"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VulnerableAssetType": {
+      "type": "string",
+      "enum": [
+        "SERVER",
+        "SERVERLESS_FUNCTION",
+        "CONTAINER",
+        "CONTAINER_REPOSITORY",
+        "CONTAINER_REPOSITORY_IMAGE",
+        "CODE_REPOSITORY",
+        "MANIFEST_FILE",
+        "WORKSTATION",
+        "OTHER"
+      ],
+      "description": "VulnerableAssetType describes the types of assets a vulnerability is on."
+    }
+  },
+  "audit": {
+    "AddAuditorInput": {
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email of the new user."
+        },
+        "givenName": {
+          "type": "string",
+          "description": "First name of the new user."
+        },
+        "familyName": {
+          "type": "string",
+          "description": "Last name of the new user."
+        }
+      },
+      "required": [
+        "email",
+        "givenName",
+        "familyName"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ListAuditsPageSize": {
+      "type": "integer",
+      "format": "int32",
+      "default": 10,
+      "description": "Controls the maximum number of items returned in one response from the listAudits API.\n\nWe have increased the pagination size for this endpoint to enable our upmarket audit firms to\nsync in a timely manner. The rest of the API will use a pagination size of 100.",
+      "minimum": 1,
+      "maximum": 200
+    },
+    "PageCursor": {
+      "type": "string",
+      "description": "A marker or pointer, telling the API where to start fetching items for the subsequent page in a paginated dataset.\nNote that the requested page will not include the item that corresponds to this cursor but will start from the one immediately\nafter this cursor."
+    },
+    "PageSize": {
+      "type": "integer",
+      "format": "int32",
+      "default": 10,
+      "description": "Controls the maximum number of items returned in one response from the API.",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "CreateCustomControlInput": {
+      "properties": {
+        "externalId": {
+          "type": "string",
+          "description": "The external id of the control."
+        },
+        "name": {
+          "type": "string",
+          "nullable": true,
+          "description": "The name of the control."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the control."
+        },
+        "effectiveDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The effective date of the control."
+        },
+        "category": {
+          "$ref": "#/components/schemas/ControlDomain",
+          "description": "The category of the control. See the ControlDomain enum for possible values."
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/components/schemas/FrameworkSection"
+          },
+          "type": "array",
+          "nullable": true,
+          "description": "Framework sections that the control should be mapped to."
+        },
+        "role": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/GdprRole"
+            }
+          ],
+          "nullable": true,
+          "description": "The GDPR role of the control, which specifies whether the data is being \"collected\" or \"processed\". See the GdprRole enum for possible values.\nThis field should only be included for controls that are to be mapped to the GDPR framework."
+        }
+      },
+      "required": [
+        "externalId",
+        "name",
+        "description",
+        "effectiveDate",
+        "category"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ControlDomain": {
+      "enum": [
+        "ARTIFICIAL_&_AUTONOMOUS_TECHNOLOGY",
+        "ASSET_MANAGEMENT",
+        "BUSINESS_CONTINUITY_&_DISASTER_RECOVERY",
+        "CAPACITY_&_PERFORMANCE_PLANNING",
+        "CHANGE_MANAGEMENT",
+        "CLOUD_SECURITY",
+        "COMPLIANCE",
+        "CONFIGURATION_MANAGEMENT",
+        "CONTINUOUS_MONITORING",
+        "CRYPTOGRAPHIC_PROTECTIONS",
+        "DATA_CLASSIFICATION_&_HANDLING",
+        "EMBEDDED_TECHNOLOGY",
+        "ENDPOINT_SECURITY",
+        "HUMAN_RESOURCES_SECURITY",
+        "IDENTIFICATION_&_AUTHENTICATION",
+        "INCIDENT_RESPONSE",
+        "INFORMATION_ASSURANCE",
+        "MAINTENANCE",
+        "MOBILE_DEVICE_MANAGEMENT",
+        "NETWORK SECURITY",
+        "PHYSICAL_&_ENVIRONMENTAL_SECURITY",
+        "PRIVACY",
+        "PROJECT_&_RESOURCE MANAGEMENT",
+        "RISK_MANAGEMENT",
+        "SECURE_ENGINEERING_&_ARCHITECTURE",
+        "SECURITY_AWARENESS_&_TRAINING",
+        "SECURITY_OPERATIONS",
+        "SECURITY_&_PRIVACY_GOVERNANCE",
+        "TECHNOLOGY_DEVELOPMENT_&_ACQUISITION",
+        "THIRD-PARTY_MANAGEMENT",
+        "THREAT_MANAGEMENT",
+        "VULNERABILITY_&_PATCH_MANAGEMENT",
+        "WEB_SECURITY",
+        "ADMINISTRATIVE",
+        "PHYSICAL",
+        "TECHNICAL",
+        "BASIC",
+        "DERIVED"
+      ],
+      "type": "string"
+    },
+    "FrameworkSection": {
+      "properties": {
+        "frameworkId": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/FrameworkId"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "sectionId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frameworkId",
+        "sectionId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "FrameworkId": {
+      "enum": [
+        "AU_E_8",
+        "AWS_FTR",
+        "CCPA",
+        "CIS_V8",
+        "CPS_234",
+        "DORA",
+        "FEDRAMP",
+        "GDPR",
+        "HIPAA",
+        "HITRUST_E1",
+        "ISO_27001",
+        "ISO_27001_2022",
+        "ISO_27017",
+        "ISO_27018",
+        "ISO_27701",
+        "ISO_42001",
+        "ISO_9001",
+        "MSFT_SSPA",
+        "MVSP",
+        "NIS_2D",
+        "NIST_171",
+        "NIST_53",
+        "NIST_AI_RMF",
+        "NIST_CSF",
+        "NIST_CSF_2",
+        "OFDSS",
+        "PCI_SAQ_A",
+        "PCI_SAQ_A_EP",
+        "PCI_SAQ_D_MERCHANT",
+        "PCI_SAQ_D_SP",
+        "PCI_DDS_4",
+        "SOC_2",
+        "SOX_ITGC",
+        "UK_CYBER_ESSENTIALS",
+        "US_DATA_PRIVACY"
+      ],
+      "type": "string"
+    },
+    "GdprRole": {
+      "enum": [
+        "BOTH",
+        "CONTROLLER",
+        "PROCESSOR"
+      ],
+      "type": "string"
+    },
+    "CreateCustomEvidenceRequestInput": {
+      "properties": {
+        "controlIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "A set of controls, referenced by id, to map the evidence to"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title for the evidence request"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description for the evidence request"
+        },
+        "cadence": {
+          "$ref": "#/components/schemas/RecurrenceDuration",
+          "description": "Renewal cadence"
+        },
+        "reminderWindow": {
+          "$ref": "#/components/schemas/RecurrenceDuration",
+          "description": "Duration representing when to send notifications, relative to renewal date"
+        },
+        "isRestricted": {
+          "type": "boolean",
+          "description": "Whether this document contains sensitive data and needs more restrictive read access"
+        },
+        "auditorEmail": {
+          "type": "string",
+          "description": "Email of the auditor who created the custom evidence request."
+        }
+      },
+      "required": [
+        "controlIds",
+        "title",
+        "description",
+        "cadence",
+        "reminderWindow",
+        "isRestricted",
+        "auditorEmail"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RecurrenceDuration": {
+      "enum": [
+        "P0D",
+        "P1D",
+        "P1W",
+        "P1M",
+        "P3M",
+        "P6M",
+        "P1Y"
+      ],
+      "type": "string"
+    },
+    "AuditEvidenceUpdateInput": {
+      "properties": {
+        "statusUpdate": {
+          "properties": {
+            "auditorEmail": {
+              "type": "string",
+              "description": "Email of the auditor who changed the state"
+            },
+            "stateTransition": {
+              "$ref": "#/components/schemas/AuditorEnabledStateTransition",
+              "description": "State change for audit evidence"
+            }
+          },
+          "required": [
+            "auditorEmail",
+            "stateTransition"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AuditorEnabledStateTransition": {
+      "type": "string",
+      "enum": [
+        "ACCEPT",
+        "MARK_APPLICABLE",
+        "FLAG",
+        "MARK_NA",
+        "READY_FOR_AUDIT"
+      ]
+    },
+    "AddCommentInput": {
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Text value of the comment"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email of author. Must match an existing Vanta user and the user must exist under the Audit Firm who is making the API request"
+        },
+        "creationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the comment was created in the external system"
+        }
+      },
+      "required": [
+        "text",
+        "email",
+        "creationDate"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CreateInformationRequestInput": {
+      "description": "Input for creating a new information request.\nNew requests are created in an initial state by default.",
+      "properties": {
+        "uniqueId": {
+          "type": "string",
+          "description": "External unique ID to prevent duplicate requests across audit systems.\nMust be unique within the audit. Used for idempotency."
+        },
+        "title": {
+          "type": "string",
+          "description": "Short, descriptive title summarizing what is being requested.\nMust be at least 1 character."
+        },
+        "requestType": {
+          "$ref": "#/components/schemas/InformationRequestType",
+          "description": "Scope of evidence required."
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "Detailed description explaining what evidence is needed.\nHelps the customer understand what to submit. Optional."
+        },
+        "frameworkCodes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Framework codes this request addresses.\nAn empty array if no framework codes are associated."
+        },
+        "cadence": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/InformationRequestCadence"
+            }
+          ],
+          "nullable": true,
+          "description": "How frequently this request recurs. Null or omitted for one-time requests."
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "Deadline for fulfilling this request. Null or omitted if no deadline.\nFormat: ISO 8601 UTC timestamp."
+        },
+        "evidenceCaptureDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "Start date of the audit period. Evidence before this date may not be accepted.\nNull or omitted if not restricted.\nFormat: ISO 8601 UTC timestamp."
+        }
+      },
+      "required": [
+        "uniqueId",
+        "title",
+        "requestType",
+        "frameworkCodes"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "InformationRequestType": {
+      "type": "string",
+      "enum": [
+        "POINT_IN_TIME",
+        "POPULATION",
+        "SAMPLE"
+      ],
+      "description": "Type of information request, defining what scope of evidence is needed.\n\n- POINT_IN_TIME: Evidence for a specific moment (e.g., current state of a policy)\n- POPULATION: Evidence covering all items in a category (e.g., all employees)\n- SAMPLE: Evidence for a representative sample (e.g., 10 random customer records)"
+    },
+    "InformationRequestCadence": {
+      "type": "string",
+      "enum": [
+        "ANNUALLY",
+        "BIANNUALLY",
+        "MONTHLY",
+        "QUARTERLY"
+      ],
+      "description": "Frequency cadence for the information request, indicating how often it recurs."
+    },
+    "PartialUpdateInformationRequest": {
+      "description": "Input for partially updating an information request. Only provided fields\nwill be updated; omitted fields remain unchanged. At least one field must\nbe provided.",
+      "properties": {
+        "frameworkCodes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "The framework codes this request addresses.\nAn empty array if no framework codes are associated."
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "Detailed description of what evidence is needed."
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "Deadline for fulfilling this request. Null if no deadline.\nFormat: ISO 8601 UTC timestamp."
+        },
+        "evidenceCaptureDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "Start date of the audit period. Evidence before this date may not be accepted.\nNull if not restricted. Format: ISO 8601 UTC timestamp."
+        },
+        "requestType": {
+          "$ref": "#/components/schemas/InformationRequestType",
+          "description": "Scope of evidence required."
+        },
+        "title": {
+          "type": "string",
+          "description": "Short, descriptive title."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AcceptInformationRequestEvidenceInput": {
+      "description": "Input for accepting evidence on an information request, indicating that\nthe submitted evidence meets requirements. This changes the request's\napprovalStatus to an approved state and creates an activity log entry.",
+      "properties": {
+        "auditorEmail": {
+          "type": "string",
+          "description": "Email of the auditor accepting the evidence.\nMust match an existing Vanta user who belongs to the audit firm making the API request."
+        }
+      },
+      "required": [
+        "auditorEmail"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddInformationRequestCommentInput": {
+      "description": "Comments enable communication between auditors and customers about\nevidence requirements and submissions. All comments are immediately\nvisible to both parties once created.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the information request."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+        },
+        "creationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the comment was created in the external audit management system.\nThis allows synchronizing comment timestamps from external systems.\nFormat: ISO 8601 UTC timestamp."
+        }
+      },
+      "required": [
+        "text",
+        "email",
+        "creationDate"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateInformationRequestCommentInput": {
+      "description": "Updates an existing comment on an information request.\nOnly the original author of the comment can update it.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the information request."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+        }
+      },
+      "required": [
+        "text",
+        "email"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "DeleteInformationRequestCommentInput": {
+      "description": "Deletes an existing comment on an information request.\nOnly the original author of the comment can delete it.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "InformationRequestSupportedEvidenceType": {
+      "type": "string",
+      "enum": [
+        "UPLOADED_DOCUMENT",
+        "OBSERVATION",
+        "LINK",
+        "VANTA_DOCUMENT",
+        "VANTA_POLICY",
+        "VANTA_TEST"
+      ]
+    },
+    "FlagInformationRequestEvidenceInput": {
+      "description": "Input for flagging evidence on an information request, indicating issues\nthat need to be addressed. This changes the request's approvalStatus to\na flagged state and creates an activity log entry.\n\nThe customer will be notified and can resubmit evidence after addressing the issues.",
+      "properties": {
+        "auditorEmail": {
+          "type": "string",
+          "description": "Email of the auditor flagging the evidence.\nMust match an existing Vanta user who belongs to the audit firm making the API request."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Detailed explanation of what issues were found with the evidence.\nThis reason is visible to the customer and guides them on what to fix.\nMust be at least 1 character."
+        }
+      },
+      "required": [
+        "auditorEmail",
+        "reason"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ComputerStatusFilter": {
+      "description": "Enum representing computer compliance statuses that can be utilized as a filter. The meanings are as follows:\nAV_NOT_INSTALLED: The computer does not have antivirus software installed.\nHD_NOT_ENCRYPTED: The computer's harddrive is not encrypted.\nLAST_CHECK_OVER_14_DAYS: No data has been received from computer for over 14 days.\nPWM_NOT_INSTALLED: The computer does not have a password manager installed.\nSCREENLOCK_NOT_CONFIGURED: The computer does not have screenlock configured appropriately.",
+      "enum": [
+        "PWM_NOT_INSTALLED",
+        "HD_NOT_ENCRYPTED",
+        "AV_NOT_INSTALLED",
+        "SCREENLOCK_NOT_CONFIGURED",
+        "LAST_CHECK_OVER_14_DAYS"
+      ],
+      "type": "string"
+    },
+    "TasksSummaryStatus": {
+      "description": "The overall status of a person's outstanding tasks:\n- NONE: There are no tasks.\n- DUE_SOON: At least one task is due soon.\n- OVERDUE: At least one task is overdue. Has a higher priority than DUE_SOON.\n- COMPLETE: All tasks are complete.\n- PAUSED: All tasks are paused.\n- OFFBOARDING_DUE_SOON: At least one offboarding task is due soon.\n- OFFBOARDING_OVERDUE: At least one offboarding task is overdue. Has a higher priority than OFFBOARDING_DUE_SOON.\n- OFFBOARDING_COMPLETE: All offboarding tasks are complete.",
+      "enum": [
+        "COMPLETE",
+        "DUE_SOON",
+        "NONE",
+        "OFFBOARDING_COMPLETE",
+        "OFFBOARDING_DUE_SOON",
+        "OFFBOARDING_OVERDUE",
+        "OVERDUE",
+        "PAUSED"
+      ],
+      "type": "string"
+    },
+    "TaskType": {
+      "description": "The type a task summary falls into.\nCOMPLETE_TRAININGS: The task summary containing security trainings.\nACCEPT_POLICIES: The task summary containing policy acceptance.\nCOMPLETE_CUSTOM_TASKS: The task summary containing custom tasks.\nINSTALL_DEVICE_MONITORING: The task summary containing device monitoring installation.\nCOMPLETE_BACKGROUND_CHECKS: The task summary containing background checks.",
+      "enum": [
+        "COMPLETE_TRAININGS",
+        "ACCEPT_POLICIES",
+        "COMPLETE_CUSTOM_TASKS",
+        "COMPLETE_CUSTOM_OFFBOARDING_TASKS",
+        "INSTALL_DEVICE_MONITORING",
+        "COMPLETE_BACKGROUND_CHECKS"
+      ],
+      "type": "string"
+    },
+    "TaskStatus": {
+      "description": "The status of a task.\n- COMPLETE: The task has been completed.\n- DUE_SOON: The task is due soon.\n- OVERDUE: The task is overdue.\n- NONE: The task is not assigned.",
+      "enum": [
+        "COMPLETE",
+        "DUE_SOON",
+        "OVERDUE",
+        "NONE"
+      ],
+      "type": "string"
+    },
+    "ExternalFindingSeverity": {
+      "description": "ExternalFindingSeverity describes the severity of an external finding (Vulnerability or Security Alert)",
+      "enum": [
+        "CRITICAL",
+        "HIGH",
+        "LOW",
+        "MEDIUM"
+      ],
+      "type": "string"
+    },
+    "VulnerableAssetType": {
+      "type": "string",
+      "enum": [
+        "SERVER",
+        "SERVERLESS_FUNCTION",
+        "CONTAINER",
+        "CONTAINER_REPOSITORY",
+        "CONTAINER_REPOSITORY_IMAGE",
+        "CODE_REPOSITORY",
+        "MANIFEST_FILE",
+        "WORKSTATION",
+        "OTHER"
+      ],
+      "description": "VulnerableAssetType describes the types of assets a vulnerability is on."
+    }
+  },
+  "connectors": {}
+};
 
 export const generatedOperations: GeneratedOperation[] = [
   {
@@ -58,53 +3097,102 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateControlInput"
+      },
       "fields": [
         {
           "name": "externalId",
           "required": true,
           "description": "The control's external ID.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The control's external ID."
+          }
         },
         {
           "name": "name",
           "required": true,
           "description": "The control's name.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The control's name."
+          }
         },
         {
           "name": "description",
           "required": true,
           "description": "The control's description.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The control's description."
+          }
         },
         {
           "name": "effectiveDate",
           "required": true,
           "description": "The effective date of the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The effective date of the control."
+          }
         },
         {
           "name": "domain",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/ControlDomain",
+            "description": "The control's category."
+          }
         },
         {
           "name": "sections",
           "required": false,
           "description": "The framework sections that the control maps to.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/FrameworkSection"
+            },
+            "type": "array",
+            "nullable": true,
+            "description": "The framework sections that the control maps to."
+          }
         },
         {
           "name": "role",
           "required": false,
           "description": "The GDPR role of the control, which specifies whether the data is being \"collected\" or \"processed\".\nThis field should only be included for controls that are to be mapped to the GDPR framework.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GdprRole"
+              }
+            ],
+            "nullable": true,
+            "description": "The GDPR role of the control, which specifies whether the data is being \"collected\" or \"processed\".\nThis field should only be included for controls that are to be mapped to the GDPR framework."
+          }
         },
         {
           "name": "customFields",
           "required": false,
           "description": "The control's values for custom fields.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "type": "array",
+            "description": "The control's values for custom fields."
+          }
         }
       ]
     }
@@ -123,13 +3211,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "frameworkMatchesAny",
@@ -137,6 +3231,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Includes all controls belonging to one of the provided framework values in frameworkMatchesAny.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "itemKind": "string"
       }
     ]
@@ -155,12 +3255,19 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddControlFromLibraryInput"
+      },
       "fields": [
         {
           "name": "controlId",
           "required": true,
           "description": "The ID of the control to be added.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The ID of the control to be added."
+          }
         }
       ]
     }
@@ -179,13 +3286,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -203,48 +3316,81 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/EditControlMetadataInput"
+      },
       "fields": [
         {
           "name": "name",
           "required": false,
           "description": "A new name for the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "A new name for the control."
+          }
         },
         {
           "name": "externalId",
           "required": false,
           "description": "The new external ID for the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The new external ID for the control."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "The new description for the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The new description for the control."
+          }
         },
         {
           "name": "domain",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/ControlDomain",
+            "description": "The new category for the control."
+          }
         },
         {
           "name": "note",
           "required": false,
           "description": "The new note for the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The new note for the control."
+          }
         },
         {
           "name": "customFields",
           "required": false,
           "description": "The control's new values for custom fields.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "type": "array",
+            "description": "The control's new values for custom fields."
+          }
         }
       ]
     }
@@ -263,7 +3409,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -281,7 +3430,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -299,19 +3451,29 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddControlDocumentMappingInput"
+      },
       "fields": [
         {
           "name": "documentId",
           "required": true,
           "description": "The ID of the document to add to the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The ID of the document to add to the control."
+          }
         }
       ]
     }
@@ -330,19 +3492,29 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddControlTestMappingInput"
+      },
       "fields": [
         {
           "name": "testId",
           "required": true,
           "description": "The ID of the test to add to the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The ID of the test to add to the control."
+          }
         }
       ]
     }
@@ -361,19 +3533,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -391,13 +3572,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -415,19 +3602,30 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/SetOwnerForControlInput"
+      },
       "fields": [
         {
           "name": "userId",
           "required": true,
           "description": "The new owner's ID.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The new owner's ID."
+          }
         }
       ]
     }
@@ -446,19 +3644,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -476,13 +3683,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "testId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -500,13 +3713,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -524,26 +3743,41 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateCustomerTrustAccountInput"
+      },
       "fields": [
         {
           "name": "name",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "emailDomain",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "ndaDetails",
           "required": false,
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/CustomerTrustAccountNDADetailsInput"
+          }
         },
         {
           "name": "accessConfig",
           "required": false,
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/CustomerTrustAccountAccessConfigInput"
+          }
         }
       ]
     }
@@ -562,7 +3796,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "accountId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -580,25 +3817,40 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "q",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "statusMatchesAny",
         "in": "query",
         "required": false,
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/QuestionnaireStatus"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -606,25 +3858,43 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/QuestionnaireType"
+          }
+        },
         "itemKind": "string"
       },
       {
         "name": "createdAfter",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "createdBefore",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "ownerIdMatchesAny",
         "in": "query",
         "required": false,
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -632,6 +3902,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "itemKind": "string"
       }
     ]
@@ -650,18 +3926,35 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CustomerTrustExportInput"
+      },
       "fields": [
         {
           "name": "questionnaireId",
           "required": true,
           "description": "Unique identifier for the questionnaire to trigger an export for.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Unique identifier for the questionnaire to trigger an export for.",
+            "example": "65a5d6e2f1a2b3c4d5e6f7a8"
+          }
         },
         {
           "name": "format",
           "required": true,
           "description": "The output format for the exported questionnaire.\n- `\"original\"`: Exports in the questionnaire's native format (XLSX for spreadsheets, DOCX for documents).\n- `\"csv\"`: Exports as a CSV file, suitable for data analysis or import into other systems.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "original",
+              "csv"
+            ],
+            "description": "The output format for the exported questionnaire.\n- `\"original\"`: Exports in the questionnaire's native format (XLSX for spreadsheets, DOCX for documents).\n- `\"csv\"`: Exports as a CSV file, suitable for data analysis or import into other systems.",
+            "example": "original"
+          }
         }
       ]
     }
@@ -681,7 +3974,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "path",
         "required": true,
         "description": "The unique identifier of the export job, returned from the POST endpoint.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -703,60 +3999,138 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "file",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          }
         },
         {
           "name": "displayName",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "ownerAssignment",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "approverAssignment",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "description",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "companyUrl",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "dueDate",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "customerTrustAccountId",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "tagAndCategoryIds",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "includeUntagged",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "metadata",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         }
       ],
-      "fileFieldName": "file"
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "ownerAssignment": {
+            "type": "string"
+          },
+          "approverAssignment": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "companyUrl": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "customerTrustAccountId": {
+            "type": "string"
+          },
+          "tagAndCategoryIds": {
+            "type": "string"
+          },
+          "includeUntagged": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file",
+          "displayName"
+        ]
+      }
     }
   },
   {
@@ -773,61 +4147,107 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateWebsiteQuestionnaireInput"
+      },
       "fields": [
         {
           "name": "displayName",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "url",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "ownerAssignment",
           "required": false,
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/ActorAssignmentInput"
+          }
         },
         {
           "name": "approverAssignment",
           "required": false,
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/ActorAssignmentInput"
+          }
         },
         {
           "name": "companyUrl",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "customerTrustAccountId",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "description",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "dueDate",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
         },
         {
           "name": "metadata",
           "required": false,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/QuestionnaireMetadata"
+            },
+            "type": "array"
+          }
         },
         {
           "name": "tagAndCategoryIds",
           "required": false,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array"
+          }
         },
         {
           "name": "includeUntagged",
           "required": false,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
         }
       ]
     }
@@ -846,7 +4266,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "questionnaireId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -864,7 +4287,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "questionnaireId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -882,54 +4308,105 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "questionnaireId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateQuestionnaireArgs"
+      },
       "fields": [
         {
           "name": "displayName",
           "required": false,
           "description": "Display name of the questionnaire",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Display name of the questionnaire"
+          }
         },
         {
           "name": "dueDate",
           "required": false,
           "description": "Due date for questionnaire completion (ISO 8601 string, null to clear)",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Due date for questionnaire completion (ISO 8601 string, null to clear)"
+          }
         },
         {
           "name": "status",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/SettableQuestionnaireStatus",
+            "description": "Status transition (limited to settable statuses)"
+          }
         },
         {
           "name": "ownerAssignment",
           "required": false,
           "description": "Owner assignment as Actor (null to unassign)",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UpdateActorAssignment"
+              }
+            ],
+            "nullable": true,
+            "description": "Owner assignment as Actor (null to unassign)"
+          }
         },
         {
           "name": "approverAssignment",
           "required": false,
           "description": "Approver assignment as Actor (null to unassign, requires QuestionnaireAutomationAdvanced)",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UpdateActorAssignment"
+              }
+            ],
+            "nullable": true,
+            "description": "Approver assignment as Actor (null to unassign, requires QuestionnaireAutomationAdvanced)"
+          }
         },
         {
           "name": "metadata",
           "required": false,
           "description": "Metadata key-value pairs",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/QuestionnaireMetadata"
+            },
+            "type": "array",
+            "description": "Metadata key-value pairs"
+          }
         },
         {
           "name": "tagAndCategoryIds",
           "required": false,
           "description": "Tag and category ID pairs",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array",
+            "description": "Tag and category ID pairs"
+          }
         }
       ]
     }
@@ -948,19 +4425,29 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "questionnaireId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CompleteQuestionnaireRequest"
+      },
       "fields": [
         {
           "name": "shouldSyncApprovedToAnswerLibrary",
           "required": false,
           "description": "Whether to sync approved answers to the answer library.\nDefaults to true. Silently set to false for non-English FILE/DOCUMENT questionnaires.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether to sync approved answers to the answer library.\nDefaults to true. Silently set to false for non-English FILE/DOCUMENT questionnaires."
+          }
         }
       ]
     }
@@ -981,6 +4468,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Defaults to \"NEEDS_REVIEW\" if not provided",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/DiscoveredVendorScope"
+        },
         "enumValues": [
           "NEEDS_REVIEW",
           "IGNORED",
@@ -991,13 +4481,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1015,19 +4511,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "discoveredVendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1045,7 +4550,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "discoveredVendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1063,39 +4571,66 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateDocumentInput"
+      },
       "fields": [
         {
           "name": "title",
           "required": true,
           "description": "The document's title.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The document's title."
+          }
         },
         {
           "name": "description",
           "required": true,
           "description": "The document's description.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The document's description."
+          }
         },
         {
           "name": "timeSensitivity",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/TimeSensitivity",
+            "description": "When to upload the document.\nMust be one of: \"Most recent\", \"During audit window\""
+          }
         },
         {
           "name": "cadence",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/RecurrenceDuration",
+            "description": "How often the document needs to be renewed.\n\nNever: P0D - The document does not need to be renewed.\nDaily: P1D - The document needs to be renewed daily.\nWeekly: P1W - The document needs to be renewed weekly.\nMonthly: P1M - The document needs to be renewed monthly.\nQuarterly: P3M - The document needs to be renewed quarterly.\nBiannually: P6M - The document needs to be renewed biannually.\nAnnually: P1Y - The document needs to be renewed annually."
+          }
         },
         {
           "name": "reminderWindow",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/ReminderWindow",
+            "description": "The number of days before the renewal date to send a reminder.\nNote that reminderWindow should be smaller than the cadence.\n\nOptions are:\nNever: P0D - No reminder will be sent.\nDay: P1D - A reminder will be sent one day before the renewal date.\nWeek: P1W - A reminder will be sent one week before the renewal date.\nMonth: P1M - A reminder will be sent one month before the renewal date.\nQuarter: P3M - A reminder will be sent one quarter before the renewal date."
+          }
         },
         {
           "name": "isSensitive",
           "required": true,
           "description": "Determines whether or not the document is sensitive.\nThis restricts which users can access or upload files to the document.\nOnly admins are able to view or upload sensitive documents.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Determines whether or not the document is sensitive.\nThis restricts which users can access or upload files to the document.\nOnly admins are able to view or upload sensitive documents."
+          }
         }
       ]
     }
@@ -1114,13 +4649,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "frameworkMatchesAny",
@@ -1128,6 +4669,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Includes all documents that match one of the provided framework values in frameworkMatchesAny.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -1136,6 +4683,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Includes all documents that match one of the provided status values in statusMatchesAny.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/DocumentStatus"
+          }
+        },
         "itemKind": "string"
       }
     ]
@@ -1154,7 +4707,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1172,7 +4728,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1190,19 +4749,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1220,19 +4788,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1250,37 +4827,62 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateLinkForDocumentInput"
+      },
       "fields": [
         {
           "name": "url",
           "required": true,
           "description": "The link's URL",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The link's URL"
+          }
         },
         {
           "name": "title",
           "required": true,
           "description": "The link's title.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The link's title."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "The link's description.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The link's description."
+          }
         },
         {
           "name": "effectiveDate",
           "required": false,
           "description": "The link's effective date.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The link's effective date."
+          }
         }
       ]
     }
@@ -1299,13 +4901,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "linkId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1323,19 +4931,30 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/SetOwnerForDocumentInput"
+      },
       "fields": [
         {
           "name": "userId",
           "required": true,
           "description": "The new owner ID",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The new owner ID"
+          }
         }
       ]
     }
@@ -1354,7 +4973,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1372,7 +4994,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
@@ -1383,22 +5008,55 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "file",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          }
         },
         {
           "name": "effectiveAtDate",
           "required": false,
           "description": "Date indicating when the document is effective from.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Date indicating when the document is effective from."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "Description of the uploaded document.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description of the uploaded document."
+          }
         }
       ],
-      "fileFieldName": "file"
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "effectiveAtDate": {
+            "type": "string",
+            "description": "Date indicating when the document is effective from."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the uploaded document."
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
     }
   },
   {
@@ -1415,19 +5073,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1445,13 +5112,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "uploadedFileId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1469,13 +5142,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "uploadedFileId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1493,13 +5172,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1517,7 +5202,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "frameworkId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1535,19 +5223,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "frameworkId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1565,13 +5262,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1589,7 +5292,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "groupId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1607,19 +5313,64 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "groupId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "updates": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of people IDs to add a group.",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "updates",
           "required": true,
           "description": "List of people IDs to add a group.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of people IDs to add a group.",
+            "minItems": 1,
+            "maxItems": 100
+          }
         }
       ]
     }
@@ -1638,7 +5389,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "groupId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1656,18 +5410,35 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "groupId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "id",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
         }
       ]
     }
@@ -1686,13 +5457,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "groupId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "personId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1710,19 +5487,64 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "groupId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "updates": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of people IDs to remove from a group.",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "updates",
           "required": true,
           "description": "List of people IDs to remove from a group.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of people IDs to remove from a group.",
+            "minItems": 1,
+            "maxItems": 100
+          }
         }
       ]
     }
@@ -1741,13 +5563,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1766,7 +5594,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1785,7 +5616,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1804,21 +5638,30 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceKind",
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration resource kind.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "connectionId",
         "in": "query",
         "required": false,
         "description": "Unique identifier of the integration connection.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -1837,26 +5680,58 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceKind",
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration resource kind.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "updates": {
+            "items": {
+              "$ref": "#/components/schemas/UpdateResourceRequest"
+            },
+            "type": "array",
+            "description": "List of resource update requests.",
+            "minItems": 1,
+            "maxItems": 50
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "updates",
           "required": true,
           "description": "List of resource update requests.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/UpdateResourceRequest"
+            },
+            "type": "array",
+            "description": "List of resource update requests.",
+            "minItems": 1,
+            "maxItems": 50
+          }
         }
       ]
     }
@@ -1876,54 +5751,78 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceKind",
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration resource type.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "connectionId",
         "in": "query",
         "required": false,
         "description": "Unique identifier of the integration connection.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "hasDescription",
         "in": "query",
         "required": false,
         "description": "Filter resources that have a description.\nIf omitted, this will return resources both with and without a description.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "hasOwner",
         "in": "query",
         "required": false,
         "description": "Filter resources that have an owner.\nIf omitted, this will return resources both with and without an owner.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "isInScope",
         "in": "query",
         "required": false,
         "description": "Filter resources that are in scope.\nIf omitted, this will return resources both in and out of scope.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -1942,45 +5841,83 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceKind",
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration resource kind.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceId",
         "in": "path",
         "required": true,
         "description": "Unique identifier of the resource.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "inScope": {
+            "type": "boolean",
+            "description": "Determines whether resources should be marked as in scope."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description to update for the resources."
+          },
+          "ownerId": {
+            "type": "string",
+            "description": "Owner ID to update for the resources."
+          }
+        },
+        "type": "object"
+      },
       "fields": [
         {
           "name": "inScope",
           "required": false,
           "description": "Determines whether resources should be marked as in scope.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Determines whether resources should be marked as in scope."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "Description to update for the resources.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description to update for the resources."
+          }
         },
         {
           "name": "ownerId",
           "required": false,
           "description": "Owner ID to update for the resources.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Owner ID to update for the resources."
+          }
         }
       ]
     }
@@ -2000,21 +5937,30 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceKind",
         "in": "path",
         "required": true,
         "description": "Unique identifier of the integration resource kind.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceId",
         "in": "path",
         "required": true,
         "description": "Unique identifier of the resource.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -2032,13 +5978,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "complianceStatusFilterMatchesAny",
@@ -2046,6 +5998,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filters for monitored computers matching any status declared in the filter.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ComputerStatusFilter"
+          }
+        },
         "itemKind": "string"
       }
     ]
@@ -2064,7 +6022,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "computerId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -2082,13 +6043,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "tasksSummaryStatusMatchesAny",
@@ -2096,6 +6063,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter individuals by those whose tasksSummary status is any of the provided values.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TasksSummaryStatus"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -2104,6 +6077,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Requires taskStatusMatchesAny. Includes all people for whom any of the provided taskType values in taskTypeMatchesAny\nis any of the provided taskStatus values in taskStatusMatchesAny.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TaskType"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -2112,6 +6091,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Requires taskTypeMatchesAny. Includes all people for whom any of the provided taskType values in taskTypeMatchesAny\nis any of the provided taskStatus values in taskStatusMatchesAny.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TaskStatus"
+          }
+        },
         "itemKind": "string"
       }
     ]
@@ -2130,12 +6115,66 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "updates": {
+            "items": {
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "description": "Reason for making this change."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "ID of the person to change"
+                }
+              },
+              "required": [
+                "reason",
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of account IDs to mark as not a person",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "updates",
           "required": true,
           "description": "List of account IDs to mark as not a person",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "description": "Reason for making this change."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "ID of the person to change"
+                }
+              },
+              "required": [
+                "reason",
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of account IDs to mark as not a person",
+            "minItems": 1,
+            "maxItems": 100
+          }
         }
       ]
     }
@@ -2154,12 +6193,56 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "updates": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "ID of the person to change"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of account IDs to mark as a person",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "updates",
           "required": true,
           "description": "List of account IDs to mark as a person",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "ID of the person to change"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of account IDs to mark as a person",
+            "minItems": 1,
+            "maxItems": 100
+          }
         }
       ]
     }
@@ -2178,12 +6261,66 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "updates": {
+            "items": {
+              "properties": {
+                "acknowledgerId": {
+                  "type": "string",
+                  "description": "ID of the person who will be recorded as completing the offboarding for these people"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "ID of the person to offboard"
+                }
+              },
+              "required": [
+                "acknowledgerId",
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of the people to offboard.",
+            "minItems": 1,
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "updates",
           "required": true,
           "description": "List of the people to offboard.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "properties": {
+                "acknowledgerId": {
+                  "type": "string",
+                  "description": "ID of the person who will be recorded as completing the offboarding for these people"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "ID of the person to offboard"
+                }
+              },
+              "required": [
+                "acknowledgerId",
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of the people to offboard.",
+            "minItems": 1,
+            "maxItems": 1000
+          }
         }
       ]
     }
@@ -2202,7 +6339,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "personId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -2220,23 +6360,79 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "personId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "name": {
+            "properties": {
+              "last": {
+                "type": "string"
+              },
+              "first": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "last",
+              "first"
+            ],
+            "type": "object"
+          },
+          "employment": {
+            "properties": {
+              "startDate": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "fields": [
         {
           "name": "name",
           "required": false,
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "properties": {
+              "last": {
+                "type": "string"
+              },
+              "first": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "last",
+              "first"
+            ],
+            "type": "object"
+          }
         },
         {
           "name": "employment",
           "required": false,
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "properties": {
+              "startDate": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "type": "object"
+          }
         }
       ]
     }
@@ -2255,7 +6451,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "personId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -2273,25 +6472,59 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "personId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The end date of the person's leave. If left empty, the leave is considered indefinite."
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start date of the person's leave."
+          }
+        },
+        "required": [
+          "endDate",
+          "startDate"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "endDate",
           "required": true,
           "description": "The end date of the person's leave. If left empty, the leave is considered indefinite.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The end date of the person's leave. If left empty, the leave is considered indefinite."
+          }
         },
         {
           "name": "startDate",
           "required": true,
           "description": "The start date of the person's leave.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start date of the person's leave."
+          }
         }
       ]
     }
@@ -2310,13 +6543,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -2334,7 +6573,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "userId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -2352,13 +6594,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -2376,7 +6624,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "policyId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -2394,19 +6645,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "includeIgnored",
         "in": "query",
         "required": false,
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "ownerMatchesAny",
@@ -2414,13 +6674,22 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Use \"No owner\" to filter scenarios without owner assigned.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "itemKind": "string"
       },
       {
         "name": "searchString",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "categoryMatchesAny",
@@ -2428,6 +6697,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Use \"Uncategorized\" to filter scenarios without any category.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -2436,6 +6711,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Use \"Uncategorized\" to filter scenarios with none of Confidentiality, Integrity or Availability assigned.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CIA"
+              },
+              {
+                "$ref": "#/components/schemas/UNCATEGORIZED"
+              }
+            ]
+          }
+        },
         "itemKind": "object"
       },
       {
@@ -2444,6 +6732,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Use \"No treatment type\" to filter scenarios without treatment specified.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Treatment"
+              },
+              {
+                "$ref": "#/components/schemas/NO_TREATMENT_TYPE"
+              }
+            ]
+          }
+        },
         "itemKind": "object"
       },
       {
@@ -2451,6 +6752,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ScoreGroup"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -2458,6 +6765,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ScoreGroup"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -2465,6 +6778,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -2473,6 +6792,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter by risk scenario type. Defaults to \"Risk Scenario\".\nOnly returns enterprise risks when explicitly set to \"Enterprise Risk\".",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/RiskScenarioType"
+        },
         "enumValues": [
           "Risk Scenario",
           "Enterprise Risk"
@@ -2484,6 +6806,13 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Default to order by description alphabetically.",
         "kind": "string",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "description",
+            "createdAt"
+          ]
+        },
         "enumValues": [
           "description",
           "createdAt"
@@ -2505,94 +6834,171 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateRiskScenarioInput"
+      },
       "fields": [
         {
           "name": "description",
           "required": true,
           "description": "This describes an actual or potential risk to your organization's people, processes, technology, data, and facilities.\nDocument actual issues or likely scenarios based on your specific environment or a potential vulnerability.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "This describes an actual or potential risk to your organization's people, processes, technology, data, and facilities.\nDocument actual issues or likely scenarios based on your specific environment or a potential vulnerability."
+          }
         },
         {
           "name": "riskId",
           "required": false,
           "description": "The unique ID of the risk. Used to reference and update existing risks.\nWe will auto-generate one if one isn't specified.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The unique ID of the risk. Used to reference and update existing risks.\nWe will auto-generate one if one isn't specified."
+          }
         },
         {
           "name": "isSensitive",
           "required": false,
           "description": "If set to true this risk can only be seen by its owner or users with Admin, RiskSensitiveManage or RiskSensitiveView permissions.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "If set to true this risk can only be seen by its owner or users with Admin, RiskSensitiveManage or RiskSensitiveView permissions.",
+            "deprecated": true
+          }
         },
         {
           "name": "likelihood",
           "required": false,
           "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings.",
-          "kind": "number"
+          "kind": "number",
+          "schema": {
+            "type": "number",
+            "format": "double",
+            "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings."
+          }
         },
         {
           "name": "impact",
           "required": false,
           "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings.",
-          "kind": "number"
+          "kind": "number",
+          "schema": {
+            "type": "number",
+            "format": "double",
+            "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings."
+          }
         },
         {
           "name": "residualLikelihood",
           "required": false,
           "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings.",
-          "kind": "number"
+          "kind": "number",
+          "schema": {
+            "type": "number",
+            "format": "double",
+            "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
+          }
         },
         {
           "name": "residualImpact",
           "required": false,
           "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings.",
-          "kind": "number"
+          "kind": "number",
+          "schema": {
+            "type": "number",
+            "format": "double",
+            "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
+          }
         },
         {
           "name": "categories",
           "required": false,
           "description": "The list of categories this risk scenario belongs to.\nEach element in the list will become a new custom category if it doesn't match an existing one.\nYou can reference the current category options in the Risk Management settings and/or enter new values.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The list of categories this risk scenario belongs to.\nEach element in the list will become a new custom category if it doesn't match an existing one.\nYou can reference the current category options in the Risk Management settings and/or enter new values."
+          }
         },
         {
           "name": "ciaCategories",
           "required": false,
           "description": "Enter a list of the following for the type of risk documented:\n- Confidentiality: Risk to data stores, customer/sensitive information, etc.\n- Integrity: Risk to accuracy or integrity of system settings and/or data\n- Availability: Risk to normal service operations and critical system functionality",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CIA"
+            },
+            "type": "array",
+            "description": "Enter a list of the following for the type of risk documented:\n- Confidentiality: Risk to data stores, customer/sensitive information, etc.\n- Integrity: Risk to accuracy or integrity of system settings and/or data\n- Availability: Risk to normal service operations and critical system functionality"
+          }
         },
         {
           "name": "treatment",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/Treatment",
+            "description": "Indicate how your leadership team wants to address an identified risk. Please note: not all risks need to be addressed immediately (or at all). Your Risk Treatment decision will depend on multiple factors, such as your organization's risk tolerance and the value of the asset that the risk is associated with. The options are:\n- Mitigate: Identify controls to put in place or tasks to be done that will reduce the risk score.\n- Transfer: Move risk outside of your organization's set of responsibilities e.g. get cyber liability insurance.\n- Avoid: Stop doing the activity which is causing the risk to your organization and its assets.\n- Accept: Decide to live with the risk and take no further actions. - Accept: decide to live with the risk; this may be because it is highly unlikely, has a low financial or operational impact, or the cost and effort to treat the risk far exceeds the value of the asset"
+          }
         },
         {
           "name": "owner",
           "required": false,
           "description": "The person responsible for tracking and mitigating this risk scenario. This should be the email address of a valid Vanta user.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The person responsible for tracking and mitigating this risk scenario. This should be the email address of a valid Vanta user."
+          }
         },
         {
           "name": "note",
           "required": false,
           "description": "Additional context about the risk scenario and why it has specific impact and likelihood scores.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Additional context about the risk scenario and why it has specific impact and likelihood scores."
+          }
         },
         {
           "name": "riskRegister",
           "required": false,
           "description": "Name of the risk register to associate with this scenario.\n\nThis field must be set if the organization has multiple registers.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the risk register to associate with this scenario.\n\nThis field must be set if the organization has multiple registers."
+          }
         },
         {
           "name": "customFields",
           "required": false,
           "description": "The list of custom attributes.\nYou can reference existing custom attributes in the Risk Management settings and/or create new ones.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomAttribute"
+            },
+            "type": "array",
+            "description": "The list of custom attributes.\nYou can reference existing custom attributes in the Risk Management settings and/or create new ones.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
+          }
         },
         {
           "name": "type",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/RiskScenarioType",
+            "description": "The type of risk scenario to create.\n- \"Risk Scenario\": Standard risk scenario (default)\n- \"Enterprise Risk\": Enterprise-level risk (requires Enterprise Risk Management SKU)\n\nEnterprise risks cannot be associated with a risk register.\nDefaults to \"Risk Scenario\" if not specified."
+          }
         }
       ]
     }
@@ -2611,7 +7017,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "riskScenarioId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -2629,90 +7038,163 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "riskScenarioId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateRiskScenarioInput"
+      },
       "fields": [
         {
           "name": "description",
           "required": false,
           "description": "This describes an actual or potential risk to your organization's people, processes, technology, data, and facilities.\nDocument actual issues or likely scenarios based on your specific environment or a potential vulnerability.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "This describes an actual or potential risk to your organization's people, processes, technology, data, and facilities.\nDocument actual issues or likely scenarios based on your specific environment or a potential vulnerability."
+          }
         },
         {
           "name": "isSensitive",
           "required": false,
           "description": "If set to true this risk can only be seen by its owner or users with Admin, RiskSensitiveManage or RiskSensitiveView permissions.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "If set to true this risk can only be seen by its owner or users with Admin, RiskSensitiveManage or RiskSensitiveView permissions.",
+            "deprecated": true
+          }
         },
         {
           "name": "likelihood",
           "required": false,
           "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings.",
-          "kind": "number"
+          "kind": "number",
+          "schema": {
+            "type": "number",
+            "format": "double",
+            "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings."
+          }
         },
         {
           "name": "impact",
           "required": false,
           "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings.",
-          "kind": "number"
+          "kind": "number",
+          "schema": {
+            "type": "number",
+            "format": "double",
+            "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings."
+          }
         },
         {
           "name": "residualLikelihood",
           "required": false,
           "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings.",
-          "kind": "number"
+          "kind": "number",
+          "schema": {
+            "type": "number",
+            "format": "double",
+            "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
+          }
         },
         {
           "name": "residualImpact",
           "required": false,
           "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings.",
-          "kind": "number"
+          "kind": "number",
+          "schema": {
+            "type": "number",
+            "format": "double",
+            "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
+          }
         },
         {
           "name": "categories",
           "required": false,
           "description": "The list of categories this risk scenario belongs to.\nEach element in the list will become a new custom category if it doesn't match an existing one.\nYou can reference the current category options in the Risk Management settings and/or enter new values.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The list of categories this risk scenario belongs to.\nEach element in the list will become a new custom category if it doesn't match an existing one.\nYou can reference the current category options in the Risk Management settings and/or enter new values."
+          }
         },
         {
           "name": "ciaCategories",
           "required": false,
           "description": "Enter a list of the following for the type of risk documented:\n- Confidentiality: Risk to data stores, customer/sensitive information, etc.\n- Integrity: Risk to accuracy or integrity of system settings and/or data\n- Availability: Risk to normal service operations and critical system functionality",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CIA"
+            },
+            "type": "array",
+            "description": "Enter a list of the following for the type of risk documented:\n- Confidentiality: Risk to data stores, customer/sensitive information, etc.\n- Integrity: Risk to accuracy or integrity of system settings and/or data\n- Availability: Risk to normal service operations and critical system functionality"
+          }
         },
         {
           "name": "treatment",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/Treatment",
+            "description": "Indicate how your leadership team wants to address an identified risk. Please note: not all risks need to be addressed immediately (or at all). Your Risk Treatment decision will depend on multiple factors, such as your organization's risk tolerance and the value of the asset that the risk is associated with. The options are:\n- Mitigate: Identify controls to put in place or tasks to be done that will reduce the risk score.\n- Transfer: Move risk outside of your organization's set of responsibilities e.g. get cyber liability insurance.\n- Avoid: Stop doing the activity which is causing the risk to your organization and its assets.\n- Accept: Decide to live with the risk and take no further actions. - Accept: decide to live with the risk; this may be because it is highly unlikely, has a low financial or operational impact, or the cost and effort to treat the risk far exceeds the value of the asset"
+          }
         },
         {
           "name": "owner",
           "required": false,
           "description": "The person responsible for tracking and mitigating this risk scenario. This should be the email address of a valid Vanta user.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The person responsible for tracking and mitigating this risk scenario. This should be the email address of a valid Vanta user."
+          }
         },
         {
           "name": "note",
           "required": false,
           "description": "Additional context about the risk scenario and why it has specific impact and likelihood scores.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Additional context about the risk scenario and why it has specific impact and likelihood scores."
+          }
         },
         {
           "name": "riskRegister",
           "required": false,
           "description": "Name of the risk register to associate with this scenario.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the risk register to associate with this scenario."
+          }
         },
         {
           "name": "customFields",
           "required": false,
           "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomAttribute"
+            },
+            "type": "array",
+            "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
+          }
         }
       ]
     }
@@ -2731,19 +7213,32 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "riskScenarioId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/LinkControlsToRiskScenarioInput"
+      },
       "fields": [
         {
           "name": "controlLinks",
           "required": true,
           "description": "List of control links to create for the risk scenario. Control links that\nalready exist on the scenario are a no-op; unknown identifiers cause the\nrequest to fail.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/ControlLinkToRiskScenarioInput"
+            },
+            "type": "array",
+            "description": "List of control links to create for the risk scenario. Control links that\nalready exist on the scenario are a no-op; unknown identifiers cause the\nrequest to fail."
+          }
         }
       ]
     }
@@ -2762,7 +7257,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "riskScenarioId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -2780,19 +7278,29 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "riskScenarioId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/SubmitRiskForApprovalInput"
+      },
       "fields": [
         {
           "name": "comment",
           "required": false,
           "description": "Optional comment to include with the approval request.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Optional comment to include with the approval request."
+          }
         }
       ]
     }
@@ -2811,13 +7319,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "statusFilter",
@@ -2825,6 +7339,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter tests by test status.\nPossible values: OK (Test passed), DEACTIVATED (Test is deactivated), NEEDS_ATTENTION (Test failed), IN_PROGRESS (Test is in progress), INVALID (Test is invalid), NOT_APPLICABLE (Test is not applicable)",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/TestStatus"
+        },
         "enumValues": [
           "OK",
           "DEACTIVATED",
@@ -2839,28 +7356,40 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter tests by framework.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "integrationFilter",
         "in": "query",
         "required": false,
         "description": "Filter tests by integration.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "controlFilter",
         "in": "query",
         "required": false,
         "description": "Filter tests by control ID.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "ownerFilter",
         "in": "query",
         "required": false,
         "description": "Filter tests by owner ID.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "categoryFilter",
@@ -2868,6 +7397,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter tests by category.",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/TestCategory"
+        },
         "enumValues": [
           "ACCOUNTS_ACCESS",
           "ACCOUNT_SECURITY",
@@ -2894,7 +7426,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter tests by rollout status.\nA test in rollout is an upcoming test that does not have its history tracked yet.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       }
     ]
   },
@@ -2912,7 +7447,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "testId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -2930,7 +7468,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "testId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "entityStatus",
@@ -2938,6 +7479,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "The status of the test entities. Defaults to FAILING.\nPossible values: FAILING, DEACTIVATED",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/EntityStatus"
+        },
         "enumValues": [
           "FAILING",
           "DEACTIVATED"
@@ -2947,13 +7491,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -2971,31 +7521,65 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "testId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "entityId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "deactivateReason": {
+            "type": "string",
+            "description": "Reason for deactivating the entity.",
+            "minLength": 1
+          },
+          "deactivateUntilDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date until which the entity should be deactivated. If not provided, the entity will be deactivated indefinitely."
+          }
+        },
+        "required": [
+          "deactivateReason"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "deactivateReason",
           "required": true,
           "description": "Reason for deactivating the entity.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Reason for deactivating the entity.",
+            "minLength": 1
+          }
         },
         {
           "name": "deactivateUntilDate",
           "required": false,
           "description": "Date until which the entity should be deactivated. If not provided, the entity will be deactivated indefinitely.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date until which the entity should be deactivated. If not provided, the entity will be deactivated indefinitely."
+          }
         }
       ]
     }
@@ -3014,13 +7598,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "testId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "entityId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3038,7 +7628,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3056,49 +7649,111 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateTrustCenterInput"
+      },
       "fields": [
         {
           "name": "title",
           "required": false,
           "description": "Custom title for the Trust Center. If null is passed in, the current\ncustom title is unset and the default title is restored.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Custom title for the Trust Center. If null is passed in, the current\ncustom title is unset and the default title is restored."
+          }
         },
         {
           "name": "companyDescription",
           "required": false,
           "description": "Company description displayed in the Trust Center header. If null is passed\nin, the current company description is unset.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Company description displayed in the Trust Center header. If null is passed\nin, the current company description is unset."
+          }
         },
         {
           "name": "bannerSetting",
           "required": false,
           "description": "The banner configuration of the Trust Center.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "properties": {
+              "endColor": {
+                "type": "string",
+                "description": "End color of the banner. Only applies if setting is GRADIENT."
+              },
+              "startColor": {
+                "type": "string",
+                "description": "Start color of the banner. Only applies if setting is GRADIENT."
+              },
+              "setting": {
+                "$ref": "#/components/schemas/ApiSelectableBannerSetting",
+                "description": "The banner style to use. Must be one of \"GRADIENT\" or \"MINIMAL\"."
+              }
+            },
+            "required": [
+              "setting"
+            ],
+            "type": "object",
+            "description": "The banner configuration of the Trust Center."
+          }
         },
         {
           "name": "customTheme",
           "required": false,
           "description": "The custom theme configuration for the Trust Center.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "properties": {
+              "secondary": {
+                "type": "string",
+                "nullable": true,
+                "description": "Secondary color for the theme. If null is passed in, resets to default."
+              },
+              "primary": {
+                "type": "string",
+                "nullable": true,
+                "description": "Primary color for the theme. If null is passed in, resets to default."
+              }
+            },
+            "type": "object",
+            "description": "The custom theme configuration for the Trust Center."
+          }
         },
         {
           "name": "privacyPolicy",
           "required": false,
           "description": "Privacy policy URL to set on the Trust Center. If null is passed in, unsets\nthe current privacy policy.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Privacy policy URL to set on the Trust Center. If null is passed in, unsets\nthe current privacy policy."
+          }
         },
         {
           "name": "isPublic",
           "required": false,
           "description": "Whether the Trust Center is public or not.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether the Trust Center is public or not."
+          }
         }
       ]
     }
@@ -3117,19 +7772,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -3147,13 +7811,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "accessRequestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3171,43 +7841,72 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "accessRequestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/ApproveTrustCenterAccessRequestInput"
+      },
       "fields": [
         {
           "name": "expirationDate",
           "required": false,
           "description": "The date access should expire for this viewer. If a date isn't provided,\naccess will not expire.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date access should expire for this viewer. If a date isn't provided,\naccess will not expire."
+          }
         },
         {
           "name": "isNdaRequired",
           "required": false,
           "description": "Whether to require an NDA for the viewer. Defaults to true.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether to require an NDA for the viewer. Defaults to true."
+          }
         },
         {
           "name": "resourceIds",
           "required": false,
           "description": "Identifiers for the resources that this viewer should have access to. If\nthis field is omitted, the viewer will have access to all resources that\nthey requested.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Identifiers for the resources that this viewer should have access to. If\nthis field is omitted, the viewer will have access to all resources that\nthey requested."
+          }
         },
         {
           "name": "accessLevel",
           "required": false,
           "description": "The access level of the viewer.\nFULL_ACCESS means having access to all resources on the trust center.\nPARTIAL_ACCESS means having access to all public resources and a select list of requestable resources.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/ViewerAccessLevel",
+            "description": "Approved access level of the viewer. If this field is omitted, the viewer\nwill have the access level they requested."
+          }
         }
       ]
     }
@@ -3226,13 +7925,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "accessRequestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3250,25 +7955,40 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "eventTypesMatchesAny",
         "in": "query",
         "required": false,
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ActivityEventType"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -3276,14 +7996,22 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Only include activity events that occurred on or after the specified date and time.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       },
       {
         "name": "beforeDate",
         "in": "query",
         "required": false,
         "description": "Only include activity events that occurred before the specified date and time.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     ]
   },
@@ -3301,7 +8029,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3319,19 +8050,29 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddOrEditTrustCenterControlCategoryInput"
+      },
       "fields": [
         {
           "name": "name",
           "required": true,
           "description": "Name of the category.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the category."
+          }
         }
       ]
     }
@@ -3350,13 +8091,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "categoryId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3374,25 +8121,38 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "categoryId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddOrEditTrustCenterControlCategoryInput"
+      },
       "fields": [
         {
           "name": "name",
           "required": true,
           "description": "Name of the category.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the category."
+          }
         }
       ]
     }
@@ -3411,13 +8171,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "categoryId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3435,19 +8201,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -3465,25 +8240,43 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddControlToTrustCenterInput"
+      },
       "fields": [
         {
           "name": "controlId",
           "required": true,
           "description": "ID of the control to add to the Trust Center.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "ID of the control to add to the Trust Center."
+          }
         },
         {
           "name": "categoryIds",
           "required": true,
           "description": "IDs of the categories to add the control to. This cannot be empty.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the categories to add the control to. This cannot be empty.",
+            "minItems": 1
+          }
         }
       ]
     }
@@ -3502,13 +8295,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3526,13 +8325,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "controlId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3550,7 +8355,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3568,25 +8376,39 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddOrEditTrustCenterFaqInput"
+      },
       "fields": [
         {
           "name": "question",
           "required": true,
           "description": "The FAQ question.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The FAQ question."
+          }
         },
         {
           "name": "answer",
           "required": true,
           "description": "The FAQ answer.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The FAQ answer."
+          }
         }
       ]
     }
@@ -3605,13 +8427,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "faqId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3629,31 +8457,48 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "faqId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddOrEditTrustCenterFaqInput"
+      },
       "fields": [
         {
           "name": "question",
           "required": true,
           "description": "The FAQ question.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The FAQ question."
+          }
         },
         {
           "name": "answer",
           "required": true,
           "description": "The FAQ answer.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The FAQ answer."
+          }
         }
       ]
     }
@@ -3672,13 +8517,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "faqId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3696,19 +8547,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -3726,7 +8586,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3744,7 +8607,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
@@ -3755,28 +8621,71 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "file",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          }
         },
         {
           "name": "title",
           "required": true,
           "description": "Title of the Trust Center document.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Title of the Trust Center document."
+          }
         },
         {
           "name": "isPublic",
           "required": true,
           "description": "Boolean determining whether the document is publicly available.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Boolean determining whether the document is publicly available."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "Description of the uploaded document.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description of the uploaded document."
+          }
         }
       ],
-      "fileFieldName": "file"
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the Trust Center document."
+          },
+          "isPublic": {
+            "type": "string",
+            "description": "Boolean determining whether the document is publicly available."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the uploaded document."
+          }
+        },
+        "required": [
+          "file",
+          "title",
+          "isPublic"
+        ]
+      }
     }
   },
   {
@@ -3793,13 +8702,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3817,37 +8732,58 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/EditTrustCenterResourceInput"
+      },
       "fields": [
         {
           "name": "title",
           "required": false,
           "description": "Title of the Trust Center document.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Title of the Trust Center document."
+          }
         },
         {
           "name": "isPublic",
           "required": false,
           "description": "Boolean determining whether the document is publicly available.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Boolean determining whether the document is publicly available."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "Description of the uploaded document.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description of the uploaded document."
+          }
         }
       ]
     }
@@ -3866,13 +8802,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3890,13 +8832,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "resourceId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3914,7 +8862,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3932,43 +8883,69 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddTrustCenterSubprocessorInput"
+      },
       "fields": [
         {
           "name": "name",
           "required": true,
           "description": "Name of the subprocessor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the subprocessor."
+          }
         },
         {
           "name": "url",
           "required": false,
           "description": "URL of the subprocessor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "URL of the subprocessor."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "Description of the subprocessor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description of the subprocessor."
+          }
         },
         {
           "name": "location",
           "required": false,
           "description": "Where this subprocessor is deployed.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Where this subprocessor is deployed."
+          }
         },
         {
           "name": "purpose",
           "required": false,
           "description": "The purpose that the subprocessor serves.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The purpose that the subprocessor serves."
+          }
         }
       ]
     }
@@ -3987,13 +8964,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "subprocessorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4011,37 +8994,61 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "subprocessorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/EditTrustCenterSubprocessorInput"
+      },
       "fields": [
         {
           "name": "description",
           "required": false,
           "description": "What to set the subprocessor description to. If null is passed in, the\nsubprocessor's current description is unset.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "What to set the subprocessor description to. If null is passed in, the\nsubprocessor's current description is unset."
+          }
         },
         {
           "name": "location",
           "required": false,
           "description": "What to set the subprocessor location to. If null is passed in, the\nsubprocessor's current description is unset.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "What to set the subprocessor location to. If null is passed in, the\nsubprocessor's current description is unset."
+          }
         },
         {
           "name": "purpose",
           "required": false,
           "description": "What to set the subprocessor purpose to. If null is passed in, the\nsubprocessor's current description is unset.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "What to set the subprocessor purpose to. If null is passed in, the\nsubprocessor's current description is unset."
+          }
         }
       ]
     }
@@ -4060,13 +9067,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "subprocessorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4084,25 +9097,42 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateTrustCenterSubscriberGroupInput"
+      },
       "fields": [
         {
           "name": "name",
           "required": true,
           "description": "Name of the subscriber group.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the subscriber group."
+          }
         },
         {
           "name": "subscriberIds",
           "required": true,
           "description": "List of subscriber IDs in the group.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "List of subscriber IDs in the group."
+          }
         }
       ]
     }
@@ -4121,19 +9151,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -4151,25 +9190,38 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "subscriberGroupId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/EditTrustCenterSubscriberGroupInput"
+      },
       "fields": [
         {
           "name": "name",
           "required": true,
           "description": "Updated name of the subscriber group.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Updated name of the subscriber group."
+          }
         }
       ]
     }
@@ -4188,13 +9240,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "subscriberGroupId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4212,13 +9270,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "subscriberGroupId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4236,19 +9300,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -4266,19 +9339,29 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddTrustCenterSubscriberInput"
+      },
       "fields": [
         {
           "name": "email",
           "required": true,
           "description": "Email of the subscriber.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of the subscriber."
+          }
         }
       ]
     }
@@ -4297,13 +9380,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "subscriberId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4321,13 +9410,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "subscriberId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4345,25 +9440,41 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "subscriberId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/SetGroupsForTrustCenterSubscriberInput"
+      },
       "fields": [
         {
           "name": "groupIds",
           "required": true,
           "description": "Group IDs to set for the subscriber. The subscriber will be removed from\nany groups not included in this list.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Group IDs to set for the subscriber. The subscriber will be removed from\nany groups not included in this list."
+          }
         }
       ]
     }
@@ -4382,19 +9493,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -4412,55 +9532,95 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddTrustCenterUpdateInput"
+      },
       "fields": [
         {
           "name": "title",
           "required": true,
           "description": "Title of the update.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Title of the update."
+          }
         },
         {
           "name": "description",
           "required": true,
           "description": "Description of the update.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description of the update."
+          }
         },
         {
           "name": "category",
           "required": true,
           "description": "The possible categories for a Trust Center update.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/UpdateCategory",
+            "description": "Category of the update."
+          }
         },
         {
           "name": "visibilityType",
           "required": false,
           "description": "Visibility of a Trust Center update.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/UpdateVisibilityType",
+            "description": "Visibility type of the update. This field is in Beta and not widely used yet."
+          }
         },
         {
           "name": "notifiedEmails",
           "required": false,
           "description": "Emails to notify about the update. This field is in Beta and not widely used yet.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Emails to notify about the update. This field is in Beta and not widely used yet."
+          }
         },
         {
           "name": "notificationTarget",
           "required": false,
           "description": "Target recipients for notifications",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/UpdateNotificationTarget",
+            "description": "Target audience for notifications. Can hold a value of ALL, GROUPS, or NONE. This field is in Beta and not widely used yet."
+          }
         },
         {
           "name": "subscriberGroupIds",
           "required": false,
           "description": "IDs of subscriber groups to notify. Required if notificationTarget is GROUPS. This field is in Beta and not widely used yet.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of subscriber groups to notify. Required if notificationTarget is GROUPS. This field is in Beta and not widely used yet."
+          }
         }
       ]
     }
@@ -4479,13 +9639,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "updateId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4503,43 +9669,68 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "updateId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/EditTrustCenterUpdateInput"
+      },
       "fields": [
         {
           "name": "title",
           "required": true,
           "description": "Title of the update.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Title of the update."
+          }
         },
         {
           "name": "description",
           "required": true,
           "description": "Description of the update.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description of the update."
+          }
         },
         {
           "name": "category",
           "required": true,
           "description": "The possible categories for a Trust Center update.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/UpdateCategory",
+            "description": "Category of the update."
+          }
         },
         {
           "name": "visibilityType",
           "required": false,
           "description": "Visibility of a Trust Center update.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/UpdateVisibilityType",
+            "description": "Visibility type of the update. This field is in Beta and not widely used yet."
+          }
         }
       ]
     }
@@ -4558,13 +9749,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "updateId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4582,13 +9779,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "updateId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4606,31 +9809,56 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "updateId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/SendTrustCenterUpdateNotificationsInput"
+      },
       "fields": [
         {
           "name": "emails",
           "required": true,
           "description": "Additional email addresses to notify about this Trust Center update in addition to the existing Trust Center subscribers.\nDuplicate emails are deduplicated to ensure each recipient gets only one notification.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Additional email addresses to notify about this Trust Center update in addition to the existing Trust Center subscribers.\nDuplicate emails are deduplicated to ensure each recipient gets only one notification.",
+            "maxItems": 10
+          }
         },
         {
           "name": "subscriberGroupIds",
           "required": true,
           "description": "IDs of subscriber groups to notify.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of subscriber groups to notify.",
+            "maxItems": 10
+          }
         }
       ]
     }
@@ -4649,25 +9877,38 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "includeRemoved",
         "in": "query",
         "required": false,
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "default": true,
+          "type": "boolean"
+        }
       }
     ]
   },
@@ -4685,55 +9926,93 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddTrustCenterViewerInput"
+      },
       "fields": [
         {
           "name": "email",
           "required": true,
           "description": "Email of the viewer.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of the viewer."
+          }
         },
         {
           "name": "name",
           "required": true,
           "description": "Name of the viewer.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the viewer."
+          }
         },
         {
           "name": "companyName",
           "required": true,
           "description": "Name of the viewer's company.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the viewer's company."
+          }
         },
         {
           "name": "isNdaRequired",
           "required": true,
           "description": "Whether to require an NDA for the viewer.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether to require an NDA for the viewer."
+          }
         },
         {
           "name": "expirationDate",
           "required": false,
           "description": "The date access should expire for this viewer. If a date isn't provided,\naccess will not expire.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date access should expire for this viewer. If a date isn't provided,\naccess will not expire."
+          }
         },
         {
           "name": "resourceIds",
           "required": false,
           "description": "Identifiers for the resources that this viewer should have access to. If\nthis field is omitted, the viewer will have access to all resources on the\nTrust Center.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Identifiers for the resources that this viewer should have access to. If\nthis field is omitted, the viewer will have access to all resources on the\nTrust Center."
+          }
         },
         {
           "name": "accessLevel",
           "required": true,
           "description": "The access level of the viewer.\nFULL_ACCESS means having access to all resources on the trust center.\nPARTIAL_ACCESS means having access to all public resources and a select list of requestable resources.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/ViewerAccessLevel",
+            "description": "Access level for the viewer."
+          }
         }
       ]
     }
@@ -4752,13 +10031,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "viewerId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4776,13 +10061,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slugId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "viewerId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -4800,13 +10091,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -4824,130 +10121,251 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateVendorInput"
+      },
       "fields": [
         {
           "name": "name",
           "required": true,
           "description": "Display name of the vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Display name of the vendor.",
+            "maxLength": 2000
+          }
         },
         {
           "name": "websiteUrl",
           "required": false,
           "description": "The url of the vendor's website.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The url of the vendor's website.",
+            "maxLength": 2000
+          }
         },
         {
           "name": "accountManagerName",
           "required": false,
           "description": "Name of the external account manager for this vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the external account manager for this vendor.",
+            "maxLength": 2000
+          }
         },
         {
           "name": "accountManagerEmail",
           "required": false,
           "description": "Email of the external account manager for this vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of the external account manager for this vendor.",
+            "maxLength": 2000
+          }
         },
         {
           "name": "securityOwnerUserId",
           "required": false,
           "description": "The Vanta user ID of the security owner of this vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The Vanta user ID of the security owner of this vendor."
+          }
         },
         {
           "name": "servicesProvided",
           "required": false,
           "description": "Services provided by the vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Services provided by the vendor."
+          }
         },
         {
           "name": "additionalNotes",
           "required": false,
           "description": "Miscellaneous notes about the vendor",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Miscellaneous notes about the vendor",
+            "maxLength": 2000
+          }
         },
         {
           "name": "businessOwnerUserId",
           "required": false,
           "description": "The Vanta user ID of the business owner of this vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The Vanta user ID of the business owner of this vendor."
+          }
         },
         {
           "name": "contractStartDate",
           "required": false,
           "description": "When the contract with the vendor is up for renewal.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the contract with the vendor is up for renewal."
+          }
         },
         {
           "name": "contractRenewalDate",
           "required": false,
           "description": "When the contract with the vendor is up for renewal.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the contract with the vendor is up for renewal."
+          }
         },
         {
           "name": "contractTerminationDate",
           "required": false,
           "description": "When the contract with the vendor was terminated.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the contract with the vendor was terminated."
+          }
         },
         {
           "name": "isVisibleToAuditors",
           "required": false,
           "description": "Whether or not auditors can view this vendor.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether or not auditors can view this vendor."
+          }
         },
         {
           "name": "authDetails",
           "required": false,
           "description": "The authentication details about the vendor.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "properties": {
+              "passwordMinimumLength": {
+                "type": "number",
+                "format": "double",
+                "description": "Minimum number for chacters required for passwords for this vendor."
+              },
+              "passwordRequiresSymbol": {
+                "type": "boolean",
+                "description": "Whether or not the vendor requires passwords to have a symbol."
+              },
+              "passwordRequiresNumber": {
+                "type": "boolean",
+                "description": "Whether or not the vendor requires passwords to have a number."
+              },
+              "passwordMFA": {
+                "type": "boolean",
+                "description": "Whether or not the vendor requires password multi factor authentication."
+              },
+              "method": {
+                "$ref": "#/components/schemas/VendorAuthenticationMethod",
+                "description": "The authentication method the vendor uses."
+              }
+            },
+            "type": "object",
+            "description": "The authentication details about the vendor."
+          }
         },
         {
           "name": "status",
           "required": false,
           "description": "The current state of a vendor:\n- MANAGED: The vendor is actively managed.\n- ARCHIVED: The vendor has been archived\n- IN_PROCUREMENT: The vendor is in the procurement process",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/VendorStatus",
+            "description": "The current status of the vendor."
+          }
         },
         {
           "name": "category",
           "required": false,
           "description": "The vendor's category.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The vendor's category."
+          }
         },
         {
           "name": "inherentRiskLevel",
           "required": false,
           "description": "The risk level of a vendor:\n- CRITICAL: The vendor has a critical security risk\n- HIGH: The vendor has a high security risk\n- MEDIUM: The vendor has a medium security risk\n- LOW: The vendor has a low security risk\n- UNSCORED: The vendor has not been given a risk level",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/VendorRiskLevel",
+            "description": "The inherent risk level of the vendor."
+          }
         },
         {
           "name": "residualRiskLevel",
           "required": false,
           "description": "The risk level of a vendor:\n- CRITICAL: The vendor has a critical security risk\n- HIGH: The vendor has a high security risk\n- MEDIUM: The vendor has a medium security risk\n- LOW: The vendor has a low security risk\n- UNSCORED: The vendor has not been given a risk level",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/VendorRiskLevel",
+            "description": "The residual risk level of the vendor."
+          }
         },
         {
           "name": "vendorHeadquarters",
           "required": false,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/CountryCode",
+            "description": "The vendor's headquarters."
+          }
         },
         {
           "name": "contractAmount",
           "required": false,
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/VendorContractAmount",
+            "description": "The contract amount for the vendor."
+          }
         },
         {
           "name": "customFields",
           "required": false,
           "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "type": "array",
+            "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors"
+          }
         },
         {
           "name": "frameworkScope",
           "required": false,
           "description": "Framework scoping configuration for a vendor.\nDetermines which compliance frameworks the vendor applies to.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/VendorFrameworkScope",
+            "description": "Framework scoping configuration for this vendor.\nDetermines which compliance frameworks the vendor applies to."
+          }
         }
       ]
     }
@@ -4966,20 +10384,29 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "name",
         "in": "query",
         "required": false,
         "description": "Filter vendors by name (case-insensitive, partial match)",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "statusMatchesAny",
@@ -4987,6 +10414,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter vendors by status (can specify multiple)",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/VendorStatus"
+          }
+        },
         "itemKind": "string"
       }
     ]
@@ -5005,7 +10438,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5023,7 +10459,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5041,145 +10480,304 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateVendorInput"
+      },
       "fields": [
         {
           "name": "name",
           "required": false,
           "description": "Display name of the vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Display name of the vendor.",
+            "maxLength": 2000
+          }
         },
         {
           "name": "websiteUrl",
           "required": false,
           "description": "The url of the vendor's website.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The url of the vendor's website.",
+            "maxLength": 2000
+          }
         },
         {
           "name": "accountManagerName",
           "required": false,
           "description": "Name of the external account manager for this vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the external account manager for this vendor.",
+            "maxLength": 2000
+          }
         },
         {
           "name": "accountManagerEmail",
           "required": false,
           "description": "Email of the external account manager for this vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of the external account manager for this vendor.",
+            "maxLength": 2000
+          }
         },
         {
           "name": "securityOwnerUserId",
           "required": false,
           "description": "The Vanta user ID of the security owner of this vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The Vanta user ID of the security owner of this vendor."
+          }
         },
         {
           "name": "servicesProvided",
           "required": false,
           "description": "Services provided by the vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Services provided by the vendor."
+          }
         },
         {
           "name": "additionalNotes",
           "required": false,
           "description": "Miscellaneous notes about the vendor",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Miscellaneous notes about the vendor"
+          }
         },
         {
           "name": "businessOwnerUserId",
           "required": false,
           "description": "The Vanta user ID of the business owner of this vendor.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The Vanta user ID of the business owner of this vendor."
+          }
         },
         {
           "name": "contractStartDate",
           "required": false,
           "description": "When the contract with the vendor is up for renewal.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the contract with the vendor is up for renewal."
+          }
         },
         {
           "name": "contractRenewalDate",
           "required": false,
           "description": "When the contract with the vendor is up for renewal.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the contract with the vendor is up for renewal."
+          }
         },
         {
           "name": "contractTerminationDate",
           "required": false,
           "description": "When the contract with the vendor was terminated.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the contract with the vendor was terminated."
+          }
         },
         {
           "name": "isVisibleToAuditors",
           "required": false,
           "description": "Whether or not auditors can view this vendor.",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether or not auditors can view this vendor."
+          }
         },
         {
           "name": "authDetails",
           "required": false,
           "description": "The authentication details about the vendor.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "properties": {
+              "passwordMinimumLength": {
+                "type": "number",
+                "format": "double",
+                "description": "Minimum number for chacters required for passwords for this vendor."
+              },
+              "passwordRequiresSymbol": {
+                "type": "boolean",
+                "description": "Whether or not the vendor requires passwords to have a symbol."
+              },
+              "passwordRequiresNumber": {
+                "type": "boolean",
+                "description": "Whether or not the vendor requires passwords to have a number."
+              },
+              "passwordMFA": {
+                "type": "boolean",
+                "description": "Whether or not the vendor requires password multi factor authentication."
+              },
+              "method": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/VendorAuthenticationMethod"
+                  }
+                ],
+                "nullable": true,
+                "description": "The authentication method the vendor uses."
+              }
+            },
+            "type": "object",
+            "description": "The authentication details about the vendor."
+          }
         },
         {
           "name": "status",
           "required": false,
           "description": "The current state of a vendor:\n- MANAGED: The vendor is actively managed.\n- ARCHIVED: The vendor has been archived\n- IN_PROCUREMENT: The vendor is in the procurement process",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/VendorStatus",
+            "description": "The current status of the vendor."
+          }
         },
         {
           "name": "category",
           "required": false,
           "description": "The vendor's category.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The vendor's category."
+          }
         },
         {
           "name": "inherentRiskLevel",
           "required": false,
           "description": "The inherent risk level of the vendor.\nSetting it to null means it will be auto-scored by Vanta based on the risk attributes and rubric",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VendorRiskLevel"
+              }
+            ],
+            "nullable": true,
+            "description": "The inherent risk level of the vendor.\nSetting it to null means it will be auto-scored by Vanta based on the risk attributes and rubric"
+          }
         },
         {
           "name": "residualRiskLevel",
           "required": false,
           "description": "The risk level of a vendor:\n- CRITICAL: The vendor has a critical security risk\n- HIGH: The vendor has a high security risk\n- MEDIUM: The vendor has a medium security risk\n- LOW: The vendor has a low security risk\n- UNSCORED: The vendor has not been given a risk level",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/VendorRiskLevel",
+            "description": "The residual risk level of the vendor."
+          }
         },
         {
           "name": "riskAttributeIds",
           "required": false,
           "description": "A list of risk attribute ids the vendor has been assigned.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "A list of risk attribute ids the vendor has been assigned."
+          }
         },
         {
           "name": "vendorHeadquarters",
           "required": false,
           "description": "The vendor's headquarters.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CountryCode"
+              }
+            ],
+            "nullable": true,
+            "description": "The vendor's headquarters."
+          }
         },
         {
           "name": "contractAmount",
           "required": false,
           "description": "The contract amount for the vendor.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VendorContractAmount"
+              }
+            ],
+            "nullable": true,
+            "description": "The contract amount for the vendor."
+          }
         },
         {
           "name": "customFields",
           "required": false,
           "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "type": "array",
+            "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors"
+          }
         },
         {
           "name": "frameworkScope",
           "required": false,
           "description": "Framework scoping configuration for a vendor.\nDetermines which compliance frameworks the vendor applies to.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/VendorFrameworkScope",
+            "description": "Framework scoping configuration for this vendor.\nDetermines which compliance frameworks the vendor applies to."
+          }
         }
       ]
     }
@@ -5198,19 +10796,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -5228,7 +10835,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
@@ -5239,28 +10849,70 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "file",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          }
         },
         {
           "name": "type",
           "required": true,
           "description": "Type of the vendor document.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Type of the vendor document."
+          }
         },
         {
           "name": "title",
           "required": false,
           "description": "The document's title.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The document's title."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "The document's description.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The document's description."
+          }
         }
       ],
-      "fileFieldName": "file"
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the vendor document."
+          },
+          "title": {
+            "type": "string",
+            "description": "The document's title."
+          },
+          "description": {
+            "type": "string",
+            "description": "The document's description."
+          }
+        },
+        "required": [
+          "file",
+          "type"
+        ]
+      }
     }
   },
   {
@@ -5277,33 +10929,48 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "securityReviewId",
         "in": "query",
         "required": false,
         "description": "Filter findings by security review ID",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "documentId",
         "in": "query",
         "required": false,
         "description": "Filter findings by document ID",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5321,43 +10988,79 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateFindingInput"
+      },
       "fields": [
         {
           "name": "content",
           "required": true,
           "description": "The content of the finding.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The content of the finding."
+          }
         },
         {
           "name": "riskStatus",
           "required": true,
           "description": "The status of the finding:\n- ACCEPT: The finding and its risk has been accepted and no follow up is required.\n- REMEDIATE: The finding needs to be remediated in some way.\n- NONE: The finding is not related to an observed risk that needs to be accepted or remediated.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/FindingRiskStatus",
+            "description": "The risk status of the finding."
+          }
         },
         {
           "name": "remediation",
           "required": false,
           "description": "Remediation information about the finding. Will only be populated if riskStatus is set to \"REMEDIATE\".",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "properties": {
+              "state": {
+                "$ref": "#/components/schemas/FindingRemediationState",
+                "description": "The state of the remediation."
+              },
+              "requirementNotes": {
+                "type": "string",
+                "description": "A string containing the information needed to properly remediate the finding."
+              }
+            },
+            "type": "object",
+            "description": "Remediation information about the finding. Will only be populated if riskStatus is set to \"REMEDIATE\"."
+          }
         },
         {
           "name": "securityReviewId",
           "required": false,
           "description": "Unique identifier for a security review.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Unique identifier for a security review."
+          }
         },
         {
           "name": "documentId",
           "required": false,
           "description": "Unique identifier for a document.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Unique identifier for a document."
+          }
         }
       ]
     }
@@ -5376,37 +11079,68 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "findingId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateFindingInput"
+      },
       "fields": [
         {
           "name": "content",
           "required": false,
           "description": "The content of the finding.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The content of the finding."
+          }
         },
         {
           "name": "riskStatus",
           "required": false,
           "description": "The status of the finding:\n- ACCEPT: The finding and its risk has been accepted and no follow up is required.\n- REMEDIATE: The finding needs to be remediated in some way.\n- NONE: The finding is not related to an observed risk that needs to be accepted or remediated.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/FindingRiskStatus",
+            "description": "The risk status of the finding."
+          }
         },
         {
           "name": "remediation",
           "required": false,
           "description": "Remediation information about the finding. Will only be populated if riskStatus is set to \"REMEDIATE\".",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "properties": {
+              "state": {
+                "$ref": "#/components/schemas/FindingRemediationState",
+                "description": "The state of the remediation."
+              },
+              "requirementNotes": {
+                "type": "string",
+                "description": "A string containing the information needed to properly remediate the finding."
+              }
+            },
+            "type": "object",
+            "description": "Remediation information about the finding. Will only be populated if riskStatus is set to \"REMEDIATE\"."
+          }
         }
       ]
     }
@@ -5425,13 +11159,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "findingId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5449,19 +11189,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -5479,13 +11228,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "securityReviewId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5503,13 +11258,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "securityReviewId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
@@ -5520,28 +11281,70 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "file",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          }
         },
         {
           "name": "type",
           "required": true,
           "description": "Type of the vendor document.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Type of the vendor document."
+          }
         },
         {
           "name": "title",
           "required": false,
           "description": "The document's title.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The document's title."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "The document's description.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The document's description."
+          }
         }
       ],
-      "fileFieldName": "file"
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the vendor document."
+          },
+          "title": {
+            "type": "string",
+            "description": "The document's title."
+          },
+          "description": {
+            "type": "string",
+            "description": "The document's description."
+          }
+        },
+        "required": [
+          "file",
+          "type"
+        ]
+      }
     }
   },
   {
@@ -5558,25 +11361,37 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "securityReviewId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -5594,19 +11409,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "securityReviewId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "documentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5624,7 +11448,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vendorId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
@@ -5636,9 +11463,26 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "status",
           "required": true,
           "description": "Status of the vendor",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Status of the vendor"
+          }
         }
-      ]
+      ],
+      "fileRequired": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Status of the vendor"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      }
     }
   },
   {
@@ -5656,61 +11500,90 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities by search query",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "isDeactivated",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities by deactivation status.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "externalVulnerabilityId",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities based on a specific external ID.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "isFixAvailable",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities that have an available fix.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "packageIdentifier",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities that are from a specific package.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "slaDeadlineAfterDate",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities with a fix due after a specific timestamp",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       },
       {
         "name": "slaDeadlineBeforeDate",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities with a fix due before a specific timestamp",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       },
       {
         "name": "severity",
@@ -5718,6 +11591,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter vulnerabilities by severity.\nPossible values: CRITICAL, HIGH, MEDIUM, LOW.",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/ExternalFindingSeverity"
+        },
         "enumValues": [
           "CRITICAL",
           "HIGH",
@@ -5730,21 +11606,30 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities by the vulnerability scanner that detected them.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "includeVulnerabilitiesWithoutSlas",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities without an SLA due date.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "vulnerableAssetId",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities by a specific asset ID.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5762,12 +11647,38 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "updates": {
+            "items": {
+              "$ref": "#/components/schemas/VulnerabilityDeactivateRequest"
+            },
+            "type": "array",
+            "description": "List of vulnerabilities to deactivate",
+            "minItems": 1,
+            "maxItems": 50
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "updates",
           "required": true,
           "description": "List of vulnerabilities to deactivate",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/VulnerabilityDeactivateRequest"
+            },
+            "type": "array",
+            "description": "List of vulnerabilities to deactivate",
+            "minItems": 1,
+            "maxItems": 50
+          }
         }
       ]
     }
@@ -5786,12 +11697,56 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "updates": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "ID of the vulnerability to reactivate."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of vulnerability IDs to reactivate.",
+            "minItems": 1,
+            "maxItems": 50
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "updates",
           "required": true,
           "description": "List of vulnerability IDs to reactivate.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "ID of the vulnerability to reactivate."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of vulnerability IDs to reactivate.",
+            "minItems": 1,
+            "maxItems": 50
+          }
         }
       ]
     }
@@ -5810,7 +11765,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vulnerabilityId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5828,20 +11786,29 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "integrationId",
         "in": "query",
         "required": false,
         "description": "Filter vulnerability remediations based on a specific scanner integration.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "severity",
@@ -5849,6 +11816,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter vulnerability remediations by severity.\nPossible values: CRITICAL, HIGH, MEDIUM, LOW.",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/ExternalFindingSeverity"
+        },
         "enumValues": [
           "CRITICAL",
           "HIGH",
@@ -5861,21 +11831,32 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter vulnerability remediations by remediation status.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "remediatedAfterDate",
         "in": "query",
         "required": false,
         "description": "Filter vulnerability remediations that occurred after a specific timestamp.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       },
       {
         "name": "remediatedBeforeDate",
         "in": "query",
         "required": false,
         "description": "Filter vulnerability remediations that occurred before a specific timestamp.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     ]
   },
@@ -5893,12 +11874,68 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "properties": {
+          "updates": {
+            "items": {
+              "properties": {
+                "slaViolationComment": {
+                  "type": "string",
+                  "description": "SLA miss acknowledgement comment. This comment should describe why the SLA was missed.",
+                  "minLength": 1
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Remediation IDs"
+                }
+              },
+              "required": [
+                "slaViolationComment",
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of vulnerability remediation IDs.",
+            "minItems": 1,
+            "maxItems": 50
+          }
+        },
+        "required": [
+          "updates"
+        ],
+        "type": "object"
+      },
       "fields": [
         {
           "name": "updates",
           "required": true,
           "description": "List of vulnerability remediation IDs.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "properties": {
+                "slaViolationComment": {
+                  "type": "string",
+                  "description": "SLA miss acknowledgement comment. This comment should describe why the SLA was missed.",
+                  "minLength": 1
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Remediation IDs"
+                }
+              },
+              "required": [
+                "slaViolationComment",
+                "id"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "description": "List of vulnerability remediation IDs.",
+            "minItems": 1,
+            "maxItems": 50
+          }
         }
       ]
     }
@@ -5918,26 +11955,38 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter vulnerable assets by search query.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "integrationId",
         "in": "query",
         "required": false,
         "description": "Filter vulnerable assets by specific vulnerability scanner.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "assetType",
@@ -5945,6 +11994,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter vulnerable assets by asset type.\nPossible values: CODE_REPOSITORY, CONTAINER_REPOSITORY, CONTAINER_REPOSITORY_IMAGE, MANIFEST_FILE, SERVER, SERVERLESS_FUNCTION, WORKSTATION.",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/VulnerableAssetType"
+        },
         "enumValues": [
           "SERVER",
           "SERVERLESS_FUNCTION",
@@ -5962,7 +12014,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter vulnerable assets by...",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5980,7 +12035,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "vulnerableAssetId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -5998,24 +12056,39 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddAuditorInput"
+      },
       "fields": [
         {
           "name": "email",
           "required": true,
           "description": "Email of the new user.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of the new user."
+          }
         },
         {
           "name": "givenName",
           "required": true,
           "description": "First name of the new user.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "First name of the new user."
+          }
         },
         {
           "name": "familyName",
           "required": true,
           "description": "Last name of the new user.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Last name of the new user."
+          }
         }
       ]
     }
@@ -6034,27 +12107,40 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/ListAuditsPageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "changedSinceDate",
         "in": "query",
         "required": false,
         "description": "Includes all audits that have changed since changedSinceDate.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       },
       {
         "name": "isActiveAudit",
         "in": "query",
         "required": false,
         "description": "Includes only audits with no audit report uploaded",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       }
     ]
   },
@@ -6072,7 +12158,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -6090,26 +12179,39 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "changedSinceDate",
         "in": "query",
         "required": false,
         "description": "Includes all comments that have changed since changedSinceDate.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     ]
   },
@@ -6127,19 +12229,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -6157,54 +12268,99 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateCustomControlInput"
+      },
       "fields": [
         {
           "name": "externalId",
           "required": true,
           "description": "The external id of the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The external id of the control."
+          }
         },
         {
           "name": "name",
           "required": true,
           "description": "The name of the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The name of the control."
+          }
         },
         {
           "name": "description",
           "required": true,
           "description": "The description of the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The description of the control."
+          }
         },
         {
           "name": "effectiveDate",
           "required": true,
           "description": "The effective date of the control.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The effective date of the control."
+          }
         },
         {
           "name": "category",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/ControlDomain",
+            "description": "The category of the control. See the ControlDomain enum for possible values."
+          }
         },
         {
           "name": "sections",
           "required": false,
           "description": "Framework sections that the control should be mapped to.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/FrameworkSection"
+            },
+            "type": "array",
+            "nullable": true,
+            "description": "Framework sections that the control should be mapped to."
+          }
         },
         {
           "name": "role",
           "required": false,
           "description": "The GDPR role of the control, which specifies whether the data is being \"collected\" or \"processed\". See the GdprRole enum for possible values.\nThis field should only be included for controls that are to be mapped to the GDPR framework.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GdprRole"
+              }
+            ],
+            "nullable": true,
+            "description": "The GDPR role of the control, which specifies whether the data is being \"collected\" or \"processed\". See the GdprRole enum for possible values.\nThis field should only be included for controls that are to be mapped to the GDPR framework."
+          }
         }
       ]
     }
@@ -6223,26 +12379,39 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "changedSinceDate",
         "in": "query",
         "required": false,
         "description": "Includes all audit evidence that have changed since changedSinceDate.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     ]
   },
@@ -6260,53 +12429,90 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateCustomEvidenceRequestInput"
+      },
       "fields": [
         {
           "name": "controlIds",
           "required": true,
           "description": "A set of controls, referenced by id, to map the evidence to",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "A set of controls, referenced by id, to map the evidence to"
+          }
         },
         {
           "name": "title",
           "required": true,
           "description": "Title for the evidence request",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Title for the evidence request"
+          }
         },
         {
           "name": "description",
           "required": true,
           "description": "Description for the evidence request",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description for the evidence request"
+          }
         },
         {
           "name": "cadence",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/RecurrenceDuration",
+            "description": "Renewal cadence"
+          }
         },
         {
           "name": "reminderWindow",
           "required": true,
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/RecurrenceDuration",
+            "description": "Duration representing when to send notifications, relative to renewal date"
+          }
         },
         {
           "name": "isRestricted",
           "required": true,
           "description": "Whether this document contains sensitive data and needs more restrictive read access",
-          "kind": "boolean"
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether this document contains sensitive data and needs more restrictive read access"
+          }
         },
         {
           "name": "auditorEmail",
           "required": true,
           "description": "Email of the auditor who created the custom evidence request.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of the auditor who created the custom evidence request."
+          }
         }
       ]
     }
@@ -6325,24 +12531,50 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "auditEvidenceId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AuditEvidenceUpdateInput"
+      },
       "fields": [
         {
           "name": "statusUpdate",
           "required": false,
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "properties": {
+              "auditorEmail": {
+                "type": "string",
+                "description": "Email of the auditor who changed the state"
+              },
+              "stateTransition": {
+                "$ref": "#/components/schemas/AuditorEnabledStateTransition",
+                "description": "State change for audit evidence"
+              }
+            },
+            "required": [
+              "auditorEmail",
+              "stateTransition"
+            ],
+            "type": "object"
+          }
         }
       ]
     }
@@ -6361,37 +12593,59 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "auditEvidenceId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddCommentInput"
+      },
       "fields": [
         {
           "name": "text",
           "required": true,
           "description": "Text value of the comment",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Text value of the comment"
+          }
         },
         {
           "name": "email",
           "required": true,
           "description": "Email of author. Must match an existing Vanta user and the user must exist under the Audit Firm who is making the API request",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of author. Must match an existing Vanta user and the user must exist under the Audit Firm who is making the API request"
+          }
         },
         {
           "name": "creationDate",
           "required": true,
           "description": "When the comment was created in the external system",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the comment was created in the external system"
+          }
         }
       ]
     }
@@ -6410,25 +12664,37 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "auditEvidenceId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -6446,7 +12712,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -6464,28 +12733,41 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
         "description": "Maximum number of information requests to return per page.",
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
         "description": "Pagination cursor from a previous response. Provide to fetch the next page of results.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "changedSinceDate",
         "in": "query",
         "required": false,
         "description": "Includes all information requests that have changed since changedSinceDate.\nConsiders creationDate, modificationDate, and deletionDate timestamps when determining changes.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     ]
   },
@@ -6503,61 +12785,112 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateInformationRequestInput"
+      },
       "fields": [
         {
           "name": "uniqueId",
           "required": true,
           "description": "External unique ID to prevent duplicate requests across audit systems.\nMust be unique within the audit. Used for idempotency.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "External unique ID to prevent duplicate requests across audit systems.\nMust be unique within the audit. Used for idempotency."
+          }
         },
         {
           "name": "title",
           "required": true,
           "description": "Short, descriptive title summarizing what is being requested.\nMust be at least 1 character.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Short, descriptive title summarizing what is being requested.\nMust be at least 1 character."
+          }
         },
         {
           "name": "requestType",
           "required": true,
           "description": "Type of information request, defining what scope of evidence is needed.\n\n- POINT_IN_TIME: Evidence for a specific moment (e.g., current state of a policy)\n- POPULATION: Evidence covering all items in a category (e.g., all employees)\n- SAMPLE: Evidence for a representative sample (e.g., 10 random customer records)",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/InformationRequestType",
+            "description": "Scope of evidence required."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "Detailed description explaining what evidence is needed.\nHelps the customer understand what to submit. Optional.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Detailed description explaining what evidence is needed.\nHelps the customer understand what to submit. Optional."
+          }
         },
         {
           "name": "frameworkCodes",
           "required": true,
           "description": "Framework codes this request addresses.\nAn empty array if no framework codes are associated.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Framework codes this request addresses.\nAn empty array if no framework codes are associated."
+          }
         },
         {
           "name": "cadence",
           "required": false,
           "description": "How frequently this request recurs. Null or omitted for one-time requests.",
-          "kind": "object"
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InformationRequestCadence"
+              }
+            ],
+            "nullable": true,
+            "description": "How frequently this request recurs. Null or omitted for one-time requests."
+          }
         },
         {
           "name": "dueDate",
           "required": false,
           "description": "Deadline for fulfilling this request. Null or omitted if no deadline.\nFormat: ISO 8601 UTC timestamp.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Deadline for fulfilling this request. Null or omitted if no deadline.\nFormat: ISO 8601 UTC timestamp."
+          }
         },
         {
           "name": "evidenceCaptureDate",
           "required": false,
           "description": "Start date of the audit period. Evidence before this date may not be accepted.\nNull or omitted if not restricted.\nFormat: ISO 8601 UTC timestamp.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Start date of the audit period. Evidence before this date may not be accepted.\nNull or omitted if not restricted.\nFormat: ISO 8601 UTC timestamp."
+          }
         }
       ]
     }
@@ -6576,55 +12909,96 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/PartialUpdateInformationRequest"
+      },
       "fields": [
         {
           "name": "frameworkCodes",
           "required": false,
           "description": "The framework codes this request addresses.\nAn empty array if no framework codes are associated.",
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The framework codes this request addresses.\nAn empty array if no framework codes are associated."
+          }
         },
         {
           "name": "description",
           "required": false,
           "description": "Detailed description of what evidence is needed.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Detailed description of what evidence is needed."
+          }
         },
         {
           "name": "dueDate",
           "required": false,
           "description": "Deadline for fulfilling this request. Null if no deadline.\nFormat: ISO 8601 UTC timestamp.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Deadline for fulfilling this request. Null if no deadline.\nFormat: ISO 8601 UTC timestamp."
+          }
         },
         {
           "name": "evidenceCaptureDate",
           "required": false,
           "description": "Start date of the audit period. Evidence before this date may not be accepted.\nNull if not restricted. Format: ISO 8601 UTC timestamp.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Start date of the audit period. Evidence before this date may not be accepted.\nNull if not restricted. Format: ISO 8601 UTC timestamp."
+          }
         },
         {
           "name": "requestType",
           "required": false,
           "description": "Type of information request, defining what scope of evidence is needed.\n\n- POINT_IN_TIME: Evidence for a specific moment (e.g., current state of a policy)\n- POPULATION: Evidence covering all items in a category (e.g., all employees)\n- SAMPLE: Evidence for a representative sample (e.g., 10 random customer records)",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/InformationRequestType",
+            "description": "Scope of evidence required."
+          }
         },
         {
           "name": "title",
           "required": false,
           "description": "Short, descriptive title.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Short, descriptive title."
+          }
         }
       ]
     }
@@ -6643,13 +13017,19 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -6667,25 +13047,38 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AcceptInformationRequestEvidenceInput"
+      },
       "fields": [
         {
           "name": "auditorEmail",
           "required": true,
           "description": "Email of the auditor accepting the evidence.\nMust match an existing Vanta user who belongs to the audit firm making the API request.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of the auditor accepting the evidence.\nMust match an existing Vanta user who belongs to the audit firm making the API request."
+          }
         }
       ]
     }
@@ -6704,34 +13097,50 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
         "description": "Maximum number of activity entries to return per page.",
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
         "description": "Pagination cursor from a previous response. Provide to fetch the next page of activity logs.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "changedSinceDate",
         "in": "query",
         "required": false,
         "description": "Includes activity logs that have changed since changedSinceDate.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     ]
   },
@@ -6749,34 +13158,50 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
         "description": "Maximum number of comments to return per page.",
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
         "description": "Pagination cursor from a previous response. Provide to fetch the next page of comments.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "changedSinceDate",
         "in": "query",
         "required": false,
         "description": "Includes all comments that have changed since changedSinceDate.\nConsiders creationDate, modificationDate, and deletionDate timestamps when determining changes.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     ]
   },
@@ -6794,37 +13219,59 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddInformationRequestCommentInput"
+      },
       "fields": [
         {
           "name": "text",
           "required": true,
           "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the information request.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the information request."
+          }
         },
         {
           "name": "email",
           "required": true,
           "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+          }
         },
         {
           "name": "creationDate",
           "required": true,
           "description": "Timestamp when the comment was created in the external audit management system.\nThis allows synchronizing comment timestamps from external systems.\nFormat: ISO 8601 UTC timestamp.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the comment was created in the external audit management system.\nThis allows synchronizing comment timestamps from external systems.\nFormat: ISO 8601 UTC timestamp."
+          }
         }
       ]
     }
@@ -6843,37 +13290,57 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "commentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateInformationRequestCommentInput"
+      },
       "fields": [
         {
           "name": "text",
           "required": true,
           "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the information request.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the information request."
+          }
         },
         {
           "name": "email",
           "required": true,
           "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+          }
         }
       ]
     }
@@ -6892,31 +13359,47 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "commentId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/DeleteInformationRequestCommentInput"
+      },
       "fields": [
         {
           "name": "email",
           "required": true,
           "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+          }
         }
       ]
     }
@@ -6935,34 +13418,50 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
         "description": "Maximum number of evidence entries to return per page.",
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
         "description": "Pagination cursor from a previous response. Provide to fetch the next page of evidence.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "changedSinceDate",
         "in": "query",
         "required": false,
         "description": "Includes all evidence that have changed since changedSinceDate. Considers creationDate,\nmodificationDate, deletionDate, and visibleToAuditorDate timestamps when determining changes.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       },
       {
         "name": "evidenceTypeMatchesAny",
@@ -6970,6 +13469,13 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Limits results to the provided evidence types. Must include at least one of:\nUPLOADED_DOCUMENT, OBSERVATION, LINK, VANTA_DOCUMENT, VANTA_POLICY, VANTA_TEST.",
         "kind": "array",
+        "schema": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/InformationRequestSupportedEvidenceType"
+          }
+        },
         "itemKind": "string"
       }
     ]
@@ -6988,31 +13494,48 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "requestId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ],
     "requestBody": {
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/FlagInformationRequestEvidenceInput"
+      },
       "fields": [
         {
           "name": "auditorEmail",
           "required": true,
           "description": "Email of the auditor flagging the evidence.\nMust match an existing Vanta user who belongs to the audit firm making the API request.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of the auditor flagging the evidence.\nMust match an existing Vanta user who belongs to the audit firm making the API request."
+          }
         },
         {
           "name": "reason",
           "required": true,
           "description": "Detailed explanation of what issues were found with the evidence.\nThis reason is visible to the customer and guides them on what to fix.\nMust be at least 1 character.",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Detailed explanation of what issues were found with the evidence.\nThis reason is visible to the customer and guides them on what to fix.\nMust be at least 1 character."
+          }
         }
       ]
     }
@@ -7031,19 +13554,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "complianceStatusFilterMatchesAny",
@@ -7051,6 +13583,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filters for monitored computers matching any status declared in the filter.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ComputerStatusFilter"
+          }
+        },
         "itemKind": "string"
       }
     ]
@@ -7069,19 +13607,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "tasksSummaryStatusMatchesAny",
@@ -7089,6 +13636,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter individuals by those whose tasksSummary status is any of the provided values.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TasksSummaryStatus"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -7097,6 +13650,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Requires taskStatusMatchesAny. Includes all people for whom any of the provided taskType values in taskTypeMatchesAny\nis any of the provided taskStatus values in taskStatusMatchesAny.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TaskType"
+          }
+        },
         "itemKind": "string"
       },
       {
@@ -7105,6 +13664,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Requires taskTypeMatchesAny. Includes all people for whom any of the provided taskType values in taskTypeMatchesAny\nis any of the provided taskStatus values in taskStatusMatchesAny.",
         "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TaskStatus"
+          }
+        },
         "itemKind": "string"
       }
     ]
@@ -7123,7 +13688,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7141,19 +13709,28 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       }
     ]
   },
@@ -7171,68 +13748,100 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "query",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities by search query",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "isDeactivated",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities by deactivation status.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "externalVulnerabilityId",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities based on a specific external ID.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "isFixAvailable",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities that have an available fix.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "packageIdentifier",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities that are from a specific package.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "slaDeadlineAfterDate",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities with a fix due after a specific timestamp",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       },
       {
         "name": "slaDeadlineBeforeDate",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities with a fix due before a specific timestamp",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       },
       {
         "name": "severity",
@@ -7240,6 +13849,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter vulnerabilities by severity.\nPossible values: CRITICAL, HIGH, MEDIUM, LOW.",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/ExternalFindingSeverity"
+        },
         "enumValues": [
           "CRITICAL",
           "HIGH",
@@ -7252,21 +13864,30 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities by the vulnerability scanner that detected them.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "includeVulnerabilitiesWithoutSlas",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities without an SLA due date.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "vulnerableAssetId",
         "in": "query",
         "required": false,
         "description": "Filter vulnerabilities by a specific asset ID.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7284,26 +13905,38 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "integrationId",
         "in": "query",
         "required": false,
         "description": "Filter vulnerability remediations based on a specific scanner integration.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "severity",
@@ -7311,6 +13944,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter vulnerability remediations by severity.\nPossible values: CRITICAL, HIGH, MEDIUM, LOW.",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/ExternalFindingSeverity"
+        },
         "enumValues": [
           "CRITICAL",
           "HIGH",
@@ -7323,21 +13959,32 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter vulnerability remediations by remediation status.",
-        "kind": "boolean"
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
       },
       {
         "name": "remediatedAfterDate",
         "in": "query",
         "required": false,
         "description": "Filter vulnerability remediations that occurred after a specific timestamp.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       },
       {
         "name": "remediatedBeforeDate",
         "in": "query",
         "required": false,
         "description": "Filter vulnerability remediations that occurred before a specific timestamp.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
       }
     ]
   },
@@ -7355,33 +14002,48 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "auditId",
         "in": "path",
         "required": true,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "query",
         "in": "query",
         "required": false,
         "description": "Filter vulnerable assets by search query.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "pageSize",
         "in": "query",
         "required": false,
-        "kind": "integer"
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
       },
       {
         "name": "pageCursor",
         "in": "query",
         "required": false,
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
       },
       {
         "name": "integrationId",
         "in": "query",
         "required": false,
         "description": "Filter vulnerable assets by specific vulnerability scanner.",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       },
       {
         "name": "assetType",
@@ -7389,6 +14051,9 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": false,
         "description": "Filter vulnerable assets by asset type.\nPossible values: CODE_REPOSITORY, CONTAINER_REPOSITORY, CONTAINER_REPOSITORY_IMAGE, MANIFEST_FILE, SERVER, SERVERLESS_FUNCTION, WORKSTATION.",
         "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/VulnerableAssetType"
+        },
         "enumValues": [
           "SERVER",
           "SERVERLESS_FUNCTION",
@@ -7406,7 +14071,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter vulnerable assets by...",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7425,7 +14093,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7443,17 +14114,298 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "occurrences": {
+                  "items": {
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "Markdown description of this API endpoint vulnerability occurrence."
+                      },
+                      "fromUrl": {
+                        "type": "string",
+                        "description": "The API endpoint URL associated with this vulnerability occurrence."
+                      },
+                      "queryParams": {
+                        "items": {
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "description": "The API query param key associated with this vulnerability occurrence."
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "The API query param value associated with this vulnerability occurrence."
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "value"
+                          ]
+                        },
+                        "type": "array",
+                        "description": "The API params associated with this vulnerability."
+                      },
+                      "headers": {
+                        "items": {
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "description": "The API header key associated with this vulnerability occurrence."
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "The API header value associated with this vulnerability occurrence."
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "value"
+                          ]
+                        },
+                        "type": "array",
+                        "description": "The API headers associated with this vulnerability."
+                      },
+                      "body": {
+                        "type": "string",
+                        "description": "The body of the request passed to the API, with sensitive information redacted."
+                      }
+                    },
+                    "required": [
+                      "description"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of occurrences of vulnerable API endpoints."
+                },
+                "severity": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The severity of the vulnerability, on a scale of 0 to 10. This will be rounded to the nearest tenth."
+                },
+                "vulnerableComponentUniqueId": {
+                  "type": "string",
+                  "description": "A unique identifier for the vulnerable component associated with the vulnerability. This must reference the `uniqueId` field in the a previously supplied `VulnerableComponent`."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the vulnerability."
+                },
+                "remediationInstructions": {
+                  "type": "string",
+                  "description": "Instructions for remediating the vulnerability."
+                },
+                "url": {
+                  "type": "string",
+                  "description": "The vulnerable URL."
+                },
+                "httpMethod": {
+                  "type": "string",
+                  "description": "The HTTP method (eg: GET, POST) associated with this vulnerability."
+                },
+                "cveId": {
+                  "type": "string",
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                },
+                "cvss3Vector": {
+                  "type": "string",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                },
+                "cvss3Score": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "occurrences",
+                "severity",
+                "vulnerableComponentUniqueId",
+                "description",
+                "remediationInstructions",
+                "url",
+                "httpMethod"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "occurrences": {
+                  "items": {
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "Markdown description of this API endpoint vulnerability occurrence."
+                      },
+                      "fromUrl": {
+                        "type": "string",
+                        "description": "The API endpoint URL associated with this vulnerability occurrence."
+                      },
+                      "queryParams": {
+                        "items": {
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "description": "The API query param key associated with this vulnerability occurrence."
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "The API query param value associated with this vulnerability occurrence."
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "value"
+                          ]
+                        },
+                        "type": "array",
+                        "description": "The API params associated with this vulnerability."
+                      },
+                      "headers": {
+                        "items": {
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "description": "The API header key associated with this vulnerability occurrence."
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "The API header value associated with this vulnerability occurrence."
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "value"
+                          ]
+                        },
+                        "type": "array",
+                        "description": "The API headers associated with this vulnerability."
+                      },
+                      "body": {
+                        "type": "string",
+                        "description": "The body of the request passed to the API, with sensitive information redacted."
+                      }
+                    },
+                    "required": [
+                      "description"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of occurrences of vulnerable API endpoints."
+                },
+                "severity": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The severity of the vulnerability, on a scale of 0 to 10. This will be rounded to the nearest tenth."
+                },
+                "vulnerableComponentUniqueId": {
+                  "type": "string",
+                  "description": "A unique identifier for the vulnerable component associated with the vulnerability. This must reference the `uniqueId` field in the a previously supplied `VulnerableComponent`."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the vulnerability."
+                },
+                "remediationInstructions": {
+                  "type": "string",
+                  "description": "Instructions for remediating the vulnerability."
+                },
+                "url": {
+                  "type": "string",
+                  "description": "The vulnerable URL."
+                },
+                "httpMethod": {
+                  "type": "string",
+                  "description": "The HTTP method (eg: GET, POST) associated with this vulnerability."
+                },
+                "cveId": {
+                  "type": "string",
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                },
+                "cvss3Vector": {
+                  "type": "string",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                },
+                "cvss3Score": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "occurrences",
+                "severity",
+                "vulnerableComponentUniqueId",
+                "description",
+                "remediationInstructions",
+                "url",
+                "httpMethod"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7473,7 +14425,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7491,17 +14446,130 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "fullName": {
+                  "type": "string",
+                  "description": "The full name of the employee or contractor undergoing the background check."
+                },
+                "email": {
+                  "type": "string",
+                  "description": "The email address of the employee or contractor undergoing the background check."
+                },
+                "status": {
+                  "description": "The current status of the background check.",
+                  "enum": [
+                    "INCOMPLETE",
+                    "IN_PROGRESS",
+                    "COMPLETE"
+                  ]
+                },
+                "completionDate": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "If complete, the date of completion of the background check."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "fullName",
+                "email",
+                "status"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "fullName": {
+                  "type": "string",
+                  "description": "The full name of the employee or contractor undergoing the background check."
+                },
+                "email": {
+                  "type": "string",
+                  "description": "The email address of the employee or contractor undergoing the background check."
+                },
+                "status": {
+                  "description": "The current status of the background check.",
+                  "enum": [
+                    "INCOMPLETE",
+                    "IN_PROGRESS",
+                    "COMPLETE"
+                  ]
+                },
+                "completionDate": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "If complete, the date of completion of the background check."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "fullName",
+                "email",
+                "status"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7521,7 +14589,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7539,17 +14610,82 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7569,7 +14705,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7587,17 +14726,546 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "collectedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the data being sent was collected from the host computer. In some cases, you may have staggered data collection for the various data being sent. In that case, feel free to use the latest collected timestamp for the individual data items to populate this field."
+                },
+                "osName": {
+                  "type": "string",
+                  "description": "The OS name. Example: `MacOS Monterey`."
+                },
+                "osVersion": {
+                  "type": "string",
+                  "description": "The OS version. Example: `Version 12.4`."
+                },
+                "hardwareUuid": {
+                  "type": "string",
+                  "description": "The hardware UUID/UDID of the device."
+                },
+                "serialNumber": {
+                  "type": "string",
+                  "description": "The hardware serial number of the device."
+                },
+                "applications": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the application."
+                      },
+                      "bundleId": {
+                        "type": "string",
+                        "description": "The bundle identifier of the application."
+                      },
+                      "lastOpenedTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The last time the application was opened."
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "bundleId"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "All the installed Mac Apps on the system."
+                },
+                "browserExtensions": {
+                  "items": {
+                    "properties": {
+                      "extensionId": {
+                        "type": "string",
+                        "description": "The identifier of the browser extension."
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the browser extension."
+                      },
+                      "browser": {
+                        "description": "The type of browser. If you see something not on this list - if the browser is chromium based, use Chrome. Otherwise, skip sending the extension and contact Vanta for a longer term addition to this enum.",
+                        "enum": [
+                          "CHROME",
+                          "FIREFOX",
+                          "OPERA",
+                          "SAFARI",
+                          "EDGE"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "extensionId",
+                      "name",
+                      "browser"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of browser extensions on this device. Used to match against known password managers to demonstrate use."
+                },
+                "drives": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the drive."
+                      },
+                      "encrypted": {
+                        "type": "boolean",
+                        "description": "Does the drive have some sort of encryption on it."
+                      },
+                      "filevaultEnabled": {
+                        "type": "boolean",
+                        "description": "Does the drive have filevault enabled."
+                      },
+                      "isBootVolume": {
+                        "type": "boolean",
+                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "encrypted",
+                      "filevaultEnabled"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of drives on this device. Used to verify encryption status."
+                },
+                "users": {
+                  "items": {
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "description": "The user's username. Does not have to be unique."
+                      },
+                      "screenlockPolicies": {
+                        "items": {
+                          "properties": {
+                            "requiresPassword": {
+                              "type": "boolean",
+                              "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                            },
+                            "screenSleepTimeoutMs": {
+                              "type": "integer",
+                              "format": "int32",
+                              "description": "The timeout in milliseconds for screenlock to trigger."
+                            }
+                          },
+                          "required": [
+                            "requiresPassword",
+                            "screenSleepTimeoutMs"
+                          ]
+                        },
+                        "type": "array",
+                        "description": "If the source system cannot easily retrieve screenlock policies, it's OK to skip this data."
+                      },
+                      "screenlockSettings": {
+                        "properties": {
+                          "requiresPassword": {
+                            "type": "boolean",
+                            "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                          },
+                          "screenSleepTimeoutMs": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "The timeout in milliseconds for screenlock to trigger."
+                          }
+                        },
+                        "required": [
+                          "requiresPassword",
+                          "screenSleepTimeoutMs"
+                        ]
+                      },
+                      "lastLoginTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The last time the user logged in to the device, if available."
+                      }
+                    },
+                    "required": [
+                      "username",
+                      "screenlockPolicies",
+                      "screenlockSettings"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The human users of the system. If it's not feasible to send only human users, prefer skipping sending users entirely."
+                },
+                "systemScreenlockPolicies": {
+                  "items": {
+                    "properties": {
+                      "requiresPassword": {
+                        "type": "boolean",
+                        "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                      },
+                      "screenSleepTimeoutMs": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The timeout in milliseconds for screenlock to trigger."
+                      }
+                    },
+                    "required": [
+                      "requiresPassword",
+                      "screenSleepTimeoutMs"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "System screenlock policy settings. Pass an empty list if this is tricky to retrieve for your system. Used for screenlock tests."
+                },
+                "isManaged": {
+                  "type": "boolean",
+                  "description": "Is the system managed by a Mobile Device Management system."
+                },
+                "autoUpdatesEnabled": {
+                  "type": "boolean",
+                  "description": "Does the system have auto-updates enabled."
+                },
+                "owner": {
+                  "type": "string",
+                  "description": "The email address of the owner of the system, if it's known."
+                },
+                "passwordPolicy": {
+                  "properties": {
+                    "minimumLengthRequirement": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "If the system has a password policy, what the minimum password length requirement is."
+                    }
+                  },
+                  "required": [
+                    "minimumLengthRequirement"
+                  ]
+                },
+                "lastEnrolledTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment."
+                },
+                "isXProtectEnabled": {
+                  "type": "boolean",
+                  "description": "Is XProtect enabled on the system."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "collectedTimestamp",
+                "osName",
+                "osVersion",
+                "hardwareUuid",
+                "serialNumber",
+                "applications",
+                "browserExtensions",
+                "drives",
+                "users",
+                "systemScreenlockPolicies",
+                "isManaged",
+                "autoUpdatesEnabled"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "collectedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the data being sent was collected from the host computer. In some cases, you may have staggered data collection for the various data being sent. In that case, feel free to use the latest collected timestamp for the individual data items to populate this field."
+                },
+                "osName": {
+                  "type": "string",
+                  "description": "The OS name. Example: `MacOS Monterey`."
+                },
+                "osVersion": {
+                  "type": "string",
+                  "description": "The OS version. Example: `Version 12.4`."
+                },
+                "hardwareUuid": {
+                  "type": "string",
+                  "description": "The hardware UUID/UDID of the device."
+                },
+                "serialNumber": {
+                  "type": "string",
+                  "description": "The hardware serial number of the device."
+                },
+                "applications": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the application."
+                      },
+                      "bundleId": {
+                        "type": "string",
+                        "description": "The bundle identifier of the application."
+                      },
+                      "lastOpenedTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The last time the application was opened."
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "bundleId"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "All the installed Mac Apps on the system."
+                },
+                "browserExtensions": {
+                  "items": {
+                    "properties": {
+                      "extensionId": {
+                        "type": "string",
+                        "description": "The identifier of the browser extension."
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the browser extension."
+                      },
+                      "browser": {
+                        "description": "The type of browser. If you see something not on this list - if the browser is chromium based, use Chrome. Otherwise, skip sending the extension and contact Vanta for a longer term addition to this enum.",
+                        "enum": [
+                          "CHROME",
+                          "FIREFOX",
+                          "OPERA",
+                          "SAFARI",
+                          "EDGE"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "extensionId",
+                      "name",
+                      "browser"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of browser extensions on this device. Used to match against known password managers to demonstrate use."
+                },
+                "drives": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the drive."
+                      },
+                      "encrypted": {
+                        "type": "boolean",
+                        "description": "Does the drive have some sort of encryption on it."
+                      },
+                      "filevaultEnabled": {
+                        "type": "boolean",
+                        "description": "Does the drive have filevault enabled."
+                      },
+                      "isBootVolume": {
+                        "type": "boolean",
+                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "encrypted",
+                      "filevaultEnabled"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of drives on this device. Used to verify encryption status."
+                },
+                "users": {
+                  "items": {
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "description": "The user's username. Does not have to be unique."
+                      },
+                      "screenlockPolicies": {
+                        "items": {
+                          "properties": {
+                            "requiresPassword": {
+                              "type": "boolean",
+                              "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                            },
+                            "screenSleepTimeoutMs": {
+                              "type": "integer",
+                              "format": "int32",
+                              "description": "The timeout in milliseconds for screenlock to trigger."
+                            }
+                          },
+                          "required": [
+                            "requiresPassword",
+                            "screenSleepTimeoutMs"
+                          ]
+                        },
+                        "type": "array",
+                        "description": "If the source system cannot easily retrieve screenlock policies, it's OK to skip this data."
+                      },
+                      "screenlockSettings": {
+                        "properties": {
+                          "requiresPassword": {
+                            "type": "boolean",
+                            "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                          },
+                          "screenSleepTimeoutMs": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "The timeout in milliseconds for screenlock to trigger."
+                          }
+                        },
+                        "required": [
+                          "requiresPassword",
+                          "screenSleepTimeoutMs"
+                        ]
+                      },
+                      "lastLoginTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The last time the user logged in to the device, if available."
+                      }
+                    },
+                    "required": [
+                      "username",
+                      "screenlockPolicies",
+                      "screenlockSettings"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The human users of the system. If it's not feasible to send only human users, prefer skipping sending users entirely."
+                },
+                "systemScreenlockPolicies": {
+                  "items": {
+                    "properties": {
+                      "requiresPassword": {
+                        "type": "boolean",
+                        "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                      },
+                      "screenSleepTimeoutMs": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The timeout in milliseconds for screenlock to trigger."
+                      }
+                    },
+                    "required": [
+                      "requiresPassword",
+                      "screenSleepTimeoutMs"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "System screenlock policy settings. Pass an empty list if this is tricky to retrieve for your system. Used for screenlock tests."
+                },
+                "isManaged": {
+                  "type": "boolean",
+                  "description": "Is the system managed by a Mobile Device Management system."
+                },
+                "autoUpdatesEnabled": {
+                  "type": "boolean",
+                  "description": "Does the system have auto-updates enabled."
+                },
+                "owner": {
+                  "type": "string",
+                  "description": "The email address of the owner of the system, if it's known."
+                },
+                "passwordPolicy": {
+                  "properties": {
+                    "minimumLengthRequirement": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "If the system has a password policy, what the minimum password length requirement is."
+                    }
+                  },
+                  "required": [
+                    "minimumLengthRequirement"
+                  ]
+                },
+                "lastEnrolledTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment."
+                },
+                "isXProtectEnabled": {
+                  "type": "boolean",
+                  "description": "Is XProtect enabled on the system."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "collectedTimestamp",
+                "osName",
+                "osVersion",
+                "hardwareUuid",
+                "serialNumber",
+                "applications",
+                "browserExtensions",
+                "drives",
+                "users",
+                "systemScreenlockPolicies",
+                "isManaged",
+                "autoUpdatesEnabled"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7617,7 +15285,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7635,17 +15306,188 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "packageName": {
+                  "type": "string",
+                  "description": "The name of the package associated with the vulnerability."
+                },
+                "packageVersion": {
+                  "type": "string",
+                  "description": "The version of the package associated with the vulnerability."
+                },
+                "severity": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The severity of the vulnerability, on a scale of 0 to 10. This will be rounded to the nearest tenth."
+                },
+                "vulnerableComponentUniqueId": {
+                  "type": "string",
+                  "description": "A unique identifier for the vulnerable component associated with the vulnerability. This must reference the `uniqueId` field in the a previously supplied `VulnerableComponent`."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the vulnerability."
+                },
+                "isResolvable": {
+                  "type": "boolean",
+                  "description": "Whether the vulnerability can be resolved."
+                },
+                "remediationInstructions": {
+                  "type": "string",
+                  "description": "Instructions for remediating the vulnerability."
+                },
+                "isReachable": {
+                  "type": "boolean",
+                  "description": "Whether there is a code path to the vulnerable code in this package. This field is optional."
+                },
+                "cveId": {
+                  "type": "string",
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                },
+                "cvss3Vector": {
+                  "type": "string",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                },
+                "cvss3Score": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "packageName",
+                "packageVersion",
+                "severity",
+                "vulnerableComponentUniqueId",
+                "description",
+                "isResolvable",
+                "remediationInstructions"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "packageName": {
+                  "type": "string",
+                  "description": "The name of the package associated with the vulnerability."
+                },
+                "packageVersion": {
+                  "type": "string",
+                  "description": "The version of the package associated with the vulnerability."
+                },
+                "severity": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The severity of the vulnerability, on a scale of 0 to 10. This will be rounded to the nearest tenth."
+                },
+                "vulnerableComponentUniqueId": {
+                  "type": "string",
+                  "description": "A unique identifier for the vulnerable component associated with the vulnerability. This must reference the `uniqueId` field in the a previously supplied `VulnerableComponent`."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the vulnerability."
+                },
+                "isResolvable": {
+                  "type": "boolean",
+                  "description": "Whether the vulnerability can be resolved."
+                },
+                "remediationInstructions": {
+                  "type": "string",
+                  "description": "Instructions for remediating the vulnerability."
+                },
+                "isReachable": {
+                  "type": "boolean",
+                  "description": "Whether there is a code path to the vulnerable code in this package. This field is optional."
+                },
+                "cveId": {
+                  "type": "string",
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                },
+                "cvss3Vector": {
+                  "type": "string",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                },
+                "cvss3Score": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "packageName",
+                "packageVersion",
+                "severity",
+                "vulnerableComponentUniqueId",
+                "description",
+                "isResolvable",
+                "remediationInstructions"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7665,7 +15507,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7683,17 +15528,164 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name of the secret."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A short description of the secret, if any."
+                },
+                "createdTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the secret was created."
+                },
+                "creator": {
+                  "type": "string",
+                  "description": "The creator of the secret."
+                },
+                "owner": {
+                  "type": "string",
+                  "description": "The current owner of the secret. Vanta will check that every secret has a valid owner."
+                },
+                "updatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the secret was last updated."
+                },
+                "lastAccessedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the secret was last accessed."
+                },
+                "expiresTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the secret is set to expire, if relevant."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "name",
+                "description",
+                "createdTimestamp",
+                "creator",
+                "owner"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name of the secret."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A short description of the secret, if any."
+                },
+                "createdTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the secret was created."
+                },
+                "creator": {
+                  "type": "string",
+                  "description": "The creator of the secret."
+                },
+                "owner": {
+                  "type": "string",
+                  "description": "The current owner of the secret. Vanta will check that every secret has a valid owner."
+                },
+                "updatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the secret was last updated."
+                },
+                "lastAccessedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the secret was last accessed."
+                },
+                "expiresTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the secret is set to expire, if relevant."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "name",
+                "description",
+                "createdTimestamp",
+                "creator",
+                "owner"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7713,7 +15705,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7731,17 +15726,220 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "taskId": {
+                  "type": "string",
+                  "description": "The task ID, as present in the source application. This will be shown in Vanta to help customers match tasks if necessary."
+                },
+                "taskTitle": {
+                  "type": "string",
+                  "description": "The title of the task, as present in the source application. This will be shown in Vanta to help customers match tasks if necessary."
+                },
+                "createdTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the task was created."
+                },
+                "taskState": {
+                  "description": "The status of the task. If your application supports additional states, use the closest approximation.",
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "CLOSED"
+                  ]
+                },
+                "priority": {
+                  "description": "Priorities are mapped against SLAs for tasks. If your task system does not have fixed priorities, consider letting users configure priorities through labels.",
+                  "enum": [
+                    "P0",
+                    "P1",
+                    "P2",
+                    "P3",
+                    "P4"
+                  ]
+                },
+                "assignees": {
+                  "items": {
+                    "type": "string",
+                    "description": "Email address of the assignee."
+                  },
+                  "type": "array",
+                  "description": "The set of users assigned to the tasks. Emails do not necessarily need to be Vanta users."
+                },
+                "creator": {
+                  "type": "string",
+                  "description": "The creator of the task."
+                },
+                "labels": {
+                  "items": {
+                    "type": "string",
+                    "description": "Each tag."
+                  },
+                  "type": "array",
+                  "description": "The set of task tags or labels."
+                },
+                "closedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the task was closed, if the task was closed. Required if `taskState` is `CLOSED`, otherwise must be absent."
+                },
+                "updatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the task was last updated."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "taskId",
+                "taskTitle",
+                "createdTimestamp",
+                "taskState",
+                "priority",
+                "assignees",
+                "creator",
+                "labels"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "taskId": {
+                  "type": "string",
+                  "description": "The task ID, as present in the source application. This will be shown in Vanta to help customers match tasks if necessary."
+                },
+                "taskTitle": {
+                  "type": "string",
+                  "description": "The title of the task, as present in the source application. This will be shown in Vanta to help customers match tasks if necessary."
+                },
+                "createdTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the task was created."
+                },
+                "taskState": {
+                  "description": "The status of the task. If your application supports additional states, use the closest approximation.",
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "CLOSED"
+                  ]
+                },
+                "priority": {
+                  "description": "Priorities are mapped against SLAs for tasks. If your task system does not have fixed priorities, consider letting users configure priorities through labels.",
+                  "enum": [
+                    "P0",
+                    "P1",
+                    "P2",
+                    "P3",
+                    "P4"
+                  ]
+                },
+                "assignees": {
+                  "items": {
+                    "type": "string",
+                    "description": "Email address of the assignee."
+                  },
+                  "type": "array",
+                  "description": "The set of users assigned to the tasks. Emails do not necessarily need to be Vanta users."
+                },
+                "creator": {
+                  "type": "string",
+                  "description": "The creator of the task."
+                },
+                "labels": {
+                  "items": {
+                    "type": "string",
+                    "description": "Each tag."
+                  },
+                  "type": "array",
+                  "description": "The set of task tags or labels."
+                },
+                "closedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the task was closed, if the task was closed. Required if `taskState` is `CLOSED`, otherwise must be absent."
+                },
+                "updatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the task was last updated."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "taskId",
+                "taskTitle",
+                "createdTimestamp",
+                "taskState",
+                "priority",
+                "assignees",
+                "creator",
+                "labels"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7761,7 +15959,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7779,17 +15980,252 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "occurrences": {
+                  "items": {
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "description": "The path to the file where the vulnerability was found."
+                      },
+                      "beginLine": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The line number where the vulnerability begins."
+                      },
+                      "endLine": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The line number where the vulnerability ends."
+                      },
+                      "beginColumn": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The column number where the vulnerability begins."
+                      },
+                      "endColumn": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The column number where the vulnerability ends."
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "beginLine",
+                      "endLine",
+                      "beginColumn",
+                      "endColumn"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The path to each point in the source code where a vulnerability has been revealed through static analysis."
+                },
+                "severity": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The severity of the vulnerability, on a scale of 0 to 10."
+                },
+                "confidence": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The confidence in the vulnerability, on a scale of 0-10."
+                },
+                "isResolvable": {
+                  "type": "boolean",
+                  "description": "Whether the vulnerability can be resolved."
+                },
+                "vulnerableComponentUniqueId": {
+                  "type": "string",
+                  "description": "A unique identifier for the vulnerable component associated with the vulnerability. This must reference the `uniqueId` field in the a previously supplied `VulnerableComponent`."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the vulnerability."
+                },
+                "remediationInstructions": {
+                  "type": "string",
+                  "description": "Instructions for remediating the vulnerability."
+                },
+                "cveId": {
+                  "type": "string",
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                },
+                "cvss3Vector": {
+                  "type": "string",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                },
+                "cvss3Score": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "occurrences",
+                "severity",
+                "confidence",
+                "isResolvable",
+                "vulnerableComponentUniqueId",
+                "description",
+                "remediationInstructions"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "occurrences": {
+                  "items": {
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "description": "The path to the file where the vulnerability was found."
+                      },
+                      "beginLine": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The line number where the vulnerability begins."
+                      },
+                      "endLine": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The line number where the vulnerability ends."
+                      },
+                      "beginColumn": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The column number where the vulnerability begins."
+                      },
+                      "endColumn": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The column number where the vulnerability ends."
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "beginLine",
+                      "endLine",
+                      "beginColumn",
+                      "endColumn"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The path to each point in the source code where a vulnerability has been revealed through static analysis."
+                },
+                "severity": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The severity of the vulnerability, on a scale of 0 to 10."
+                },
+                "confidence": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The confidence in the vulnerability, on a scale of 0-10."
+                },
+                "isResolvable": {
+                  "type": "boolean",
+                  "description": "Whether the vulnerability can be resolved."
+                },
+                "vulnerableComponentUniqueId": {
+                  "type": "string",
+                  "description": "A unique identifier for the vulnerable component associated with the vulnerability. This must reference the `uniqueId` field in the a previously supplied `VulnerableComponent`."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the vulnerability."
+                },
+                "remediationInstructions": {
+                  "type": "string",
+                  "description": "Instructions for remediating the vulnerability."
+                },
+                "cveId": {
+                  "type": "string",
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                },
+                "cvss3Vector": {
+                  "type": "string",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                },
+                "cvss3Score": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "occurrences",
+                "severity",
+                "confidence",
+                "isResolvable",
+                "vulnerableComponentUniqueId",
+                "description",
+                "remediationInstructions"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7809,7 +16245,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7827,17 +16266,286 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "fullName": {
+                  "type": "string",
+                  "description": "The full name of the corresponding user. If your system splits name by given name and family name, send us space separated values."
+                },
+                "accountName": {
+                  "type": "string",
+                  "description": "In case a fullName is not relevant, like a machine account, populate this field."
+                },
+                "email": {
+                  "type": "string",
+                  "description": "The email address of the user. This lets us connect accounts to Vanta users."
+                },
+                "permissionLevel": {
+                  "description": "What the permission level of the user is. If your system supports more advanced roles, find the closest approximation. This will be used to help populate Vanta access reviews and help customers ensure that the right set of users have access to their relevant systems.",
+                  "enum": [
+                    "ADMIN",
+                    "EDITOR",
+                    "BASE"
+                  ]
+                },
+                "createdTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which this user was created in the system."
+                },
+                "status": {
+                  "description": "The status of the user. It's acceptable to omit any deactivated users from your application, but if your application has access to deactivated users, it's preferable to send them over with this status.",
+                  "enum": [
+                    "ACTIVE",
+                    "DEACTIVATED"
+                  ]
+                },
+                "mfaEnabled": {
+                  "type": "boolean",
+                  "description": "This value is ignored if `authMethod` is SSO."
+                },
+                "mfaMethods": {
+                  "items": {
+                    "description": "The individual MFA setting.",
+                    "enum": [
+                      "UNSUPPORTED",
+                      "DISABLED",
+                      "SMS",
+                      "EMAIL",
+                      "OTP",
+                      "HARDWARE_TOKEN",
+                      "PUSH_PROMPT"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The MFA settings of the user. This helps customers verify that their users are adequately protecting their accounts. This value is ignored if authMethod is SSO."
+                },
+                "authMethod": {
+                  "description": "How the user logs into the system. This is useful for us to validate security properties, like ensuring MFA is enabled if the user logs in with a password.",
+                  "enum": [
+                    "SSO",
+                    "PASSWORD",
+                    "TOKEN",
+                    "BIOMETRIC"
+                  ]
+                },
+                "roleDescription": {
+                  "type": "string",
+                  "description": "A human readable description of the user's role."
+                },
+                "updatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The last time the user was updated in the system."
+                },
+                "deactivatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "If the user is deactivated, the timestamp of that deactivation."
+                },
+                "lastLoginTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which the user last logged in."
+                },
+                "lastPasswordResetTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which the user last reset their password. Helps with future Vanta functionality."
+                },
+                "groupIds": {
+                  "items": {
+                    "type": "string",
+                    "description": "The individual group identifier."
+                  },
+                  "type": "array",
+                  "description": "If the user belongs to any groups/teams in the product, those corresponding group IDs. We'll map these to groups in our product in the future."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "fullName",
+                "accountName",
+                "email",
+                "permissionLevel",
+                "createdTimestamp",
+                "status",
+                "mfaEnabled",
+                "mfaMethods",
+                "authMethod"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "fullName": {
+                  "type": "string",
+                  "description": "The full name of the corresponding user. If your system splits name by given name and family name, send us space separated values."
+                },
+                "accountName": {
+                  "type": "string",
+                  "description": "In case a fullName is not relevant, like a machine account, populate this field."
+                },
+                "email": {
+                  "type": "string",
+                  "description": "The email address of the user. This lets us connect accounts to Vanta users."
+                },
+                "permissionLevel": {
+                  "description": "What the permission level of the user is. If your system supports more advanced roles, find the closest approximation. This will be used to help populate Vanta access reviews and help customers ensure that the right set of users have access to their relevant systems.",
+                  "enum": [
+                    "ADMIN",
+                    "EDITOR",
+                    "BASE"
+                  ]
+                },
+                "createdTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which this user was created in the system."
+                },
+                "status": {
+                  "description": "The status of the user. It's acceptable to omit any deactivated users from your application, but if your application has access to deactivated users, it's preferable to send them over with this status.",
+                  "enum": [
+                    "ACTIVE",
+                    "DEACTIVATED"
+                  ]
+                },
+                "mfaEnabled": {
+                  "type": "boolean",
+                  "description": "This value is ignored if `authMethod` is SSO."
+                },
+                "mfaMethods": {
+                  "items": {
+                    "description": "The individual MFA setting.",
+                    "enum": [
+                      "UNSUPPORTED",
+                      "DISABLED",
+                      "SMS",
+                      "EMAIL",
+                      "OTP",
+                      "HARDWARE_TOKEN",
+                      "PUSH_PROMPT"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The MFA settings of the user. This helps customers verify that their users are adequately protecting their accounts. This value is ignored if authMethod is SSO."
+                },
+                "authMethod": {
+                  "description": "How the user logs into the system. This is useful for us to validate security properties, like ensuring MFA is enabled if the user logs in with a password.",
+                  "enum": [
+                    "SSO",
+                    "PASSWORD",
+                    "TOKEN",
+                    "BIOMETRIC"
+                  ]
+                },
+                "roleDescription": {
+                  "type": "string",
+                  "description": "A human readable description of the user's role."
+                },
+                "updatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The last time the user was updated in the system."
+                },
+                "deactivatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "If the user is deactivated, the timestamp of that deactivation."
+                },
+                "lastLoginTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which the user last logged in."
+                },
+                "lastPasswordResetTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which the user last reset their password. Helps with future Vanta functionality."
+                },
+                "groupIds": {
+                  "items": {
+                    "type": "string",
+                    "description": "The individual group identifier."
+                  },
+                  "type": "array",
+                  "description": "If the user belongs to any groups/teams in the product, those corresponding group IDs. We'll map these to groups in our product in the future."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "fullName",
+                "accountName",
+                "email",
+                "permissionLevel",
+                "createdTimestamp",
+                "status",
+                "mfaEnabled",
+                "mfaMethods",
+                "authMethod"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7857,7 +16565,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7875,17 +16586,214 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "trainingId": {
+                  "type": "string",
+                  "description": "A stable ID of a training or a course. For example: gdpr-training-123."
+                },
+                "trainingName": {
+                  "type": "string",
+                  "description": "The name of the training. For example: \"GDPR Training\"."
+                },
+                "frameworksFulfilled": {
+                  "items": {
+                    "description": "The individual framework.",
+                    "enum": [
+                      "SOC2",
+                      "ISO27001",
+                      "HIPAA",
+                      "PCI",
+                      "GDPR",
+                      "CCPA"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The set of compliance or other framework requirements that can be satisfied when an employee completes this training."
+                },
+                "traineeFullName": {
+                  "type": "string",
+                  "description": "The name of the user completing the training."
+                },
+                "traineeAccountName": {
+                  "type": "string",
+                  "description": "The account name of the user completing the training. This field is mostly useful if the trainee doesn't have a name associated, but has an associated account with a username."
+                },
+                "traineeEmail": {
+                  "type": "string",
+                  "description": "The email address of the user completing the training."
+                },
+                "status": {
+                  "description": "Whether the training has been fully completed.",
+                  "enum": [
+                    "INCOMPLETE",
+                    "COMPLETE"
+                  ]
+                },
+                "trainingCreatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which this training course was created. This field is useful as identifying metadata."
+                },
+                "trainingDueTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which this training course is due for the user. Vanta will check whether employees complete their training on time."
+                },
+                "trainingCompletedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which this training course was completed by the user."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "trainingId",
+                "trainingName",
+                "frameworksFulfilled",
+                "traineeFullName",
+                "traineeAccountName",
+                "traineeEmail",
+                "status",
+                "trainingCreatedTimestamp",
+                "trainingDueTimestamp"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "trainingId": {
+                  "type": "string",
+                  "description": "A stable ID of a training or a course. For example: gdpr-training-123."
+                },
+                "trainingName": {
+                  "type": "string",
+                  "description": "The name of the training. For example: \"GDPR Training\"."
+                },
+                "frameworksFulfilled": {
+                  "items": {
+                    "description": "The individual framework.",
+                    "enum": [
+                      "SOC2",
+                      "ISO27001",
+                      "HIPAA",
+                      "PCI",
+                      "GDPR",
+                      "CCPA"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The set of compliance or other framework requirements that can be satisfied when an employee completes this training."
+                },
+                "traineeFullName": {
+                  "type": "string",
+                  "description": "The name of the user completing the training."
+                },
+                "traineeAccountName": {
+                  "type": "string",
+                  "description": "The account name of the user completing the training. This field is mostly useful if the trainee doesn't have a name associated, but has an associated account with a username."
+                },
+                "traineeEmail": {
+                  "type": "string",
+                  "description": "The email address of the user completing the training."
+                },
+                "status": {
+                  "description": "Whether the training has been fully completed.",
+                  "enum": [
+                    "INCOMPLETE",
+                    "COMPLETE"
+                  ]
+                },
+                "trainingCreatedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which this training course was created. This field is useful as identifying metadata."
+                },
+                "trainingDueTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which this training course is due for the user. Vanta will check whether employees complete their training on time."
+                },
+                "trainingCompletedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which this training course was completed by the user."
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "trainingId",
+                "trainingName",
+                "frameworksFulfilled",
+                "traineeFullName",
+                "traineeAccountName",
+                "traineeEmail",
+                "status",
+                "trainingCreatedTimestamp",
+                "trainingDueTimestamp"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7905,7 +16813,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7923,17 +16834,144 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "collectedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the data being sent was collected from the vulnerable component. In some cases, you may have staggered data collection for the various data being sent. In that case, feel free to use the latest collected timestamp for the individual data items to populate this field."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name of the system component in which a vulnerability has been detected."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the system component in which a vulnerability has been detected."
+                },
+                "targetType": {
+                  "description": "The type of the system component in which a vulnerability has been detected (eg: container, source code repository).",
+                  "enum": [
+                    "HOST",
+                    "SERVER",
+                    "CONTAINER",
+                    "CONTAINER_REPOSITORY",
+                    "CONTAINER_REPOSITORY_IMAGE",
+                    "CODE_REPOSITORY",
+                    "SERVERLESS_FUNCTION",
+                    "MANIFEST_FILE",
+                    "WORKSTATION"
+                  ]
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "collectedTimestamp",
+                "name",
+                "description",
+                "targetType"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "collectedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the data being sent was collected from the vulnerable component. In some cases, you may have staggered data collection for the various data being sent. In that case, feel free to use the latest collected timestamp for the individual data items to populate this field."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name of the system component in which a vulnerability has been detected."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the system component in which a vulnerability has been detected."
+                },
+                "targetType": {
+                  "description": "The type of the system component in which a vulnerability has been detected (eg: container, source code repository).",
+                  "enum": [
+                    "HOST",
+                    "SERVER",
+                    "CONTAINER",
+                    "CONTAINER_REPOSITORY",
+                    "CONTAINER_REPOSITORY_IMAGE",
+                    "CODE_REPOSITORY",
+                    "SERVERLESS_FUNCTION",
+                    "MANIFEST_FILE",
+                    "WORKSTATION"
+                  ]
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "collectedTimestamp",
+                "name",
+                "description",
+                "targetType"
+              ]
+            }
+          }
         }
       ]
     }
@@ -7953,7 +16991,10 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": true,
         "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-        "kind": "string"
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7971,17 +17012,750 @@ export const generatedOperations: GeneratedOperation[] = [
       "required": true,
       "contentType": "application/json",
       "kind": "json",
+      "schema": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "resources"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "collectedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the data being sent was collected from the host computer. In some cases, you may have staggered data collection for the various data being sent. In that case, feel free to use the latest collected timestamp for the individual data items to populate this field."
+                },
+                "osName": {
+                  "type": "string",
+                  "description": "The OS name. Example: `Windows 11`."
+                },
+                "osVersion": {
+                  "type": "string",
+                  "description": "The OS version. Example: `Version 10.0.22621`."
+                },
+                "hardwareUuid": {
+                  "type": "string",
+                  "description": "The hardware UUID/UDID of the device."
+                },
+                "serialNumber": {
+                  "type": "string",
+                  "description": "The hardware serial number of the device."
+                },
+                "programs": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the application."
+                      },
+                      "lastOpenedTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The last time the application was opened."
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "All the installed programs on the Windows system."
+                },
+                "browserExtensions": {
+                  "items": {
+                    "properties": {
+                      "extensionId": {
+                        "type": "string",
+                        "description": "The identifier of the browser extension."
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the browser extension."
+                      },
+                      "browser": {
+                        "description": "The type of browser. If you see something not on this list - if the browser is chromium based, use Chrome. Otherwise, skip sending the extension and contact Vanta for a longer term addition to this enum.",
+                        "enum": [
+                          "CHROME",
+                          "FIREFOX",
+                          "OPERA",
+                          "SAFARI",
+                          "EDGE"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "extensionId",
+                      "name",
+                      "browser"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of browser extensions on this device. Used to match against known password managers to demonstrate use."
+                },
+                "drives": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the drive."
+                      },
+                      "encrypted": {
+                        "type": "boolean",
+                        "description": "Does the drive have some sort of encryption on it."
+                      },
+                      "isBootVolume": {
+                        "type": "boolean",
+                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "encrypted"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of drives on this device. Used to verify encryption status."
+                },
+                "users": {
+                  "items": {
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "description": "The user's username. Does not have to be unique."
+                      },
+                      "screenlockPolicies": {
+                        "items": {
+                          "properties": {
+                            "requiresPassword": {
+                              "type": "boolean",
+                              "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                            },
+                            "screenSleepTimeoutMs": {
+                              "type": "integer",
+                              "format": "int32",
+                              "description": "The timeout in milliseconds for screenlock to trigger."
+                            }
+                          },
+                          "required": [
+                            "requiresPassword",
+                            "screenSleepTimeoutMs"
+                          ]
+                        },
+                        "type": "array",
+                        "description": "If the source system cannot easily retrieve screenlock policies, it's OK to skip this data."
+                      },
+                      "screenlockSettings": {
+                        "properties": {
+                          "requiresPassword": {
+                            "type": "boolean",
+                            "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                          },
+                          "screenSleepTimeoutMs": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "The timeout in milliseconds for screenlock to trigger."
+                          }
+                        },
+                        "required": [
+                          "requiresPassword",
+                          "screenSleepTimeoutMs"
+                        ]
+                      },
+                      "lastLoginTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The last time the user logged in to the device, if available."
+                      }
+                    },
+                    "required": [
+                      "username",
+                      "screenlockPolicies",
+                      "screenlockSettings"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The human users of the system. If it's not feasible to send only human users, prefer skipping sending users entirely."
+                },
+                "systemScreenlockPolicies": {
+                  "items": {
+                    "properties": {
+                      "requiresPassword": {
+                        "type": "boolean",
+                        "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                      },
+                      "screenSleepTimeoutMs": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The timeout in milliseconds for screenlock to trigger."
+                      }
+                    },
+                    "required": [
+                      "requiresPassword",
+                      "screenSleepTimeoutMs"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "System screenlock policy settings. Pass an empty list if this is tricky to retrieve for your system. Used for screenlock tests."
+                },
+                "isManaged": {
+                  "type": "boolean",
+                  "description": "Is the system managed by a Mobile Device Management system."
+                },
+                "autoUpdatesEnabled": {
+                  "type": "boolean",
+                  "description": "Does the system have auto-updates enabled."
+                },
+                "owner": {
+                  "type": "string",
+                  "description": "The email address of the owner of the system, if it's known."
+                },
+                "passwordPolicy": {
+                  "properties": {
+                    "minimumLengthRequirement": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "If the system has a password policy, what the minimum password length requirement is."
+                    }
+                  },
+                  "required": [
+                    "minimumLengthRequirement"
+                  ]
+                },
+                "lastEnrolledTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment."
+                },
+                "windowsSecurityProducts": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the security product."
+                      },
+                      "category": {
+                        "description": "The category of the security product.",
+                        "enum": [
+                          "FIREWALL",
+                          "ANTIVIRUS",
+                          "ANTISPYWARE"
+                        ]
+                      },
+                      "state": {
+                        "description": "The state of the security product.",
+                        "enum": [
+                          "ON",
+                          "OFF",
+                          "UNKNOWN"
+                        ]
+                      },
+                      "stateTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When this data was collected."
+                      },
+                      "signaturesUpToDate": {
+                        "type": "boolean",
+                        "description": "Whether the security signatures are up to date."
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "category",
+                      "state",
+                      "stateTimestamp",
+                      "signaturesUpToDate"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of services that are monitored by Windows Security Center (WSC)."
+                },
+                "windowsSecurityCenter": {
+                  "properties": {
+                    "firewall": {
+                      "description": "The health of the monitored Firewall.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "autoupdate": {
+                      "description": "The health of the Windows Autoupdate feature.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "antivirus": {
+                      "description": "The health of the monitored Antivirus solution.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "internetSetting": {
+                      "description": "The health of the Internet Settings.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "userAccountControl": {
+                      "description": "The health of the User Account Control (UAC) capability in Windows.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "windowsSecurityCenterService": {
+                      "description": "The health of the Windows Security Center Service.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "firewall",
+                    "autoupdate",
+                    "antivirus",
+                    "internetSetting",
+                    "userAccountControl",
+                    "windowsSecurityCenterService"
+                  ]
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "collectedTimestamp",
+                "osName",
+                "osVersion",
+                "hardwareUuid",
+                "serialNumber",
+                "programs",
+                "browserExtensions",
+                "drives",
+                "users",
+                "systemScreenlockPolicies",
+                "isManaged",
+                "autoUpdatesEnabled"
+              ]
+            }
+          }
+        }
+      },
       "fields": [
         {
           "name": "resourceId",
           "required": true,
           "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources",
-          "kind": "string"
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
+          }
         },
         {
           "name": "resources",
           "required": true,
-          "kind": "array"
+          "kind": "array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "A human readable label for this resource - will be shown as-is in inventory page."
+                },
+                "uniqueId": {
+                  "type": "string",
+                  "description": "A stable global identifier for this resource."
+                },
+                "externalUrl": {
+                  "type": "string",
+                  "description": "A link to this resource on the partner site. This must be a HTTPS URL."
+                },
+                "collectedTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the data being sent was collected from the host computer. In some cases, you may have staggered data collection for the various data being sent. In that case, feel free to use the latest collected timestamp for the individual data items to populate this field."
+                },
+                "osName": {
+                  "type": "string",
+                  "description": "The OS name. Example: `Windows 11`."
+                },
+                "osVersion": {
+                  "type": "string",
+                  "description": "The OS version. Example: `Version 10.0.22621`."
+                },
+                "hardwareUuid": {
+                  "type": "string",
+                  "description": "The hardware UUID/UDID of the device."
+                },
+                "serialNumber": {
+                  "type": "string",
+                  "description": "The hardware serial number of the device."
+                },
+                "programs": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the application."
+                      },
+                      "lastOpenedTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The last time the application was opened."
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "All the installed programs on the Windows system."
+                },
+                "browserExtensions": {
+                  "items": {
+                    "properties": {
+                      "extensionId": {
+                        "type": "string",
+                        "description": "The identifier of the browser extension."
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the browser extension."
+                      },
+                      "browser": {
+                        "description": "The type of browser. If you see something not on this list - if the browser is chromium based, use Chrome. Otherwise, skip sending the extension and contact Vanta for a longer term addition to this enum.",
+                        "enum": [
+                          "CHROME",
+                          "FIREFOX",
+                          "OPERA",
+                          "SAFARI",
+                          "EDGE"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "extensionId",
+                      "name",
+                      "browser"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of browser extensions on this device. Used to match against known password managers to demonstrate use."
+                },
+                "drives": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the drive."
+                      },
+                      "encrypted": {
+                        "type": "boolean",
+                        "description": "Does the drive have some sort of encryption on it."
+                      },
+                      "isBootVolume": {
+                        "type": "boolean",
+                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "encrypted"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of drives on this device. Used to verify encryption status."
+                },
+                "users": {
+                  "items": {
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "description": "The user's username. Does not have to be unique."
+                      },
+                      "screenlockPolicies": {
+                        "items": {
+                          "properties": {
+                            "requiresPassword": {
+                              "type": "boolean",
+                              "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                            },
+                            "screenSleepTimeoutMs": {
+                              "type": "integer",
+                              "format": "int32",
+                              "description": "The timeout in milliseconds for screenlock to trigger."
+                            }
+                          },
+                          "required": [
+                            "requiresPassword",
+                            "screenSleepTimeoutMs"
+                          ]
+                        },
+                        "type": "array",
+                        "description": "If the source system cannot easily retrieve screenlock policies, it's OK to skip this data."
+                      },
+                      "screenlockSettings": {
+                        "properties": {
+                          "requiresPassword": {
+                            "type": "boolean",
+                            "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                          },
+                          "screenSleepTimeoutMs": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "The timeout in milliseconds for screenlock to trigger."
+                          }
+                        },
+                        "required": [
+                          "requiresPassword",
+                          "screenSleepTimeoutMs"
+                        ]
+                      },
+                      "lastLoginTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The last time the user logged in to the device, if available."
+                      }
+                    },
+                    "required": [
+                      "username",
+                      "screenlockPolicies",
+                      "screenlockSettings"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "The human users of the system. If it's not feasible to send only human users, prefer skipping sending users entirely."
+                },
+                "systemScreenlockPolicies": {
+                  "items": {
+                    "properties": {
+                      "requiresPassword": {
+                        "type": "boolean",
+                        "description": "After the screenlock takes effect, does the user have to enter a password to access their device."
+                      },
+                      "screenSleepTimeoutMs": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The timeout in milliseconds for screenlock to trigger."
+                      }
+                    },
+                    "required": [
+                      "requiresPassword",
+                      "screenSleepTimeoutMs"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "System screenlock policy settings. Pass an empty list if this is tricky to retrieve for your system. Used for screenlock tests."
+                },
+                "isManaged": {
+                  "type": "boolean",
+                  "description": "Is the system managed by a Mobile Device Management system."
+                },
+                "autoUpdatesEnabled": {
+                  "type": "boolean",
+                  "description": "Does the system have auto-updates enabled."
+                },
+                "owner": {
+                  "type": "string",
+                  "description": "The email address of the owner of the system, if it's known."
+                },
+                "passwordPolicy": {
+                  "properties": {
+                    "minimumLengthRequirement": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "If the system has a password policy, what the minimum password length requirement is."
+                    }
+                  },
+                  "required": [
+                    "minimumLengthRequirement"
+                  ]
+                },
+                "lastEnrolledTimestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment."
+                },
+                "windowsSecurityProducts": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the security product."
+                      },
+                      "category": {
+                        "description": "The category of the security product.",
+                        "enum": [
+                          "FIREWALL",
+                          "ANTIVIRUS",
+                          "ANTISPYWARE"
+                        ]
+                      },
+                      "state": {
+                        "description": "The state of the security product.",
+                        "enum": [
+                          "ON",
+                          "OFF",
+                          "UNKNOWN"
+                        ]
+                      },
+                      "stateTimestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When this data was collected."
+                      },
+                      "signaturesUpToDate": {
+                        "type": "boolean",
+                        "description": "Whether the security signatures are up to date."
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "category",
+                      "state",
+                      "stateTimestamp",
+                      "signaturesUpToDate"
+                    ]
+                  },
+                  "type": "array",
+                  "description": "A list of services that are monitored by Windows Security Center (WSC)."
+                },
+                "windowsSecurityCenter": {
+                  "properties": {
+                    "firewall": {
+                      "description": "The health of the monitored Firewall.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "autoupdate": {
+                      "description": "The health of the Windows Autoupdate feature.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "antivirus": {
+                      "description": "The health of the monitored Antivirus solution.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "internetSetting": {
+                      "description": "The health of the Internet Settings.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "userAccountControl": {
+                      "description": "The health of the User Account Control (UAC) capability in Windows.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    },
+                    "windowsSecurityCenterService": {
+                      "description": "The health of the Windows Security Center Service.",
+                      "enum": [
+                        "GOOD",
+                        "POOR",
+                        "SNOOZED",
+                        "NOT_MONITORED",
+                        "ERROR"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "firewall",
+                    "autoupdate",
+                    "antivirus",
+                    "internetSetting",
+                    "userAccountControl",
+                    "windowsSecurityCenterService"
+                  ]
+                }
+              },
+              "required": [
+                "displayName",
+                "uniqueId",
+                "externalUrl",
+                "collectedTimestamp",
+                "osName",
+                "osVersion",
+                "hardwareUuid",
+                "serialNumber",
+                "programs",
+                "browserExtensions",
+                "drives",
+                "users",
+                "systemScreenlockPolicies",
+                "isManaged",
+                "autoUpdatesEnabled"
+              ]
+            }
+          }
         }
       ]
     }
