@@ -2,6 +2,69 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { getTokenManager } from "../auth.js";
 import { VantaApiClient } from "../client/vanta-client.js";
+import { invokeGeneratedOperation } from "../tools/endpoint-tools.js";
+import { parseToolEnvelope } from "./helpers.js";
+
+for (const status of [403, 502]) {
+  test(`malformed JSON HTTP ${status.toString()} retains status and raw body`, async () => {
+    // Arrange
+    const body = status === 403 ? "Forbidden" : "<html>Bad gateway</html>";
+    const client = new VantaApiClient({
+      tokenManager: {
+        getValidToken: async () => "test-token",
+        refreshToken: async () => "refreshed-token",
+      },
+      fetch: async () =>
+        new Response(body, {
+          status,
+          headers: { "content-type": "application/json" },
+        }),
+    });
+    // Initial Assert
+    assert.throws(() => JSON.parse(body));
+    // Act: a write avoids transient read retries and exercises the final response.
+    const result = await client.request({ method: "POST", path: "/fixture" });
+    // Assert
+    assert.equal(result.ok, false);
+    assert.equal(result.status, status);
+    assert.equal(result.data, body);
+  });
+}
+
+test("connector malformed JSON denial becomes api_error with HTTP status and raw text", async () => {
+  // Arrange
+  let calls = 0;
+  const client = new VantaApiClient({
+    tokenManager: {
+      getValidToken: async () => "test-token",
+      refreshToken: async () => "refreshed-token",
+    },
+    fetch: async () => {
+      calls += 1;
+      return new Response("Forbidden", {
+        status: 403,
+        headers: { "content-type": "application/json" },
+      });
+    },
+  });
+  // Initial Assert
+  assert.equal(calls, 0);
+  // Act
+  const result = await invokeGeneratedOperation(
+    "connector_get_user_account",
+    { resourceId: "missing-fixture" },
+    client,
+  );
+  // Assert
+  const envelope = parseToolEnvelope(result);
+  assert.equal(result.isError, true);
+  assert.equal(envelope.success, false);
+  const error = envelope.error as Record<string, unknown>;
+  assert.equal(error.code, "api_error");
+  assert.equal(error.message, "Vanta API request failed with status 403.");
+  assert.deepEqual(error.details, { value: "Forbidden" });
+  assert.equal(calls, 1);
+});
 
 const withMockedAuth = async (run: () => Promise<void>): Promise<void> => {
   const tokenManager = getTokenManager() as {

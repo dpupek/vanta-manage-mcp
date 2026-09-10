@@ -94,6 +94,9 @@ const parseResponsePayload = async (response: Response): Promise<unknown> => {
     try {
       return JSON.parse(text) as unknown;
     } catch (error) {
+      // Some gateways label plain-text errors as JSON. Preserve the HTTP
+      // failure and its original body so callers can report the actual cause.
+      if (!response.ok) return text;
       const message = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to parse JSON response: ${message}`);
     }

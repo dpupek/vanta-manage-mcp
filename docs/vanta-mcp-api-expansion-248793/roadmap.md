@@ -100,3 +100,14 @@ This phase preserves the 222-operation pinned surface. Live tenant validation an
 4. [ ] Prioritize workflow expansion after contract refresh: issues/event logs and vendor assessments first, followed by risk/control and audit lifecycle capabilities.
 
 Engineering implementation is complete; live tenant acceptance, deployment, and the broader contract refresh remain open.
+
+### DG live validation checkpoint
+
+- [x] Validate DG OAuth, Manage reads, bounded/resumable workflow pagination, and complete vendor inventory.
+- [x] Validate disposable Markdown-to-PDF upload, file readback, source preservation, temporary cleanup, document deletion, and 404 readback.
+- [x] Verify failed vulnerability workflow outcomes with an ID proven absent; no existing vulnerabilities changed.
+- [x] Preserve HTTP status/raw error text when an unsuccessful API response contains malformed JSON (observed connector 403); verified with regression tests and a live DG read-only recheck.
+- [ ] Complete Audit/Connector acceptance with permitted credentials and connector resource fixtures.
+- [ ] Complete successful vendor/vulnerability/SLA lifecycle tests using dedicated fixtures.
+
+Evidence and exact limits: [DG validation report](dg-validation-2026-09-09.md). Full live integration remains open; this checkpoint does not imply deployment.
