@@ -12,6 +12,46 @@ const findOperation = (name: string) => {
   return operation;
 };
 
+test("refreshed risk-control contract retains tool name and rejects legacy batch payload", () => {
+  // Arrange
+  const operation = findOperation("link_controls_to_risk_scenario");
+  const schema = buildOperationSchema(operation);
+  // Initial Assert
+  assert.equal(operation.operationId, "CreateRiskScenarioControl");
+  // Act
+  const current = schema.safeParse({
+    riskScenarioId: "risk-1",
+    body: { controlId: "control-1", controlType: "TREATMENT_PLAN" },
+  });
+  const legacy = schema.safeParse({
+    riskScenarioId: "risk-1",
+    body: { controlLinks: [{ controlId: "control-1", linkType: "TREATMENT" }] },
+  });
+  // Assert
+  assert.equal(current.success, true);
+  assert.equal(legacy.success, false);
+});
+
+test("new optional denial body preserves bodyless calls", () => {
+  // Arrange
+  const operation = findOperation("deny_trust_center_access_request");
+  const schema = buildOperationSchema(operation);
+  const ids = Object.fromEntries(
+    operation.parameters
+      .filter(p => p.required)
+      .map(p => [p.name, "fixture-id"]),
+  );
+  // Initial Assert
+  assert.equal(operation.requestBody?.required, false);
+  // Act
+  const results = [
+    schema.safeParse(ids),
+    schema.safeParse({ ...ids, body: { reason: "Reviewed denial" } }),
+  ];
+  // Assert
+  assert.ok(results.every(result => result.success));
+});
+
 test("generated list schemas reject invalid enums and page limits", () => {
   // Arrange
   const operation = findOperation("list_tests");
@@ -162,10 +202,10 @@ test("all generated schemas construct successfully", () => {
   // Arrange
   const operations = generatedOperations;
   // Initial Assert
-  assert.equal(operations.length, 222);
+  assert.equal(operations.length, 323);
   // Act
   const schemas = operations.map(buildOperationSchema);
   // Assert
-  assert.equal(schemas.length, 222);
+  assert.equal(schemas.length, 323);
   assert.ok(schemas.every(schema => typeof schema.safeParse === "function"));
 });

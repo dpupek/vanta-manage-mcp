@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Build integrations",
-    "description": "The API that enables syncing and viewing resources",
+    "description": "The API that enables syncing and viewing resources\n\n**Note for Vanta Gov (FedRAMP) customers:** Select `Vanta Gov (FedRAMP)` from the server dropdown to issue requests against `https://api.vanta-gov.com`. The OAuth token and authorization URLs shown below default to the commercial hosts — Gov customers should replace `api.vanta.com` with `api.vanta-gov.com` and `app.vanta.com` with `app.vanta-gov.com`.",
     "termsOfService": "https://www.vanta.com/terms",
     "contact": {
       "name": "API Support",
@@ -15,8 +15,19 @@
     },
     "version": "0.0.1"
   },
-  "x-readme": { "explorer-enabled": false },
-  "servers": [{ "url": "https://api.vanta.com" }],
+  "x-readme": {
+    "explorer-enabled": false
+  },
+  "servers": [
+    {
+      "url": "https://api.vanta.com",
+      "description": "Vanta (Commercial)"
+    },
+    {
+      "url": "https://api.vanta-gov.com",
+      "description": "Vanta Gov (FedRAMP)"
+    }
+  ],
   "security": [
     {
       "oauth": [
@@ -25,24 +36,6 @@
       ]
     }
   ],
-  "components": {
-    "securitySchemes": {
-      "oauth": {
-        "type": "oauth2",
-        "x-default": "vat_llamainapajama",
-        "flows": {
-          "authorizationCode": {
-            "authorizationUrl": "https://app.vanta.com/oauth/authorize",
-            "tokenUrl": "https://api.vanta.com/oauth/token",
-            "scopes": {
-              "connectors.self:write-resource": "Send data to your account.",
-              "connectors.self:read-resource": "Read data from your account."
-            }
-          }
-        }
-      }
-    }
-  },
   "paths": {
     "/v1/resources/api_endpoint_vulnerability_connectors": {
       "get": {
@@ -50,7 +43,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -102,7 +97,10 @@
                                         "description": "The API query param value associated with this vulnerability occurrence."
                                       }
                                     },
-                                    "required": ["key", "value"]
+                                    "required": [
+                                      "key",
+                                      "value"
+                                    ]
                                   },
                                   "type": "array",
                                   "description": "The API params associated with this vulnerability."
@@ -119,7 +117,10 @@
                                         "description": "The API header value associated with this vulnerability occurrence."
                                       }
                                     },
-                                    "required": ["key", "value"]
+                                    "required": [
+                                      "key",
+                                      "value"
+                                    ]
                                   },
                                   "type": "array",
                                   "description": "The API headers associated with this vulnerability."
@@ -129,7 +130,9 @@
                                   "description": "The body of the request passed to the API, with sensitive information redacted."
                                 }
                               },
-                              "required": ["description"]
+                              "required": [
+                                "description"
+                              ]
                             },
                             "type": "array",
                             "description": "A list of occurrences of vulnerable API endpoints."
@@ -196,7 +199,9 @@
         "operationId": "get-ApiEndpointVulnerabilityConnectors",
         "summary": "List all API Endpoint Vulnerabilities",
         "description": "\nList `ApiEndpointVulnerabilityConnectors` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["API Endpoint Vulnerabilities"]
+        "tags": [
+          "API Endpoint Vulnerabilities"
+        ]
       },
       "put": {
         "requestBody": {
@@ -206,7 +211,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -251,7 +259,10 @@
                                       "description": "The API query param value associated with this vulnerability occurrence."
                                     }
                                   },
-                                  "required": ["key", "value"]
+                                  "required": [
+                                    "key",
+                                    "value"
+                                  ]
                                 },
                                 "type": "array",
                                 "description": "The API params associated with this vulnerability."
@@ -268,7 +279,10 @@
                                       "description": "The API header value associated with this vulnerability occurrence."
                                     }
                                   },
-                                  "required": ["key", "value"]
+                                  "required": [
+                                    "key",
+                                    "value"
+                                  ]
                                 },
                                 "type": "array",
                                 "description": "The API headers associated with this vulnerability."
@@ -278,7 +292,9 @@
                                 "description": "The body of the request passed to the API, with sensitive information redacted."
                               }
                             },
-                            "required": ["description"]
+                            "required": [
+                              "description"
+                            ]
                           },
                           "type": "array",
                           "description": "A list of occurrences of vulnerable API endpoints."
@@ -348,8 +364,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -358,7 +380,9 @@
         "operationId": "put-ApiEndpointVulnerabilityConnectors",
         "summary": "Sync all API Endpoint Vulnerabilities",
         "description": "To send us data related to API endpoint vulnerabilities. Note that you must first sync `VulnerableComponent` resources before sending us this data, and this sync should reference the `uniqueId` field in the `VulnerableComponent` resource.\n\nThis call replaces ALL existing `ApiEndpointVulnerabilityConnectors` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `ApiEndpointVulnerabilityConnectors` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `ApiEndpointVulnerabilityConnectors`.",
-        "tags": ["API Endpoint Vulnerabilities"]
+        "tags": [
+          "API Endpoint Vulnerabilities"
+        ]
       }
     },
     "/v1/resources/background_check_connector": {
@@ -367,7 +391,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -406,7 +432,11 @@
                           },
                           "status": {
                             "description": "The current status of the background check.",
-                            "enum": ["INCOMPLETE", "IN_PROGRESS", "COMPLETE"]
+                            "enum": [
+                              "INCOMPLETE",
+                              "IN_PROGRESS",
+                              "COMPLETE"
+                            ]
                           },
                           "completionDate": {
                             "type": "string",
@@ -433,7 +463,9 @@
         "operationId": "get-BackgroundCheckConnector",
         "summary": "List all Background Checks",
         "description": "\nList `BackgroundCheckConnector` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["Background Checks"]
+        "tags": [
+          "Background Checks"
+        ]
       },
       "put": {
         "requestBody": {
@@ -443,7 +475,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -475,7 +510,11 @@
                         },
                         "status": {
                           "description": "The current status of the background check.",
-                          "enum": ["INCOMPLETE", "IN_PROGRESS", "COMPLETE"]
+                          "enum": [
+                            "INCOMPLETE",
+                            "IN_PROGRESS",
+                            "COMPLETE"
+                          ]
                         },
                         "completionDate": {
                           "type": "string",
@@ -505,8 +544,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -515,7 +560,9 @@
         "operationId": "put-BackgroundCheckConnector",
         "summary": "Sync all Background Checks",
         "description": "To send us data regarding employee/contractor background checks, you send us `BackgroundCheckConnector` resources. This helps us determine current background check statuses.\n\nThis call replaces ALL existing `BackgroundCheckConnector` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `BackgroundCheckConnector` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `BackgroundCheckConnector`.",
-        "tags": ["Background Checks"]
+        "tags": [
+          "Background Checks"
+        ]
       }
     },
     "/v1/resources/custom_resource": {
@@ -524,7 +571,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -554,7 +603,11 @@
                             "description": "A link to this resource on the partner site. This must be a HTTPS URL."
                           }
                         },
-                        "required": ["displayName", "uniqueId", "externalUrl"]
+                        "required": [
+                          "displayName",
+                          "uniqueId",
+                          "externalUrl"
+                        ]
                       }
                     }
                   }
@@ -566,7 +619,9 @@
         "operationId": "get-CustomResource",
         "summary": "List all Custom Resources",
         "description": "\nList `CustomResource` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["Custom Resources"]
+        "tags": [
+          "Custom Resources"
+        ]
       },
       "put": {
         "requestBody": {
@@ -576,7 +631,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -599,7 +657,11 @@
                           "description": "A link to this resource on the partner site. This must be a HTTPS URL."
                         }
                       },
-                      "required": ["displayName", "uniqueId", "externalUrl"]
+                      "required": [
+                        "displayName",
+                        "uniqueId",
+                        "externalUrl"
+                      ]
                     }
                   }
                 }
@@ -614,8 +676,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -624,7 +692,93 @@
         "operationId": "put-CustomResource",
         "summary": "Sync all Custom Resources",
         "description": "To send data of custom resource that you want to build custom tests on, use `CustomResource`.\n\nThis call replaces ALL existing `CustomResource` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `CustomResource` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `CustomResource`.",
-        "tags": ["Custom Resources"]
+        "tags": [
+          "Custom Resources"
+        ]
+      }
+    },
+    "/v1/documents/{documentId}/uploads": {
+      "post": {
+        "operationId": "UploadFileForDocument",
+        "summary": "Upload file for document",
+        "description": "Upload a file for a document.",
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "effectiveAtDate": {
+                    "type": "string",
+                    "description": "Date indicating when the document is effective from."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description of the uploaded document."
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded for document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadedFileT"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "id": "1",
+                      "fileName": "Document Name",
+                      "title": "Document title",
+                      "description": "Document Description",
+                      "url": "https://example.com",
+                      "creationDate": "2024-03-17T00:00:00.000Z",
+                      "updatedDate": "2024-03-18T00:00:00.000Z",
+                      "effectiveDate": "2024-03-17T00:00:00.000Z",
+                      "deletionDate": null,
+                      "mimeType": "application/pdf",
+                      "uploadedBy": {
+                        "id": "66993da0cf4ba2ad40599ba7",
+                        "type": "USER"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/resources/macos_user_computer": {
@@ -633,7 +787,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -700,7 +856,10 @@
                                   "description": "The last time the application was opened."
                                 }
                               },
-                              "required": ["name", "bundleId"]
+                              "required": [
+                                "name",
+                                "bundleId"
+                              ]
                             },
                             "type": "array",
                             "description": "All the installed Mac Apps on the system."
@@ -727,7 +886,11 @@
                                   ]
                                 }
                               },
-                              "required": ["extensionId", "name", "browser"]
+                              "required": [
+                                "extensionId",
+                                "name",
+                                "browser"
+                              ]
                             },
                             "type": "array",
                             "description": "A list of browser extensions on this device. Used to match against known password managers to demonstrate use."
@@ -862,7 +1025,9 @@
                                 "description": "If the system has a password policy, what the minimum password length requirement is."
                               }
                             },
-                            "required": ["minimumLengthRequirement"]
+                            "required": [
+                              "minimumLengthRequirement"
+                            ]
                           },
                           "lastEnrolledTimestamp": {
                             "type": "string",
@@ -902,7 +1067,9 @@
         "operationId": "get-MacosUserComputer",
         "summary": "List all MacOS User Computers",
         "description": "\nList `MacosUserComputer` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["MacOS User Computers"]
+        "tags": [
+          "MacOS User Computers"
+        ]
       },
       "put": {
         "requestBody": {
@@ -912,7 +1079,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -972,7 +1142,10 @@
                                 "description": "The last time the application was opened."
                               }
                             },
-                            "required": ["name", "bundleId"]
+                            "required": [
+                              "name",
+                              "bundleId"
+                            ]
                           },
                           "type": "array",
                           "description": "All the installed Mac Apps on the system."
@@ -999,7 +1172,11 @@
                                 ]
                               }
                             },
-                            "required": ["extensionId", "name", "browser"]
+                            "required": [
+                              "extensionId",
+                              "name",
+                              "browser"
+                            ]
                           },
                           "type": "array",
                           "description": "A list of browser extensions on this device. Used to match against known password managers to demonstrate use."
@@ -1134,7 +1311,9 @@
                               "description": "If the system has a password policy, what the minimum password length requirement is."
                             }
                           },
-                          "required": ["minimumLengthRequirement"]
+                          "required": [
+                            "minimumLengthRequirement"
+                          ]
                         },
                         "lastEnrolledTimestamp": {
                           "type": "string",
@@ -1177,8 +1356,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -1187,7 +1372,9 @@
         "operationId": "put-MacosUserComputer",
         "summary": "Sync all MacOS User Computers",
         "description": "To send us data related to employee/contractor MacOS computers, you send us `MacosUserComputer` resources. This helps us determine important security properties, like whether devices have encrypted drives, have anti-virus installed or have password managers installed.\n\nThis call replaces ALL existing `MacosUserComputer` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `MacosUserComputer` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `MacosUserComputer`.",
-        "tags": ["MacOS User Computers"]
+        "tags": [
+          "MacOS User Computers"
+        ]
       }
     },
     "/v1/resources/package_vulnerability_connectors": {
@@ -1196,7 +1383,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -1295,7 +1484,9 @@
         "operationId": "get-PackageVulnerabilityConnectors",
         "summary": "List all Package Vulnerabilities",
         "description": "\nList `PackageVulnerabilityConnectors` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["Package Vulnerabilities"]
+        "tags": [
+          "Package Vulnerabilities"
+        ]
       },
       "put": {
         "requestBody": {
@@ -1305,7 +1496,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -1400,8 +1594,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -1410,7 +1610,9 @@
         "operationId": "put-PackageVulnerabilityConnectors",
         "summary": "Sync all Package Vulnerabilities",
         "description": "To send us data related to package vulnerabilities. Note that you must first sync `VulnerableComponent` resources before sending us this data, and this sync should reference the `uniqueId` field in the `VulnerableComponent` resource.\n\nThis call replaces ALL existing `PackageVulnerabilityConnectors` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `PackageVulnerabilityConnectors` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `PackageVulnerabilityConnectors`.",
-        "tags": ["Package Vulnerabilities"]
+        "tags": [
+          "Package Vulnerabilities"
+        ]
       }
     },
     "/v1/resources/secret": {
@@ -1419,7 +1621,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -1506,7 +1710,9 @@
         "operationId": "get-Secret",
         "summary": "List all secrets",
         "description": "\nList `Secret` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["Secrets"]
+        "tags": [
+          "Secrets"
+        ]
       },
       "put": {
         "requestBody": {
@@ -1516,7 +1722,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -1599,8 +1808,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -1609,7 +1824,9 @@
         "operationId": "put-Secret",
         "summary": "Sync all secrets",
         "description": "To send metadata of a secret used to access applications or infrastructure, use `Secret`.\n\nThis call replaces ALL existing `Secret` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `Secret` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `Secret`.",
-        "tags": ["Secrets"]
+        "tags": [
+          "Secrets"
+        ]
       }
     },
     "/v1/resources/security_task": {
@@ -1618,7 +1835,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -1662,11 +1881,21 @@
                           },
                           "taskState": {
                             "description": "The status of the task. If your application supports additional states, use the closest approximation.",
-                            "enum": ["OPEN", "IN_PROGRESS", "CLOSED"]
+                            "enum": [
+                              "OPEN",
+                              "IN_PROGRESS",
+                              "CLOSED"
+                            ]
                           },
                           "priority": {
                             "description": "Priorities are mapped against SLAs for tasks. If your task system does not have fixed priorities, consider letting users configure priorities through labels.",
-                            "enum": ["P0", "P1", "P2", "P3", "P4"]
+                            "enum": [
+                              "P0",
+                              "P1",
+                              "P2",
+                              "P3",
+                              "P4"
+                            ]
                           },
                           "assignees": {
                             "items": {
@@ -1723,7 +1952,9 @@
         "operationId": "get-SecurityTask",
         "summary": "List all security tasks",
         "description": "\nList `SecurityTask` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["Security Tasks"]
+        "tags": [
+          "Security Tasks"
+        ]
       },
       "put": {
         "requestBody": {
@@ -1733,7 +1964,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -1770,11 +2004,21 @@
                         },
                         "taskState": {
                           "description": "The status of the task. If your application supports additional states, use the closest approximation.",
-                          "enum": ["OPEN", "IN_PROGRESS", "CLOSED"]
+                          "enum": [
+                            "OPEN",
+                            "IN_PROGRESS",
+                            "CLOSED"
+                          ]
                         },
                         "priority": {
                           "description": "Priorities are mapped against SLAs for tasks. If your task system does not have fixed priorities, consider letting users configure priorities through labels.",
-                          "enum": ["P0", "P1", "P2", "P3", "P4"]
+                          "enum": [
+                            "P0",
+                            "P1",
+                            "P2",
+                            "P3",
+                            "P4"
+                          ]
                         },
                         "assignees": {
                           "items": {
@@ -1834,8 +2078,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -1844,7 +2094,9 @@
         "operationId": "put-SecurityTask",
         "summary": "Sync all security tasks",
         "description": "To send us data related to security relevant tasks/follow-ups your system, you send us `SecurityTask` resources. This helps us determine whether security relevant tasks are being completed in a timely manner.\n\nThis call replaces ALL existing `SecurityTask` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `SecurityTask` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `SecurityTask`.",
-        "tags": ["Security Tasks"]
+        "tags": [
+          "Security Tasks"
+        ]
       }
     },
     "/v1/resources/static_analysis_code_vulnerability_connectors": {
@@ -1853,7 +2105,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -1984,7 +2238,9 @@
         "operationId": "get-StaticAnalysisCodeVulnerabilityConnectors",
         "summary": "List all Static Code Analysis Vulnerabilities",
         "description": "\nList `StaticAnalysisCodeVulnerabilityConnectors` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["Static Code Analysis Vulnerabilities"]
+        "tags": [
+          "Static Code Analysis Vulnerabilities"
+        ]
       },
       "put": {
         "requestBody": {
@@ -1994,7 +2250,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -2121,8 +2380,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -2131,7 +2396,9 @@
         "operationId": "put-StaticAnalysisCodeVulnerabilityConnectors",
         "summary": "Sync all Static Code Analysis Vulnerabilities",
         "description": "To send us data related to static code analysis vulnerabilities. Note that you must first sync `VulnerableComponent` resources before sending us this data, and this sync should reference the `uniqueId` field in the `VulnerableComponent` resource.\n\nThis call replaces ALL existing `StaticAnalysisCodeVulnerabilityConnectors` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `StaticAnalysisCodeVulnerabilityConnectors` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `StaticAnalysisCodeVulnerabilityConnectors`.",
-        "tags": ["Static Code Analysis Vulnerabilities"]
+        "tags": [
+          "Static Code Analysis Vulnerabilities"
+        ]
       }
     },
     "/v1/resources/user_account": {
@@ -2140,7 +2407,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -2183,7 +2452,11 @@
                           },
                           "permissionLevel": {
                             "description": "What the permission level of the user is. If your system supports more advanced roles, find the closest approximation. This will be used to help populate Vanta access reviews and help customers ensure that the right set of users have access to their relevant systems.",
-                            "enum": ["ADMIN", "EDITOR", "BASE"]
+                            "enum": [
+                              "ADMIN",
+                              "EDITOR",
+                              "BASE"
+                            ]
                           },
                           "createdTimestamp": {
                             "type": "string",
@@ -2192,7 +2465,10 @@
                           },
                           "status": {
                             "description": "The status of the user. It's acceptable to omit any deactivated users from your application, but if your application has access to deactivated users, it's preferable to send them over with this status.",
-                            "enum": ["ACTIVE", "DEACTIVATED"]
+                            "enum": [
+                              "ACTIVE",
+                              "DEACTIVATED"
+                            ]
                           },
                           "mfaEnabled": {
                             "type": "boolean",
@@ -2216,7 +2492,12 @@
                           },
                           "authMethod": {
                             "description": "How the user logs into the system. This is useful for us to validate security properties, like ensuring MFA is enabled if the user logs in with a password.",
-                            "enum": ["SSO", "PASSWORD", "TOKEN", "BIOMETRIC"]
+                            "enum": [
+                              "SSO",
+                              "PASSWORD",
+                              "TOKEN",
+                              "BIOMETRIC"
+                            ]
                           },
                           "roleDescription": {
                             "type": "string",
@@ -2276,7 +2557,9 @@
         "operationId": "get-UserAccount",
         "summary": "List all user accounts",
         "description": "\nList `UserAccount` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["User Accounts"]
+        "tags": [
+          "User Accounts"
+        ]
       },
       "put": {
         "requestBody": {
@@ -2286,7 +2569,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -2322,7 +2608,11 @@
                         },
                         "permissionLevel": {
                           "description": "What the permission level of the user is. If your system supports more advanced roles, find the closest approximation. This will be used to help populate Vanta access reviews and help customers ensure that the right set of users have access to their relevant systems.",
-                          "enum": ["ADMIN", "EDITOR", "BASE"]
+                          "enum": [
+                            "ADMIN",
+                            "EDITOR",
+                            "BASE"
+                          ]
                         },
                         "createdTimestamp": {
                           "type": "string",
@@ -2331,7 +2621,10 @@
                         },
                         "status": {
                           "description": "The status of the user. It's acceptable to omit any deactivated users from your application, but if your application has access to deactivated users, it's preferable to send them over with this status.",
-                          "enum": ["ACTIVE", "DEACTIVATED"]
+                          "enum": [
+                            "ACTIVE",
+                            "DEACTIVATED"
+                          ]
                         },
                         "mfaEnabled": {
                           "type": "boolean",
@@ -2355,7 +2648,12 @@
                         },
                         "authMethod": {
                           "description": "How the user logs into the system. This is useful for us to validate security properties, like ensuring MFA is enabled if the user logs in with a password.",
-                          "enum": ["SSO", "PASSWORD", "TOKEN", "BIOMETRIC"]
+                          "enum": [
+                            "SSO",
+                            "PASSWORD",
+                            "TOKEN",
+                            "BIOMETRIC"
+                          ]
                         },
                         "roleDescription": {
                           "type": "string",
@@ -2418,8 +2716,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -2428,7 +2732,9 @@
         "operationId": "put-UserAccount",
         "summary": "Sync all user accounts",
         "description": "To send us data related to users in your system, you send us `UserAccount` resources. Every partner must send us `UserAccount` resources. This helps us determine whether users have appropriate levels of access and have a secure authentication mechanism.\n\nThis call replaces ALL existing `UserAccount` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `UserAccount` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and it is \"deletedAt\" time in is set to that of the `sync_all` call. The resource will still show in the Vanta UI as a Deactivated `UserAccount`, and `list_all` calls.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `UserAccount`.",
-        "tags": ["User Accounts"]
+        "tags": [
+          "User Accounts"
+        ]
       }
     },
     "/v1/resources/user_security_training_status": {
@@ -2437,7 +2743,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -2503,7 +2811,10 @@
                           },
                           "status": {
                             "description": "Whether the training has been fully completed.",
-                            "enum": ["INCOMPLETE", "COMPLETE"]
+                            "enum": [
+                              "INCOMPLETE",
+                              "COMPLETE"
+                            ]
                           },
                           "trainingCreatedTimestamp": {
                             "type": "string",
@@ -2546,7 +2857,9 @@
         "operationId": "get-UserSecurityTrainingStatus",
         "summary": "List all user security training statuses",
         "description": "\nList `UserSecurityTrainingStatus` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["User Security Training Statuses"]
+        "tags": [
+          "User Security Training Statuses"
+        ]
       },
       "put": {
         "requestBody": {
@@ -2556,7 +2869,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -2615,7 +2931,10 @@
                         },
                         "status": {
                           "description": "Whether the training has been fully completed.",
-                          "enum": ["INCOMPLETE", "COMPLETE"]
+                          "enum": [
+                            "INCOMPLETE",
+                            "COMPLETE"
+                          ]
                         },
                         "trainingCreatedTimestamp": {
                           "type": "string",
@@ -2661,8 +2980,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -2671,7 +2996,9 @@
         "operationId": "put-UserSecurityTrainingStatus",
         "summary": "Sync all user security training statuses",
         "description": "To send us data related to security trainings, you send us `UserSecurityTrainingStatus` resources. This helps us determine whether users have completed their security and compliance trainings in a timely manner.\n\nThis call replaces ALL existing `UserSecurityTrainingStatus` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `UserSecurityTrainingStatus` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `UserSecurityTrainingStatus`.",
-        "tags": ["User Security Training Statuses"]
+        "tags": [
+          "User Security Training Statuses"
+        ]
       }
     },
     "/v1/resources/vulnerable_component": {
@@ -2680,7 +3007,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -2733,7 +3062,8 @@
                               "CODE_REPOSITORY",
                               "SERVERLESS_FUNCTION",
                               "MANIFEST_FILE",
-                              "WORKSTATION"
+                              "WORKSTATION",
+                              "OTHER"
                             ]
                           }
                         },
@@ -2757,7 +3087,9 @@
         "operationId": "get-VulnerableComponent",
         "summary": "List all Vulnerable Components",
         "description": "\nList `VulnerableComponent` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["Vulnerable Components"]
+        "tags": [
+          "Vulnerable Components"
+        ]
       },
       "put": {
         "requestBody": {
@@ -2767,7 +3099,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -2813,7 +3148,8 @@
                             "CODE_REPOSITORY",
                             "SERVERLESS_FUNCTION",
                             "MANIFEST_FILE",
-                            "WORKSTATION"
+                            "WORKSTATION",
+                            "OTHER"
                           ]
                         }
                       },
@@ -2840,8 +3176,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -2850,7 +3192,9 @@
         "operationId": "put-VulnerableComponent",
         "summary": "Sync all Vulnerable Components",
         "description": "To send us data related to system components that have vulnerabilities.\n\nThis call replaces ALL existing `VulnerableComponent` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `VulnerableComponent` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `VulnerableComponent`.",
-        "tags": ["Vulnerable Components"]
+        "tags": [
+          "Vulnerable Components"
+        ]
       }
     },
     "/v1/resources/windows_user_computer": {
@@ -2859,7 +3203,9 @@
           {
             "name": "resourceId",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "description": "Vanta generated identifier for the given resource, and can be found on the developer console page. See the list of registered resources and their IDs on https://app.vanta.com/settings/developer-console/<app_id>?tab=resources"
           }
@@ -2922,7 +3268,9 @@
                                   "description": "The last time the application was opened."
                                 }
                               },
-                              "required": ["name"]
+                              "required": [
+                                "name"
+                              ]
                             },
                             "type": "array",
                             "description": "All the installed programs on the Windows system."
@@ -2949,7 +3297,11 @@
                                   ]
                                 }
                               },
-                              "required": ["extensionId", "name", "browser"]
+                              "required": [
+                                "extensionId",
+                                "name",
+                                "browser"
+                              ]
                             },
                             "type": "array",
                             "description": "A list of browser extensions on this device. Used to match against known password managers to demonstrate use."
@@ -2970,7 +3322,10 @@
                                   "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
                                 }
                               },
-                              "required": ["name", "encrypted"]
+                              "required": [
+                                "name",
+                                "encrypted"
+                              ]
                             },
                             "type": "array",
                             "description": "A list of drives on this device. Used to verify encryption status."
@@ -3076,7 +3431,9 @@
                                 "description": "If the system has a password policy, what the minimum password length requirement is."
                               }
                             },
-                            "required": ["minimumLengthRequirement"]
+                            "required": [
+                              "minimumLengthRequirement"
+                            ]
                           },
                           "lastEnrolledTimestamp": {
                             "type": "string",
@@ -3100,7 +3457,11 @@
                                 },
                                 "state": {
                                   "description": "The state of the security product.",
-                                  "enum": ["ON", "OFF", "UNKNOWN"]
+                                  "enum": [
+                                    "ON",
+                                    "OFF",
+                                    "UNKNOWN"
+                                  ]
                                 },
                                 "stateTimestamp": {
                                   "type": "string",
@@ -3224,7 +3585,9 @@
         "operationId": "get-WindowsUserComputer",
         "summary": "List all Windows User Computers",
         "description": "\nList `WindowsUserComputer` resources for the given application.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:read-resource\n```\n",
-        "tags": ["Windows User Computers"]
+        "tags": [
+          "Windows User Computers"
+        ]
       },
       "put": {
         "requestBody": {
@@ -3234,7 +3597,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["resourceId", "resources"],
+                "required": [
+                  "resourceId",
+                  "resources"
+                ],
                 "properties": {
                   "resourceId": {
                     "type": "string",
@@ -3290,7 +3656,9 @@
                                 "description": "The last time the application was opened."
                               }
                             },
-                            "required": ["name"]
+                            "required": [
+                              "name"
+                            ]
                           },
                           "type": "array",
                           "description": "All the installed programs on the Windows system."
@@ -3317,7 +3685,11 @@
                                 ]
                               }
                             },
-                            "required": ["extensionId", "name", "browser"]
+                            "required": [
+                              "extensionId",
+                              "name",
+                              "browser"
+                            ]
                           },
                           "type": "array",
                           "description": "A list of browser extensions on this device. Used to match against known password managers to demonstrate use."
@@ -3338,7 +3710,10 @@
                                 "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
                               }
                             },
-                            "required": ["name", "encrypted"]
+                            "required": [
+                              "name",
+                              "encrypted"
+                            ]
                           },
                           "type": "array",
                           "description": "A list of drives on this device. Used to verify encryption status."
@@ -3444,7 +3819,9 @@
                               "description": "If the system has a password policy, what the minimum password length requirement is."
                             }
                           },
-                          "required": ["minimumLengthRequirement"]
+                          "required": [
+                            "minimumLengthRequirement"
+                          ]
                         },
                         "lastEnrolledTimestamp": {
                           "type": "string",
@@ -3460,11 +3837,19 @@
                               },
                               "category": {
                                 "description": "The category of the security product.",
-                                "enum": ["FIREWALL", "ANTIVIRUS", "ANTISPYWARE"]
+                                "enum": [
+                                  "FIREWALL",
+                                  "ANTIVIRUS",
+                                  "ANTISPYWARE"
+                                ]
                               },
                               "state": {
                                 "description": "The state of the security product.",
-                                "enum": ["ON", "OFF", "UNKNOWN"]
+                                "enum": [
+                                  "ON",
+                                  "OFF",
+                                  "UNKNOWN"
+                                ]
                               },
                               "stateTimestamp": {
                                 "type": "string",
@@ -3591,8 +3976,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success"],
-                  "properties": { "success": { "type": "boolean" } }
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -3601,8 +3992,166 @@
         "operationId": "put-WindowsUserComputer",
         "summary": "Sync all Windows User Computers",
         "description": "To send us data related to employee/contractor Windows computers, you send us `WindowsUserComputer` resources. This helps us determine important security properties, like whether devices have encrypted drives, have anti-virus installed or have password managers installed.\n\nThis call replaces ALL existing `WindowsUserComputer` resources for the given app and `source_id` - this is a \"state of the world\" sync. In other words, if a `WindowsUserComputer` resource is sent for a user in a previous `sync_all` call, but is not included in a later `sync_all` call for that customer, it is assumed to no longer exist and is deleted in Vanta.\n\n** Headers **\n```\nAuthorization: Bearer <access_token>\n```\n\n** Scopes **\n```\nconnectors.self:write-resource\n```\n\n** Schema **\n\nExpand the `resources` array below for the schema of `WindowsUserComputer`.",
-        "tags": ["Windows User Computers"]
+        "tags": [
+          "Windows User Computers"
+        ]
       }
     }
-  }
+  },
+  "components": {
+    "securitySchemes": {
+      "oauth": {
+        "type": "oauth2",
+        "x-default": "vat_llamainapajama",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://app.vanta.com/oauth/authorize",
+            "tokenUrl": "https://api.vanta.com/oauth/token",
+            "scopes": {
+              "connectors.self:write-resource": "Send data to your account.",
+              "connectors.self:read-resource": "Read data from your account."
+            }
+          }
+        }
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "UploadedDocumentUploadedByType": {
+        "enum": [
+          "USER",
+          "APPLICATION"
+        ],
+        "type": "string"
+      },
+      "UploadedFileT": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the document."
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true,
+            "description": "The file name of the document."
+          },
+          "title": {
+            "type": "string",
+            "description": "The document's title."
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "The document's description"
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "Mime type of the document."
+          },
+          "uploadedBy": {
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/UploadedDocumentUploadedByType"
+              },
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "id"
+            ],
+            "type": "object",
+            "nullable": true,
+            "description": "The actor who uploaded this document. It could be a user or an app."
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of when the document was uploaded."
+          },
+          "updatedDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date when the document was last updated."
+          },
+          "deletionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Date of when the document was deleted. Is set to null if the document has not been deleted."
+          },
+          "effectiveDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The document's effective date."
+          },
+          "url": {
+            "type": "string",
+            "description": "The document's URL."
+          }
+        },
+        "required": [
+          "id",
+          "fileName",
+          "title",
+          "description",
+          "mimeType",
+          "uploadedBy",
+          "creationDate",
+          "updatedDate",
+          "deletionDate",
+          "effectiveDate",
+          "url"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "API Endpoint Vulnerabilities"
+    },
+    {
+      "name": "Background Checks"
+    },
+    {
+      "name": "Custom Resources"
+    },
+    {
+      "name": "Documents"
+    },
+    {
+      "name": "MacOS User Computers"
+    },
+    {
+      "name": "Package Vulnerabilities"
+    },
+    {
+      "name": "Secrets"
+    },
+    {
+      "name": "Security Tasks"
+    },
+    {
+      "name": "Static Code Analysis Vulnerabilities"
+    },
+    {
+      "name": "User Accounts"
+    },
+    {
+      "name": "User Security Training Statuses"
+    },
+    {
+      "name": "Vulnerable Components"
+    },
+    {
+      "name": "Windows User Computers"
+    }
+  ]
 }

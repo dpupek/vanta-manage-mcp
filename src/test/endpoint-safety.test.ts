@@ -9,6 +9,34 @@ import {
   invokeGeneratedOperation,
 } from "../tools/endpoint-tools.js";
 import { parseToolEnvelope } from "./helpers.js";
+import { generatedOperations } from "../generated/operations.generated.js";
+
+test("every generated mutation requires confirmation before HTTP", async () => {
+  // Arrange
+  const mutations = generatedOperations.filter(
+    operation => operation.isMutation,
+  );
+  const client = new FakeClient();
+  // Initial Assert
+  assert.equal(mutations.length, 166);
+  assert.equal(client.calls.length, 0);
+  // Act
+  const results = await Promise.all(
+    mutations.map(operation =>
+      invokeGeneratedOperation(operation.toolName, {}, client as never),
+    ),
+  );
+  // Assert
+  for (const result of results) {
+    const envelope = parseToolEnvelope(result);
+    assert.equal(envelope.success, false);
+    assert.equal(
+      (envelope.error as Record<string, unknown>).code,
+      "confirmation_required",
+    );
+  }
+  assert.equal(client.calls.length, 0);
+});
 
 class FakeClient {
   public calls: Record<string, unknown>[] = [];
@@ -141,7 +169,7 @@ test("already mapped API responses are translated to idempotent success", async 
 test("risk scenario control links use idempotent mapping behavior", async () => {
   // Arrange
   const toolName = getGeneratedToolNameByOperationId(
-    "LinkControlsToRiskScenario",
+    "CreateRiskScenarioControl",
     "manage",
   );
   assert.ok(toolName);
@@ -165,7 +193,8 @@ test("risk scenario control links use idempotent mapping behavior", async () => 
     {
       riskScenarioId: "risk-1",
       body: {
-        controlLinks: [{ controlId: "AC-1", linkType: "TREATMENT" }],
+        controlId: "AC-1",
+        controlType: "TREATMENT_PLAN",
       },
       confirm: true,
     },

@@ -12,7 +12,7 @@ Vanta Manage MCP is a full-capability Model Context Protocol server for operatin
 
 ## Feature Snapshot
 
-- `222` generated endpoint tools (current generated baseline).
+- `323` generated endpoint tools (current generated baseline).
 - Safe mutation contract with `confirm=true` gating.
 - Multipart uploads use local `filePath` preflight validation (readability + supported type checks).
 - Workflow tools with `mode=plan|execute`.
@@ -65,3 +65,5 @@ Main-branch CI publishes immutable tags in `v1.0.<buildnumber>` format and also 
 
 - Use `#v1.0.<buildnumber>` for deterministic installs.
 - Use `#stable` for latest successful release on main.
+
+Contract refresh migration: [September 10 input changes and stable tool names](docs/vanta-mcp-api-expansion-248793/contract-refresh.md).

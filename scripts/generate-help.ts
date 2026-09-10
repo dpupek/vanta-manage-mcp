@@ -53,12 +53,8 @@ const main = async (): Promise<void> => {
   };
 
   writeMarkdown(
-    "docs/vanta-mcp-help.md",
+    "docs/dev/help-surface-reference.md",
     contentModule.buildVantaMcpHelpMarkdown(context),
-  );
-  writeMarkdown(
-    "docs/mcp-resources-prompts.md",
-    contentModule.buildResourcesPromptsReferenceMarkdown(),
   );
 };
 

@@ -1,0 +1,25 @@
+{
+  "sources": [
+    {
+      "source": "manage",
+      "file": "manage-v1.json",
+      "url": "https://developer.vanta.com/reference/manage-vanta.json",
+      "retrievedAt": "2026-09-10T02:44:51.773954+00:00",
+      "sha256": "4f51bc9619c413b4443f2dbb6923ba4a3305910b326a52aa304f92564f6e62b9"
+    },
+    {
+      "source": "audit",
+      "file": "audit-v1.json",
+      "url": "https://developer.vanta.com/reference/auditor-api.json",
+      "retrievedAt": "2026-09-10T02:44:51.785553+00:00",
+      "sha256": "5a91c5376655279896e787a317fb3198adbb8e2b501f20189eb80664534cfc6a"
+    },
+    {
+      "source": "connectors",
+      "file": "connectors-v1.json",
+      "url": "https://developer.vanta.com/reference/build-integrations.json",
+      "retrievedAt": "2026-09-10T02:44:51.790536+00:00",
+      "sha256": "8b1f9794f01122196096d25651577556d97f53fe23cf07f97f43cbb83d15dd99"
+    }
+  ]
+}

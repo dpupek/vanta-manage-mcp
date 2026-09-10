@@ -14,23 +14,23 @@ test("generated parity count matches per-spec totals", () => {
     generatedStats.connectors.operations;
 
   // Initial Assert
-  assert.equal(generatedStats.manage.operations, 167);
-  assert.equal(generatedStats.audit.operations, 31);
-  assert.equal(generatedStats.connectors.operations, 24);
+  assert.equal(generatedStats.manage.operations, 241);
+  assert.equal(generatedStats.audit.operations, 57);
+  assert.equal(generatedStats.connectors.operations, 25);
 
   // Act
   const actualTotal = generatedOperationCount;
 
   // Assert
   assert.equal(actualTotal, expectedTotal);
-  assert.equal(actualTotal, 222);
+  assert.equal(actualTotal, 323);
 });
 
 test("requested latest Manage operations are generated with expected tool names", () => {
   // Arrange
   const expected = [
     {
-      operationId: "LinkControlsToRiskScenario",
+      operationId: "CreateRiskScenarioControl",
       toolName: "link_controls_to_risk_scenario",
       method: "post",
       path: "/risk-scenarios/{riskScenarioId}/controls",

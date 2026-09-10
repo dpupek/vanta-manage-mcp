@@ -21,6 +21,9 @@ export const extensionToMimeType: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+  ".gif": "image/gif",
+  ".ico": "image/vnd.microsoft.icon",
   ".zip": "application/zip",
   ".ps": "application/postscript",
 };

@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -96,7 +97,59 @@ const main = (): void => {
   );
 
   const names = new Set<string>();
+  const identities = new Set<string>();
+  const provenance = JSON.parse(
+    fs.readFileSync(path.join(openApiDirectory, "sources.json"), "utf8"),
+  ) as {
+    sources: { source: string; file: string; sha256: string }[];
+  };
+  assert(
+    provenance.sources.length === 3,
+    "Expected provenance for three API sources.",
+  );
+  for (const source of ["manage", "audit", "connectors"]) {
+    const filename = `${source}-v1.json`;
+    const raw = fs.readFileSync(path.join(openApiDirectory, filename));
+    const recorded = provenance.sources.filter(
+      item => item.source === source && item.file === filename,
+    );
+    assert(recorded.length === 1, `Missing or duplicate provenance: ${source}`);
+    assert(
+      recorded[0].sha256 === createHash("sha256").update(raw).digest("hex"),
+      `Source hash mismatch: ${source}`,
+    );
+    const spec = JSON.parse(raw.toString("utf8")) as OpenApiSpec;
+    for (const [route, methods] of Object.entries(spec.paths ?? {})) {
+      for (const method of [
+        "get",
+        "post",
+        "put",
+        "patch",
+        "delete",
+        "options",
+        "head",
+      ]) {
+        const operation = methods[method] as
+          | { operationId?: string }
+          | undefined;
+        if (operation)
+          identities.add(
+            JSON.stringify([source, method, route, operation.operationId]),
+          );
+      }
+    }
+  }
   for (const tool of manifest.tools) {
+    const identity = JSON.stringify([
+      tool.source,
+      tool.method,
+      tool.path,
+      tool.operationId,
+    ]);
+    assert(
+      identities.delete(identity),
+      `Unexpected or duplicate operation identity: ${identity}`,
+    );
     assert(
       /^[a-z0-9_]+$/.test(tool.toolName),
       `Tool name is invalid for MCP naming: ${tool.toolName}`,
@@ -108,6 +161,10 @@ const main = (): void => {
     assert(!names.has(tool.toolName), `Duplicate tool name: ${tool.toolName}`);
     names.add(tool.toolName);
   }
+  assert(
+    identities.size === 0,
+    `Missing operation identities: ${[...identities].join(", ")}`,
+  );
 
   process.stdout.write(
     `spec parity verified: ${expectedTotal.toString()} operations mapped to ${names.size.toString()} unique tools\n`,

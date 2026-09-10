@@ -64,4 +64,10 @@ Endpoint invocation owns prepared upload files until the HTTP request settles, i
 
 Reads (GET/HEAD/OPTIONS) retry transient transport failures and HTTP 408/429/500/502/503/504 at most twice. All methods may retry authentication rejection once and rate-limit rejection within the same attempt budget. Conflicts and ambiguous mutation failures are returned without replay. Retry-After seconds and HTTP dates are honored; a delay beyond the deadline causes timeout rather than an early retry.
 
-Workflow collections default to 100 items per page and ten pages per inventory. Explicit pageSize/maxPages accept 1–100. Missing completion indicators/cursors, repeated cursors, and failed pages return errors with partial evidence. A page limit returns an incomplete collection with a resume cursor and warning. Resource discovery must be complete before bulk mutation; explicitly reviewed resourceIds can be supplied instead.
+Workflow collections default to 100 items per page and ten pages per inventory. Explicit pageSize/maxPages accept 1â€“100. Missing completion indicators/cursors, repeated cursors, and failed pages return errors with partial evidence. A page limit returns an incomplete collection with a resume cursor and warning. Resource discovery must be complete before bulk mutation; explicitly reviewed resourceIds can be supplied instead.
+
+## September 10 provenance and migration
+
+Pinned surface: Manage 241, Audit 57, Connectors 25 (323 operations). openapi/sources.json records official URLs, UTC retrieval timestamps, and SHA-256 hashes of pinned bytes. The generated manifest timestamp derives from provenance, so unchanged specs produce identical artifacts. Do not reformat pinned JSON without recording its new hash.
+
+Parity checks source/method/path/operationId identities exactly once and verifies each source hash. Upstream renames retain link_controls_to_risk_scenario and initiate_export. Risk-control linking now requires body.controlId and optionally body.controlType, replacing controlLinks. See the epic contract-refresh migration notes.

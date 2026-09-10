@@ -406,6 +406,13 @@ const preferredNameOverride = (
   source: ApiSource,
   operationId: string,
 ): string | undefined => {
+  if (source === "manage" && operationId === "CreateRiskScenarioControl")
+    return "link_controls_to_risk_scenario";
+  if (source === "manage" && operationId === "CreateQuestionnaireExport")
+    return "initiate_export";
+  if (source === "manage" && operationId === "List") return "list_issues";
+  if (source === "audit" && operationId === "Duplicate")
+    return "duplicate_audit";
   if (source === "audit" && operationId === "CreateCustomControl") {
     return "audit_create_custom_control";
   }
@@ -636,7 +643,14 @@ export const generatedOperationByToolName: Partial<Record<string, GeneratedOpera
 `;
 
   const manifest = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: (
+      JSON.parse(
+        fs.readFileSync(path.join(openApiDirectory, "sources.json"), "utf8"),
+      ) as { sources: { retrievedAt: string }[] }
+    ).sources
+      .map(source => source.retrievedAt)
+      .sort()
+      .at(-1),
     totalOperations: operations.length,
     totalMutations: operations.filter(operation => operation.isMutation).length,
     stats,

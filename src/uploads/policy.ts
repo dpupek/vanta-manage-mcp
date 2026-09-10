@@ -31,7 +31,21 @@ const buildDefaultPolicy = (): UploadPolicy => ({
   allowedMimeTypes: [...defaultAllowedMimeTypes],
 });
 
+const buildImagePolicy = (): UploadPolicy => ({
+  allowedExtensions: [".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif", ".ico"],
+  allowedMimeTypes: ["image/*"],
+});
+
 export const uploadPolicyByToolName: Record<string, UploadPolicy> = {
+  upload_contract: {
+    allowedExtensions: [".pdf"],
+    allowedMimeTypes: ["application/pdf"],
+  },
+  create_document_resource: buildDefaultPolicy(),
+  replace_document_resource_file: buildDefaultPolicy(),
+  connector_upload_file_for_document: buildDefaultPolicy(),
+  upload_compliance_framework_badge: buildImagePolicy(),
+  upload_trust_center_favicon: buildImagePolicy(),
   create_file_questionnaire: buildDefaultPolicy(),
   upload_file_for_document: buildDefaultPolicy(),
   create_trust_center_resource: buildDefaultPolicy(),

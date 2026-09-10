@@ -1,0 +1,2761 @@
+{
+  "manage": {
+    "before": 167,
+    "after": 241,
+    "added": [
+      {
+        "method": "post",
+        "path": "/contracts",
+        "operationId": "UploadContract"
+      },
+      {
+        "method": "get",
+        "path": "/contracts",
+        "operationId": "ListContracts"
+      },
+      {
+        "method": "get",
+        "path": "/contracts/{contractId}",
+        "operationId": "GetContract"
+      },
+      {
+        "method": "delete",
+        "path": "/contracts/{contractId}",
+        "operationId": "DeleteContract"
+      },
+      {
+        "method": "get",
+        "path": "/controls/deactivated-controls",
+        "operationId": "ListDeactivatedControls"
+      },
+      {
+        "method": "delete",
+        "path": "/customer-trust/accounts/{accountId}",
+        "operationId": "DeleteCustomerTrustAccount"
+      },
+      {
+        "method": "patch",
+        "path": "/customer-trust/accounts/{accountId}",
+        "operationId": "UpdateCustomerTrustAccount"
+      },
+      {
+        "method": "post",
+        "path": "/customer-trust/deletion-requests",
+        "operationId": "CreateDeletionRequest"
+      },
+      {
+        "method": "get",
+        "path": "/customer-trust/questionnaires/assignable-users",
+        "operationId": "ListAssignableUsers"
+      },
+      {
+        "method": "post",
+        "path": "/customer-trust/questionnaires/{questionnaireId}/approve",
+        "operationId": "ApproveQuestionnaire"
+      },
+      {
+        "method": "get",
+        "path": "/customer-trust/questionnaires/{questionnaireId}/responses",
+        "operationId": "ListQuestionnaireResponses"
+      },
+      {
+        "method": "get",
+        "path": "/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}",
+        "operationId": "GetQuestionnaireResponse"
+      },
+      {
+        "method": "patch",
+        "path": "/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}",
+        "operationId": "UpdateQuestionnaireResponseContent"
+      },
+      {
+        "method": "patch",
+        "path": "/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}/owner",
+        "operationId": "UpdateQuestionnaireResponseOwner"
+      },
+      {
+        "method": "get",
+        "path": "/customer-trust/tag-categories",
+        "operationId": "ListTagCategories"
+      },
+      {
+        "method": "get",
+        "path": "/customer-trust/tag-categories/{tagCategoryId}",
+        "operationId": "GetTagsForCategory"
+      },
+      {
+        "method": "post",
+        "path": "/customer-trust/tag-categories/{tagCategoryId}/product-contexts",
+        "operationId": "AddTagCategoryProductContext"
+      },
+      {
+        "method": "delete",
+        "path": "/customer-trust/tag-categories/{tagCategoryId}/product-contexts/{productContextId}",
+        "operationId": "RemoveTagCategoryProductContext"
+      },
+      {
+        "method": "get",
+        "path": "/event-logs",
+        "operationId": "ListEventLogs"
+      },
+      {
+        "method": "post",
+        "path": "/groups",
+        "operationId": "CreateGroup"
+      },
+      {
+        "method": "post",
+        "path": "/groups/import-from-idp",
+        "operationId": "ImportIdpGroups"
+      },
+      {
+        "method": "get",
+        "path": "/groups/importable-idp-groups",
+        "operationId": "ListImportableIdpGroups"
+      },
+      {
+        "method": "patch",
+        "path": "/groups/{groupId}",
+        "operationId": "UpdateGroup"
+      },
+      {
+        "method": "get",
+        "path": "/issues",
+        "operationId": "List"
+      },
+      {
+        "method": "get",
+        "path": "/issues/{issueId}",
+        "operationId": "GetIssue"
+      },
+      {
+        "method": "get",
+        "path": "/knowledge-base/answer-library",
+        "operationId": "ListAnswerLibraryEntries"
+      },
+      {
+        "method": "post",
+        "path": "/knowledge-base/answer-library",
+        "operationId": "CreateAnswerLibraryEntry"
+      },
+      {
+        "method": "get",
+        "path": "/knowledge-base/answer-library/{id}",
+        "operationId": "GetAnswerLibraryEntry"
+      },
+      {
+        "method": "patch",
+        "path": "/knowledge-base/answer-library/{id}",
+        "operationId": "UpdateAnswerLibraryEntryRoute"
+      },
+      {
+        "method": "delete",
+        "path": "/knowledge-base/answer-library/{id}",
+        "operationId": "DeleteAnswerLibraryEntryRoute"
+      },
+      {
+        "method": "post",
+        "path": "/knowledge-base/answer-library/{id}/verify",
+        "operationId": "VerifyAnswerLibraryEntryRoute"
+      },
+      {
+        "method": "get",
+        "path": "/knowledge-base/resources",
+        "operationId": "ListKnowledgeBaseResources"
+      },
+      {
+        "method": "post",
+        "path": "/knowledge-base/resources/documents",
+        "operationId": "CreateDocumentResource"
+      },
+      {
+        "method": "patch",
+        "path": "/knowledge-base/resources/documents/{id}",
+        "operationId": "UpdateDocumentResource"
+      },
+      {
+        "method": "post",
+        "path": "/knowledge-base/resources/documents/{id}/upload",
+        "operationId": "ReplaceDocumentResourceFile"
+      },
+      {
+        "method": "post",
+        "path": "/knowledge-base/resources/webpages",
+        "operationId": "CreateWebpageResource"
+      },
+      {
+        "method": "patch",
+        "path": "/knowledge-base/resources/webpages/{id}",
+        "operationId": "UpdateWebpageResource"
+      },
+      {
+        "method": "get",
+        "path": "/knowledge-base/resources/{id}",
+        "operationId": "GetKnowledgeBaseResource"
+      },
+      {
+        "method": "delete",
+        "path": "/knowledge-base/resources/{id}",
+        "operationId": "DeleteKnowledgeBaseResource"
+      },
+      {
+        "method": "post",
+        "path": "/knowledge-base/resources/{id}/verify",
+        "operationId": "VerifyKnowledgeBaseResource"
+      },
+      {
+        "method": "get",
+        "path": "/risk-scenarios/{riskScenarioId}/controls",
+        "operationId": "ListRiskScenarioControls"
+      },
+      {
+        "method": "patch",
+        "path": "/risk-scenarios/{riskScenarioId}/controls/{controlId}",
+        "operationId": "UpdateRiskScenarioControl"
+      },
+      {
+        "method": "delete",
+        "path": "/risk-scenarios/{riskScenarioId}/controls/{controlId}",
+        "operationId": "DeleteRiskScenarioControl"
+      },
+      {
+        "method": "get",
+        "path": "/trust-centers/{slugId}/chatbot/conversations",
+        "operationId": "ListChatbotConversations"
+      },
+      {
+        "method": "get",
+        "path": "/trust-centers/{slugId}/chatbot/conversations/{conversationId}",
+        "operationId": "GetChatbotConversationMessages"
+      },
+      {
+        "method": "get",
+        "path": "/trust-centers/{slugId}/compliance-frameworks",
+        "operationId": "ListComplianceFrameworks"
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/compliance-frameworks",
+        "operationId": "CreateComplianceFramework"
+      },
+      {
+        "method": "patch",
+        "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}",
+        "operationId": "UpdateComplianceFramework"
+      },
+      {
+        "method": "delete",
+        "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}",
+        "operationId": "DeleteComplianceFramework"
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}/badge",
+        "operationId": "UploadComplianceFrameworkBadge"
+      },
+      {
+        "method": "put",
+        "path": "/trust-centers/{slugId}/control-categories/order",
+        "operationId": "UpsertTrustCenterControlCategoriesOrder"
+      },
+      {
+        "method": "patch",
+        "path": "/trust-centers/{slugId}/control-categories/{categoryId}/controls",
+        "operationId": "UpdateTrustCenterControlsInCategory"
+      },
+      {
+        "method": "put",
+        "path": "/trust-centers/{slugId}/control-categories/{categoryId}/controls/order",
+        "operationId": "UpsertTrustCenterControlsInCategoryOrder"
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/controls/tags",
+        "operationId": "BulkAddTagsToControls"
+      },
+      {
+        "method": "delete",
+        "path": "/trust-centers/{slugId}/controls/tags",
+        "operationId": "BulkRemoveTagsFromControls"
+      },
+      {
+        "method": "get",
+        "path": "/trust-centers/{slugId}/data-collected",
+        "operationId": "ListTrustCenterDataCollected"
+      },
+      {
+        "method": "put",
+        "path": "/trust-centers/{slugId}/data-collected",
+        "operationId": "UpsertTrustCenterDataCollected"
+      },
+      {
+        "method": "get",
+        "path": "/trust-centers/{slugId}/faq-categories",
+        "operationId": "ListTrustCenterFaqCategories"
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/faq-categories",
+        "operationId": "AddTrustCenterFaqCategory"
+      },
+      {
+        "method": "patch",
+        "path": "/trust-centers/{slugId}/faq-categories/{categoryId}",
+        "operationId": "UpdateTrustCenterFaqCategory"
+      },
+      {
+        "method": "delete",
+        "path": "/trust-centers/{slugId}/faq-categories/{categoryId}",
+        "operationId": "DeleteTrustCenterFaqCategory"
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/favicon",
+        "operationId": "UploadTrustCenterFavicon"
+      },
+      {
+        "method": "get",
+        "path": "/trust-centers/{slugId}/resource-categories",
+        "operationId": "ListTrustCenterResourceCategories"
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/resource-categories",
+        "operationId": "AddTrustCenterResourceCategory"
+      },
+      {
+        "method": "put",
+        "path": "/trust-centers/{slugId}/resource-categories/order",
+        "operationId": "UpsertTrustCenterResourceCategoriesOrder"
+      },
+      {
+        "method": "patch",
+        "path": "/trust-centers/{slugId}/resource-categories/{categoryId}",
+        "operationId": "UpdateTrustCenterResourceCategory"
+      },
+      {
+        "method": "delete",
+        "path": "/trust-centers/{slugId}/resource-categories/{categoryId}",
+        "operationId": "DeleteTrustCenterResourceCategory"
+      },
+      {
+        "method": "put",
+        "path": "/trust-centers/{slugId}/videos",
+        "operationId": "UpsertTrustCenterVideos"
+      },
+      {
+        "method": "patch",
+        "path": "/trust-centers/{slugId}/viewers/{viewerId}",
+        "operationId": "UpdateTrustCenterViewer"
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/viewers/{viewerId}/send-invite-reminder",
+        "operationId": "SendTrustCenterViewerInviteReminder"
+      },
+      {
+        "method": "get",
+        "path": "/vendor-assessment-types",
+        "operationId": "ListVendorAssessmentTypes"
+      },
+      {
+        "method": "get",
+        "path": "/vendor-assessment-types/{assessmentTypeId}",
+        "operationId": "GetVendorAssessmentTypeById"
+      },
+      {
+        "method": "get",
+        "path": "/vendors/{vendorId}/assessments",
+        "operationId": "GetAssessmentsByVendorId"
+      },
+      {
+        "method": "get",
+        "path": "/vendors/{vendorId}/assessments/{assessmentId}",
+        "operationId": "GetAssessmentById"
+      }
+    ],
+    "removed": [],
+    "inputChanges": [
+      {
+        "method": "get",
+        "path": "/customer-trust/accounts",
+        "operationId": "ListCustomerTrustAccounts",
+        "changes": [
+          {
+            "path": "/parameters",
+            "before": [
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "after": [
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "searchString",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "isAutoApprovalEnabled",
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              {
+                "in": "query",
+                "name": "customFieldsFilter",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "get",
+        "path": "/customer-trust/questionnaires",
+        "operationId": "ListQuestionnaires",
+        "changes": [
+          {
+            "path": "/parameters",
+            "before": [
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "q",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "statusMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "APPROVED",
+                      "IN_PROGRESS",
+                      "IN_REVIEW",
+                      "READY_FOR_REVIEW",
+                      "WAITING_ON_ANSWERS",
+                      "ON_HOLD",
+                      "NO_LONGER_NEEDED",
+                      "COMPLETE",
+                      "ERROR",
+                      "EXTRACTING_QUESTIONS",
+                      "QUEUED_FOR_EXTRACTION",
+                      "PROCESSING",
+                      "QUEUED_FOR_PROCESSING",
+                      "WAITING_ON_COLUMN_SELECTION",
+                      "WAITING_ON_COLUMN_APPROVAL",
+                      "QUEUED_FOR_COLUMN_DETECTION",
+                      "DETECTING_COLUMNS"
+                    ]
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "typeMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "FILE",
+                      "PORTAL",
+                      "DOCUMENT"
+                    ]
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "createdAfter",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "createdBefore",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "ownerIdMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "approverIdMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            ],
+            "after": [
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "q",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "statusMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "APPROVED",
+                      "IN_PROGRESS",
+                      "IN_REVIEW",
+                      "READY_FOR_REVIEW",
+                      "WAITING_ON_ANSWERS",
+                      "ON_HOLD",
+                      "NO_LONGER_NEEDED",
+                      "COMPLETE",
+                      "ERROR",
+                      "EXTRACTING_QUESTIONS",
+                      "QUEUED_FOR_SECTION_EXTRACTION",
+                      "EXTRACTING_SECTIONS",
+                      "MAPPING_SECTIONS",
+                      "QUEUED_FOR_ANSWERING",
+                      "GENERATING_ANSWERS",
+                      "QUEUED_FOR_EXTRACTION",
+                      "PROCESSING",
+                      "QUEUED_FOR_PROCESSING",
+                      "WAITING_ON_COLUMN_SELECTION",
+                      "WAITING_ON_COLUMN_APPROVAL",
+                      "QUEUED_FOR_COLUMN_DETECTION",
+                      "DETECTING_COLUMNS"
+                    ]
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "typeMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "SPREADSHEET",
+                      "WEBSITE",
+                      "DOCUMENT"
+                    ]
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "createdAfter",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "createdBefore",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "ownerIdMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "approverIdMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "get",
+        "path": "/people",
+        "operationId": "ListPeople",
+        "changes": [
+          {
+            "path": "/parameters",
+            "before": [
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "tasksSummaryStatusMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "COMPLETE",
+                      "DUE_SOON",
+                      "NONE",
+                      "OFFBOARDING_COMPLETE",
+                      "OFFBOARDING_DUE_SOON",
+                      "OFFBOARDING_OVERDUE",
+                      "OVERDUE",
+                      "PAUSED"
+                    ],
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "taskTypeMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "COMPLETE_TRAININGS",
+                      "ACCEPT_POLICIES",
+                      "COMPLETE_CUSTOM_TASKS",
+                      "COMPLETE_CUSTOM_OFFBOARDING_TASKS",
+                      "INSTALL_DEVICE_MONITORING",
+                      "COMPLETE_BACKGROUND_CHECKS"
+                    ],
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "taskStatusMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "COMPLETE",
+                      "DUE_SOON",
+                      "OVERDUE",
+                      "NONE"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            ],
+            "after": [
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "tasksSummaryStatusMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "COMPLETE",
+                      "DUE_SOON",
+                      "NONE",
+                      "OFFBOARDING_COMPLETE",
+                      "OFFBOARDING_DUE_SOON",
+                      "OFFBOARDING_OVERDUE",
+                      "OVERDUE",
+                      "PAUSED"
+                    ],
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "taskTypeMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "COMPLETE_TRAININGS",
+                      "ACCEPT_POLICIES",
+                      "COMPLETE_CUSTOM_TASKS",
+                      "COMPLETE_CUSTOM_OFFBOARDING_TASKS",
+                      "INSTALL_DEVICE_MONITORING",
+                      "COMPLETE_BACKGROUND_CHECKS"
+                    ],
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "taskStatusMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "COMPLETE",
+                      "DUE_SOON",
+                      "OVERDUE",
+                      "NONE"
+                    ],
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "emailAndNameFilter",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "groupIdsMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "in": "query",
+                "name": "employmentStatus",
+                "required": false,
+                "schema": {
+                  "enum": [
+                    "UPCOMING",
+                    "CURRENT",
+                    "ON_LEAVE",
+                    "INACTIVE",
+                    "FORMER"
+                  ],
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "get",
+        "path": "/trust-centers/{slugId}/subscribers",
+        "operationId": "ListTrustCenterSubscribers",
+        "changes": [
+          {
+            "path": "/parameters",
+            "before": [
+              {
+                "in": "path",
+                "name": "slugId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "after": [
+              {
+                "in": "path",
+                "name": "slugId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "customerTrustAccountId",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "get",
+        "path": "/vulnerabilities",
+        "operationId": "ListVulnerabilities",
+        "changes": [
+          {
+            "path": "/parameters",
+            "before": [
+              {
+                "in": "query",
+                "name": "q",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "isDeactivated",
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              {
+                "in": "query",
+                "name": "externalVulnerabilityId",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "isFixAvailable",
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              {
+                "in": "query",
+                "name": "packageIdentifier",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "slaDeadlineAfterDate",
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "slaDeadlineBeforeDate",
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "severity",
+                "required": false,
+                "schema": {
+                  "enum": [
+                    "CRITICAL",
+                    "HIGH",
+                    "LOW",
+                    "MEDIUM"
+                  ],
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "integrationId",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "includeVulnerabilitiesWithoutSlas",
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              {
+                "in": "query",
+                "name": "vulnerableAssetId",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "after": [
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "isDeactivated",
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              {
+                "in": "query",
+                "name": "externalVulnerabilityId",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "isFixAvailable",
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              {
+                "in": "query",
+                "name": "packageIdentifier",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "slaDeadlineAfterDate",
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "slaDeadlineBeforeDate",
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "severity",
+                "required": false,
+                "schema": {
+                  "enum": [
+                    "CRITICAL",
+                    "HIGH",
+                    "LOW",
+                    "MEDIUM"
+                  ],
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "integrationId",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "includeVulnerabilitiesWithoutSlas",
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              {
+                "in": "query",
+                "name": "vulnerableAssetId",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "q",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "patch",
+        "path": "/risk-scenarios/{riskScenarioId}",
+        "operationId": "UpdateRiskScenario",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/type",
+            "before": null,
+            "after": {
+              "type": "string",
+              "enum": [
+                "Risk Scenario",
+                "Enterprise Risk"
+              ]
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/identificationDate",
+            "before": null,
+            "after": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/likelihood/type",
+            "before": "number",
+            "after": "integer"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/likelihood/format",
+            "before": "double",
+            "after": "int32"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/impact/type",
+            "before": "number",
+            "after": "integer"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/impact/format",
+            "before": "double",
+            "after": "int32"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/residualImpact/type",
+            "before": "number",
+            "after": "integer"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/residualImpact/format",
+            "before": "double",
+            "after": "int32"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/detailedDescription",
+            "before": null,
+            "after": {
+              "type": "string"
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/residualLikelihood/type",
+            "before": "number",
+            "after": "integer"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/residualLikelihood/format",
+            "before": "double",
+            "after": "int32"
+          }
+        ]
+      },
+      {
+        "method": "patch",
+        "path": "/trust-centers/{slugId}",
+        "operationId": "UpdateTrustCenter",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/contactEmail",
+            "before": null,
+            "after": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/customHeading",
+            "before": null,
+            "after": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/awsMarketplaceListing",
+            "before": null,
+            "after": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/controlVisibilityMode",
+            "before": null,
+            "after": {
+              "type": "string",
+              "enum": [
+                "SHOW_OK_ONLY",
+                "SHOW_OK_AND_UNMAPPED",
+                "SHOW_ALL_WITHOUT_STATUS",
+                "SHOW_ALL_WITH_STATUS"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "method": "patch",
+        "path": "/trust-centers/{slugId}/control-categories/{categoryId}",
+        "operationId": "UpdateTrustCenterControlCategory",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/required",
+            "before": [
+              "name"
+            ],
+            "after": null
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/visibility",
+            "before": null,
+            "after": {
+              "type": "string",
+              "enum": [
+                "PUBLIC",
+                "SHAREABLE"
+              ]
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/statusVisibilityOverride",
+            "before": null,
+            "after": {
+              "allOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "SHOW_OK_ONLY",
+                    "SHOW_OK_AND_UNMAPPED",
+                    "SHOW_ALL_WITHOUT_STATUS",
+                    "SHOW_ALL_WITH_STATUS"
+                  ]
+                }
+              ],
+              "nullable": true
+            }
+          }
+        ]
+      },
+      {
+        "method": "patch",
+        "path": "/trust-centers/{slugId}/faqs/{faqId}",
+        "operationId": "UpdateTrustCenterFaq",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/categoryId",
+            "before": null,
+            "after": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ]
+      },
+      {
+        "method": "patch",
+        "path": "/vendors/{vendorId}",
+        "operationId": "UpdateVendor",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/authDetails/properties/method/allOf",
+            "before": [
+              {
+                "enum": [
+                  "AUTH_0",
+                  "AZURE_AD",
+                  "GOOGLE_WORKSPACE",
+                  "O_AUTH",
+                  "O365",
+                  "OKTA",
+                  "ONE_LOGIN",
+                  "OWA",
+                  "SSO",
+                  "USERNAME_PASSWORD"
+                ],
+                "type": "string"
+              }
+            ],
+            "after": [
+              {
+                "enum": [
+                  "AUTH_0",
+                  "AZURE_AD",
+                  "GOOGLE_WORKSPACE",
+                  "O_AUTH",
+                  "O365",
+                  "OKTA",
+                  "ONE_LOGIN",
+                  "OWA",
+                  "SSO",
+                  "USERNAME_PASSWORD",
+                  "OTHER"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/accountManagerEmail/maxLength",
+            "before": 2000,
+            "after": 100
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/controls",
+        "operationId": "CreateCustomControl",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/sections/items/properties/frameworkId/anyOf",
+            "before": [
+              {
+                "enum": [
+                  "AU_E_8",
+                  "AWS_FTR",
+                  "CCPA",
+                  "CIS_V8",
+                  "CPS_234",
+                  "DORA",
+                  "FEDRAMP",
+                  "GDPR",
+                  "HIPAA",
+                  "HITRUST_E1",
+                  "ISO_27001",
+                  "ISO_27001_2022",
+                  "ISO_27017",
+                  "ISO_27018",
+                  "ISO_27701",
+                  "ISO_42001",
+                  "ISO_9001",
+                  "MSFT_SSPA",
+                  "MVSP",
+                  "NIS_2D",
+                  "NIST_171",
+                  "NIST_53",
+                  "NIST_AI_RMF",
+                  "NIST_CSF",
+                  "NIST_CSF_2",
+                  "OFDSS",
+                  "PCI_SAQ_A",
+                  "PCI_SAQ_A_EP",
+                  "PCI_SAQ_D_MERCHANT",
+                  "PCI_SAQ_D_SP",
+                  "PCI_DDS_4",
+                  "SOC_2",
+                  "SOX_ITGC",
+                  "UK_CYBER_ESSENTIALS",
+                  "US_DATA_PRIVACY"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "after": [
+              {
+                "enum": [
+                  "AU_E_8",
+                  "AWS_FTR",
+                  "CCPA",
+                  "CIS_V8",
+                  "CPS_234",
+                  "DORA",
+                  "FEDRAMP",
+                  "GDPR",
+                  "HIPAA",
+                  "HITRUST_E1",
+                  "ISO_27001",
+                  "ISO_27001_2022",
+                  "ISO_27017",
+                  "ISO_27018",
+                  "ISO_27701",
+                  "ISO_42001",
+                  "ISO_9001",
+                  "MSFT_SSPA",
+                  "MVSP",
+                  "NIS_2D",
+                  "NIST_171",
+                  "NIST_171_R3",
+                  "NIST_53",
+                  "NIST_AI_RMF",
+                  "NIST_CSF",
+                  "NIST_CSF_2",
+                  "OFDSS",
+                  "PCI_SAQ_A",
+                  "PCI_SAQ_A_EP",
+                  "PCI_SAQ_D_MERCHANT",
+                  "PCI_SAQ_D_SP",
+                  "PCI_DDS_4",
+                  "SOC_2",
+                  "SOX_ITGC",
+                  "UK_CYBER_ESSENTIALS",
+                  "US_DATA_PRIVACY"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/customer-trust/accounts",
+        "operationId": "CreateCustomerTrustAccount",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/tagsByCategory",
+            "before": null,
+            "after": {
+              "items": {
+                "properties": {
+                  "categoryId": {
+                    "type": "string"
+                  },
+                  "tagIds": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "categoryId",
+                  "tagIds"
+                ],
+                "type": "object",
+                "additionalProperties": false
+              },
+              "type": "array"
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/accessConfig/properties/grantAccessOption",
+            "before": null,
+            "after": {
+              "allOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "INCLUDE_EVERYTHING_REQUESTED",
+                    "INCLUDE_ONLY_CONFIGURED"
+                  ]
+                }
+              ],
+              "nullable": true
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/accessConfig/properties/tagsByCategory",
+            "before": null,
+            "after": {
+              "items": {
+                "properties": {
+                  "categoryId": {
+                    "type": "string"
+                  },
+                  "tagIds": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "categoryId",
+                  "tagIds"
+                ],
+                "type": "object",
+                "additionalProperties": false
+              },
+              "type": "array",
+              "deprecated": true
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/customFields",
+            "before": null,
+            "after": {
+              "items": {
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "label",
+                  "value"
+                ],
+                "type": "object",
+                "additionalProperties": false
+              },
+              "type": "array"
+            }
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/customer-trust/questionnaires/file",
+        "operationId": "CreateFileQuestionnaire",
+        "changes": [
+          {
+            "path": "/requestBody/content/multipart/form-data/schema/properties/includeUntaggedEntitiesForCategoryIds",
+            "before": null,
+            "after": {
+              "type": "string"
+            }
+          },
+          {
+            "path": "/requestBody/content/multipart/form-data/schema/properties/includeUntagged",
+            "before": {
+              "type": "string"
+            },
+            "after": null
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/customer-trust/questionnaires/website",
+        "operationId": "CreateWebsiteQuestionnaire",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/includeUntaggedEntitiesForCategoryIds",
+            "before": null,
+            "after": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/includeUntagged",
+            "before": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "after": null
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/documents",
+        "operationId": "CreateDocument",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/cadence/enum",
+            "before": [
+              "P0D",
+              "P1D",
+              "P1W",
+              "P1M",
+              "P3M",
+              "P6M",
+              "P1Y"
+            ],
+            "after": [
+              "P0D",
+              "P1D",
+              "P1W",
+              "P1M",
+              "P3M",
+              "P6M",
+              "P1Y",
+              "P2Y"
+            ]
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/risk-scenarios",
+        "operationId": "CreateRiskScenario",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/identificationDate",
+            "before": null,
+            "after": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/likelihood/type",
+            "before": "number",
+            "after": "integer"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/likelihood/format",
+            "before": "double",
+            "after": "int32"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/impact/type",
+            "before": "number",
+            "after": "integer"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/impact/format",
+            "before": "double",
+            "after": "int32"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/residualImpact/type",
+            "before": "number",
+            "after": "integer"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/residualImpact/format",
+            "before": "double",
+            "after": "int32"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/detailedDescription",
+            "before": null,
+            "after": {
+              "type": "string"
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/residualLikelihood/type",
+            "before": "number",
+            "after": "integer"
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/residualLikelihood/format",
+            "before": "double",
+            "after": "int32"
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/risk-scenarios/{riskScenarioId}/controls",
+        "operationId": "CreateRiskScenarioControl",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/required",
+            "before": [
+              "controlLinks"
+            ],
+            "after": [
+              "controlId"
+            ]
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/controlType",
+            "before": null,
+            "after": {
+              "type": "string",
+              "enum": [
+                "EXISTING",
+                "TREATMENT_PLAN"
+              ]
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/controlId",
+            "before": null,
+            "after": {
+              "type": "string"
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/controlLinks",
+            "before": {
+              "items": {
+                "properties": {
+                  "controlId": {
+                    "type": "string"
+                  },
+                  "linkType": {
+                    "type": "string",
+                    "enum": [
+                      "TREATMENT"
+                    ],
+                    "nullable": false
+                  }
+                },
+                "required": [
+                  "controlId",
+                  "linkType"
+                ],
+                "type": "object",
+                "additionalProperties": false
+              },
+              "type": "array"
+            },
+            "after": null
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/access-requests/{accessRequestId}/deny",
+        "operationId": "DenyTrustCenterAccessRequest",
+        "changes": [
+          {
+            "path": "/requestBody",
+            "before": null,
+            "after": {
+              "required": false,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "reason": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/faqs",
+        "operationId": "CreateTrustCenterFaq",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/categoryId",
+            "before": null,
+            "after": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/subscribers",
+        "operationId": "CreateTrustCenterSubscriber",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/customerTrustAccountId",
+            "before": null,
+            "after": {
+              "type": "string"
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/shouldSkipEmailVerification",
+            "before": null,
+            "after": {
+              "type": "boolean"
+            }
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/updates/{updateId}/notify-specific-subscribers",
+        "operationId": "SendTrustCenterUpdateNotifications",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/customerTrustAccounts",
+            "before": null,
+            "after": {
+              "properties": {
+                "customFieldsFilter": {
+                  "items": {
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        ],
+                        "maxItems": 5000
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "value"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  },
+                  "type": "array",
+                  "maxItems": 10
+                },
+                "tagsByCategory": {
+                  "items": {
+                    "properties": {
+                      "categoryId": {
+                        "type": "string"
+                      },
+                      "tagIds": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "categoryId",
+                      "tagIds"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  },
+                  "type": "array",
+                  "maxItems": 10
+                }
+              },
+              "type": "object",
+              "additionalProperties": false
+            }
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/trust-centers/{slugId}/viewers",
+        "operationId": "AddTrustCenterViewer",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/customerTrustAccountId",
+            "before": null,
+            "after": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/vendors",
+        "operationId": "CreateVendor",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/authDetails/properties/method/enum",
+            "before": [
+              "AUTH_0",
+              "AZURE_AD",
+              "GOOGLE_WORKSPACE",
+              "O_AUTH",
+              "O365",
+              "OKTA",
+              "ONE_LOGIN",
+              "OWA",
+              "SSO",
+              "USERNAME_PASSWORD"
+            ],
+            "after": [
+              "AUTH_0",
+              "AZURE_AD",
+              "GOOGLE_WORKSPACE",
+              "O_AUTH",
+              "O365",
+              "OKTA",
+              "ONE_LOGIN",
+              "OWA",
+              "SSO",
+              "USERNAME_PASSWORD",
+              "OTHER"
+            ]
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/accountManagerEmail/maxLength",
+            "before": 2000,
+            "after": 100
+          }
+        ]
+      }
+    ]
+  },
+  "audit": {
+    "before": 31,
+    "after": 57,
+    "added": [
+      {
+        "method": "post",
+        "path": "/audits/duplicate",
+        "operationId": "Duplicate"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/assets/code-changes",
+        "operationId": "ListCodeChanges"
+      },
+      {
+        "method": "put",
+        "path": "/audits/{auditId}/controls/{controlId}/assessment",
+        "operationId": "UpsertAssessmentForControl"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/controls/{controlId}/comments",
+        "operationId": "ListCommentsForControl"
+      },
+      {
+        "method": "post",
+        "path": "/audits/{auditId}/controls/{controlId}/comments",
+        "operationId": "CreateCommentForControl"
+      },
+      {
+        "method": "patch",
+        "path": "/audits/{auditId}/controls/{controlId}/comments/{commentId}",
+        "operationId": "UpdateCommentForControl"
+      },
+      {
+        "method": "delete",
+        "path": "/audits/{auditId}/controls/{controlId}/comments/{commentId}",
+        "operationId": "DeleteCommentForControl"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/controls/{controlId}/information-requests",
+        "operationId": "ListInformationRequestsForControl"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/evidence/{auditEvidenceId}",
+        "operationId": "GetAuditEvidence"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/evidence/{auditEvidenceId}/comments/{commentId}",
+        "operationId": "GetAuditEvidenceComment"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/information-requests/{requestId}",
+        "operationId": "GetInformationRequest"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/information-requests/{requestId}/comments/{commentId}",
+        "operationId": "GetCommentForInformationRequest"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}",
+        "operationId": "GetInformationRequestEvidence"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}/test-snapshot",
+        "operationId": "GetInformationRequestTestSnapshotEvidenceDetail"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/integrations",
+        "operationId": "ListIntegrations"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/issues/items",
+        "operationId": "ListAuditIssues"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/issues/snapshots",
+        "operationId": "ListAuditSnapshots"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/managed-vendors",
+        "operationId": "ListVendors"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/organization/information",
+        "operationId": "GetOrganizationInformation"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/organization/notifications",
+        "operationId": "GetOrganizationNotifications"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/personnel/account-access/services",
+        "operationId": "ListAccountAccessServices"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/personnel/account-access/{serviceId}",
+        "operationId": "ListPersonnelAccountAccess"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/personnel/groups",
+        "operationId": "ListPersonnelGroups"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/personnel/people",
+        "operationId": "ListPersonnelPeople"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/risks/snapshots",
+        "operationId": "ListRiskSnapshots"
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/risks/{snapshotId}",
+        "operationId": "ListAuditRisks"
+      }
+    ],
+    "removed": [],
+    "inputChanges": [
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/controls",
+        "operationId": "ListAuditControls",
+        "changes": [
+          {
+            "path": "/parameters",
+            "before": [
+              {
+                "in": "path",
+                "name": "auditId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "after": [
+              {
+                "in": "path",
+                "name": "auditId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "externalIdMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/information-requests",
+        "operationId": "ListInformationRequests",
+        "changes": [
+          {
+            "path": "/parameters",
+            "before": [
+              {
+                "in": "path",
+                "name": "auditId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "changedSinceDate",
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              }
+            ],
+            "after": [
+              {
+                "in": "path",
+                "name": "auditId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "changedSinceDate",
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "segmentIdsMatchesAny",
+                "required": false,
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "get",
+        "path": "/audits/{auditId}/information-requests/{requestId}/evidence",
+        "operationId": "ListInformationRequestEvidence",
+        "changes": [
+          {
+            "path": "/parameters",
+            "before": [
+              {
+                "in": "path",
+                "name": "auditId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "path",
+                "name": "requestId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "changedSinceDate",
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "evidenceTypeMatchesAny",
+                "required": false,
+                "schema": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "UPLOADED_DOCUMENT",
+                      "OBSERVATION",
+                      "LINK",
+                      "VANTA_DOCUMENT",
+                      "VANTA_POLICY",
+                      "VANTA_TEST"
+                    ]
+                  }
+                }
+              }
+            ],
+            "after": [
+              {
+                "in": "path",
+                "name": "auditId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "path",
+                "name": "requestId",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageSize",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              {
+                "in": "query",
+                "name": "pageCursor",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "changedSinceDate",
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              {
+                "in": "query",
+                "name": "evidenceTypeMatchesAny",
+                "required": false,
+                "schema": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "UPLOADED_DOCUMENT",
+                      "OBSERVATION",
+                      "LINK",
+                      "VANTA_DOCUMENT",
+                      "VANTA_POLICY",
+                      "VANTA_TEST",
+                      "VANTA_TEST_SNAPSHOT"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "patch",
+        "path": "/audits/{auditId}/information-requests/{requestId}",
+        "operationId": "UpdateInformationRequest",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/cadence",
+            "before": null,
+            "after": {
+              "type": "string",
+              "enum": [
+                "ANNUALLY",
+                "BIANNUALLY",
+                "MONTHLY",
+                "QUARTERLY"
+              ]
+            }
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/additionalControlIds",
+            "before": null,
+            "after": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/audits/{auditId}/controls/custom-controls",
+        "operationId": "CreateCustomControl",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/sections/items/properties/frameworkId/anyOf",
+            "before": [
+              {
+                "enum": [
+                  "AU_E_8",
+                  "AWS_FTR",
+                  "CCPA",
+                  "CIS_V8",
+                  "CPS_234",
+                  "DORA",
+                  "FEDRAMP",
+                  "GDPR",
+                  "HIPAA",
+                  "HITRUST_E1",
+                  "ISO_27001",
+                  "ISO_27001_2022",
+                  "ISO_27017",
+                  "ISO_27018",
+                  "ISO_27701",
+                  "ISO_42001",
+                  "ISO_9001",
+                  "MSFT_SSPA",
+                  "MVSP",
+                  "NIS_2D",
+                  "NIST_171",
+                  "NIST_53",
+                  "NIST_AI_RMF",
+                  "NIST_CSF",
+                  "NIST_CSF_2",
+                  "OFDSS",
+                  "PCI_SAQ_A",
+                  "PCI_SAQ_A_EP",
+                  "PCI_SAQ_D_MERCHANT",
+                  "PCI_SAQ_D_SP",
+                  "PCI_DDS_4",
+                  "SOC_2",
+                  "SOX_ITGC",
+                  "UK_CYBER_ESSENTIALS",
+                  "US_DATA_PRIVACY"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "after": [
+              {
+                "enum": [
+                  "AU_E_8",
+                  "AWS_FTR",
+                  "CCPA",
+                  "CIS_V8",
+                  "CPS_234",
+                  "DORA",
+                  "FEDRAMP",
+                  "GDPR",
+                  "HIPAA",
+                  "HITRUST_E1",
+                  "ISO_27001",
+                  "ISO_27001_2022",
+                  "ISO_27017",
+                  "ISO_27018",
+                  "ISO_27701",
+                  "ISO_42001",
+                  "ISO_9001",
+                  "MSFT_SSPA",
+                  "MVSP",
+                  "NIS_2D",
+                  "NIST_171",
+                  "NIST_171_R3",
+                  "NIST_53",
+                  "NIST_AI_RMF",
+                  "NIST_CSF",
+                  "NIST_CSF_2",
+                  "OFDSS",
+                  "PCI_SAQ_A",
+                  "PCI_SAQ_A_EP",
+                  "PCI_SAQ_D_MERCHANT",
+                  "PCI_SAQ_D_SP",
+                  "PCI_DDS_4",
+                  "SOC_2",
+                  "SOX_ITGC",
+                  "UK_CYBER_ESSENTIALS",
+                  "US_DATA_PRIVACY"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/audits/{auditId}/evidence/custom-evidence-requests",
+        "operationId": "CreateCustomEvidenceRequest",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/reminderWindow/enum",
+            "before": [
+              "P0D",
+              "P1D",
+              "P1W",
+              "P1M",
+              "P3M",
+              "P6M",
+              "P1Y"
+            ],
+            "after": [
+              "P0D",
+              "P1D",
+              "P1W",
+              "P1M",
+              "P3M",
+              "P6M",
+              "P1Y",
+              "P2Y"
+            ]
+          },
+          {
+            "path": "/requestBody/content/application/json/schema/properties/cadence/enum",
+            "before": [
+              "P0D",
+              "P1D",
+              "P1W",
+              "P1M",
+              "P3M",
+              "P6M",
+              "P1Y"
+            ],
+            "after": [
+              "P0D",
+              "P1D",
+              "P1W",
+              "P1M",
+              "P3M",
+              "P6M",
+              "P1Y",
+              "P2Y"
+            ]
+          }
+        ]
+      },
+      {
+        "method": "post",
+        "path": "/audits/{auditId}/information-requests",
+        "operationId": "CreateInformationRequest",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/additionalControlIds",
+            "before": null,
+            "after": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "connectors": {
+    "before": 24,
+    "after": 25,
+    "added": [
+      {
+        "method": "post",
+        "path": "/v1/documents/{documentId}/uploads",
+        "operationId": "UploadFileForDocument"
+      }
+    ],
+    "removed": [],
+    "inputChanges": [
+      {
+        "method": "put",
+        "path": "/v1/resources/vulnerable_component",
+        "operationId": "put-VulnerableComponent",
+        "changes": [
+          {
+            "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/targetType/enum",
+            "before": [
+              "HOST",
+              "SERVER",
+              "CONTAINER",
+              "CONTAINER_REPOSITORY",
+              "CONTAINER_REPOSITORY_IMAGE",
+              "CODE_REPOSITORY",
+              "SERVERLESS_FUNCTION",
+              "MANIFEST_FILE",
+              "WORKSTATION"
+            ],
+            "after": [
+              "HOST",
+              "SERVER",
+              "CONTAINER",
+              "CONTAINER_REPOSITORY",
+              "CONTAINER_REPOSITORY_IMAGE",
+              "CODE_REPOSITORY",
+              "SERVERLESS_FUNCTION",
+              "MANIFEST_FILE",
+              "WORKSTATION",
+              "OTHER"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

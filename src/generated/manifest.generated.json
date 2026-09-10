@@ -1,22 +1,54 @@
 {
-  "generatedAt": "2026-09-09T20:09:23.694Z",
-  "totalOperations": 222,
-  "totalMutations": 113,
+  "generatedAt": "2026-09-10T02:44:51.790536+00:00",
+  "totalOperations": 323,
+  "totalMutations": 166,
   "stats": {
     "manage": {
-      "operations": 167,
-      "mutations": 87
+      "operations": 241,
+      "mutations": 134
     },
     "audit": {
-      "operations": 31,
-      "mutations": 14
+      "operations": 57,
+      "mutations": 19
     },
     "connectors": {
-      "operations": 24,
-      "mutations": 12
+      "operations": 25,
+      "mutations": 13
     }
   },
   "tools": [
+    {
+      "toolName": "upload_contract",
+      "source": "manage",
+      "method": "post",
+      "path": "/contracts",
+      "operationId": "UploadContract",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_contracts",
+      "source": "manage",
+      "method": "get",
+      "path": "/contracts",
+      "operationId": "ListContracts",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_contract",
+      "source": "manage",
+      "method": "get",
+      "path": "/contracts/{contractId}",
+      "operationId": "GetContract",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_contract",
+      "source": "manage",
+      "method": "delete",
+      "path": "/contracts/{contractId}",
+      "operationId": "DeleteContract",
+      "isMutation": true
+    },
     {
       "toolName": "create_custom_control",
       "source": "manage",
@@ -47,6 +79,14 @@
       "method": "get",
       "path": "/controls/controls-library",
       "operationId": "ListLibraryControls",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_deactivated_controls",
+      "source": "manage",
+      "method": "get",
+      "path": "/controls/deactivated-controls",
+      "operationId": "ListDeactivatedControls",
       "isMutation": false
     },
     {
@@ -154,6 +194,30 @@
       "isMutation": false
     },
     {
+      "toolName": "delete_customer_trust_account",
+      "source": "manage",
+      "method": "delete",
+      "path": "/customer-trust/accounts/{accountId}",
+      "operationId": "DeleteCustomerTrustAccount",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_customer_trust_account",
+      "source": "manage",
+      "method": "patch",
+      "path": "/customer-trust/accounts/{accountId}",
+      "operationId": "UpdateCustomerTrustAccount",
+      "isMutation": true
+    },
+    {
+      "toolName": "create_deletion_request",
+      "source": "manage",
+      "method": "post",
+      "path": "/customer-trust/deletion-requests",
+      "operationId": "CreateDeletionRequest",
+      "isMutation": true
+    },
+    {
       "toolName": "list_questionnaires",
       "source": "manage",
       "method": "get",
@@ -162,11 +226,19 @@
       "isMutation": false
     },
     {
+      "toolName": "list_assignable_users",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/questionnaires/assignable-users",
+      "operationId": "ListAssignableUsers",
+      "isMutation": false
+    },
+    {
       "toolName": "initiate_export",
       "source": "manage",
       "method": "post",
       "path": "/customer-trust/questionnaires/exports",
-      "operationId": "InitiateExport",
+      "operationId": "CreateQuestionnaireExport",
       "isMutation": true
     },
     {
@@ -218,11 +290,83 @@
       "isMutation": true
     },
     {
+      "toolName": "approve_questionnaire",
+      "source": "manage",
+      "method": "post",
+      "path": "/customer-trust/questionnaires/{questionnaireId}/approve",
+      "operationId": "ApproveQuestionnaire",
+      "isMutation": true
+    },
+    {
       "toolName": "complete_questionnaire",
       "source": "manage",
       "method": "post",
       "path": "/customer-trust/questionnaires/{questionnaireId}/complete",
       "operationId": "CompleteQuestionnaire",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_questionnaire_responses",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/questionnaires/{questionnaireId}/responses",
+      "operationId": "ListQuestionnaireResponses",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_questionnaire_response",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}",
+      "operationId": "GetQuestionnaireResponse",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_questionnaire_response_content",
+      "source": "manage",
+      "method": "patch",
+      "path": "/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}",
+      "operationId": "UpdateQuestionnaireResponseContent",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_questionnaire_response_owner",
+      "source": "manage",
+      "method": "patch",
+      "path": "/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}/owner",
+      "operationId": "UpdateQuestionnaireResponseOwner",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_tag_categories",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/tag-categories",
+      "operationId": "ListTagCategories",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_tags_for_category",
+      "source": "manage",
+      "method": "get",
+      "path": "/customer-trust/tag-categories/{tagCategoryId}",
+      "operationId": "GetTagsForCategory",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_tag_category_product_context",
+      "source": "manage",
+      "method": "post",
+      "path": "/customer-trust/tag-categories/{tagCategoryId}/product-contexts",
+      "operationId": "AddTagCategoryProductContext",
+      "isMutation": true
+    },
+    {
+      "toolName": "remove_tag_category_product_context",
+      "source": "manage",
+      "method": "delete",
+      "path": "/customer-trust/tag-categories/{tagCategoryId}/product-contexts/{productContextId}",
+      "operationId": "RemoveTagCategoryProductContext",
       "isMutation": true
     },
     {
@@ -362,6 +506,14 @@
       "isMutation": false
     },
     {
+      "toolName": "list_event_logs",
+      "source": "manage",
+      "method": "get",
+      "path": "/event-logs",
+      "operationId": "ListEventLogs",
+      "isMutation": false
+    },
+    {
       "toolName": "list_frameworks",
       "source": "manage",
       "method": "get",
@@ -386,12 +538,44 @@
       "isMutation": false
     },
     {
+      "toolName": "create_group",
+      "source": "manage",
+      "method": "post",
+      "path": "/groups",
+      "operationId": "CreateGroup",
+      "isMutation": true
+    },
+    {
       "toolName": "list_person_groups",
       "source": "manage",
       "method": "get",
       "path": "/groups",
       "operationId": "ListPersonGroups",
       "isMutation": false
+    },
+    {
+      "toolName": "import_idp_groups",
+      "source": "manage",
+      "method": "post",
+      "path": "/groups/import-from-idp",
+      "operationId": "ImportIdpGroups",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_importable_idp_groups",
+      "source": "manage",
+      "method": "get",
+      "path": "/groups/importable-idp-groups",
+      "operationId": "ListImportableIdpGroups",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_group",
+      "source": "manage",
+      "method": "patch",
+      "path": "/groups/{groupId}",
+      "operationId": "UpdateGroup",
+      "isMutation": true
     },
     {
       "toolName": "get_group",
@@ -506,6 +690,142 @@
       "isMutation": false
     },
     {
+      "toolName": "list_issues",
+      "source": "manage",
+      "method": "get",
+      "path": "/issues",
+      "operationId": "List",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_issue",
+      "source": "manage",
+      "method": "get",
+      "path": "/issues/{issueId}",
+      "operationId": "GetIssue",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_answer_library_entries",
+      "source": "manage",
+      "method": "get",
+      "path": "/knowledge-base/answer-library",
+      "operationId": "ListAnswerLibraryEntries",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_answer_library_entry",
+      "source": "manage",
+      "method": "post",
+      "path": "/knowledge-base/answer-library",
+      "operationId": "CreateAnswerLibraryEntry",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_answer_library_entry",
+      "source": "manage",
+      "method": "get",
+      "path": "/knowledge-base/answer-library/{id}",
+      "operationId": "GetAnswerLibraryEntry",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_answer_library_entry_route",
+      "source": "manage",
+      "method": "patch",
+      "path": "/knowledge-base/answer-library/{id}",
+      "operationId": "UpdateAnswerLibraryEntryRoute",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_answer_library_entry_route",
+      "source": "manage",
+      "method": "delete",
+      "path": "/knowledge-base/answer-library/{id}",
+      "operationId": "DeleteAnswerLibraryEntryRoute",
+      "isMutation": true
+    },
+    {
+      "toolName": "verify_answer_library_entry_route",
+      "source": "manage",
+      "method": "post",
+      "path": "/knowledge-base/answer-library/{id}/verify",
+      "operationId": "VerifyAnswerLibraryEntryRoute",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_knowledge_base_resources",
+      "source": "manage",
+      "method": "get",
+      "path": "/knowledge-base/resources",
+      "operationId": "ListKnowledgeBaseResources",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_document_resource",
+      "source": "manage",
+      "method": "post",
+      "path": "/knowledge-base/resources/documents",
+      "operationId": "CreateDocumentResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_document_resource",
+      "source": "manage",
+      "method": "patch",
+      "path": "/knowledge-base/resources/documents/{id}",
+      "operationId": "UpdateDocumentResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "replace_document_resource_file",
+      "source": "manage",
+      "method": "post",
+      "path": "/knowledge-base/resources/documents/{id}/upload",
+      "operationId": "ReplaceDocumentResourceFile",
+      "isMutation": true
+    },
+    {
+      "toolName": "create_webpage_resource",
+      "source": "manage",
+      "method": "post",
+      "path": "/knowledge-base/resources/webpages",
+      "operationId": "CreateWebpageResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_webpage_resource",
+      "source": "manage",
+      "method": "patch",
+      "path": "/knowledge-base/resources/webpages/{id}",
+      "operationId": "UpdateWebpageResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_knowledge_base_resource",
+      "source": "manage",
+      "method": "get",
+      "path": "/knowledge-base/resources/{id}",
+      "operationId": "GetKnowledgeBaseResource",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_knowledge_base_resource",
+      "source": "manage",
+      "method": "delete",
+      "path": "/knowledge-base/resources/{id}",
+      "operationId": "DeleteKnowledgeBaseResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "verify_knowledge_base_resource",
+      "source": "manage",
+      "method": "post",
+      "path": "/knowledge-base/resources/{id}/verify",
+      "operationId": "VerifyKnowledgeBaseResource",
+      "isMutation": true
+    },
+    {
       "toolName": "list_monitored_computers",
       "source": "manage",
       "method": "get",
@@ -586,22 +906,6 @@
       "isMutation": true
     },
     {
-      "toolName": "list_users",
-      "source": "manage",
-      "method": "get",
-      "path": "/users",
-      "operationId": "ListUsers",
-      "isMutation": false
-    },
-    {
-      "toolName": "get_user",
-      "source": "manage",
-      "method": "get",
-      "path": "/users/{userId}",
-      "operationId": "GetUser",
-      "isMutation": false
-    },
-    {
       "toolName": "list_policies",
       "source": "manage",
       "method": "get",
@@ -650,19 +954,43 @@
       "isMutation": true
     },
     {
-      "toolName": "link_controls_to_risk_scenario",
-      "source": "manage",
-      "method": "post",
-      "path": "/risk-scenarios/{riskScenarioId}/controls",
-      "operationId": "LinkControlsToRiskScenario",
-      "isMutation": true
-    },
-    {
       "toolName": "cancel_risk_scenario_approval_request",
       "source": "manage",
       "method": "post",
       "path": "/risk-scenarios/{riskScenarioId}/cancel-approval-request",
       "operationId": "CancelRiskScenarioApprovalRequest",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_risk_scenario_controls",
+      "source": "manage",
+      "method": "get",
+      "path": "/risk-scenarios/{riskScenarioId}/controls",
+      "operationId": "ListRiskScenarioControls",
+      "isMutation": false
+    },
+    {
+      "toolName": "link_controls_to_risk_scenario",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios/{riskScenarioId}/controls",
+      "operationId": "CreateRiskScenarioControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_risk_scenario_control",
+      "source": "manage",
+      "method": "patch",
+      "path": "/risk-scenarios/{riskScenarioId}/controls/{controlId}",
+      "operationId": "UpdateRiskScenarioControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_risk_scenario_control",
+      "source": "manage",
+      "method": "delete",
+      "path": "/risk-scenarios/{riskScenarioId}/controls/{controlId}",
+      "operationId": "DeleteRiskScenarioControl",
       "isMutation": true
     },
     {
@@ -770,6 +1098,62 @@
       "isMutation": false
     },
     {
+      "toolName": "list_chatbot_conversations",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/chatbot/conversations",
+      "operationId": "ListChatbotConversations",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_chatbot_conversation_messages",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/chatbot/conversations/{conversationId}",
+      "operationId": "GetChatbotConversationMessages",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_compliance_frameworks",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/compliance-frameworks",
+      "operationId": "ListComplianceFrameworks",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_compliance_framework",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/compliance-frameworks",
+      "operationId": "CreateComplianceFramework",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_compliance_framework",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}",
+      "operationId": "UpdateComplianceFramework",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_compliance_framework",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}",
+      "operationId": "DeleteComplianceFramework",
+      "isMutation": true
+    },
+    {
+      "toolName": "upload_compliance_framework_badge",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}/badge",
+      "operationId": "UploadComplianceFrameworkBadge",
+      "isMutation": true
+    },
+    {
       "toolName": "get_trust_center_control_categories",
       "source": "manage",
       "method": "get",
@@ -783,6 +1167,14 @@
       "method": "post",
       "path": "/trust-centers/{slugId}/control-categories",
       "operationId": "AddTrustCenterControlCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "upsert_trust_center_control_categories_order",
+      "source": "manage",
+      "method": "put",
+      "path": "/trust-centers/{slugId}/control-categories/order",
+      "operationId": "UpsertTrustCenterControlCategoriesOrder",
       "isMutation": true
     },
     {
@@ -810,6 +1202,22 @@
       "isMutation": true
     },
     {
+      "toolName": "update_trust_center_controls_in_category",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/control-categories/{categoryId}/controls",
+      "operationId": "UpdateTrustCenterControlsInCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "upsert_trust_center_controls_in_category_order",
+      "source": "manage",
+      "method": "put",
+      "path": "/trust-centers/{slugId}/control-categories/{categoryId}/controls/order",
+      "operationId": "UpsertTrustCenterControlsInCategoryOrder",
+      "isMutation": true
+    },
+    {
       "toolName": "list_trust_center_controls",
       "source": "manage",
       "method": "get",
@@ -826,6 +1234,22 @@
       "isMutation": true
     },
     {
+      "toolName": "bulk_add_tags_to_controls",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/controls/tags",
+      "operationId": "BulkAddTagsToControls",
+      "isMutation": true
+    },
+    {
+      "toolName": "bulk_remove_tags_from_controls",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/controls/tags",
+      "operationId": "BulkRemoveTagsFromControls",
+      "isMutation": true
+    },
+    {
       "toolName": "get_trust_center_control",
       "source": "manage",
       "method": "get",
@@ -839,6 +1263,54 @@
       "method": "delete",
       "path": "/trust-centers/{slugId}/controls/{controlId}",
       "operationId": "DeleteTrustCenterControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_data_collected",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/data-collected",
+      "operationId": "ListTrustCenterDataCollected",
+      "isMutation": false
+    },
+    {
+      "toolName": "upsert_trust_center_data_collected",
+      "source": "manage",
+      "method": "put",
+      "path": "/trust-centers/{slugId}/data-collected",
+      "operationId": "UpsertTrustCenterDataCollected",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_trust_center_faq_categories",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/faq-categories",
+      "operationId": "ListTrustCenterFaqCategories",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_trust_center_faq_category",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/faq-categories",
+      "operationId": "AddTrustCenterFaqCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_trust_center_faq_category",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/faq-categories/{categoryId}",
+      "operationId": "UpdateTrustCenterFaqCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_trust_center_faq_category",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/faq-categories/{categoryId}",
+      "operationId": "DeleteTrustCenterFaqCategory",
       "isMutation": true
     },
     {
@@ -882,12 +1354,60 @@
       "isMutation": true
     },
     {
+      "toolName": "upload_trust_center_favicon",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/favicon",
+      "operationId": "UploadTrustCenterFavicon",
+      "isMutation": true
+    },
+    {
       "toolName": "list_trust_center_historical_access_requests",
       "source": "manage",
       "method": "get",
       "path": "/trust-centers/{slugId}/historical-access-requests",
       "operationId": "ListTrustCenterHistoricalAccessRequests",
       "isMutation": false
+    },
+    {
+      "toolName": "list_trust_center_resource_categories",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/resource-categories",
+      "operationId": "ListTrustCenterResourceCategories",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_trust_center_resource_category",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/resource-categories",
+      "operationId": "AddTrustCenterResourceCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "upsert_trust_center_resource_categories_order",
+      "source": "manage",
+      "method": "put",
+      "path": "/trust-centers/{slugId}/resource-categories/order",
+      "operationId": "UpsertTrustCenterResourceCategoriesOrder",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_trust_center_resource_category",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/resource-categories/{categoryId}",
+      "operationId": "UpdateTrustCenterResourceCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_trust_center_resource_category",
+      "source": "manage",
+      "method": "delete",
+      "path": "/trust-centers/{slugId}/resource-categories/{categoryId}",
+      "operationId": "DeleteTrustCenterResourceCategory",
+      "isMutation": true
     },
     {
       "toolName": "list_trust_center_resources",
@@ -1114,6 +1634,14 @@
       "isMutation": true
     },
     {
+      "toolName": "upsert_trust_center_videos",
+      "source": "manage",
+      "method": "put",
+      "path": "/trust-centers/{slugId}/videos",
+      "operationId": "UpsertTrustCenterVideos",
+      "isMutation": true
+    },
+    {
       "toolName": "list_trust_center_viewers",
       "source": "manage",
       "method": "get",
@@ -1144,6 +1672,54 @@
       "path": "/trust-centers/{slugId}/viewers/{viewerId}",
       "operationId": "RemoveTrustCenterViewer",
       "isMutation": true
+    },
+    {
+      "toolName": "update_trust_center_viewer",
+      "source": "manage",
+      "method": "patch",
+      "path": "/trust-centers/{slugId}/viewers/{viewerId}",
+      "operationId": "UpdateTrustCenterViewer",
+      "isMutation": true
+    },
+    {
+      "toolName": "send_trust_center_viewer_invite_reminder",
+      "source": "manage",
+      "method": "post",
+      "path": "/trust-centers/{slugId}/viewers/{viewerId}/send-invite-reminder",
+      "operationId": "SendTrustCenterViewerInviteReminder",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_users",
+      "source": "manage",
+      "method": "get",
+      "path": "/users",
+      "operationId": "ListUsers",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_user",
+      "source": "manage",
+      "method": "get",
+      "path": "/users/{userId}",
+      "operationId": "GetUser",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_vendor_assessment_types",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-assessment-types",
+      "operationId": "ListVendorAssessmentTypes",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_vendor_assessment_type_by_id",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-assessment-types/{assessmentTypeId}",
+      "operationId": "GetVendorAssessmentTypeById",
+      "isMutation": false
     },
     {
       "toolName": "list_vendor_risk_attributes",
@@ -1192,6 +1768,22 @@
       "path": "/vendors/{vendorId}",
       "operationId": "UpdateVendor",
       "isMutation": true
+    },
+    {
+      "toolName": "get_assessments_by_vendor_id",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}/assessments",
+      "operationId": "GetAssessmentsByVendorId",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_assessment_by_id",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}/assessments/{assessmentId}",
+      "operationId": "GetAssessmentById",
+      "isMutation": false
     },
     {
       "toolName": "list_vendor_documents",
@@ -1370,11 +1962,27 @@
       "isMutation": false
     },
     {
+      "toolName": "duplicate_audit",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/duplicate",
+      "operationId": "Duplicate",
+      "isMutation": true
+    },
+    {
       "toolName": "get_audit",
       "source": "audit",
       "method": "get",
       "path": "/audits/{auditId}",
       "operationId": "GetAudit",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_code_changes",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/assets/code-changes",
+      "operationId": "ListCodeChanges",
       "isMutation": false
     },
     {
@@ -1402,6 +2010,54 @@
       "isMutation": true
     },
     {
+      "toolName": "upsert_assessment_for_control",
+      "source": "audit",
+      "method": "put",
+      "path": "/audits/{auditId}/controls/{controlId}/assessment",
+      "operationId": "UpsertAssessmentForControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_comments_for_control",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/controls/{controlId}/comments",
+      "operationId": "ListCommentsForControl",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_comment_for_control",
+      "source": "audit",
+      "method": "post",
+      "path": "/audits/{auditId}/controls/{controlId}/comments",
+      "operationId": "CreateCommentForControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_comment_for_control",
+      "source": "audit",
+      "method": "patch",
+      "path": "/audits/{auditId}/controls/{controlId}/comments/{commentId}",
+      "operationId": "UpdateCommentForControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_comment_for_control",
+      "source": "audit",
+      "method": "delete",
+      "path": "/audits/{auditId}/controls/{controlId}/comments/{commentId}",
+      "operationId": "DeleteCommentForControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_information_requests_for_control",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/controls/{controlId}/information-requests",
+      "operationId": "ListInformationRequestsForControl",
+      "isMutation": false
+    },
+    {
       "toolName": "list_audit_evidence",
       "source": "audit",
       "method": "get",
@@ -1426,12 +2082,28 @@
       "isMutation": true
     },
     {
+      "toolName": "get_audit_evidence",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/evidence/{auditEvidenceId}",
+      "operationId": "GetAuditEvidence",
+      "isMutation": false
+    },
+    {
       "toolName": "create_comment_for_audit_evidence",
       "source": "audit",
       "method": "post",
       "path": "/audits/{auditId}/evidence/{auditEvidenceId}/comments",
       "operationId": "CreateCommentForAuditEvidence",
       "isMutation": true
+    },
+    {
+      "toolName": "get_audit_evidence_comment",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/evidence/{auditEvidenceId}/comments/{commentId}",
+      "operationId": "GetAuditEvidenceComment",
+      "isMutation": false
     },
     {
       "toolName": "list_audit_evidence_urls",
@@ -1464,6 +2136,14 @@
       "path": "/audits/{auditId}/information-requests",
       "operationId": "CreateInformationRequest",
       "isMutation": true
+    },
+    {
+      "toolName": "get_information_request",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/information-requests/{requestId}",
+      "operationId": "GetInformationRequest",
+      "isMutation": false
     },
     {
       "toolName": "update_information_request",
@@ -1514,6 +2194,14 @@
       "isMutation": true
     },
     {
+      "toolName": "get_comment_for_information_request",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/information-requests/{requestId}/comments/{commentId}",
+      "operationId": "GetCommentForInformationRequest",
+      "isMutation": false
+    },
+    {
       "toolName": "update_comment_for_information_request",
       "source": "audit",
       "method": "patch",
@@ -1538,12 +2226,60 @@
       "isMutation": false
     },
     {
+      "toolName": "get_information_request_evidence",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}",
+      "operationId": "GetInformationRequestEvidence",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_information_request_test_snapshot_evidence_detail",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}/test-snapshot",
+      "operationId": "GetInformationRequestTestSnapshotEvidenceDetail",
+      "isMutation": false
+    },
+    {
       "toolName": "flag_information_request_evidence",
       "source": "audit",
       "method": "post",
       "path": "/audits/{auditId}/information-requests/{requestId}/flag-evidence",
       "operationId": "FlagInformationRequestEvidence",
       "isMutation": true
+    },
+    {
+      "toolName": "list_integrations",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/integrations",
+      "operationId": "ListIntegrations",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_audit_issues",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/issues/items",
+      "operationId": "ListAuditIssues",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_audit_snapshots",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/issues/snapshots",
+      "operationId": "ListAuditSnapshots",
+      "isMutation": false
+    },
+    {
+      "toolName": "audit_list_vendors",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/managed-vendors",
+      "operationId": "ListVendors",
+      "isMutation": false
     },
     {
       "toolName": "list_monitored_computers_in_audit_scope",
@@ -1554,11 +2290,75 @@
       "isMutation": false
     },
     {
+      "toolName": "get_organization_information",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/organization/information",
+      "operationId": "GetOrganizationInformation",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_organization_notifications",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/organization/notifications",
+      "operationId": "GetOrganizationNotifications",
+      "isMutation": false
+    },
+    {
       "toolName": "list_people_in_audit_scope",
       "source": "audit",
       "method": "get",
       "path": "/audits/{auditId}/people",
       "operationId": "ListPeopleInAuditScope",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_account_access_services",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/personnel/account-access/services",
+      "operationId": "ListAccountAccessServices",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_personnel_account_access",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/personnel/account-access/{serviceId}",
+      "operationId": "ListPersonnelAccountAccess",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_personnel_groups",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/personnel/groups",
+      "operationId": "ListPersonnelGroups",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_personnel_people",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/personnel/people",
+      "operationId": "ListPersonnelPeople",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_risk_snapshots",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/risks/snapshots",
+      "operationId": "ListRiskSnapshots",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_audit_risks",
+      "source": "audit",
+      "method": "get",
+      "path": "/audits/{auditId}/risks/{snapshotId}",
+      "operationId": "ListAuditRisks",
       "isMutation": false
     },
     {
@@ -1647,6 +2447,14 @@
       "method": "put",
       "path": "/v1/resources/custom_resource",
       "operationId": "put-CustomResource",
+      "isMutation": true
+    },
+    {
+      "toolName": "connector_upload_file_for_document",
+      "source": "connectors",
+      "method": "post",
+      "path": "/v1/documents/{documentId}/uploads",
+      "operationId": "UploadFileForDocument",
       "isMutation": true
     },
     {

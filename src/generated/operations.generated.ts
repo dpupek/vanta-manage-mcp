@@ -49,6 +49,18 @@ export interface GeneratedOperation {
 
 export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record<string, unknown>>> = {
   "manage": {
+    "PageSize": {
+      "type": "integer",
+      "format": "int32",
+      "default": 10,
+      "description": "Controls the maximum number of items returned in one response from the API.",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "PageCursor": {
+      "type": "string",
+      "description": "A marker or pointer, telling the API where to start fetching items for the subsequent page in a paginated dataset.\nNote that the requested page will not include the item that corresponds to this cursor but will start from the one immediately\nafter this cursor."
+    },
     "CreateControlInput": {
       "properties": {
         "externalId": {
@@ -197,6 +209,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "MVSP",
         "NIS_2D",
         "NIST_171",
+        "NIST_171_R3",
         "NIST_53",
         "NIST_AI_RMF",
         "NIST_CSF",
@@ -247,18 +260,6 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ],
       "type": "object",
       "additionalProperties": false
-    },
-    "PageSize": {
-      "type": "integer",
-      "format": "int32",
-      "default": 10,
-      "description": "Controls the maximum number of items returned in one response from the API.",
-      "minimum": 1,
-      "maximum": 100
-    },
-    "PageCursor": {
-      "type": "string",
-      "description": "A marker or pointer, telling the API where to start fetching items for the subsequent page in a paginated dataset.\nNote that the requested page will not include the item that corresponds to this cursor but will start from the one immediately\nafter this cursor."
     },
     "AddControlFromLibraryInput": {
       "properties": {
@@ -359,6 +360,19 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         },
         "accessConfig": {
           "$ref": "#/components/schemas/CustomerTrustAccountAccessConfigInput"
+        },
+        "customFields": {
+          "items": {
+            "$ref": "#/components/schemas/CustomField"
+          },
+          "type": "array"
+        },
+        "tagsByCategory": {
+          "items": {
+            "$ref": "#/components/schemas/TagsByCategoryInput"
+          },
+          "type": "array",
+          "description": "Tags to assign to this account, grouped by category"
         }
       },
       "required": [
@@ -386,10 +400,98 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "autoApprovalEnabled": {
           "type": "boolean",
           "description": "Whether access requests matching this account's email domain should be auto-approved"
+        },
+        "grantAccessOption": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/CustomerTrustAccountGrantAccessOption"
+            }
+          ],
+          "nullable": true,
+          "description": "How to grant resource access for auto-approved requests. Must be specified if autoApprovalEnabled is true"
+        },
+        "tagsByCategory": {
+          "items": {
+            "$ref": "#/components/schemas/TagsByCategoryInput"
+          },
+          "type": "array",
+          "description": "Tags to assign to this account, grouped by category.",
+          "deprecated": true
         }
       },
       "required": [
         "autoApprovalEnabled"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomerTrustAccountGrantAccessOption": {
+      "type": "string",
+      "enum": [
+        "INCLUDE_EVERYTHING_REQUESTED",
+        "INCLUDE_ONLY_CONFIGURED"
+      ],
+      "description": "How a CustomerTrustAccount determines which resources to grant its viewers access to."
+    },
+    "TagsByCategoryInput": {
+      "properties": {
+        "categoryId": {
+          "type": "string",
+          "description": "The tag category ID"
+        },
+        "tagIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Tag IDs to assign. An empty array removes all tags for the category."
+        }
+      },
+      "required": [
+        "categoryId",
+        "tagIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditCustomerTrustAccountInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Updated name for the account"
+        },
+        "emailDomain": {
+          "type": "string",
+          "description": "Updated primary email domain for the account"
+        },
+        "customFields": {
+          "items": {
+            "$ref": "#/components/schemas/CustomField"
+          },
+          "type": "array",
+          "description": "Updated custom field values for the account"
+        },
+        "tagsByCategory": {
+          "items": {
+            "$ref": "#/components/schemas/TagsByCategoryInput"
+          },
+          "type": "array",
+          "description": "Tags to assign to this account, grouped by category. Replaces existing tags per category."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CreateDeletionRequestInput": {
+      "description": "Request body for creating a data deletion request.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email address of the individual requesting data deletion."
+        }
+      },
+      "required": [
+        "email"
       ],
       "type": "object",
       "additionalProperties": false
@@ -407,6 +509,11 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "COMPLETE",
         "ERROR",
         "EXTRACTING_QUESTIONS",
+        "QUEUED_FOR_SECTION_EXTRACTION",
+        "EXTRACTING_SECTIONS",
+        "MAPPING_SECTIONS",
+        "QUEUED_FOR_ANSWERING",
+        "GENERATING_ANSWERS",
         "QUEUED_FOR_EXTRACTION",
         "PROCESSING",
         "QUEUED_FOR_PROCESSING",
@@ -416,16 +523,23 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "DETECTING_COLUMNS"
       ]
     },
-    "QuestionnaireType": {
+    "CustomerTrustQuestionnaireType": {
       "type": "string",
       "enum": [
-        "FILE",
-        "PORTAL",
+        "SPREADSHEET",
+        "WEBSITE",
         "DOCUMENT"
       ]
     },
-    "CustomerTrustExportInput": {
-      "description": "Request body for initiating a questionnaire export.",
+    "QuestionnaireAssignableUserRole": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "approver"
+      ]
+    },
+    "CustomerTrustCreateQuestionnaireExportInput": {
+      "description": "Request body for creating a questionnaire export.",
       "properties": {
         "questionnaireId": {
           "type": "string",
@@ -450,49 +564,61 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "additionalProperties": false
     },
     "CreateWebsiteQuestionnaireInput": {
+      "description": "Request body for creating a website-based questionnaire from a portal URL.",
       "properties": {
         "displayName": {
-          "type": "string"
+          "type": "string",
+          "description": "Display name for the questionnaire."
         },
         "url": {
-          "type": "string"
+          "type": "string",
+          "description": "The portal URL to create the questionnaire from."
         },
         "ownerAssignment": {
-          "$ref": "#/components/schemas/ActorAssignmentInput"
+          "$ref": "#/components/schemas/ActorAssignmentInput",
+          "description": "Actor to assign as the owner (user or team)."
         },
         "approverAssignment": {
-          "$ref": "#/components/schemas/ActorAssignmentInput"
+          "$ref": "#/components/schemas/ActorAssignmentInput",
+          "description": "Actor to assign as the approver (user or team)."
         },
         "companyUrl": {
-          "type": "string"
+          "type": "string",
+          "description": "URL of the company associated with this questionnaire."
         },
         "customerTrustAccountId": {
-          "type": "string"
+          "type": "string",
+          "description": "ID of the customer trust account to associate with this questionnaire."
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Description of the questionnaire."
         },
         "dueDate": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "Due date for questionnaire completion (ISO 8601)."
         },
         "metadata": {
           "items": {
             "$ref": "#/components/schemas/QuestionnaireMetadata"
           },
-          "type": "array"
+          "type": "array",
+          "description": "Custom key-value pairs. Keys and values may contain alphanumeric characters, hyphens, underscores, and periods. Maximum 30 entries."
+        },
+        "includeUntaggedEntitiesForCategoryIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Category IDs for which to include untagged entities."
         },
         "tagAndCategoryIds": {
           "items": {
             "$ref": "#/components/schemas/TagInput"
           },
-          "type": "array"
-        },
-        "includeUntagged": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
+          "type": "array",
+          "description": "Tags to assign to the questionnaire. Each entry must include a categoryId and tagId. Replaces all existing tags."
         }
       },
       "required": [
@@ -599,7 +725,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "$ref": "#/components/schemas/TagInput"
           },
           "type": "array",
-          "description": "Tag and category ID pairs"
+          "description": "Tags to assign to the questionnaire. Each entry must include a categoryId and tagId. Replaces all existing tags."
         }
       },
       "type": "object",
@@ -617,16 +743,19 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ]
     },
     "UpdateActorAssignment": {
+      "description": "Actor assignment for setting an owner or approver.",
       "properties": {
         "type": {
           "type": "string",
           "enum": [
             "User",
             "Team"
-          ]
+          ],
+          "description": "The type of actor: \"User\" for an individual user, \"Team\" for a team."
         },
         "id": {
-          "type": "string"
+          "type": "string",
+          "description": "The unique identifier of the user or team."
         }
       },
       "required": [
@@ -636,16 +765,96 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "object",
       "additionalProperties": false
     },
+    "ApproveQuestionnaireRequest": {
+      "description": "Request body for approving a questionnaire.",
+      "properties": {
+        "statusChangeMessage": {
+          "type": "string",
+          "description": "Optional message describing the reason for approval."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
     "CompleteQuestionnaireRequest": {
       "description": "Request body for completing a questionnaire.",
       "properties": {
         "shouldSyncApprovedToAnswerLibrary": {
           "type": "boolean",
-          "description": "Whether to sync approved answers to the answer library.\nDefaults to true. Silently set to false for non-English FILE/DOCUMENT questionnaires."
+          "description": "Whether to sync approved answers to the answer library.\nDefaults to true. Ignored for non-English SPREADSHEET/DOCUMENT questionnaires."
         }
       },
       "type": "object",
       "additionalProperties": false
+    },
+    "UpdateQuestionnaireResponseContentArgs": {
+      "description": "Request body for updating a questionnaire response's answer content.",
+      "properties": {
+        "answerPartsValues": {
+          "$ref": "#/components/schemas/Record_string.unknown_",
+          "description": "Map of answer part id -> value, matching the shape of the\n`answerPartsValues` read field. Values must be string, number,\nboolean, null, or string[]. A null value clears that part's value;\nids omitted from the map are left unchanged."
+        }
+      },
+      "required": [
+        "answerPartsValues"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Record_string.unknown_": {
+      "properties": {},
+      "additionalProperties": {},
+      "type": "object",
+      "description": "Construct a type with a set of properties K of type T"
+    },
+    "UpdateQuestionnaireResponseOwnerArgs": {
+      "description": "Request body for reassigning (or clearing) a questionnaire response's owner.",
+      "properties": {
+        "ownerAssignment": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/UpdateActorAssignment"
+            }
+          ],
+          "nullable": true,
+          "description": "New owner, or null to clear the current owner."
+        }
+      },
+      "required": [
+        "ownerAssignment"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomerTrustProductContextIdFilter": {
+      "type": "string",
+      "enum": [
+        "EXTERNAL_TRUST_CENTER",
+        "DOCUMENT_SHARING",
+        "CONTROL_SHARING",
+        "QUESTIONNAIRE"
+      ]
+    },
+    "AddTagCategoryProductContextInput": {
+      "properties": {
+        "productContextId": {
+          "$ref": "#/components/schemas/CustomerTrustProductContextIdWritable",
+          "description": "Product context to enable this tag category for."
+        }
+      },
+      "required": [
+        "productContextId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomerTrustProductContextIdWritable": {
+      "type": "string",
+      "enum": [
+        "EXTERNAL_TRUST_CENTER",
+        "DOCUMENT_SHARING",
+        "CONTROL_SHARING"
+      ]
     },
     "DiscoveredVendorScope": {
       "description": "The scope of a discovered vendor.\nNEEDS_REVIEW: The vendor needs review\nIGNORED: The vendor was ignored\nREJECTED: The vendor was rejected",
@@ -671,7 +880,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           "description": "When to upload the document.\nMust be one of: \"Most recent\", \"During audit window\""
         },
         "cadence": {
-          "$ref": "#/components/schemas/RecurrenceDuration",
+          "$ref": "#/components/schemas/CadenceType",
           "description": "How often the document needs to be renewed.\n\nNever: P0D - The document does not need to be renewed.\nDaily: P1D - The document needs to be renewed daily.\nWeekly: P1W - The document needs to be renewed weekly.\nMonthly: P1M - The document needs to be renewed monthly.\nQuarterly: P3M - The document needs to be renewed quarterly.\nBiannually: P6M - The document needs to be renewed biannually.\nAnnually: P1Y - The document needs to be renewed annually."
         },
         "reminderWindow": {
@@ -701,6 +910,9 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ],
       "type": "string"
     },
+    "CadenceType": {
+      "$ref": "#/components/schemas/RecurrenceDuration"
+    },
     "RecurrenceDuration": {
       "enum": [
         "P0D",
@@ -709,7 +921,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "P1M",
         "P3M",
         "P6M",
-        "P1Y"
+        "P1Y",
+        "P2Y"
       ],
       "type": "string"
     },
@@ -800,6 +1013,412 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "object",
       "additionalProperties": false
     },
+    "IssueStatus": {
+      "type": "string",
+      "enum": [
+        "NOT_STARTED",
+        "IN_PROGRESS",
+        "CLOSED"
+      ]
+    },
+    "IssueSeverity": {
+      "type": "string",
+      "enum": [
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "NO_SEVERITY"
+      ]
+    },
+    "SourceType": {
+      "type": "string",
+      "enum": [
+        "AUDIT",
+        "AUDIT_EXTERNAL",
+        "INCIDENT",
+        "EXTERNAL_PARTY",
+        "SELF_ASSESSMENT",
+        "OTHER"
+      ]
+    },
+    "StandardIssueType": {
+      "type": "string",
+      "enum": [
+        "AREA_OF_CONCERN",
+        "MAJOR_NONCONFORMITY",
+        "MINOR_NONCONFORMITY",
+        "OPP_FOR_IMPROVEMENT",
+        "EXCEPTION",
+        "PROCESS_FOR_IMPROVEMENT"
+      ]
+    },
+    "IssueTemplate": {
+      "type": "string",
+      "enum": [
+        "STANDARD_ISSUE",
+        "STANDARD_POAM"
+      ]
+    },
+    "ClosedReason": {
+      "type": "string",
+      "enum": [
+        "RESOLVED",
+        "DUPLICATE",
+        "ACCEPTED",
+        "OTHER"
+      ]
+    },
+    "IssueSortField": {
+      "type": "string",
+      "enum": [
+        "dueDate",
+        "createdDate",
+        "detectedDate",
+        "lastModifiedDate",
+        "status",
+        "severity"
+      ]
+    },
+    "OrderDirection": {
+      "type": "string",
+      "enum": [
+        "asc",
+        "desc"
+      ],
+      "description": "`\"asc\"` for ascending, `\"desc\"` for descending."
+    },
+    "CreateAnswerLibraryEntryInput": {
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "The question text.",
+          "example": "Do you encrypt customer data at rest?"
+        },
+        "answer": {
+          "type": "string",
+          "description": "The answer text.",
+          "example": "Yes. All customer data is encrypted at rest using AES-256, with keys managed in AWS KMS."
+        },
+        "ownerAssignment": {
+          "$ref": "#/components/schemas/AnswerLibraryActorAssignmentInput",
+          "description": "The actor to assign as owner. Currently only type \"User\" is supported."
+        },
+        "expirationDate": {
+          "type": "string",
+          "description": "The expiration date in ISO 8601 format.",
+          "example": "2025-12-31T00:00:00.000Z"
+        },
+        "tags": {
+          "items": {
+            "$ref": "#/components/schemas/TagInput"
+          },
+          "type": "array",
+          "description": "Tags to associate with the entry. Discover valid `categoryId` and `tagId`\nvalues via `GET /v1/customer-trust/tag-categories` (to list categories)\nand `GET /v1/customer-trust/tag-categories/{tagCategoryId}` (to list tags\nwithin a category)."
+        }
+      },
+      "required": [
+        "question",
+        "answer"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AnswerLibraryActorAssignmentInput": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "User"
+          ],
+          "nullable": false,
+          "description": "The type of actor. Currently only \"User\" is supported.",
+          "example": "User"
+        },
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the user or team.",
+          "example": "507f1f77bcf86cd799439041"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateAnswerLibraryEntryInput": {
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "The question text.",
+          "example": "Do you encrypt customer data at rest?"
+        },
+        "answer": {
+          "type": "string",
+          "description": "The answer text.",
+          "example": "Yes. All customer data is encrypted at rest using AES-256, with keys managed in AWS KMS."
+        },
+        "ownerAssignment": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/AnswerLibraryActorAssignmentInput"
+            }
+          ],
+          "nullable": true,
+          "description": "The actor to assign as owner. Pass `null` to clear. Currently only type\n\"User\" is supported."
+        },
+        "expirationDate": {
+          "type": "string",
+          "nullable": true,
+          "description": "The expiration date in ISO 8601 format. Pass `null` to clear.",
+          "example": "2025-12-31T00:00:00.000Z"
+        },
+        "tags": {
+          "items": {
+            "$ref": "#/components/schemas/TagInput"
+          },
+          "type": "array",
+          "description": "Tags to associate with the entry. Replaces the existing tag set. Pass\n`[]` to clear all tags. Discover valid `categoryId` and `tagId` values\nvia `GET /v1/customer-trust/tag-categories` (to list categories) and\n`GET /v1/customer-trust/tag-categories/{tagCategoryId}` (to list tags\nwithin a category)."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VerifyAnswerLibraryEntryInput": {
+      "properties": {
+        "expirationDate": {
+          "type": "string",
+          "description": "The expiration date in ISO 8601 format. If omitted, falls back to the\nconfigured review cadence.",
+          "example": "2025-12-31T00:00:00.000Z"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "KnowledgeBaseResourceTypeFilter": {
+      "type": "string",
+      "enum": [
+        "FILE",
+        "URL"
+      ]
+    },
+    "UpdateDocumentResourceInput": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the document resource.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "A description for the document resource. Pass `null` to clear."
+        },
+        "ownerAssignment": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/KnowledgeBaseResourceActorAssignmentInput"
+            }
+          ],
+          "nullable": true,
+          "description": "The actor to assign as owner. Pass `null` to clear. Currently only type\n\"User\" is supported."
+        },
+        "customerVisibility": {
+          "$ref": "#/components/schemas/KnowledgeBaseCustomerVisibility",
+          "description": "Customer visibility on the Trust Center."
+        },
+        "downloadPermission": {
+          "$ref": "#/components/schemas/KnowledgeBaseResourceDownloadPermission",
+          "description": "Trust Center download permission."
+        },
+        "isUsedInQuestionnaires": {
+          "type": "boolean",
+          "description": "Whether the resource should be used for question-answering in\nQuestionnaire Automation."
+        },
+        "expirationDate": {
+          "type": "string",
+          "nullable": true,
+          "description": "Expiration date in ISO 8601 format. Pass `null` to clear."
+        },
+        "tags": {
+          "items": {
+            "$ref": "#/components/schemas/TagInput"
+          },
+          "type": "array",
+          "description": "Tags to associate with the resource. A non-empty array replaces the\nexisting tag set; pass `[]` to clear all tags."
+        },
+        "categoryId": {
+          "type": "string",
+          "nullable": true,
+          "description": "Trust Center category id to associate this resource with. Pass `null`\nto move the resource to uncategorized. Only valid when the resource's\neffective visibility (after applying any patched `customerVisibility`)\nis REQUEST_ACCESS or PUBLIC; other combinations and unknown ids return\nan InvalidInputError."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "KnowledgeBaseResourceActorAssignmentInput": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "User"
+          ],
+          "nullable": false,
+          "description": "The type of actor. Currently only \"User\" is supported."
+        },
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the user."
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "KnowledgeBaseCustomerVisibility": {
+      "type": "string",
+      "enum": [
+        "PRIVATE",
+        "SHAREABLE",
+        "REQUEST_ACCESS",
+        "PUBLIC"
+      ],
+      "description": "Customer-facing visibility of a knowledge-base resource on the\nTrust Center. Use {@link CUSTOMER_VISIBILITY_TO_DB} to translate to\n{@link TrustCenterResourceVisibility} when persisting."
+    },
+    "KnowledgeBaseResourceDownloadPermission": {
+      "type": "string",
+      "enum": [
+        "VIEW_ONLY",
+        "VIEW_AND_DOWNLOAD"
+      ],
+      "description": "Customer-facing download permission for a knowledge-base resource on\nthe Trust Center. Use {@link DOWNLOAD_PERMISSION_TO_DB} to translate\nto {@link TrustKnowledgeBaseResourceDownloadSetting} when persisting."
+    },
+    "CreateWebpageResourceInput": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the webpage resource.",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the webpage.",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description for the webpage resource."
+        },
+        "ownerAssignment": {
+          "$ref": "#/components/schemas/KnowledgeBaseResourceActorAssignmentInput",
+          "description": "The actor to assign as owner. Currently only type \"User\" is supported."
+        },
+        "customerVisibility": {
+          "$ref": "#/components/schemas/KnowledgeBaseCustomerVisibility",
+          "description": "Customer visibility on the Trust Center. Webpage resources accept only\nPRIVATE or PUBLIC; REQUEST_ACCESS and SHAREABLE return an\nInvalidInputError."
+        },
+        "includeSubPages": {
+          "type": "boolean",
+          "description": "Whether to scan sub-pages one level deep alongside the primary URL."
+        },
+        "isUsedInQuestionnaires": {
+          "type": "boolean",
+          "description": "Whether the resource should be used for question-answering in\nQuestionnaire Automation."
+        },
+        "expirationDate": {
+          "type": "string",
+          "description": "Expiration date in ISO 8601 format."
+        },
+        "tags": {
+          "items": {
+            "$ref": "#/components/schemas/TagInput"
+          },
+          "type": "array",
+          "description": "Tags to associate with the resource."
+        },
+        "categoryId": {
+          "type": "string",
+          "nullable": true,
+          "description": "Trust Center category id to associate this resource with. Pass `null`\nto keep the resource uncategorized. Only valid when `customerVisibility`\nis PUBLIC; other combinations and unknown ids return an\nInvalidInputError."
+        }
+      },
+      "required": [
+        "title",
+        "url"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateWebpageResourceInput": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the webpage resource.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "A description for the webpage resource. Pass `null` to clear."
+        },
+        "ownerAssignment": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/KnowledgeBaseResourceActorAssignmentInput"
+            }
+          ],
+          "nullable": true,
+          "description": "The actor to assign as owner. Pass `null` to clear. Currently only type\n\"User\" is supported."
+        },
+        "customerVisibility": {
+          "$ref": "#/components/schemas/KnowledgeBaseCustomerVisibility",
+          "description": "Customer visibility on the Trust Center. Webpage resources accept only\nPRIVATE or PUBLIC; REQUEST_ACCESS and SHAREABLE return an\nInvalidInputError."
+        },
+        "includeSubPages": {
+          "type": "boolean",
+          "description": "Whether to scan sub-pages one level deep alongside the primary URL."
+        },
+        "isUsedInQuestionnaires": {
+          "type": "boolean",
+          "description": "Whether the resource should be used for question-answering in\nQuestionnaire Automation."
+        },
+        "expirationDate": {
+          "type": "string",
+          "nullable": true,
+          "description": "Expiration date in ISO 8601 format. Pass `null` to clear."
+        },
+        "tags": {
+          "items": {
+            "$ref": "#/components/schemas/TagInput"
+          },
+          "type": "array",
+          "description": "Tags to associate with the resource. A non-empty array replaces the\nexisting tag set; pass `[]` to clear all tags."
+        },
+        "categoryId": {
+          "type": "string",
+          "nullable": true,
+          "description": "Trust Center category id to associate this resource with. Pass `null`\nto move the resource to uncategorized. Only valid when the resource's\neffective visibility (after applying any patched `customerVisibility`)\nis PUBLIC; other combinations and unknown ids return an\nInvalidInputError."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VerifyKnowledgeBaseResourceInput": {
+      "properties": {
+        "expirationDate": {
+          "type": "string",
+          "description": "The expiration date in ISO 8601 format. If omitted, falls back to the\nconfigured review cadence.",
+          "example": "2025-12-31T00:00:00.000Z"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
     "ComputerStatusFilter": {
       "description": "Enum representing computer compliance statuses that can be utilized as a filter. The meanings are as follows:\nAV_NOT_INSTALLED: The computer does not have antivirus software installed.\nHD_NOT_ENCRYPTED: The computer's harddrive is not encrypted.\nLAST_CHECK_OVER_14_DAYS: No data has been received from computer for over 14 days.\nPWM_NOT_INSTALLED: The computer does not have a password manager installed.\nSCREENLOCK_NOT_CONFIGURED: The computer does not have screenlock configured appropriately.",
       "enum": [
@@ -844,6 +1463,17 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "DUE_SOON",
         "OVERDUE",
         "NONE"
+      ],
+      "type": "string"
+    },
+    "EmploymentStatus": {
+      "description": "The employment status of a person:\n- UPCOMING: The person is not yet employed and will start employment in the future.\n- CURRENT: The person is currently employed.\n- ON_LEAVE: The person is on leave.\n- INACTIVE: The person's employment is inactive.\n- FORMER: The person was previously employed.",
+      "enum": [
+        "UPCOMING",
+        "CURRENT",
+        "ON_LEAVE",
+        "INACTIVE",
+        "FORMER"
       ],
       "type": "string"
     },
@@ -912,6 +1542,10 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           "type": "string",
           "description": "This describes an actual or potential risk to your organization's people, processes, technology, data, and facilities.\nDocument actual issues or likely scenarios based on your specific environment or a potential vulnerability."
         },
+        "detailedDescription": {
+          "type": "string",
+          "description": "Optional long-form description providing extended context for the risk scenario.\nMaximum 10000 characters."
+        },
         "riskId": {
           "type": "string",
           "description": "The unique ID of the risk. Used to reference and update existing risks.\nWe will auto-generate one if one isn't specified."
@@ -922,23 +1556,23 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           "deprecated": true
         },
         "likelihood": {
-          "type": "number",
-          "format": "double",
+          "type": "integer",
+          "format": "int32",
           "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings."
         },
         "impact": {
-          "type": "number",
-          "format": "double",
+          "type": "integer",
+          "format": "int32",
           "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings."
         },
         "residualLikelihood": {
-          "type": "number",
-          "format": "double",
+          "type": "integer",
+          "format": "int32",
           "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
         },
         "residualImpact": {
-          "type": "number",
-          "format": "double",
+          "type": "integer",
+          "format": "int32",
           "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
         },
         "categories": {
@@ -981,6 +1615,11 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "type": {
           "$ref": "#/components/schemas/RiskScenarioType",
           "description": "The type of risk scenario to create.\n- \"Risk Scenario\": Standard risk scenario (default)\n- \"Enterprise Risk\": Enterprise-level risk (requires Enterprise Risk Management SKU)\n\nEnterprise risks cannot be associated with a risk register.\nDefaults to \"Risk Scenario\" if not specified."
+        },
+        "identificationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date this risk was identified. Matches the \"Identified Date\" field in the Vanta UI. Defaults to the scenario's creation time if omitted."
         }
       },
       "required": [
@@ -1021,29 +1660,33 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           "type": "string",
           "description": "This describes an actual or potential risk to your organization's people, processes, technology, data, and facilities.\nDocument actual issues or likely scenarios based on your specific environment or a potential vulnerability."
         },
+        "detailedDescription": {
+          "type": "string",
+          "description": "Optional long-form description providing extended context for the risk scenario.\nMaximum 10000 characters."
+        },
         "isSensitive": {
           "type": "boolean",
           "description": "If set to true this risk can only be seen by its owner or users with Admin, RiskSensitiveManage or RiskSensitiveView permissions.",
           "deprecated": true
         },
         "likelihood": {
-          "type": "number",
-          "format": "double",
+          "type": "integer",
+          "format": "int32",
           "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings."
         },
         "impact": {
-          "type": "number",
-          "format": "double",
+          "type": "integer",
+          "format": "int32",
           "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings."
         },
         "residualLikelihood": {
-          "type": "number",
-          "format": "double",
+          "type": "integer",
+          "format": "int32",
           "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
         },
         "residualImpact": {
-          "type": "number",
-          "format": "double",
+          "type": "integer",
+          "format": "int32",
           "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
         },
         "categories": {
@@ -1083,51 +1726,56 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           },
           "type": "array",
           "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
+        },
+        "type": {
+          "$ref": "#/components/schemas/RiskScenarioType",
+          "description": "Changing the risk scenario type (`\"Risk Scenario\"` vs. `\"Enterprise Risk\"`)\nis not supported via update. Requests that include this field will be\nrejected. To change a risk's type, create a new scenario with the desired\ntype and archive the old one."
+        },
+        "identificationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date this risk was identified. Matches the \"Identified Date\" field in the Vanta UI. Omitting the field leaves the existing value unchanged."
         }
       },
       "type": "object",
       "additionalProperties": false
     },
-    "LinkControlsToRiskScenarioInput": {
-      "properties": {
-        "controlLinks": {
-          "items": {
-            "$ref": "#/components/schemas/ControlLinkToRiskScenarioInput"
-          },
-          "type": "array",
-          "description": "List of control links to create for the risk scenario. Control links that\nalready exist on the scenario are a no-op; unknown identifiers cause the\nrequest to fail."
-        }
-      },
-      "required": [
-        "controlLinks"
-      ],
-      "type": "object",
-      "additionalProperties": false
-    },
-    "ControlLinkToRiskScenarioInput": {
+    "CreateRiskScenarioControlInput": {
       "properties": {
         "controlId": {
           "type": "string",
-          "description": "Control to link to the risk scenario.\nAccepts Vanta control shorthands (e.g. `\"A.12.2.1\"`), custom-control\nshorthand names, or object IDs."
+          "description": "Control to associate with the risk scenario. Accepts Vanta control\nshorthands (e.g. `\"A.12.2.1\"`), custom-control shorthand names, or\nobject IDs."
         },
-        "linkType": {
-          "$ref": "#/components/schemas/LinkControlsToRiskScenarioLinkType",
-          "description": "How to link this control to the risk scenario.\nCurrently only `TREATMENT` links are supported."
+        "controlType": {
+          "$ref": "#/components/schemas/RiskScenarioControlType",
+          "description": "`TREATMENT_PLAN` for a control that is part of the risk's treatment plan.\nOmit (or pass `\"EXISTING\"`) to associate the control without a\ntreatment-plan designation — the default \"existing control\" relationship."
         }
       },
       "required": [
-        "controlId",
-        "linkType"
+        "controlId"
       ],
       "type": "object",
       "additionalProperties": false
     },
-    "LinkControlsToRiskScenarioLinkType": {
+    "RiskScenarioControlType": {
       "type": "string",
       "enum": [
-        "TREATMENT"
+        "EXISTING",
+        "TREATMENT_PLAN"
+      ]
+    },
+    "UpdateRiskScenarioControlInput": {
+      "properties": {
+        "controlType": {
+          "$ref": "#/components/schemas/RiskScenarioControlType",
+          "description": "The new relationship state. `TREATMENT_PLAN` moves the control into the\nrisk's treatment plan; `EXISTING` removes it from the treatment plan while\nkeeping it linked as an existing control (use DELETE to unlink entirely)."
+        }
+      },
+      "required": [
+        "controlType"
       ],
-      "nullable": false
+      "type": "object",
+      "additionalProperties": false
     },
     "SubmitRiskForApprovalInput": {
       "properties": {
@@ -1235,9 +1883,28 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           "nullable": true,
           "description": "Privacy policy URL to set on the Trust Center. If null is passed in, unsets\nthe current privacy policy."
         },
+        "awsMarketplaceListing": {
+          "type": "string",
+          "nullable": true,
+          "description": "AWS Marketplace listing URL to set on the Trust Center. If null is passed\nin, unsets the current AWS Marketplace listing."
+        },
         "isPublic": {
           "type": "boolean",
           "description": "Whether the Trust Center is public or not."
+        },
+        "contactEmail": {
+          "type": "string",
+          "nullable": true,
+          "description": "Contact email displayed on the Trust Center. If null is passed in, unsets\nthe current contact email."
+        },
+        "customHeading": {
+          "type": "string",
+          "nullable": true,
+          "description": "Custom heading displayed on the Trust Center. If null is passed in, unsets\nthe current custom heading."
+        },
+        "controlVisibilityMode": {
+          "$ref": "#/components/schemas/TrustCenterControlVisibilityMode",
+          "description": "The default status-visibility mode applied to all controls that don't\nhave a category-level override. Omit to leave unchanged. Only settable for\ndomains with the Vanta Compliance Platform; other domains have no control\nstatus to render."
         }
       },
       "type": "object",
@@ -1264,6 +1931,16 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "MINIMAL"
       ],
       "type": "string"
+    },
+    "TrustCenterControlVisibilityMode": {
+      "type": "string",
+      "enum": [
+        "SHOW_OK_ONLY",
+        "SHOW_OK_AND_UNMAPPED",
+        "SHOW_ALL_WITHOUT_STATUS",
+        "SHOW_ALL_WITH_STATUS"
+      ],
+      "description": "Which controls a Trust Center displays, and whether their pass/fail status is\nshown. Set as the Trust Center's global default, or per category to override\nthat default."
     },
     "ApproveTrustCenterAccessRequestInput": {
       "properties": {
@@ -1299,6 +1976,16 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ],
       "type": "string"
     },
+    "DenyTrustCenterAccessRequestInput": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "description": "Reason for denying the access request."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
     "ActivityEventType": {
       "enum": [
         "PAGE_VIEW",
@@ -1308,7 +1995,161 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ],
       "type": "string"
     },
-    "AddOrEditTrustCenterControlCategoryInput": {
+    "CreateComplianceFrameworkInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the framework."
+        },
+        "standard": {
+          "type": "string",
+          "enum": [
+            "aiact",
+            "aiuc1",
+            "aue8",
+            "awsFTR",
+            "bsic5",
+            "ccpa",
+            "cisv8",
+            "cjis",
+            "cmmc2",
+            "cps234",
+            "cri",
+            "dora",
+            "fedRAMPr5",
+            "fedramp",
+            "fedramp20x",
+            "fedramp20x_2026",
+            "gdpr",
+            "hipaa",
+            "hitruste1",
+            "iso9001",
+            "iso27001",
+            "iso27001_2022",
+            "iso27017",
+            "iso27018",
+            "iso27701",
+            "iso27701_2025",
+            "iso42001",
+            "msftSSPA",
+            "mvsp",
+            "nis2d",
+            "nist53",
+            "nist171",
+            "nist171r3",
+            "nistAiRmf",
+            "nistCSF",
+            "nistcsf2",
+            "ofdss",
+            "pciDss4",
+            "pciSaqA",
+            "pciSaqAEP",
+            "pciSaqDMerchant",
+            "pciSaqDSP",
+            "soc2",
+            "soxITGC",
+            "t23nycrr500",
+            "tisax",
+            "tisax2027",
+            "iso22301",
+            "trust",
+            "ukCyberEssentials",
+            "ukCyberEssentials33",
+            "usDataPrivacy",
+            "fedrampKSI",
+            null
+          ],
+          "nullable": true,
+          "description": "Compliance standard to associate with this framework."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the framework."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateComplianceFrameworkInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the framework."
+        },
+        "standard": {
+          "type": "string",
+          "enum": [
+            "aiact",
+            "aiuc1",
+            "aue8",
+            "awsFTR",
+            "bsic5",
+            "ccpa",
+            "cisv8",
+            "cjis",
+            "cmmc2",
+            "cps234",
+            "cri",
+            "dora",
+            "fedRAMPr5",
+            "fedramp",
+            "fedramp20x",
+            "fedramp20x_2026",
+            "gdpr",
+            "hipaa",
+            "hitruste1",
+            "iso9001",
+            "iso27001",
+            "iso27001_2022",
+            "iso27017",
+            "iso27018",
+            "iso27701",
+            "iso27701_2025",
+            "iso42001",
+            "msftSSPA",
+            "mvsp",
+            "nis2d",
+            "nist53",
+            "nist171",
+            "nist171r3",
+            "nistAiRmf",
+            "nistCSF",
+            "nistcsf2",
+            "ofdss",
+            "pciDss4",
+            "pciSaqA",
+            "pciSaqAEP",
+            "pciSaqDMerchant",
+            "pciSaqDSP",
+            "soc2",
+            "soxITGC",
+            "t23nycrr500",
+            "tisax",
+            "tisax2027",
+            "iso22301",
+            "trust",
+            "ukCyberEssentials",
+            "ukCyberEssentials33",
+            "usDataPrivacy",
+            "fedrampKSI",
+            null
+          ],
+          "nullable": true,
+          "description": "Compliance standard to associate with this framework. Pass null to unset."
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "Description of the framework. Pass null to unset."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddTrustCenterControlCategoryInput": {
       "properties": {
         "name": {
           "type": "string",
@@ -1317,6 +2158,94 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       },
       "required": [
         "name"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ReorderTrustCenterControlCategoriesInput": {
+      "properties": {
+        "orderedCategoryIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Ordered list of all control category IDs representing the desired order."
+        }
+      },
+      "required": [
+        "orderedCategoryIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditTrustCenterControlCategoryInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "New name for the category. Omit to leave the name unchanged."
+        },
+        "visibility": {
+          "$ref": "#/components/schemas/TrustCenterControlVisibility",
+          "description": "Visibility of the category's controls on the Trust Center. Omit to\nleave unchanged."
+        },
+        "statusVisibilityOverride": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/TrustCenterControlVisibilityMode"
+            }
+          ],
+          "nullable": true,
+          "description": "Per-category status-visibility override. Omit to leave unchanged; pass\n`null` to clear the override and fall back to the Trust Center's global\ndefault."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "TrustCenterControlVisibility": {
+      "type": "string",
+      "enum": [
+        "PUBLIC",
+        "SHAREABLE"
+      ],
+      "description": "Visibility of a control category's controls on the Trust Center.\n`SHAREABLE` categories are only visible to accounts with a matching access\ngrant."
+    },
+    "BulkEditControlsInCategoryInput": {
+      "description": "Request body for bulk editing controls in a category.",
+      "properties": {
+        "controlsToAdd": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "IDs of controls to add to the category."
+        },
+        "controlsToRemove": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "IDs of controls to remove from the category."
+        }
+      },
+      "required": [
+        "controlsToAdd",
+        "controlsToRemove"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ReorderTrustCenterControlsInput": {
+      "properties": {
+        "orderedControlIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Ordered list of all control IDs in the category representing the desired order."
+        }
+      },
+      "required": [
+        "orderedControlIds"
       ],
       "type": "object",
       "additionalProperties": false
@@ -1343,6 +2272,109 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "object",
       "additionalProperties": false
     },
+    "BulkTagControlsInput": {
+      "properties": {
+        "controlIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "IDs of the controls to tag. Maximum 100."
+        },
+        "tagCategory": {
+          "type": "string",
+          "description": "ID of the tag category."
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "IDs of the tags to add or remove."
+        }
+      },
+      "required": [
+        "controlIds",
+        "tagCategory",
+        "tags"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SetDataCollectedInput": {
+      "properties": {
+        "dataCollected": {
+          "items": {
+            "$ref": "#/components/schemas/DataCollectedInputItem"
+          },
+          "type": "array",
+          "description": "List of data-collected disclosures to set on the Trust Center."
+        },
+        "dataCollectedHeading": {
+          "type": "string",
+          "nullable": true,
+          "description": "Custom heading for the data collected section. If null is passed in, unsets the current heading."
+        }
+      },
+      "required": [
+        "dataCollected"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "DataCollectedInputItem": {
+      "properties": {
+        "dataCollected": {
+          "type": "string",
+          "description": "Name of the data type being disclosed."
+        },
+        "status": {
+          "$ref": "#/components/schemas/DataCollectedStatus",
+          "description": "Status of the data collection disclosure. Must be one of \"COLLECTED\", \"HIDDEN\", or \"NOT_COLLECTED\"."
+        }
+      },
+      "required": [
+        "dataCollected",
+        "status"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "DataCollectedStatus": {
+      "description": "Enum representing if and how the data collected is shown on the trust center",
+      "enum": [
+        "COLLECTED",
+        "HIDDEN",
+        "NOT_COLLECTED"
+      ],
+      "type": "string"
+    },
+    "AddTrustCenterFaqCategoryInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the category."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditTrustCenterFaqCategoryInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "New name for the category."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "AddOrEditTrustCenterFaqInput": {
       "properties": {
         "question": {
@@ -1352,11 +2384,58 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "answer": {
           "type": "string",
           "description": "The FAQ answer."
+        },
+        "categoryId": {
+          "type": "string",
+          "nullable": true,
+          "description": "The category to place this FAQ in. Pass null to move to uncategorized. Omit to leave unchanged (on update) or default to uncategorized (on create)."
         }
       },
       "required": [
         "question",
         "answer"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddTrustCenterResourceCategoryInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the category."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ReorderTrustCenterResourceCategoriesInput": {
+      "properties": {
+        "categoryIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Ordered list of all resource category IDs representing the desired order."
+        }
+      },
+      "required": [
+        "categoryIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditTrustCenterResourceCategoryInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "New name for the category."
+        }
+      },
+      "required": [
+        "name"
       ],
       "type": "object",
       "additionalProperties": false
@@ -1468,6 +2547,14 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "email": {
           "type": "string",
           "description": "Email of the subscriber."
+        },
+        "customerTrustAccountId": {
+          "type": "string",
+          "description": "Optional: Link subscriber to a customer trust account by ID."
+        },
+        "shouldSkipEmailVerification": {
+          "type": "boolean",
+          "description": "When true, the subscriber is created as already verified and no\nverification email is sent. Defaults to false."
         }
       },
       "required": [
@@ -1508,25 +2595,25 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         },
         "visibilityType": {
           "$ref": "#/components/schemas/UpdateVisibilityType",
-          "description": "Visibility type of the update. This field is in Beta and not widely used yet."
+          "description": "Visibility type of the update."
         },
         "notifiedEmails": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "Emails to notify about the update. This field is in Beta and not widely used yet."
+          "description": "Additional one-off email addresses to notify. These are always sent regardless of `notificationTarget`."
         },
         "notificationTarget": {
           "$ref": "#/components/schemas/UpdateNotificationTarget",
-          "description": "Target audience for notifications. Can hold a value of ALL, GROUPS, or NONE. This field is in Beta and not widely used yet."
+          "description": "Controls which Trust Center subscribers are notified.\n- `ALL`: notifies all active subscribers\n- `GROUPS`: notifies only subscribers in the specified `subscriberGroupIds`\n- `NONE`: no subscribers are notified\n\nNote: `notifiedEmails` are always sent regardless of this value."
         },
         "subscriberGroupIds": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "IDs of subscriber groups to notify. Required if notificationTarget is GROUPS. This field is in Beta and not widely used yet."
+          "description": "IDs of subscriber groups to notify. Required when `notificationTarget` is `GROUPS`."
         }
       },
       "required": [
@@ -1582,7 +2669,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         },
         "visibilityType": {
           "$ref": "#/components/schemas/UpdateVisibilityType",
-          "description": "Visibility type of the update. This field is in Beta and not widely used yet."
+          "description": "Visibility type of the update."
         }
       },
       "required": [
@@ -1594,6 +2681,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "additionalProperties": false
     },
     "SendTrustCenterUpdateNotificationsInput": {
+      "description": "Input for sending notifications to specific subscribers of a Trust Center update.\n\n**Recipient limit:** The total number of deduplicated recipient emails resolved from\nsubscriber groups, account filters, and additional emails must not exceed **5,000**.\nIf the resolved recipient count exceeds this limit, the request will return a **422** error.\nTo notify more recipients, narrow your filters or split across multiple requests.",
       "properties": {
         "emails": {
           "items": {
@@ -1608,13 +2696,130 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "type": "string"
           },
           "type": "array",
-          "description": "IDs of subscriber groups to notify.",
+          "description": "IDs of subscriber groups to notify. When `customerTrustAccounts` is also provided,\nonly subscribers in these groups whose linked account matches are notified.",
           "maxItems": 10
+        },
+        "customerTrustAccounts": {
+          "$ref": "#/components/schemas/CustomerTrustAccountsInput",
+          "description": "Optional account filters. When provided, only subscribers in `subscriberGroupIds`\nwhose linked account matches all specified filters are notified."
         }
       },
       "required": [
         "emails",
         "subscriberGroupIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomerTrustAccountsInput": {
+      "description": "Account selectors for narrowing `GROUPS` notifications to subscribers with a matching linked account.",
+      "properties": {
+        "customFieldsFilter": {
+          "items": {
+            "$ref": "#/components/schemas/CustomerTrustAccountCustomFieldFilter"
+          },
+          "type": "array",
+          "description": "Filter accounts by custom field label/value pairs.\nWhen `value` is an array, accounts matching any of the values are included.\nWhen multiple entries are provided, accounts must satisfy all of them.",
+          "example": [
+            {
+              "label": "enterprise_id",
+              "value": [
+                "ent_123",
+                "ent_456"
+              ]
+            }
+          ],
+          "maxItems": 10
+        },
+        "tagsByCategory": {
+          "items": {
+            "$ref": "#/components/schemas/TagsByCategoryInput"
+          },
+          "type": "array",
+          "description": "Narrow the candidate accounts resolved from `customFieldsFilter`\nto those with matching tags.\nWithin a category entry, accounts matching any of the `tagIds` are included.\nWhen multiple entries are provided, accounts must satisfy all of them.",
+          "example": [
+            {
+              "categoryId": "507f1f77bcf86cd799439011",
+              "tagIds": [
+                "507f1f77bcf86cd799439012"
+              ]
+            }
+          ],
+          "maxItems": 10
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomerTrustAccountCustomFieldFilter": {
+      "description": "A single custom field filter condition.",
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "The custom field label.",
+          "example": "enterprise_id"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "The value(s) to match against. Provide an array to match any of multiple values.",
+          "example": [
+            "ent_123",
+            "ent_456"
+          ],
+          "maxItems": 5000
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SetTrustCenterVideosInput": {
+      "properties": {
+        "videos": {
+          "items": {
+            "$ref": "#/components/schemas/SetTrustCenterVideoItem"
+          },
+          "type": "array",
+          "description": "The videos to display on the Trust Center. Replaces all existing videos."
+        }
+      },
+      "required": [
+        "videos"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SetTrustCenterVideoItem": {
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Full video URL (e.g. \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" or \"https://vimeo.com/123456\"). Supported platforms: YouTube, Vimeo."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the video."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the video."
+        }
+      },
+      "required": [
+        "url",
+        "title"
       ],
       "type": "object",
       "additionalProperties": false
@@ -1652,6 +2857,10 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "accessLevel": {
           "$ref": "#/components/schemas/ViewerAccessLevel",
           "description": "Access level for the viewer."
+        },
+        "customerTrustAccountId": {
+          "type": "string",
+          "description": "ID of a Customer Trust Account to associate with this viewer."
         }
       },
       "required": [
@@ -1663,6 +2872,46 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ],
       "type": "object",
       "additionalProperties": false
+    },
+    "UpdateTrustCenterViewerInput": {
+      "properties": {
+        "accessLevel": {
+          "$ref": "#/components/schemas/ViewerAccessLevel",
+          "description": "Access level for the viewer."
+        },
+        "resourceIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Identifiers for the resources that this viewer should have access to."
+        },
+        "expirationDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "The date access should expire for this viewer. Set to null to remove\nexpiration."
+        },
+        "isNdaRequired": {
+          "type": "boolean",
+          "description": "Whether to require an NDA for the viewer."
+        },
+        "customerTrustAccountId": {
+          "type": "string",
+          "nullable": true,
+          "description": "ID of a Customer Trust Account to associate with this viewer.\nSet to null to remove the association.\nOmit to leave unchanged."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VendorAssessmentTypeLifecycleStatus": {
+      "description": "The lifecycle status of a vendor assessment type:\n- ACTIVE: The assessment type is available for use.\n- ARCHIVED: The assessment type has been archived and is kept for historical reference.",
+      "enum": [
+        "ACTIVE",
+        "ARCHIVED"
+      ],
+      "type": "string"
     },
     "CreateVendorInput": {
       "properties": {
@@ -1684,7 +2933,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "accountManagerEmail": {
           "type": "string",
           "description": "Email of the external account manager for this vendor.",
-          "maxLength": 2000
+          "maxLength": 100
         },
         "securityOwnerUserId": {
           "type": "string",
@@ -1778,7 +3027,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "$ref": "#/components/schemas/CustomField"
           },
           "type": "array",
-          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors"
+          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/guides/use-custom-fields-with-vendors"
         },
         "frameworkScope": {
           "$ref": "#/components/schemas/VendorFrameworkScope",
@@ -1803,7 +3052,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "ONE_LOGIN",
         "OWA",
         "SSO",
-        "USERNAME_PASSWORD"
+        "USERNAME_PASSWORD",
+        "OTHER"
       ],
       "type": "string"
     },
@@ -2186,7 +3436,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "accountManagerEmail": {
           "type": "string",
           "description": "Email of the external account manager for this vendor.",
-          "maxLength": 2000
+          "maxLength": 100
         },
         "securityOwnerUserId": {
           "type": "string",
@@ -2264,7 +3514,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         },
         "status": {
           "$ref": "#/components/schemas/VendorStatus",
-          "description": "The current status of the vendor."
+          "description": "This field is ignored. Use `POST /vendors/{vendorId}/set-status` to change vendor status.",
+          "deprecated": true
         },
         "category": {
           "type": "string",
@@ -2313,7 +3564,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "$ref": "#/components/schemas/CustomField"
           },
           "type": "array",
-          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors"
+          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/guides/use-custom-fields-with-vendors"
         },
         "frameworkScope": {
           "$ref": "#/components/schemas/VendorFrameworkScope",
@@ -2322,6 +3573,15 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       },
       "type": "object",
       "additionalProperties": false
+    },
+    "AssessmentStatus": {
+      "description": "The lifecycle status of an assessment:\n- NOT_STARTED: The assessment has not yet been started.\n- IN_PROGRESS: The assessment is underway.\n- COMPLETED: The assessment has been completed.",
+      "enum": [
+        "NOT_STARTED",
+        "IN_PROGRESS",
+        "COMPLETED"
+      ],
+      "type": "string"
     },
     "CreateFindingInput": {
       "properties": {
@@ -2499,6 +3759,51 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "string",
       "description": "A marker or pointer, telling the API where to start fetching items for the subsequent page in a paginated dataset.\nNote that the requested page will not include the item that corresponds to this cursor but will start from the one immediately\nafter this cursor."
     },
+    "DuplicateAuditRequest": {
+      "description": "Request body for duplicating an IRL audit into a new audit engagement.",
+      "properties": {
+        "sourceAuditId": {
+          "type": "string",
+          "description": "ID of the source IRL audit to duplicate."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name for the new audit engagement."
+        },
+        "auditStartDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start of the audit window for the new audit."
+        },
+        "auditEndDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End of the audit window for the new audit."
+        },
+        "earlyAccessStartsAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When auditors gain access to the new audit."
+        },
+        "allowAuditorEmails": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Emails of auditors who may access the new audit. Minimum one entry required.\nEach email must match an active user in the authenticated audit firm's domain."
+        }
+      },
+      "required": [
+        "sourceAuditId",
+        "displayName",
+        "auditStartDate",
+        "auditEndDate",
+        "earlyAccessStartsAt",
+        "allowAuditorEmails"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "PageSize": {
       "type": "integer",
       "format": "int32",
@@ -2506,6 +3811,16 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "description": "Controls the maximum number of items returned in one response from the API.",
       "minimum": 1,
       "maximum": 100
+    },
+    "ApiCodeChangeSource": {
+      "type": "string",
+      "enum": [
+        "github",
+        "gitlab",
+        "bitbucket",
+        "azuredevops"
+      ],
+      "description": "Version control source service name for code changes."
     },
     "CreateCustomControlInput": {
       "properties": {
@@ -2648,6 +3963,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "MVSP",
         "NIS_2D",
         "NIST_171",
+        "NIST_171_R3",
         "NIST_53",
         "NIST_AI_RMF",
         "NIST_CSF",
@@ -2672,6 +3988,110 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "PROCESSOR"
       ],
       "type": "string"
+    },
+    "UpsertAuditControlAssessmentInput": {
+      "description": "Input for upserting a control's auditor assessment within an audit. Overwrites\nthe assessment for this control in the chosen program segment.",
+      "properties": {
+        "segmentId": {
+          "type": "string",
+          "description": "The program segment to assess. Required when the audit has more than one\nprogram segment. Optional on a single-program audit (the only program is\nused). Must be a program segment on the audit; system segments are rejected."
+        },
+        "assessmentState": {
+          "$ref": "#/components/schemas/AuditControlAssessmentState",
+          "description": "The assessment state to record. Must be one of the states valid for the\nsegment's framework; the request is rejected otherwise."
+        },
+        "justification": {
+          "type": "string",
+          "description": "Free-text reasoning for the assessment. Required, and at most 5000 characters."
+        },
+        "auditorEmail": {
+          "type": "string",
+          "description": "Email of the auditor performing the assessment. Must match an existing Vanta\nuser who belongs to the audit firm making the API request."
+        }
+      },
+      "required": [
+        "assessmentState",
+        "justification",
+        "auditorEmail"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AuditControlAssessmentState": {
+      "type": "string",
+      "enum": [
+        "IN_PLACE",
+        "NOT_IN_PLACE",
+        "PARTIAL",
+        "NOT_ASSESSED",
+        "CONFORMING",
+        "MINOR_NON_CONFORMITY",
+        "MAJOR_NON_CONFORMITY",
+        "SATISFIED",
+        "NOT_SATISFIED",
+        "OTHER_THAN_SATISFIED",
+        "TRUE",
+        "FALSE"
+      ],
+      "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); a given audit's\nframework only uses its own subset. `NOT_ASSESSED` is shared by all\nframeworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept."
+    },
+    "AddAuditControlCommentInput": {
+      "description": "Comments enable auditors and customers to collaborate on a control within an\naudit. All comments are immediately visible to authorized parties once created.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the control."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+        },
+        "creationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the comment was created in the external audit management system.\nThis allows synchronizing comment timestamps from external systems.\nFormat: ISO 8601 UTC timestamp."
+        }
+      },
+      "required": [
+        "text",
+        "email",
+        "creationDate"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateAuditControlCommentInput": {
+      "description": "Updates an existing comment on a control.\nOnly the original author of the comment can update it.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the control."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+        }
+      },
+      "required": [
+        "text",
+        "email"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "DeleteAuditControlCommentInput": {
+      "description": "Deletes an existing comment on a control.\nOnly the original author of the comment can delete it.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "type": "object",
+      "additionalProperties": false
     },
     "CreateCustomEvidenceRequestInput": {
       "properties": {
@@ -2727,7 +4147,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "P1M",
         "P3M",
         "P6M",
-        "P1Y"
+        "P1Y",
+        "P2Y"
       ],
       "type": "string"
     },
@@ -2835,6 +4256,13 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           "format": "date-time",
           "nullable": true,
           "description": "Start date of the audit period. Evidence before this date may not be accepted.\nNull or omitted if not restricted.\nFormat: ISO 8601 UTC timestamp."
+        },
+        "additionalControlIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control.\nOmit or pass an empty array for no direct control links."
         }
       },
       "required": [
@@ -2899,6 +4327,17 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "title": {
           "type": "string",
           "description": "Short, descriptive title."
+        },
+        "cadence": {
+          "$ref": "#/components/schemas/InformationRequestCadence",
+          "description": "How frequently this request recurs."
+        },
+        "additionalControlIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Replaces the existing set: pass the complete\ndesired list, an empty array to clear all direct control links, or omit to\nleave them unchanged. Each must be the `id` of an existing control in the\ncustomer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control."
         }
       },
       "type": "object",
@@ -2984,7 +4423,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "LINK",
         "VANTA_DOCUMENT",
         "VANTA_POLICY",
-        "VANTA_TEST"
+        "VANTA_TEST",
+        "VANTA_TEST_SNAPSHOT"
       ]
     },
     "FlagInformationRequestEvidenceInput": {
@@ -3005,6 +4445,101 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ],
       "type": "object",
       "additionalProperties": false
+    },
+    "AuditIntegrationTag": {
+      "enum": [
+        "ACCESS",
+        "COMPUTERS",
+        "CUSTOM_RESOURCE",
+        "DATA_LOSS_PREVENTION",
+        "DOCUMENTS",
+        "DOCUMENT_UPLOAD",
+        "FRAMEWORK",
+        "GROUPS",
+        "INVENTORY",
+        "NOTIFICATIONS",
+        "PEOPLE",
+        "POLICIES",
+        "SECURITY_AWARENESS_TRAINING",
+        "SECURITY_SCANNER_ALERTS",
+        "SSO",
+        "TASK_CREATION",
+        "TASK_TRACKING",
+        "TRUST_CENTER",
+        "VENDOR_DISCOVERY",
+        "VENDOR_PROCUREMENT",
+        "VULNERABILITIES"
+      ],
+      "type": "string"
+    },
+    "AuditIntegrationCategory": {
+      "enum": [
+        "ATS_MERGE_ACCOUNT",
+        "BACKGROUND_CHECK_SERVICE",
+        "CLOUD_PROVIDER",
+        "COMMUNICATION_PLATFORM",
+        "CRM_MERGE_ACCOUNT",
+        "CRM_PLATFORM",
+        "DATASTORE_PROVIDER",
+        "DATA_LOSS_PREVENTION",
+        "DATA_WAREHOUSE_PROVIDER",
+        "DOCUMENT_MANAGEMENT_TOOL",
+        "ENDPOINT_SECURITY_TOOL",
+        "HR_PROVIDER",
+        "IDENTITY_PROVIDER",
+        "INCIDENT_MANAGEMENT_TOOL",
+        "MOBILE_DEVICE_MANAGEMENT_TOOL",
+        "MONITORING_SERVICE",
+        "OTHER_INTEGRATION",
+        "SECURITY_AWARENESS_TRAINING_PROVIDER",
+        "SECURITY_SCANNER_ALERTS",
+        "TASK_TRACKER",
+        "VERSION_CONTROL_SYSTEM",
+        "VULNERABILITY_SCANNER"
+      ],
+      "type": "string"
+    },
+    "IssueSnapshotItemOrderBy": {
+      "type": "string",
+      "enum": [
+        "createdAt",
+        "lastModifiedAt",
+        "detectedAt"
+      ],
+      "description": "Allowed values for the `orderBy` query parameter on issue snapshot item endpoints."
+    },
+    "OrderDirection": {
+      "type": "string",
+      "enum": [
+        "asc",
+        "desc"
+      ],
+      "description": "`\"asc\"` for ascending, `\"desc\"` for descending."
+    },
+    "AuditVendorStatus": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "ARCHIVED",
+        "IN_PROCUREMENT"
+      ]
+    },
+    "AuditVendorRiskLevel": {
+      "type": "string",
+      "enum": [
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "UNSCORED"
+      ]
+    },
+    "VendorOrderBy": {
+      "type": "string",
+      "enum": [
+        "name",
+        "inherentRisk"
+      ]
     },
     "ComputerStatusFilter": {
       "description": "Enum representing computer compliance statuses that can be utilized as a filter. The meanings are as follows:\nAV_NOT_INSTALLED: The computer does not have antivirus software installed.\nHD_NOT_ENCRYPTED: The computer's harddrive is not encrypted.\nLAST_CHECK_OVER_14_DAYS: No data has been received from computer for over 14 days.\nPWM_NOT_INSTALLED: The computer does not have a password manager installed.\nSCREENLOCK_NOT_CONFIGURED: The computer does not have screenlock configured appropriately.",
@@ -3053,6 +4588,59 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ],
       "type": "string"
     },
+    "AccountAccessStatus": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "DEACTIVATED",
+        "UNKNOWN"
+      ],
+      "description": "Account status values for account access records.\nUnified status enum that covers all service types."
+    },
+    "GroupOrderBy": {
+      "type": "string",
+      "enum": [
+        "name",
+        "members",
+        "source",
+        "tasksLastUpdated",
+        "pointOfContact"
+      ]
+    },
+    "PeopleEmploymentStatus": {
+      "type": "string",
+      "enum": [
+        "CURRENTLY_EMPLOYED",
+        "INACTIVE_EMPLOYEE",
+        "NOT_PEOPLE",
+        "ON_LEAVE",
+        "PREVIOUSLY_EMPLOYED",
+        "UPCOMING_EMPLOYEE"
+      ],
+      "description": "Employment status filter for people queries."
+    },
+    "PeopleOrderBy": {
+      "type": "string",
+      "enum": [
+        "name",
+        "employmentStatus"
+      ]
+    },
+    "RiskOrderBy": {
+      "type": "string",
+      "enum": [
+        "inherentRisk",
+        "riskId",
+        "riskScenario",
+        "treatment",
+        "residualRisk",
+        "reviewStatus",
+        "owner",
+        "categories",
+        "ciaCategories",
+        "identified"
+      ]
+    },
     "ExternalFindingSeverity": {
       "description": "ExternalFindingSeverity describes the severity of an external finding (Vulnerability or Security Alert)",
       "enum": [
@@ -3083,6 +4671,164 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
 };
 
 export const generatedOperations: GeneratedOperation[] = [
+  {
+    "toolName": "upload_contract",
+    "source": "manage",
+    "method": "post",
+    "path": "/contracts",
+    "operationId": "UploadContract",
+    "summary": "Upload contract",
+    "description": "Upload contract",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "multipart/form-data",
+      "kind": "multipart",
+      "fields": [
+        {
+          "name": "file",
+          "required": true,
+          "description": "The contract file to upload. Only PDF files are accepted.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary",
+            "description": "The contract file to upload. Only PDF files are accepted."
+          }
+        },
+        {
+          "name": "executedDate",
+          "required": false,
+          "description": "ISO 8601 date indicating when the contract was executed.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "ISO 8601 date indicating when the contract was executed."
+          }
+        },
+        {
+          "name": "accountId",
+          "required": false,
+          "description": "ID of the customer trust account to associate with this contract.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "ID of the customer trust account to associate with this contract."
+          }
+        },
+        {
+          "name": "externalId",
+          "required": false,
+          "description": "Stable source-system identifier used to reject duplicate contract uploads; repeats return 409. Use the upstream document or record ID when available, such as the Microsoft Graph DriveItem ID for SharePoint or the Ironclad record ID for Ironclad. If there is no source system, generate and store a durable idempotency key. Maximum 256 characters.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Stable source-system identifier used to reject duplicate contract uploads; repeats return 409. Use the upstream document or record ID when available, such as the Microsoft Graph DriveItem ID for SharePoint or the Ironclad record ID for Ironclad. If there is no source system, generate and store a durable idempotency key. Maximum 256 characters."
+          }
+        }
+      ],
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "The contract file to upload. Only PDF files are accepted."
+          },
+          "executedDate": {
+            "type": "string",
+            "description": "ISO 8601 date indicating when the contract was executed."
+          },
+          "accountId": {
+            "type": "string",
+            "description": "ID of the customer trust account to associate with this contract."
+          },
+          "externalId": {
+            "type": "string",
+            "description": "Stable source-system identifier used to reject duplicate contract uploads; repeats return 409. Use the upstream document or record ID when available, such as the Microsoft Graph DriveItem ID for SharePoint or the Ironclad record ID for Ironclad. If there is no source system, generate and store a durable idempotency key. Maximum 256 characters."
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
+    }
+  },
+  {
+    "toolName": "list_contracts",
+    "source": "manage",
+    "method": "get",
+    "path": "/contracts",
+    "operationId": "ListContracts",
+    "summary": "List contracts",
+    "description": "List contracts",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "get_contract",
+    "source": "manage",
+    "method": "get",
+    "path": "/contracts/{contractId}",
+    "operationId": "GetContract",
+    "summary": "Get contract",
+    "description": "Get contract",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "contractId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "delete_contract",
+    "source": "manage",
+    "method": "delete",
+    "path": "/contracts/{contractId}",
+    "operationId": "DeleteContract",
+    "summary": "Delete contract",
+    "description": "Delete contract",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "contractId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
   {
     "toolName": "create_custom_control",
     "source": "manage",
@@ -3303,6 +5049,36 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "list_deactivated_controls",
+    "source": "manage",
+    "method": "get",
+    "path": "/controls/deactivated-controls",
+    "operationId": "ListDeactivatedControls",
+    "summary": "List deactivated controls",
+    "description": "List deactivated controls",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "update_control_metadata",
     "source": "manage",
     "method": "patch",
@@ -3401,8 +5177,8 @@ export const generatedOperations: GeneratedOperation[] = [
     "method": "delete",
     "path": "/controls/{controlId}",
     "operationId": "DeleteControl",
-    "summary": "Remove a control",
-    "description": "Remove a control",
+    "summary": "Deactivates a control",
+    "description": "Deactivates a control",
     "isMutation": true,
     "parameters": [
       {
@@ -3726,6 +5502,33 @@ export const generatedOperations: GeneratedOperation[] = [
         "schema": {
           "$ref": "#/components/schemas/PageCursor"
         }
+      },
+      {
+        "name": "searchString",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "isAutoApprovalEnabled",
+        "in": "query",
+        "required": false,
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "customFieldsFilter",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -3778,6 +5581,30 @@ export const generatedOperations: GeneratedOperation[] = [
           "schema": {
             "$ref": "#/components/schemas/CustomerTrustAccountAccessConfigInput"
           }
+        },
+        {
+          "name": "customFields",
+          "required": false,
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "name": "tagsByCategory",
+          "required": false,
+          "description": "Tags to assign to this account, grouped by category",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagsByCategoryInput"
+            },
+            "type": "array",
+            "description": "Tags to assign to this account, grouped by category"
+          }
         }
       ]
     }
@@ -3802,6 +5629,135 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       }
     ]
+  },
+  {
+    "toolName": "delete_customer_trust_account",
+    "source": "manage",
+    "method": "delete",
+    "path": "/customer-trust/accounts/{accountId}",
+    "operationId": "DeleteCustomerTrustAccount",
+    "summary": "Delete customer trust account",
+    "description": "Delete customer trust account",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "accountId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "update_customer_trust_account",
+    "source": "manage",
+    "method": "patch",
+    "path": "/customer-trust/accounts/{accountId}",
+    "operationId": "UpdateCustomerTrustAccount",
+    "summary": "Update customer trust account",
+    "description": "Update customer trust account",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "accountId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/EditCustomerTrustAccountInput"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "required": false,
+          "description": "Updated name for the account",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Updated name for the account"
+          }
+        },
+        {
+          "name": "emailDomain",
+          "required": false,
+          "description": "Updated primary email domain for the account",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Updated primary email domain for the account"
+          }
+        },
+        {
+          "name": "customFields",
+          "required": false,
+          "description": "Updated custom field values for the account",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "type": "array",
+            "description": "Updated custom field values for the account"
+          }
+        },
+        {
+          "name": "tagsByCategory",
+          "required": false,
+          "description": "Tags to assign to this account, grouped by category. Replaces existing tags per category.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagsByCategoryInput"
+            },
+            "type": "array",
+            "description": "Tags to assign to this account, grouped by category. Replaces existing tags per category."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "create_deletion_request",
+    "source": "manage",
+    "method": "post",
+    "path": "/customer-trust/deletion-requests",
+    "operationId": "CreateDeletionRequest",
+    "summary": "Create data deletion request",
+    "description": "Create data deletion request",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateDeletionRequestInput"
+      },
+      "fields": [
+        {
+          "name": "email",
+          "required": true,
+          "description": "Email address of the individual requesting data deletion.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email address of the individual requesting data deletion."
+          }
+        }
+      ]
+    }
   },
   {
     "toolName": "list_questionnaires",
@@ -3835,6 +5791,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "q",
         "in": "query",
         "required": false,
+        "description": "Filter questionnaires by display name (case-insensitive, partial match).",
         "kind": "string",
         "schema": {
           "type": "string"
@@ -3844,6 +5801,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "statusMatchesAny",
         "in": "query",
         "required": false,
+        "description": "Filter questionnaires matching any of the provided statuses.",
         "kind": "array",
         "schema": {
           "type": "array",
@@ -3857,11 +5815,12 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "typeMatchesAny",
         "in": "query",
         "required": false,
+        "description": "Filter questionnaires matching any of the provided types.",
         "kind": "array",
         "schema": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/QuestionnaireType"
+            "$ref": "#/components/schemas/CustomerTrustQuestionnaireType"
           }
         },
         "itemKind": "string"
@@ -3870,6 +5829,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "createdAfter",
         "in": "query",
         "required": false,
+        "description": "Filter to questionnaires created after this date (ISO 8601 string).",
         "kind": "string",
         "schema": {
           "type": "string"
@@ -3879,6 +5839,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "createdBefore",
         "in": "query",
         "required": false,
+        "description": "Filter to questionnaires created before this date (ISO 8601 string).",
         "kind": "string",
         "schema": {
           "type": "string"
@@ -3888,6 +5849,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "ownerIdMatchesAny",
         "in": "query",
         "required": false,
+        "description": "Filter to questionnaires owned by any of the provided user IDs.",
         "kind": "array",
         "schema": {
           "type": "array",
@@ -3901,6 +5863,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "approverIdMatchesAny",
         "in": "query",
         "required": false,
+        "description": "Filter to questionnaires with an approver matching any of the provided user IDs.",
         "kind": "array",
         "schema": {
           "type": "array",
@@ -3913,13 +5876,49 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "list_assignable_users",
+    "source": "manage",
+    "method": "get",
+    "path": "/customer-trust/questionnaires/assignable-users",
+    "operationId": "ListAssignableUsers",
+    "summary": "List assignable users",
+    "description": "List assignable users",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "role",
+        "in": "query",
+        "required": false,
+        "description": "Filter by role: \"owner\" or \"approver\".",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/QuestionnaireAssignableUserRole"
+        },
+        "enumValues": [
+          "owner",
+          "approver"
+        ]
+      },
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Optional search string to filter users by name or email.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "initiate_export",
     "source": "manage",
     "method": "post",
     "path": "/customer-trust/questionnaires/exports",
-    "operationId": "InitiateExport",
-    "summary": "Initiate questionnaire export",
-    "description": "Initiate questionnaire export",
+    "operationId": "CreateQuestionnaireExport",
+    "summary": "Create questionnaire export",
+    "description": "Create questionnaire export",
     "isMutation": true,
     "parameters": [],
     "requestBody": {
@@ -3927,7 +5926,7 @@ export const generatedOperations: GeneratedOperation[] = [
       "contentType": "application/json",
       "kind": "json",
       "schema": {
-        "$ref": "#/components/schemas/CustomerTrustExportInput"
+        "$ref": "#/components/schemas/CustomerTrustCreateQuestionnaireExportInput"
       },
       "fields": [
         {
@@ -4008,81 +6007,101 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "displayName",
           "required": true,
+          "description": "Display name for the questionnaire.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name for the questionnaire."
           }
         },
         {
           "name": "ownerAssignment",
           "required": false,
+          "description": "Owner to assign, as a JSON string: {\"type\": \"User\" | \"Team\", \"id\": \"<id>\"}.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "Owner to assign, as a JSON string: {\"type\": \"User\" | \"Team\", \"id\": \"<id>\"}."
           }
         },
         {
           "name": "approverAssignment",
           "required": false,
+          "description": "Approver to assign, as a JSON string: {\"type\": \"User\" | \"Team\", \"id\": \"<id>\"}.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "Approver to assign, as a JSON string: {\"type\": \"User\" | \"Team\", \"id\": \"<id>\"}."
           }
         },
         {
           "name": "description",
           "required": false,
+          "description": "Description of the questionnaire.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "Description of the questionnaire."
           }
         },
         {
           "name": "companyUrl",
           "required": false,
+          "description": "URL of the company associated with this questionnaire.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "URL of the company associated with this questionnaire."
           }
         },
         {
           "name": "dueDate",
           "required": false,
+          "description": "Due date for questionnaire completion.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "Due date for questionnaire completion."
           }
         },
         {
           "name": "customerTrustAccountId",
           "required": false,
+          "description": "ID of the customer trust account to associate with this questionnaire.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the customer trust account to associate with this questionnaire."
           }
         },
         {
-          "name": "tagAndCategoryIds",
+          "name": "includeUntaggedEntitiesForCategoryIds",
           "required": false,
+          "description": "Comma-separated category IDs for which to include untagged entities.",
           "kind": "string",
           "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "name": "includeUntagged",
-          "required": false,
-          "kind": "string",
-          "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "Comma-separated category IDs for which to include untagged entities."
           }
         },
         {
           "name": "metadata",
           "required": false,
+          "description": "Custom key-value pairs, as a JSON string array: [{\"key\": \"<key>\", \"value\": \"<value>\"}]. Keys and values may contain alphanumeric characters, hyphens, underscores, and periods.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "Custom key-value pairs, as a JSON string array: [{\"key\": \"<key>\", \"value\": \"<value>\"}]. Keys and values may contain alphanumeric characters, hyphens, underscores, and periods."
+          }
+        },
+        {
+          "name": "tagAndCategoryIds",
+          "required": false,
+          "description": "Tags to assign, as a JSON string array: [{\"categoryId\": \"<id>\", \"tagId\": \"<id>\"}]. Replaces all existing tags.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Tags to assign, as a JSON string array: [{\"categoryId\": \"<id>\", \"tagId\": \"<id>\"}]. Replaces all existing tags."
           }
         }
       ],
@@ -4096,34 +6115,44 @@ export const generatedOperations: GeneratedOperation[] = [
             "format": "binary"
           },
           "displayName": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name for the questionnaire."
           },
           "ownerAssignment": {
-            "type": "string"
+            "type": "string",
+            "description": "Owner to assign, as a JSON string: {\"type\": \"User\" | \"Team\", \"id\": \"<id>\"}."
           },
           "approverAssignment": {
-            "type": "string"
+            "type": "string",
+            "description": "Approver to assign, as a JSON string: {\"type\": \"User\" | \"Team\", \"id\": \"<id>\"}."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Description of the questionnaire."
           },
           "companyUrl": {
-            "type": "string"
+            "type": "string",
+            "description": "URL of the company associated with this questionnaire."
           },
           "dueDate": {
-            "type": "string"
+            "type": "string",
+            "description": "Due date for questionnaire completion."
           },
           "customerTrustAccountId": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the customer trust account to associate with this questionnaire."
           },
-          "tagAndCategoryIds": {
-            "type": "string"
-          },
-          "includeUntagged": {
-            "type": "string"
+          "includeUntaggedEntitiesForCategoryIds": {
+            "type": "string",
+            "description": "Comma-separated category IDs for which to include untagged entities."
           },
           "metadata": {
-            "type": "string"
+            "type": "string",
+            "description": "Custom key-value pairs, as a JSON string array: [{\"key\": \"<key>\", \"value\": \"<value>\"}]. Keys and values may contain alphanumeric characters, hyphens, underscores, and periods."
+          },
+          "tagAndCategoryIds": {
+            "type": "string",
+            "description": "Tags to assign, as a JSON string array: [{\"categoryId\": \"<id>\", \"tagId\": \"<id>\"}]. Replaces all existing tags."
           }
         },
         "required": [
@@ -4154,17 +6183,21 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "displayName",
           "required": true,
+          "description": "Display name for the questionnaire.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name for the questionnaire."
           }
         },
         {
           "name": "url",
           "required": true,
+          "description": "The portal URL to create the questionnaire from.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "The portal URL to create the questionnaire from."
           }
         },
         {
@@ -4172,7 +6205,8 @@ export const generatedOperations: GeneratedOperation[] = [
           "required": false,
           "kind": "object",
           "schema": {
-            "$ref": "#/components/schemas/ActorAssignmentInput"
+            "$ref": "#/components/schemas/ActorAssignmentInput",
+            "description": "Actor to assign as the owner (user or team)."
           }
         },
         {
@@ -4180,73 +6214,88 @@ export const generatedOperations: GeneratedOperation[] = [
           "required": false,
           "kind": "object",
           "schema": {
-            "$ref": "#/components/schemas/ActorAssignmentInput"
+            "$ref": "#/components/schemas/ActorAssignmentInput",
+            "description": "Actor to assign as the approver (user or team)."
           }
         },
         {
           "name": "companyUrl",
           "required": false,
+          "description": "URL of the company associated with this questionnaire.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "URL of the company associated with this questionnaire."
           }
         },
         {
           "name": "customerTrustAccountId",
           "required": false,
+          "description": "ID of the customer trust account to associate with this questionnaire.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the customer trust account to associate with this questionnaire."
           }
         },
         {
           "name": "description",
           "required": false,
+          "description": "Description of the questionnaire.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "Description of the questionnaire."
           }
         },
         {
           "name": "dueDate",
           "required": false,
+          "description": "Due date for questionnaire completion (ISO 8601).",
           "kind": "string",
           "schema": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Due date for questionnaire completion (ISO 8601)."
           }
         },
         {
           "name": "metadata",
           "required": false,
+          "description": "Custom key-value pairs. Keys and values may contain alphanumeric characters, hyphens, underscores, and periods. Maximum 30 entries.",
           "kind": "array",
           "schema": {
             "items": {
               "$ref": "#/components/schemas/QuestionnaireMetadata"
             },
-            "type": "array"
+            "type": "array",
+            "description": "Custom key-value pairs. Keys and values may contain alphanumeric characters, hyphens, underscores, and periods. Maximum 30 entries."
           }
         },
         {
-          "name": "tagAndCategoryIds",
+          "name": "includeUntaggedEntitiesForCategoryIds",
           "required": false,
-          "kind": "array",
-          "schema": {
-            "items": {
-              "$ref": "#/components/schemas/TagInput"
-            },
-            "type": "array"
-          }
-        },
-        {
-          "name": "includeUntagged",
-          "required": false,
+          "description": "Category IDs for which to include untagged entities.",
           "kind": "array",
           "schema": {
             "items": {
               "type": "string"
             },
-            "type": "array"
+            "type": "array",
+            "description": "Category IDs for which to include untagged entities."
+          }
+        },
+        {
+          "name": "tagAndCategoryIds",
+          "required": false,
+          "description": "Tags to assign to the questionnaire. Each entry must include a categoryId and tagId. Replaces all existing tags.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array",
+            "description": "Tags to assign to the questionnaire. Each entry must include a categoryId and tagId. Replaces all existing tags."
           }
         }
       ]
@@ -4398,14 +6447,55 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "tagAndCategoryIds",
           "required": false,
-          "description": "Tag and category ID pairs",
+          "description": "Tags to assign to the questionnaire. Each entry must include a categoryId and tagId. Replaces all existing tags.",
           "kind": "array",
           "schema": {
             "items": {
               "$ref": "#/components/schemas/TagInput"
             },
             "type": "array",
-            "description": "Tag and category ID pairs"
+            "description": "Tags to assign to the questionnaire. Each entry must include a categoryId and tagId. Replaces all existing tags."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "approve_questionnaire",
+    "source": "manage",
+    "method": "post",
+    "path": "/customer-trust/questionnaires/{questionnaireId}/approve",
+    "operationId": "ApproveQuestionnaire",
+    "summary": "Approve questionnaire",
+    "description": "Approve questionnaire",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "questionnaireId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/ApproveQuestionnaireRequest"
+      },
+      "fields": [
+        {
+          "name": "statusChangeMessage",
+          "required": false,
+          "description": "Optional message describing the reason for approval.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Optional message describing the reason for approval."
           }
         }
       ]
@@ -4442,15 +6532,320 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "shouldSyncApprovedToAnswerLibrary",
           "required": false,
-          "description": "Whether to sync approved answers to the answer library.\nDefaults to true. Silently set to false for non-English FILE/DOCUMENT questionnaires.",
+          "description": "Whether to sync approved answers to the answer library.\nDefaults to true. Ignored for non-English SPREADSHEET/DOCUMENT questionnaires.",
           "kind": "boolean",
           "schema": {
             "type": "boolean",
-            "description": "Whether to sync approved answers to the answer library.\nDefaults to true. Silently set to false for non-English FILE/DOCUMENT questionnaires."
+            "description": "Whether to sync approved answers to the answer library.\nDefaults to true. Ignored for non-English SPREADSHEET/DOCUMENT questionnaires."
           }
         }
       ]
     }
+  },
+  {
+    "toolName": "list_questionnaire_responses",
+    "source": "manage",
+    "method": "get",
+    "path": "/customer-trust/questionnaires/{questionnaireId}/responses",
+    "operationId": "ListQuestionnaireResponses",
+    "summary": "List questionnaire responses",
+    "description": "List questionnaire responses",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "questionnaireId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Filter responses by question text (case-insensitive, partial match).",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "get_questionnaire_response",
+    "source": "manage",
+    "method": "get",
+    "path": "/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}",
+    "operationId": "GetQuestionnaireResponse",
+    "summary": "Get questionnaire response",
+    "description": "Get questionnaire response",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "questionnaireId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "responseId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "update_questionnaire_response_content",
+    "source": "manage",
+    "method": "patch",
+    "path": "/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}",
+    "operationId": "UpdateQuestionnaireResponseContent",
+    "summary": "Update questionnaire response content",
+    "description": "Update questionnaire response content",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "questionnaireId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "responseId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateQuestionnaireResponseContentArgs"
+      },
+      "fields": [
+        {
+          "name": "answerPartsValues",
+          "required": true,
+          "description": "Construct a type with a set of properties K of type T",
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/Record_string.unknown_",
+            "description": "Map of answer part id -> value, matching the shape of the\n`answerPartsValues` read field. Values must be string, number,\nboolean, null, or string[]. A null value clears that part's value;\nids omitted from the map are left unchanged."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "update_questionnaire_response_owner",
+    "source": "manage",
+    "method": "patch",
+    "path": "/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}/owner",
+    "operationId": "UpdateQuestionnaireResponseOwner",
+    "summary": "Update questionnaire response owner",
+    "description": "Update questionnaire response owner",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "questionnaireId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "responseId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateQuestionnaireResponseOwnerArgs"
+      },
+      "fields": [
+        {
+          "name": "ownerAssignment",
+          "required": true,
+          "description": "New owner, or null to clear the current owner.",
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UpdateActorAssignment"
+              }
+            ],
+            "nullable": true,
+            "description": "New owner, or null to clear the current owner."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_tag_categories",
+    "source": "manage",
+    "method": "get",
+    "path": "/customer-trust/tag-categories",
+    "operationId": "ListTagCategories",
+    "summary": "List tag categories",
+    "description": "List tag categories",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "productContextIdsMatchesAny",
+        "in": "query",
+        "required": false,
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/CustomerTrustProductContextIdFilter"
+          }
+        },
+        "itemKind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "get_tags_for_category",
+    "source": "manage",
+    "method": "get",
+    "path": "/customer-trust/tag-categories/{tagCategoryId}",
+    "operationId": "GetTagsForCategory",
+    "summary": "Get tags for category",
+    "description": "Get tags for category",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "tagCategoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "add_tag_category_product_context",
+    "source": "manage",
+    "method": "post",
+    "path": "/customer-trust/tag-categories/{tagCategoryId}/product-contexts",
+    "operationId": "AddTagCategoryProductContext",
+    "summary": "Enable tag category for product context",
+    "description": "Enable tag category for product context",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "tagCategoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddTagCategoryProductContextInput"
+      },
+      "fields": [
+        {
+          "name": "productContextId",
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/CustomerTrustProductContextIdWritable",
+            "description": "Product context to enable this tag category for."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "remove_tag_category_product_context",
+    "source": "manage",
+    "method": "delete",
+    "path": "/customer-trust/tag-categories/{tagCategoryId}/product-contexts/{productContextId}",
+    "operationId": "RemoveTagCategoryProductContext",
+    "summary": "Disable tag category for product context",
+    "description": "Disable tag category for product context",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "tagCategoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "productContextId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/CustomerTrustProductContextIdWritable"
+        },
+        "enumValues": [
+          "EXTERNAL_TRUST_CENTER",
+          "DOCUMENT_SHARING",
+          "CONTROL_SHARING"
+        ]
+      }
+    ]
   },
   {
     "toolName": "list_discovered_vendors",
@@ -4607,9 +7002,9 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "cadence",
           "required": true,
-          "kind": "string",
+          "kind": "unknown",
           "schema": {
-            "$ref": "#/components/schemas/RecurrenceDuration",
+            "$ref": "#/components/schemas/CadenceType",
             "description": "How often the document needs to be renewed.\n\nNever: P0D - The document does not need to be renewed.\nDaily: P1D - The document needs to be renewed daily.\nWeekly: P1W - The document needs to be renewed weekly.\nMonthly: P1M - The document needs to be renewed monthly.\nQuarterly: P3M - The document needs to be renewed quarterly.\nBiannually: P6M - The document needs to be renewed biannually.\nAnnually: P1Y - The document needs to be renewed annually."
           }
         },
@@ -5159,6 +7554,47 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "list_event_logs",
+    "source": "manage",
+    "method": "get",
+    "path": "/event-logs",
+    "operationId": "ListEventLogs",
+    "summary": "List event logs",
+    "description": "List event logs",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "startDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to event logs created at or after this ISO 8601 timestamp.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "list_frameworks",
     "source": "manage",
     "method": "get",
@@ -5249,6 +7685,78 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "create_group",
+    "source": "manage",
+    "method": "post",
+    "path": "/groups",
+    "operationId": "CreateGroup",
+    "summary": "Create group",
+    "description": "Create group",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "properties": {
+          "pointOfContactEmail": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email address of the group's point of contact. Must be an active administrator."
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Description of the group."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name for the group. Must not duplicate an existing group's name."
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "fields": [
+        {
+          "name": "pointOfContactEmail",
+          "required": false,
+          "description": "Email address of the group's point of contact. Must be an active administrator.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email address of the group's point of contact. Must be an active administrator."
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "Description of the group.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Description of the group."
+          }
+        },
+        {
+          "name": "name",
+          "required": true,
+          "description": "Display name for the group. Must not duplicate an existing group's name.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Display name for the group. Must not duplicate an existing group's name."
+          }
+        }
+      ]
+    }
+  },
+  {
     "toolName": "list_person_groups",
     "source": "manage",
     "method": "get",
@@ -5277,6 +7785,187 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       }
     ]
+  },
+  {
+    "toolName": "import_idp_groups",
+    "source": "manage",
+    "method": "post",
+    "path": "/groups/import-from-idp",
+    "operationId": "ImportIdpGroups",
+    "summary": "Import IdP groups",
+    "description": "Import IdP groups",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "properties": {
+          "idpGroupIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IdP-group resource IDs to import.",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "idpGroupIds"
+        ],
+        "type": "object"
+      },
+      "fields": [
+        {
+          "name": "idpGroupIds",
+          "required": true,
+          "description": "IdP-group resource IDs to import.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IdP-group resource IDs to import.",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_importable_idp_groups",
+    "source": "manage",
+    "method": "get",
+    "path": "/groups/importable-idp-groups",
+    "operationId": "ListImportableIdpGroups",
+    "summary": "List importable IdP groups",
+    "description": "List importable IdP groups",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "integrationId",
+        "in": "query",
+        "required": false,
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "update_group",
+    "source": "manage",
+    "method": "patch",
+    "path": "/groups/{groupId}",
+    "operationId": "UpdateGroup",
+    "summary": "Update group",
+    "description": "Update group",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "groupId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "properties": {
+          "pointOfContactEmail": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email of an active Vanta user with the Admin role in the organization. Omit to preserve; pass null to clear."
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "New description. Omit to preserve; pass null to clear."
+          },
+          "name": {
+            "type": "string",
+            "description": "New display name. Omit to preserve. Names are trimmed, must be non-empty and unique, and cannot change for an IdP-managed group."
+          }
+        },
+        "type": "object"
+      },
+      "fields": [
+        {
+          "name": "pointOfContactEmail",
+          "required": false,
+          "description": "Email of an active Vanta user with the Admin role in the organization. Omit to preserve; pass null to clear.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email of an active Vanta user with the Admin role in the organization. Omit to preserve; pass null to clear."
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "New description. Omit to preserve; pass null to clear.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "New description. Omit to preserve; pass null to clear."
+          }
+        },
+        {
+          "name": "name",
+          "required": false,
+          "description": "New display name. Omit to preserve. Names are trimmed, must be non-empty and unique, and cannot change for an IdP-managed group.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "New display name. Omit to preserve. Names are trimmed, must be non-empty and unique, and cannot change for an IdP-managed group."
+          }
+        }
+      ]
+    }
   },
   {
     "toolName": "get_group",
@@ -5423,7 +8112,8 @@ export const generatedOperations: GeneratedOperation[] = [
       "schema": {
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the person to add to the group."
           }
         },
         "required": [
@@ -5435,9 +8125,11 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "id",
           "required": true,
+          "description": "ID of the person to add to the group.",
           "kind": "string",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the person to add to the group."
           }
         }
       ]
@@ -5965,6 +8657,1494 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "list_issues",
+    "source": "manage",
+    "method": "get",
+    "path": "/issues",
+    "operationId": "List",
+    "summary": "List issues",
+    "description": "List issues",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Full-text search across issue title and description.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "readableIssueIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues matching any of the provided readable issue IDs.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "statusMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues matching any of the provided statuses.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/IssueStatus"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "severityMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues matching any of the provided severities.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/IssueSeverity"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "sourceMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues matching any of the provided sources.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/SourceType"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "typeMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues matching any of the provided types.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/StandardIssueType"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "ownerIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues owned by any of the provided owner IDs.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "templateMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues matching any of the provided templates.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/IssueTemplate"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "closeReasonMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues closed for any of the provided reasons. Only applies\nto issues with a CLOSED status.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ClosedReason"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "closedAfterDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues closed on or after this date.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "closedBeforeDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues closed on or before this date.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "includeIssuesWithoutDueDate",
+        "in": "query",
+        "required": false,
+        "description": "Include issues without a due date. This is functionally a no-op if dueBeforeDate or dueAfterDate are not provided.",
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "includeOnlyIssuesWithoutDueDate",
+        "in": "query",
+        "required": false,
+        "description": "Only include issues without a due date. This filter cannot be used in conjunction with dueBeforeDate or dueAfterDate.",
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "dueAfterDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues with a due date on or after this date.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "dueBeforeDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues with a due date on or before this date.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "detectedAfterDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues detected on or after this date.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "detectedBeforeDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues detected on or before this date.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "createdAfterDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues created on or after this date.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "createdBeforeDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues created on or before this date.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "auditIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues sourced from any of the provided audit IDs.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "controlIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues mapped to any of the provided control IDs.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "orderBy",
+        "in": "query",
+        "required": false,
+        "description": "Field to sort the results by.",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/IssueSortField"
+        },
+        "enumValues": [
+          "dueDate",
+          "createdDate",
+          "detectedDate",
+          "lastModifiedDate",
+          "status",
+          "severity"
+        ]
+      },
+      {
+        "name": "orderDirection",
+        "in": "query",
+        "required": false,
+        "description": "Direction to sort the results in. One of `asc` or `desc`. Defaults to `asc`.",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/OrderDirection"
+        },
+        "enumValues": [
+          "asc",
+          "desc"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "get_issue",
+    "source": "manage",
+    "method": "get",
+    "path": "/issues/{issueId}",
+    "operationId": "GetIssue",
+    "summary": "Get issue by ID",
+    "description": "Get issue by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "issueId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_answer_library_entries",
+    "source": "manage",
+    "method": "get",
+    "path": "/knowledge-base/answer-library",
+    "operationId": "ListAnswerLibraryEntries",
+    "summary": "List Answer Library entries",
+    "description": "List Answer Library entries",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Full-text search across question and answer.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "lastUpdatedAfter",
+        "in": "query",
+        "required": false,
+        "description": "Only include entries updated at or after this ISO 8601 timestamp.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "lastUpdatedBefore",
+        "in": "query",
+        "required": false,
+        "description": "Only include entries updated at or before this ISO 8601 timestamp.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "matchesTags",
+        "in": "query",
+        "required": false,
+        "description": "JSON-encoded array of `{categoryId, tagId}` pairs. Entries matching any\nof the given tags are returned (OR filter). Discover valid `categoryId`\nand `tagId` values via `GET /v1/customer-trust/tag-categories` (to list\ncategories) and `GET /v1/customer-trust/tag-categories/{tagCategoryId}`\n(to list tags within a category).",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "expiresBefore",
+        "in": "query",
+        "required": false,
+        "description": "Only include entries expiring at or before this ISO 8601 timestamp.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "expiresAfter",
+        "in": "query",
+        "required": false,
+        "description": "Only include entries expiring at or after this ISO 8601 timestamp.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "create_answer_library_entry",
+    "source": "manage",
+    "method": "post",
+    "path": "/knowledge-base/answer-library",
+    "operationId": "CreateAnswerLibraryEntry",
+    "summary": "Create Answer Library entry",
+    "description": "Create Answer Library entry",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateAnswerLibraryEntryInput"
+      },
+      "fields": [
+        {
+          "name": "question",
+          "required": true,
+          "description": "The question text.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The question text.",
+            "example": "Do you encrypt customer data at rest?"
+          }
+        },
+        {
+          "name": "answer",
+          "required": true,
+          "description": "The answer text.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The answer text.",
+            "example": "Yes. All customer data is encrypted at rest using AES-256, with keys managed in AWS KMS."
+          }
+        },
+        {
+          "name": "ownerAssignment",
+          "required": false,
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/AnswerLibraryActorAssignmentInput",
+            "description": "The actor to assign as owner. Currently only type \"User\" is supported."
+          }
+        },
+        {
+          "name": "expirationDate",
+          "required": false,
+          "description": "The expiration date in ISO 8601 format.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The expiration date in ISO 8601 format.",
+            "example": "2025-12-31T00:00:00.000Z"
+          }
+        },
+        {
+          "name": "tags",
+          "required": false,
+          "description": "Tags to associate with the entry. Discover valid `categoryId` and `tagId`\nvalues via `GET /v1/customer-trust/tag-categories` (to list categories)\nand `GET /v1/customer-trust/tag-categories/{tagCategoryId}` (to list tags\nwithin a category).",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array",
+            "description": "Tags to associate with the entry. Discover valid `categoryId` and `tagId`\nvalues via `GET /v1/customer-trust/tag-categories` (to list categories)\nand `GET /v1/customer-trust/tag-categories/{tagCategoryId}` (to list tags\nwithin a category)."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "get_answer_library_entry",
+    "source": "manage",
+    "method": "get",
+    "path": "/knowledge-base/answer-library/{id}",
+    "operationId": "GetAnswerLibraryEntry",
+    "summary": "Get Answer Library entry",
+    "description": "Get Answer Library entry",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "update_answer_library_entry_route",
+    "source": "manage",
+    "method": "patch",
+    "path": "/knowledge-base/answer-library/{id}",
+    "operationId": "UpdateAnswerLibraryEntryRoute",
+    "summary": "Update Answer Library entry",
+    "description": "Update Answer Library entry",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateAnswerLibraryEntryInput"
+      },
+      "fields": [
+        {
+          "name": "question",
+          "required": false,
+          "description": "The question text.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The question text.",
+            "example": "Do you encrypt customer data at rest?"
+          }
+        },
+        {
+          "name": "answer",
+          "required": false,
+          "description": "The answer text.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The answer text.",
+            "example": "Yes. All customer data is encrypted at rest using AES-256, with keys managed in AWS KMS."
+          }
+        },
+        {
+          "name": "ownerAssignment",
+          "required": false,
+          "description": "The actor to assign as owner. Pass `null` to clear. Currently only type\n\"User\" is supported.",
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AnswerLibraryActorAssignmentInput"
+              }
+            ],
+            "nullable": true,
+            "description": "The actor to assign as owner. Pass `null` to clear. Currently only type\n\"User\" is supported."
+          }
+        },
+        {
+          "name": "expirationDate",
+          "required": false,
+          "description": "The expiration date in ISO 8601 format. Pass `null` to clear.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The expiration date in ISO 8601 format. Pass `null` to clear.",
+            "example": "2025-12-31T00:00:00.000Z"
+          }
+        },
+        {
+          "name": "tags",
+          "required": false,
+          "description": "Tags to associate with the entry. Replaces the existing tag set. Pass\n`[]` to clear all tags. Discover valid `categoryId` and `tagId` values\nvia `GET /v1/customer-trust/tag-categories` (to list categories) and\n`GET /v1/customer-trust/tag-categories/{tagCategoryId}` (to list tags\nwithin a category).",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array",
+            "description": "Tags to associate with the entry. Replaces the existing tag set. Pass\n`[]` to clear all tags. Discover valid `categoryId` and `tagId` values\nvia `GET /v1/customer-trust/tag-categories` (to list categories) and\n`GET /v1/customer-trust/tag-categories/{tagCategoryId}` (to list tags\nwithin a category)."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "delete_answer_library_entry_route",
+    "source": "manage",
+    "method": "delete",
+    "path": "/knowledge-base/answer-library/{id}",
+    "operationId": "DeleteAnswerLibraryEntryRoute",
+    "summary": "Delete Answer Library entry",
+    "description": "Delete Answer Library entry",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "verify_answer_library_entry_route",
+    "source": "manage",
+    "method": "post",
+    "path": "/knowledge-base/answer-library/{id}/verify",
+    "operationId": "VerifyAnswerLibraryEntryRoute",
+    "summary": "Verify Answer Library entry",
+    "description": "Verify Answer Library entry",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": false,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/VerifyAnswerLibraryEntryInput"
+      },
+      "fields": [
+        {
+          "name": "expirationDate",
+          "required": false,
+          "description": "The expiration date in ISO 8601 format. If omitted, falls back to the\nconfigured review cadence.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The expiration date in ISO 8601 format. If omitted, falls back to the\nconfigured review cadence.",
+            "example": "2025-12-31T00:00:00.000Z"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_knowledge_base_resources",
+    "source": "manage",
+    "method": "get",
+    "path": "/knowledge-base/resources",
+    "operationId": "ListKnowledgeBaseResources",
+    "summary": "List Knowledge Base resources",
+    "description": "List Knowledge Base resources",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Full-text search across resource titles.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "typeMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to FILE and/or URL resources. Repeat the param to allow either.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/KnowledgeBaseResourceTypeFilter"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "lastUpdatedAfter",
+        "in": "query",
+        "required": false,
+        "description": "Only include resources updated at or after this ISO 8601 timestamp.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "lastUpdatedBefore",
+        "in": "query",
+        "required": false,
+        "description": "Only include resources updated at or before this ISO 8601 timestamp.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "matchesTags",
+        "in": "query",
+        "required": false,
+        "description": "JSON-encoded array of `{categoryId, tagId}` pairs. Tags within the\nsame category are OR'd together; tags across different categories\nare AND'd. For example, passing two tags from \"Framework\" and one\ntag from \"Region\" matches resources that have either of the two\nframeworks AND the given region. Discover valid `categoryId` and\n`tagId` values via `GET /v1/customer-trust/tag-categories` (to list\ncategories) and `GET /v1/customer-trust/tag-categories/{tagCategoryId}`\n(to list tags within a category).",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "expiresBefore",
+        "in": "query",
+        "required": false,
+        "description": "Only include resources expiring at or before this ISO 8601 timestamp.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "expiresAfter",
+        "in": "query",
+        "required": false,
+        "description": "Only include resources expiring at or after this ISO 8601 timestamp.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "create_document_resource",
+    "source": "manage",
+    "method": "post",
+    "path": "/knowledge-base/resources/documents",
+    "operationId": "CreateDocumentResource",
+    "summary": "Create document resource",
+    "description": "Create document resource",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "multipart/form-data",
+      "kind": "multipart",
+      "fields": [
+        {
+          "name": "file",
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        {
+          "name": "title",
+          "required": true,
+          "description": "Title of the document resource.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Title of the document resource."
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "Description of the document resource.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description of the document resource."
+          }
+        },
+        {
+          "name": "ownerAssignment",
+          "required": false,
+          "description": "Owner to assign as a JSON string: {\"type\":\"User\",\"id\":\"<id>\"}.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Owner to assign as a JSON string: {\"type\":\"User\",\"id\":\"<id>\"}."
+          }
+        },
+        {
+          "name": "customerVisibility",
+          "required": false,
+          "description": "Customer visibility on the Trust Center: PRIVATE | SHAREABLE | REQUEST_ACCESS | PUBLIC.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Customer visibility on the Trust Center: PRIVATE | SHAREABLE | REQUEST_ACCESS | PUBLIC."
+          }
+        },
+        {
+          "name": "downloadPermission",
+          "required": false,
+          "description": "Trust Center download permission: VIEW_ONLY | VIEW_AND_DOWNLOAD.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Trust Center download permission: VIEW_ONLY | VIEW_AND_DOWNLOAD."
+          }
+        },
+        {
+          "name": "isUsedInQuestionnaires",
+          "required": false,
+          "description": "Whether to use this resource for Questionnaire Automation answer generation (\"true\" / \"false\").",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Whether to use this resource for Questionnaire Automation answer generation (\"true\" / \"false\")."
+          }
+        },
+        {
+          "name": "expirationDate",
+          "required": false,
+          "description": "Expiration date in ISO 8601.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Expiration date in ISO 8601."
+          }
+        },
+        {
+          "name": "tags",
+          "required": false,
+          "description": "Tags as a JSON array: [{\"categoryId\":\"<id>\",\"tagId\":\"<id>\"}].",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Tags as a JSON array: [{\"categoryId\":\"<id>\",\"tagId\":\"<id>\"}]."
+          }
+        },
+        {
+          "name": "categoryId",
+          "required": false,
+          "description": "Trust Center category id to associate this resource with. Only\napplied when `customerVisibility` is `REQUEST_ACCESS` or `PUBLIC`;\nother visibilities don't place the resource on the Trust Center, so\nthe category is ignored. Pass an unknown id to fall back to\nuncategorized.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Trust Center category id to associate this resource with. Only\napplied when `customerVisibility` is `REQUEST_ACCESS` or `PUBLIC`;\nother visibilities don't place the resource on the Trust Center, so\nthe category is ignored. Pass an unknown id to fall back to\nuncategorized."
+          }
+        }
+      ],
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Title of the document resource."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the document resource."
+          },
+          "ownerAssignment": {
+            "type": "string",
+            "description": "Owner to assign as a JSON string: {\"type\":\"User\",\"id\":\"<id>\"}."
+          },
+          "customerVisibility": {
+            "type": "string",
+            "description": "Customer visibility on the Trust Center: PRIVATE | SHAREABLE | REQUEST_ACCESS | PUBLIC."
+          },
+          "downloadPermission": {
+            "type": "string",
+            "description": "Trust Center download permission: VIEW_ONLY | VIEW_AND_DOWNLOAD."
+          },
+          "isUsedInQuestionnaires": {
+            "type": "string",
+            "description": "Whether to use this resource for Questionnaire Automation answer generation (\"true\" / \"false\")."
+          },
+          "expirationDate": {
+            "type": "string",
+            "description": "Expiration date in ISO 8601."
+          },
+          "tags": {
+            "type": "string",
+            "description": "Tags as a JSON array: [{\"categoryId\":\"<id>\",\"tagId\":\"<id>\"}]."
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Trust Center category id to associate this resource with. Only\napplied when `customerVisibility` is `REQUEST_ACCESS` or `PUBLIC`;\nother visibilities don't place the resource on the Trust Center, so\nthe category is ignored. Pass an unknown id to fall back to\nuncategorized."
+          }
+        },
+        "required": [
+          "file",
+          "title"
+        ]
+      }
+    }
+  },
+  {
+    "toolName": "update_document_resource",
+    "source": "manage",
+    "method": "patch",
+    "path": "/knowledge-base/resources/documents/{id}",
+    "operationId": "UpdateDocumentResource",
+    "summary": "Update document resource",
+    "description": "Update document resource",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateDocumentResourceInput"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "required": false,
+          "description": "The title of the document resource.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The title of the document resource.",
+            "minLength": 1
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "A description for the document resource. Pass `null` to clear.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "A description for the document resource. Pass `null` to clear."
+          }
+        },
+        {
+          "name": "ownerAssignment",
+          "required": false,
+          "description": "The actor to assign as owner. Pass `null` to clear. Currently only type\n\"User\" is supported.",
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/KnowledgeBaseResourceActorAssignmentInput"
+              }
+            ],
+            "nullable": true,
+            "description": "The actor to assign as owner. Pass `null` to clear. Currently only type\n\"User\" is supported."
+          }
+        },
+        {
+          "name": "customerVisibility",
+          "required": false,
+          "description": "Customer-facing visibility of a knowledge-base resource on the\nTrust Center. Use {@link CUSTOMER_VISIBILITY_TO_DB} to translate to\n{@link TrustCenterResourceVisibility} when persisting.",
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/KnowledgeBaseCustomerVisibility",
+            "description": "Customer visibility on the Trust Center."
+          }
+        },
+        {
+          "name": "downloadPermission",
+          "required": false,
+          "description": "Customer-facing download permission for a knowledge-base resource on\nthe Trust Center. Use {@link DOWNLOAD_PERMISSION_TO_DB} to translate\nto {@link TrustKnowledgeBaseResourceDownloadSetting} when persisting.",
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/KnowledgeBaseResourceDownloadPermission",
+            "description": "Trust Center download permission."
+          }
+        },
+        {
+          "name": "isUsedInQuestionnaires",
+          "required": false,
+          "description": "Whether the resource should be used for question-answering in\nQuestionnaire Automation.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether the resource should be used for question-answering in\nQuestionnaire Automation."
+          }
+        },
+        {
+          "name": "expirationDate",
+          "required": false,
+          "description": "Expiration date in ISO 8601 format. Pass `null` to clear.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Expiration date in ISO 8601 format. Pass `null` to clear."
+          }
+        },
+        {
+          "name": "tags",
+          "required": false,
+          "description": "Tags to associate with the resource. A non-empty array replaces the\nexisting tag set; pass `[]` to clear all tags.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array",
+            "description": "Tags to associate with the resource. A non-empty array replaces the\nexisting tag set; pass `[]` to clear all tags."
+          }
+        },
+        {
+          "name": "categoryId",
+          "required": false,
+          "description": "Trust Center category id to associate this resource with. Pass `null`\nto move the resource to uncategorized. Only valid when the resource's\neffective visibility (after applying any patched `customerVisibility`)\nis REQUEST_ACCESS or PUBLIC; other combinations and unknown ids return\nan InvalidInputError.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Trust Center category id to associate this resource with. Pass `null`\nto move the resource to uncategorized. Only valid when the resource's\neffective visibility (after applying any patched `customerVisibility`)\nis REQUEST_ACCESS or PUBLIC; other combinations and unknown ids return\nan InvalidInputError."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "replace_document_resource_file",
+    "source": "manage",
+    "method": "post",
+    "path": "/knowledge-base/resources/documents/{id}/upload",
+    "operationId": "ReplaceDocumentResourceFile",
+    "summary": "Replace document resource file",
+    "description": "Replace document resource file",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "multipart/form-data",
+      "kind": "multipart",
+      "fields": [
+        {
+          "name": "file",
+          "required": true,
+          "description": "New document binary; replaces the existing file in place.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary",
+            "description": "New document binary; replaces the existing file in place."
+          }
+        }
+      ],
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "New document binary; replaces the existing file in place."
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
+    }
+  },
+  {
+    "toolName": "create_webpage_resource",
+    "source": "manage",
+    "method": "post",
+    "path": "/knowledge-base/resources/webpages",
+    "operationId": "CreateWebpageResource",
+    "summary": "Create webpage resource",
+    "description": "Create webpage resource",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateWebpageResourceInput"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "required": true,
+          "description": "The title of the webpage resource.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The title of the webpage resource.",
+            "minLength": 1
+          }
+        },
+        {
+          "name": "url",
+          "required": true,
+          "description": "The URL of the webpage.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The URL of the webpage.",
+            "format": "uri"
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "A description for the webpage resource.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "A description for the webpage resource."
+          }
+        },
+        {
+          "name": "ownerAssignment",
+          "required": false,
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/KnowledgeBaseResourceActorAssignmentInput",
+            "description": "The actor to assign as owner. Currently only type \"User\" is supported."
+          }
+        },
+        {
+          "name": "customerVisibility",
+          "required": false,
+          "description": "Customer-facing visibility of a knowledge-base resource on the\nTrust Center. Use {@link CUSTOMER_VISIBILITY_TO_DB} to translate to\n{@link TrustCenterResourceVisibility} when persisting.",
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/KnowledgeBaseCustomerVisibility",
+            "description": "Customer visibility on the Trust Center. Webpage resources accept only\nPRIVATE or PUBLIC; REQUEST_ACCESS and SHAREABLE return an\nInvalidInputError."
+          }
+        },
+        {
+          "name": "includeSubPages",
+          "required": false,
+          "description": "Whether to scan sub-pages one level deep alongside the primary URL.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether to scan sub-pages one level deep alongside the primary URL."
+          }
+        },
+        {
+          "name": "isUsedInQuestionnaires",
+          "required": false,
+          "description": "Whether the resource should be used for question-answering in\nQuestionnaire Automation.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether the resource should be used for question-answering in\nQuestionnaire Automation."
+          }
+        },
+        {
+          "name": "expirationDate",
+          "required": false,
+          "description": "Expiration date in ISO 8601 format.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Expiration date in ISO 8601 format."
+          }
+        },
+        {
+          "name": "tags",
+          "required": false,
+          "description": "Tags to associate with the resource.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array",
+            "description": "Tags to associate with the resource."
+          }
+        },
+        {
+          "name": "categoryId",
+          "required": false,
+          "description": "Trust Center category id to associate this resource with. Pass `null`\nto keep the resource uncategorized. Only valid when `customerVisibility`\nis PUBLIC; other combinations and unknown ids return an\nInvalidInputError.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Trust Center category id to associate this resource with. Pass `null`\nto keep the resource uncategorized. Only valid when `customerVisibility`\nis PUBLIC; other combinations and unknown ids return an\nInvalidInputError."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "update_webpage_resource",
+    "source": "manage",
+    "method": "patch",
+    "path": "/knowledge-base/resources/webpages/{id}",
+    "operationId": "UpdateWebpageResource",
+    "summary": "Update webpage resource",
+    "description": "Update webpage resource",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateWebpageResourceInput"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "required": false,
+          "description": "The title of the webpage resource.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The title of the webpage resource.",
+            "minLength": 1
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "A description for the webpage resource. Pass `null` to clear.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "A description for the webpage resource. Pass `null` to clear."
+          }
+        },
+        {
+          "name": "ownerAssignment",
+          "required": false,
+          "description": "The actor to assign as owner. Pass `null` to clear. Currently only type\n\"User\" is supported.",
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/KnowledgeBaseResourceActorAssignmentInput"
+              }
+            ],
+            "nullable": true,
+            "description": "The actor to assign as owner. Pass `null` to clear. Currently only type\n\"User\" is supported."
+          }
+        },
+        {
+          "name": "customerVisibility",
+          "required": false,
+          "description": "Customer-facing visibility of a knowledge-base resource on the\nTrust Center. Use {@link CUSTOMER_VISIBILITY_TO_DB} to translate to\n{@link TrustCenterResourceVisibility} when persisting.",
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/KnowledgeBaseCustomerVisibility",
+            "description": "Customer visibility on the Trust Center. Webpage resources accept only\nPRIVATE or PUBLIC; REQUEST_ACCESS and SHAREABLE return an\nInvalidInputError."
+          }
+        },
+        {
+          "name": "includeSubPages",
+          "required": false,
+          "description": "Whether to scan sub-pages one level deep alongside the primary URL.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether to scan sub-pages one level deep alongside the primary URL."
+          }
+        },
+        {
+          "name": "isUsedInQuestionnaires",
+          "required": false,
+          "description": "Whether the resource should be used for question-answering in\nQuestionnaire Automation.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether the resource should be used for question-answering in\nQuestionnaire Automation."
+          }
+        },
+        {
+          "name": "expirationDate",
+          "required": false,
+          "description": "Expiration date in ISO 8601 format. Pass `null` to clear.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Expiration date in ISO 8601 format. Pass `null` to clear."
+          }
+        },
+        {
+          "name": "tags",
+          "required": false,
+          "description": "Tags to associate with the resource. A non-empty array replaces the\nexisting tag set; pass `[]` to clear all tags.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array",
+            "description": "Tags to associate with the resource. A non-empty array replaces the\nexisting tag set; pass `[]` to clear all tags."
+          }
+        },
+        {
+          "name": "categoryId",
+          "required": false,
+          "description": "Trust Center category id to associate this resource with. Pass `null`\nto move the resource to uncategorized. Only valid when the resource's\neffective visibility (after applying any patched `customerVisibility`)\nis PUBLIC; other combinations and unknown ids return an\nInvalidInputError.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Trust Center category id to associate this resource with. Pass `null`\nto move the resource to uncategorized. Only valid when the resource's\neffective visibility (after applying any patched `customerVisibility`)\nis PUBLIC; other combinations and unknown ids return an\nInvalidInputError."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "get_knowledge_base_resource",
+    "source": "manage",
+    "method": "get",
+    "path": "/knowledge-base/resources/{id}",
+    "operationId": "GetKnowledgeBaseResource",
+    "summary": "Get Knowledge Base resource",
+    "description": "Get Knowledge Base resource",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "delete_knowledge_base_resource",
+    "source": "manage",
+    "method": "delete",
+    "path": "/knowledge-base/resources/{id}",
+    "operationId": "DeleteKnowledgeBaseResource",
+    "summary": "Delete Knowledge Base resource",
+    "description": "Delete Knowledge Base resource",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "verify_knowledge_base_resource",
+    "source": "manage",
+    "method": "post",
+    "path": "/knowledge-base/resources/{id}/verify",
+    "operationId": "VerifyKnowledgeBaseResource",
+    "summary": "Verify Knowledge Base resource",
+    "description": "Verify Knowledge Base resource",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": false,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/VerifyKnowledgeBaseResourceInput"
+      },
+      "fields": [
+        {
+          "name": "expirationDate",
+          "required": false,
+          "description": "The expiration date in ISO 8601 format. If omitted, falls back to the\nconfigured review cadence.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The expiration date in ISO 8601 format. If omitted, falls back to the\nconfigured review cadence.",
+            "example": "2025-12-31T00:00:00.000Z"
+          }
+        }
+      ]
+    }
+  },
+  {
     "toolName": "list_monitored_computers",
     "source": "manage",
     "method": "get",
@@ -6098,6 +10278,47 @@ export const generatedOperations: GeneratedOperation[] = [
           }
         },
         "itemKind": "string"
+      },
+      {
+        "name": "emailAndNameFilter",
+        "in": "query",
+        "required": false,
+        "description": "Filter people by email address, first name, or last name (partial match, case-insensitive).",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "groupIdsMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter people matching any of the given group IDs.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "employmentStatus",
+        "in": "query",
+        "required": false,
+        "description": "Filter people matching the given employment status.",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/EmploymentStatus"
+        },
+        "enumValues": [
+          "UPCOMING",
+          "CURRENT",
+          "ON_LEAVE",
+          "INACTIVE",
+          "FORMER"
+        ]
       }
     ]
   },
@@ -6530,57 +10751,6 @@ export const generatedOperations: GeneratedOperation[] = [
     }
   },
   {
-    "toolName": "list_users",
-    "source": "manage",
-    "method": "get",
-    "path": "/users",
-    "operationId": "ListUsers",
-    "summary": "List active users",
-    "description": "List active users",
-    "isMutation": false,
-    "parameters": [
-      {
-        "name": "pageSize",
-        "in": "query",
-        "required": false,
-        "kind": "integer",
-        "schema": {
-          "$ref": "#/components/schemas/PageSize"
-        }
-      },
-      {
-        "name": "pageCursor",
-        "in": "query",
-        "required": false,
-        "kind": "string",
-        "schema": {
-          "$ref": "#/components/schemas/PageCursor"
-        }
-      }
-    ]
-  },
-  {
-    "toolName": "get_user",
-    "source": "manage",
-    "method": "get",
-    "path": "/users/{userId}",
-    "operationId": "GetUser",
-    "summary": "Get user by ID",
-    "description": "Get user by ID",
-    "isMutation": false,
-    "parameters": [
-      {
-        "name": "userId",
-        "in": "path",
-        "required": true,
-        "kind": "string",
-        "schema": {
-          "type": "string"
-        }
-      }
-    ]
-  },
-  {
     "toolName": "list_policies",
     "source": "manage",
     "method": "get",
@@ -6849,6 +11019,16 @@ export const generatedOperations: GeneratedOperation[] = [
           }
         },
         {
+          "name": "detailedDescription",
+          "required": false,
+          "description": "Optional long-form description providing extended context for the risk scenario.\nMaximum 10000 characters.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Optional long-form description providing extended context for the risk scenario.\nMaximum 10000 characters."
+          }
+        },
+        {
           "name": "riskId",
           "required": false,
           "description": "The unique ID of the risk. Used to reference and update existing risks.\nWe will auto-generate one if one isn't specified.",
@@ -6873,10 +11053,10 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "likelihood",
           "required": false,
           "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings.",
-          "kind": "number",
+          "kind": "integer",
           "schema": {
-            "type": "number",
-            "format": "double",
+            "type": "integer",
+            "format": "int32",
             "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings."
           }
         },
@@ -6884,10 +11064,10 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "impact",
           "required": false,
           "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings.",
-          "kind": "number",
+          "kind": "integer",
           "schema": {
-            "type": "number",
-            "format": "double",
+            "type": "integer",
+            "format": "int32",
             "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings."
           }
         },
@@ -6895,10 +11075,10 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "residualLikelihood",
           "required": false,
           "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings.",
-          "kind": "number",
+          "kind": "integer",
           "schema": {
-            "type": "number",
-            "format": "double",
+            "type": "integer",
+            "format": "int32",
             "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
           }
         },
@@ -6906,10 +11086,10 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "residualImpact",
           "required": false,
           "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings.",
-          "kind": "number",
+          "kind": "integer",
           "schema": {
-            "type": "number",
-            "format": "double",
+            "type": "integer",
+            "format": "int32",
             "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
           }
         },
@@ -6999,6 +11179,17 @@ export const generatedOperations: GeneratedOperation[] = [
             "$ref": "#/components/schemas/RiskScenarioType",
             "description": "The type of risk scenario to create.\n- \"Risk Scenario\": Standard risk scenario (default)\n- \"Enterprise Risk\": Enterprise-level risk (requires Enterprise Risk Management SKU)\n\nEnterprise risks cannot be associated with a risk register.\nDefaults to \"Risk Scenario\" if not specified."
           }
+        },
+        {
+          "name": "identificationDate",
+          "required": false,
+          "description": "The date this risk was identified. Matches the \"Identified Date\" field in the Vanta UI. Defaults to the scenario's creation time if omitted.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date this risk was identified. Matches the \"Identified Date\" field in the Vanta UI. Defaults to the scenario's creation time if omitted."
+          }
         }
       ]
     }
@@ -7063,6 +11254,16 @@ export const generatedOperations: GeneratedOperation[] = [
           }
         },
         {
+          "name": "detailedDescription",
+          "required": false,
+          "description": "Optional long-form description providing extended context for the risk scenario.\nMaximum 10000 characters.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Optional long-form description providing extended context for the risk scenario.\nMaximum 10000 characters."
+          }
+        },
+        {
           "name": "isSensitive",
           "required": false,
           "description": "If set to true this risk can only be seen by its owner or users with Admin, RiskSensitiveManage or RiskSensitiveView permissions.",
@@ -7077,10 +11278,10 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "likelihood",
           "required": false,
           "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings.",
-          "kind": "number",
+          "kind": "integer",
           "schema": {
-            "type": "number",
-            "format": "double",
+            "type": "integer",
+            "format": "int32",
             "description": "Represents the probability of an incident occurring due to this risk or vulnerability, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater likelihood. The range can be customized in the Risk Management settings."
           }
         },
@@ -7088,10 +11289,10 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "impact",
           "required": false,
           "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings.",
-          "kind": "number",
+          "kind": "integer",
           "schema": {
-            "type": "number",
-            "format": "double",
+            "type": "integer",
+            "format": "int32",
             "description": "Represents the potential severity of harm to your organization’s operations if this risk is exploited, expressed as a numerical score.\nDefaults to a range of 1-5, where higher values indicate greater impact. The range can be customized in the Risk Management settings."
           }
         },
@@ -7099,10 +11300,10 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "residualLikelihood",
           "required": false,
           "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings.",
-          "kind": "number",
+          "kind": "integer",
           "schema": {
-            "type": "number",
-            "format": "double",
+            "type": "integer",
+            "format": "int32",
             "description": "Represents the adjusted probability of this risk being exploited or affecting operations after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
           }
         },
@@ -7110,10 +11311,10 @@ export const generatedOperations: GeneratedOperation[] = [
           "name": "residualImpact",
           "required": false,
           "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings.",
-          "kind": "number",
+          "kind": "integer",
           "schema": {
-            "type": "number",
-            "format": "double",
+            "type": "integer",
+            "format": "int32",
             "description": "Represents the adjusted severity of harm to your organization’s operations if this risk is exploited after implementing risk treatments, such as controls or mitigations.\nExpressed as a numerical score, defaulting to a range of 1-5. The range can be customized in the Risk Management settings."
           }
         },
@@ -7195,49 +11396,25 @@ export const generatedOperations: GeneratedOperation[] = [
             "type": "array",
             "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
           }
-        }
-      ]
-    }
-  },
-  {
-    "toolName": "link_controls_to_risk_scenario",
-    "source": "manage",
-    "method": "post",
-    "path": "/risk-scenarios/{riskScenarioId}/controls",
-    "operationId": "LinkControlsToRiskScenario",
-    "summary": "Link controls to a risk scenario",
-    "description": "Link controls to a risk scenario",
-    "isMutation": true,
-    "parameters": [
-      {
-        "name": "riskScenarioId",
-        "in": "path",
-        "required": true,
-        "kind": "string",
-        "schema": {
-          "type": "string"
-        }
-      }
-    ],
-    "requestBody": {
-      "required": true,
-      "contentType": "application/json",
-      "kind": "json",
-      "schema": {
-        "$ref": "#/components/schemas/LinkControlsToRiskScenarioInput"
-      },
-      "fields": [
+        },
         {
-          "name": "controlLinks",
-          "required": true,
-          "description": "List of control links to create for the risk scenario. Control links that\nalready exist on the scenario are a no-op; unknown identifiers cause the\nrequest to fail.",
-          "kind": "array",
+          "name": "type",
+          "required": false,
+          "kind": "string",
           "schema": {
-            "items": {
-              "$ref": "#/components/schemas/ControlLinkToRiskScenarioInput"
-            },
-            "type": "array",
-            "description": "List of control links to create for the risk scenario. Control links that\nalready exist on the scenario are a no-op; unknown identifiers cause the\nrequest to fail."
+            "$ref": "#/components/schemas/RiskScenarioType",
+            "description": "Changing the risk scenario type (`\"Risk Scenario\"` vs. `\"Enterprise Risk\"`)\nis not supported via update. Requests that include this field will be\nrejected. To change a risk's type, create a new scenario with the desired\ntype and archive the old one."
+          }
+        },
+        {
+          "name": "identificationDate",
+          "required": false,
+          "description": "The date this risk was identified. Matches the \"Identified Date\" field in the Vanta UI. Omitting the field leaves the existing value unchanged.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date this risk was identified. Matches the \"Identified Date\" field in the Vanta UI. Omitting the field leaves the existing value unchanged."
           }
         }
       ]
@@ -7255,6 +11432,174 @@ export const generatedOperations: GeneratedOperation[] = [
     "parameters": [
       {
         "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_risk_scenario_controls",
+    "source": "manage",
+    "method": "get",
+    "path": "/risk-scenarios/{riskScenarioId}/controls",
+    "operationId": "ListRiskScenarioControls",
+    "summary": "List risk scenario controls",
+    "description": "List risk scenario controls",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "link_controls_to_risk_scenario",
+    "source": "manage",
+    "method": "post",
+    "path": "/risk-scenarios/{riskScenarioId}/controls",
+    "operationId": "CreateRiskScenarioControl",
+    "summary": "Add a control to a risk scenario",
+    "description": "Add a control to a risk scenario",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateRiskScenarioControlInput"
+      },
+      "fields": [
+        {
+          "name": "controlId",
+          "required": true,
+          "description": "Control to associate with the risk scenario. Accepts Vanta control\nshorthands (e.g. `\"A.12.2.1\"`), custom-control shorthand names, or\nobject IDs.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Control to associate with the risk scenario. Accepts Vanta control\nshorthands (e.g. `\"A.12.2.1\"`), custom-control shorthand names, or\nobject IDs."
+          }
+        },
+        {
+          "name": "controlType",
+          "required": false,
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/RiskScenarioControlType",
+            "description": "`TREATMENT_PLAN` for a control that is part of the risk's treatment plan.\nOmit (or pass `\"EXISTING\"`) to associate the control without a\ntreatment-plan designation — the default \"existing control\" relationship."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "update_risk_scenario_control",
+    "source": "manage",
+    "method": "patch",
+    "path": "/risk-scenarios/{riskScenarioId}/controls/{controlId}",
+    "operationId": "UpdateRiskScenarioControl",
+    "summary": "Change a risk scenario control's controlType",
+    "description": "Change a risk scenario control's controlType",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "controlId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateRiskScenarioControlInput"
+      },
+      "fields": [
+        {
+          "name": "controlType",
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/RiskScenarioControlType",
+            "description": "The new relationship state. `TREATMENT_PLAN` moves the control into the\nrisk's treatment plan; `EXISTING` removes it from the treatment plan while\nkeeping it linked as an existing control (use DELETE to unlink entirely)."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "delete_risk_scenario_control",
+    "source": "manage",
+    "method": "delete",
+    "path": "/risk-scenarios/{riskScenarioId}/controls/{controlId}",
+    "operationId": "DeleteRiskScenarioControl",
+    "summary": "Remove a control from a risk scenario",
+    "description": "Remove a control from a risk scenario",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "controlId",
         "in": "path",
         "required": true,
         "kind": "string",
@@ -7746,6 +12091,17 @@ export const generatedOperations: GeneratedOperation[] = [
           }
         },
         {
+          "name": "awsMarketplaceListing",
+          "required": false,
+          "description": "AWS Marketplace listing URL to set on the Trust Center. If null is passed\nin, unsets the current AWS Marketplace listing.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "AWS Marketplace listing URL to set on the Trust Center. If null is passed\nin, unsets the current AWS Marketplace listing."
+          }
+        },
+        {
           "name": "isPublic",
           "required": false,
           "description": "Whether the Trust Center is public or not.",
@@ -7753,6 +12109,38 @@ export const generatedOperations: GeneratedOperation[] = [
           "schema": {
             "type": "boolean",
             "description": "Whether the Trust Center is public or not."
+          }
+        },
+        {
+          "name": "contactEmail",
+          "required": false,
+          "description": "Contact email displayed on the Trust Center. If null is passed in, unsets\nthe current contact email.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Contact email displayed on the Trust Center. If null is passed in, unsets\nthe current contact email."
+          }
+        },
+        {
+          "name": "customHeading",
+          "required": false,
+          "description": "Custom heading displayed on the Trust Center. If null is passed in, unsets\nthe current custom heading.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Custom heading displayed on the Trust Center. If null is passed in, unsets\nthe current custom heading."
+          }
+        },
+        {
+          "name": "controlVisibilityMode",
+          "required": false,
+          "description": "Which controls a Trust Center displays, and whether their pass/fail status is\nshown. Set as the Trust Center's global default, or per category to override\nthat default.",
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/TrustCenterControlVisibilityMode",
+            "description": "The default status-visibility mode applied to all controls that don't\nhave a category-level override. Omit to leave unchanged. Only settable for\ndomains with the Vanta Compliance Platform; other domains have no control\nstatus to render."
           }
         }
       ]
@@ -7939,7 +12327,27 @@ export const generatedOperations: GeneratedOperation[] = [
           "type": "string"
         }
       }
-    ]
+    ],
+    "requestBody": {
+      "required": false,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/DenyTrustCenterAccessRequestInput"
+      },
+      "fields": [
+        {
+          "name": "reason",
+          "required": false,
+          "description": "Reason for denying the access request.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Reason for denying the access request."
+          }
+        }
+      ]
+    }
   },
   {
     "toolName": "list_trust_center_activity_events",
@@ -8016,6 +12424,442 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "list_chatbot_conversations",
+    "source": "manage",
+    "method": "get",
+    "path": "/trust-centers/{slugId}/chatbot/conversations",
+    "operationId": "ListChatbotConversations",
+    "summary": "List Trust Center chatbot conversations",
+    "description": "List Trust Center chatbot conversations",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "searchString",
+        "in": "query",
+        "required": false,
+        "description": "Search conversations by message content.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "get_chatbot_conversation_messages",
+    "source": "manage",
+    "method": "get",
+    "path": "/trust-centers/{slugId}/chatbot/conversations/{conversationId}",
+    "operationId": "GetChatbotConversationMessages",
+    "summary": "Get Trust Center chatbot conversation messages",
+    "description": "Get Trust Center chatbot conversation messages",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "conversationId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_compliance_frameworks",
+    "source": "manage",
+    "method": "get",
+    "path": "/trust-centers/{slugId}/compliance-frameworks",
+    "operationId": "ListComplianceFrameworks",
+    "summary": "List Trust Center compliance frameworks",
+    "description": "List Trust Center compliance frameworks",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "create_compliance_framework",
+    "source": "manage",
+    "method": "post",
+    "path": "/trust-centers/{slugId}/compliance-frameworks",
+    "operationId": "CreateComplianceFramework",
+    "summary": "Create Trust Center compliance framework",
+    "description": "Create Trust Center compliance framework",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateComplianceFrameworkInput"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "required": true,
+          "description": "Display name of the framework.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Display name of the framework."
+          }
+        },
+        {
+          "name": "standard",
+          "required": false,
+          "description": "Compliance standard to associate with this framework.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aiact",
+              "aiuc1",
+              "aue8",
+              "awsFTR",
+              "bsic5",
+              "ccpa",
+              "cisv8",
+              "cjis",
+              "cmmc2",
+              "cps234",
+              "cri",
+              "dora",
+              "fedRAMPr5",
+              "fedramp",
+              "fedramp20x",
+              "fedramp20x_2026",
+              "gdpr",
+              "hipaa",
+              "hitruste1",
+              "iso9001",
+              "iso27001",
+              "iso27001_2022",
+              "iso27017",
+              "iso27018",
+              "iso27701",
+              "iso27701_2025",
+              "iso42001",
+              "msftSSPA",
+              "mvsp",
+              "nis2d",
+              "nist53",
+              "nist171",
+              "nist171r3",
+              "nistAiRmf",
+              "nistCSF",
+              "nistcsf2",
+              "ofdss",
+              "pciDss4",
+              "pciSaqA",
+              "pciSaqAEP",
+              "pciSaqDMerchant",
+              "pciSaqDSP",
+              "soc2",
+              "soxITGC",
+              "t23nycrr500",
+              "tisax",
+              "tisax2027",
+              "iso22301",
+              "trust",
+              "ukCyberEssentials",
+              "ukCyberEssentials33",
+              "usDataPrivacy",
+              "fedrampKSI",
+              null
+            ],
+            "nullable": true,
+            "description": "Compliance standard to associate with this framework."
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "Description of the framework.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description of the framework."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "update_compliance_framework",
+    "source": "manage",
+    "method": "patch",
+    "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}",
+    "operationId": "UpdateComplianceFramework",
+    "summary": "Update Trust Center compliance framework",
+    "description": "Update Trust Center compliance framework",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "frameworkId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateComplianceFrameworkInput"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "required": false,
+          "description": "Display name of the framework.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Display name of the framework."
+          }
+        },
+        {
+          "name": "standard",
+          "required": false,
+          "description": "Compliance standard to associate with this framework. Pass null to unset.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aiact",
+              "aiuc1",
+              "aue8",
+              "awsFTR",
+              "bsic5",
+              "ccpa",
+              "cisv8",
+              "cjis",
+              "cmmc2",
+              "cps234",
+              "cri",
+              "dora",
+              "fedRAMPr5",
+              "fedramp",
+              "fedramp20x",
+              "fedramp20x_2026",
+              "gdpr",
+              "hipaa",
+              "hitruste1",
+              "iso9001",
+              "iso27001",
+              "iso27001_2022",
+              "iso27017",
+              "iso27018",
+              "iso27701",
+              "iso27701_2025",
+              "iso42001",
+              "msftSSPA",
+              "mvsp",
+              "nis2d",
+              "nist53",
+              "nist171",
+              "nist171r3",
+              "nistAiRmf",
+              "nistCSF",
+              "nistcsf2",
+              "ofdss",
+              "pciDss4",
+              "pciSaqA",
+              "pciSaqAEP",
+              "pciSaqDMerchant",
+              "pciSaqDSP",
+              "soc2",
+              "soxITGC",
+              "t23nycrr500",
+              "tisax",
+              "tisax2027",
+              "iso22301",
+              "trust",
+              "ukCyberEssentials",
+              "ukCyberEssentials33",
+              "usDataPrivacy",
+              "fedrampKSI",
+              null
+            ],
+            "nullable": true,
+            "description": "Compliance standard to associate with this framework. Pass null to unset."
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "Description of the framework. Pass null to unset.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Description of the framework. Pass null to unset."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "delete_compliance_framework",
+    "source": "manage",
+    "method": "delete",
+    "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}",
+    "operationId": "DeleteComplianceFramework",
+    "summary": "Delete Trust Center compliance framework",
+    "description": "Delete Trust Center compliance framework",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "frameworkId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "upload_compliance_framework_badge",
+    "source": "manage",
+    "method": "post",
+    "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}/badge",
+    "operationId": "UploadComplianceFrameworkBadge",
+    "summary": "Upload Trust Center compliance framework badge",
+    "description": "Upload Trust Center compliance framework badge",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "frameworkId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "multipart/form-data",
+      "kind": "multipart",
+      "fields": [
+        {
+          "name": "file",
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      ],
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
+    }
+  },
+  {
     "toolName": "get_trust_center_control_categories",
     "source": "manage",
     "method": "get",
@@ -8061,7 +12905,7 @@ export const generatedOperations: GeneratedOperation[] = [
       "contentType": "application/json",
       "kind": "json",
       "schema": {
-        "$ref": "#/components/schemas/AddOrEditTrustCenterControlCategoryInput"
+        "$ref": "#/components/schemas/AddTrustCenterControlCategoryInput"
       },
       "fields": [
         {
@@ -8072,6 +12916,50 @@ export const generatedOperations: GeneratedOperation[] = [
           "schema": {
             "type": "string",
             "description": "Name of the category."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "upsert_trust_center_control_categories_order",
+    "source": "manage",
+    "method": "put",
+    "path": "/trust-centers/{slugId}/control-categories/order",
+    "operationId": "UpsertTrustCenterControlCategoriesOrder",
+    "summary": "Reorder Trust Center control categories",
+    "description": "Reorder Trust Center control categories",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/ReorderTrustCenterControlCategoriesInput"
+      },
+      "fields": [
+        {
+          "name": "orderedCategoryIds",
+          "required": true,
+          "description": "Ordered list of all control category IDs representing the desired order.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Ordered list of all control category IDs representing the desired order."
           }
         }
       ]
@@ -8141,17 +13029,42 @@ export const generatedOperations: GeneratedOperation[] = [
       "contentType": "application/json",
       "kind": "json",
       "schema": {
-        "$ref": "#/components/schemas/AddOrEditTrustCenterControlCategoryInput"
+        "$ref": "#/components/schemas/EditTrustCenterControlCategoryInput"
       },
       "fields": [
         {
           "name": "name",
-          "required": true,
-          "description": "Name of the category.",
+          "required": false,
+          "description": "New name for the category. Omit to leave the name unchanged.",
           "kind": "string",
           "schema": {
             "type": "string",
-            "description": "Name of the category."
+            "description": "New name for the category. Omit to leave the name unchanged."
+          }
+        },
+        {
+          "name": "visibility",
+          "required": false,
+          "description": "Visibility of a control category's controls on the Trust Center.\n`SHAREABLE` categories are only visible to accounts with a matching access\ngrant.",
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/TrustCenterControlVisibility",
+            "description": "Visibility of the category's controls on the Trust Center. Omit to\nleave unchanged."
+          }
+        },
+        {
+          "name": "statusVisibilityOverride",
+          "required": false,
+          "description": "Per-category status-visibility override. Omit to leave unchanged; pass\n`null` to clear the override and fall back to the Trust Center's global\ndefault.",
+          "kind": "object",
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TrustCenterControlVisibilityMode"
+              }
+            ],
+            "nullable": true,
+            "description": "Per-category status-visibility override. Omit to leave unchanged; pass\n`null` to clear the override and fall back to the Trust Center's global\ndefault."
           }
         }
       ]
@@ -8186,6 +13099,125 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       }
     ]
+  },
+  {
+    "toolName": "update_trust_center_controls_in_category",
+    "source": "manage",
+    "method": "patch",
+    "path": "/trust-centers/{slugId}/control-categories/{categoryId}/controls",
+    "operationId": "UpdateTrustCenterControlsInCategory",
+    "summary": "Bulk edit controls in a category",
+    "description": "Bulk edit controls in a category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "categoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/BulkEditControlsInCategoryInput"
+      },
+      "fields": [
+        {
+          "name": "controlsToAdd",
+          "required": true,
+          "description": "IDs of controls to add to the category.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of controls to add to the category."
+          }
+        },
+        {
+          "name": "controlsToRemove",
+          "required": true,
+          "description": "IDs of controls to remove from the category.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of controls to remove from the category."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "upsert_trust_center_controls_in_category_order",
+    "source": "manage",
+    "method": "put",
+    "path": "/trust-centers/{slugId}/control-categories/{categoryId}/controls/order",
+    "operationId": "UpsertTrustCenterControlsInCategoryOrder",
+    "summary": "Reorder controls in a Trust Center control category",
+    "description": "Reorder controls in a Trust Center control category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "categoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/ReorderTrustCenterControlsInput"
+      },
+      "fields": [
+        {
+          "name": "orderedControlIds",
+          "required": true,
+          "description": "Ordered list of all control IDs in the category representing the desired order.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Ordered list of all control IDs in the category representing the desired order."
+          }
+        }
+      ]
+    }
   },
   {
     "toolName": "list_trust_center_controls",
@@ -8282,6 +13314,140 @@ export const generatedOperations: GeneratedOperation[] = [
     }
   },
   {
+    "toolName": "bulk_add_tags_to_controls",
+    "source": "manage",
+    "method": "post",
+    "path": "/trust-centers/{slugId}/controls/tags",
+    "operationId": "BulkAddTagsToControls",
+    "summary": "Bulk add tags to Trust Center controls",
+    "description": "Bulk add tags to Trust Center controls",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/BulkTagControlsInput"
+      },
+      "fields": [
+        {
+          "name": "controlIds",
+          "required": true,
+          "description": "IDs of the controls to tag. Maximum 100.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the controls to tag. Maximum 100."
+          }
+        },
+        {
+          "name": "tagCategory",
+          "required": true,
+          "description": "ID of the tag category.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "ID of the tag category."
+          }
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "description": "IDs of the tags to add or remove.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the tags to add or remove."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "bulk_remove_tags_from_controls",
+    "source": "manage",
+    "method": "delete",
+    "path": "/trust-centers/{slugId}/controls/tags",
+    "operationId": "BulkRemoveTagsFromControls",
+    "summary": "Bulk remove tags from Trust Center controls",
+    "description": "Bulk remove tags from Trust Center controls",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/BulkTagControlsInput"
+      },
+      "fields": [
+        {
+          "name": "controlIds",
+          "required": true,
+          "description": "IDs of the controls to tag. Maximum 100.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the controls to tag. Maximum 100."
+          }
+        },
+        {
+          "name": "tagCategory",
+          "required": true,
+          "description": "ID of the tag category.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "ID of the tag category."
+          }
+        },
+        {
+          "name": "tags",
+          "required": true,
+          "description": "IDs of the tags to add or remove.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the tags to add or remove."
+          }
+        }
+      ]
+    }
+  },
+  {
     "toolName": "get_trust_center_control",
     "source": "manage",
     "method": "get",
@@ -8332,6 +13498,224 @@ export const generatedOperations: GeneratedOperation[] = [
       },
       {
         "name": "controlId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_trust_center_data_collected",
+    "source": "manage",
+    "method": "get",
+    "path": "/trust-centers/{slugId}/data-collected",
+    "operationId": "ListTrustCenterDataCollected",
+    "summary": "List Trust Center data collected",
+    "description": "List Trust Center data collected",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "upsert_trust_center_data_collected",
+    "source": "manage",
+    "method": "put",
+    "path": "/trust-centers/{slugId}/data-collected",
+    "operationId": "UpsertTrustCenterDataCollected",
+    "summary": "Set Trust Center data collected",
+    "description": "Set Trust Center data collected",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/SetDataCollectedInput"
+      },
+      "fields": [
+        {
+          "name": "dataCollected",
+          "required": true,
+          "description": "List of data-collected disclosures to set on the Trust Center.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/DataCollectedInputItem"
+            },
+            "type": "array",
+            "description": "List of data-collected disclosures to set on the Trust Center."
+          }
+        },
+        {
+          "name": "dataCollectedHeading",
+          "required": false,
+          "description": "Custom heading for the data collected section. If null is passed in, unsets the current heading.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Custom heading for the data collected section. If null is passed in, unsets the current heading."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_trust_center_faq_categories",
+    "source": "manage",
+    "method": "get",
+    "path": "/trust-centers/{slugId}/faq-categories",
+    "operationId": "ListTrustCenterFaqCategories",
+    "summary": "List Trust Center FAQ categories",
+    "description": "List Trust Center FAQ categories",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "add_trust_center_faq_category",
+    "source": "manage",
+    "method": "post",
+    "path": "/trust-centers/{slugId}/faq-categories",
+    "operationId": "AddTrustCenterFaqCategory",
+    "summary": "Add Trust Center FAQ category",
+    "description": "Add Trust Center FAQ category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddTrustCenterFaqCategoryInput"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "required": true,
+          "description": "Name of the category.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the category."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "update_trust_center_faq_category",
+    "source": "manage",
+    "method": "patch",
+    "path": "/trust-centers/{slugId}/faq-categories/{categoryId}",
+    "operationId": "UpdateTrustCenterFaqCategory",
+    "summary": "Update Trust Center FAQ category",
+    "description": "Update Trust Center FAQ category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "categoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/EditTrustCenterFaqCategoryInput"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "required": true,
+          "description": "New name for the category.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "New name for the category."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "delete_trust_center_faq_category",
+    "source": "manage",
+    "method": "delete",
+    "path": "/trust-centers/{slugId}/faq-categories/{categoryId}",
+    "operationId": "DeleteTrustCenterFaqCategory",
+    "summary": "Delete Trust Center FAQ category",
+    "description": "Delete Trust Center FAQ category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "categoryId",
         "in": "path",
         "required": true,
         "kind": "string",
@@ -8408,6 +13792,17 @@ export const generatedOperations: GeneratedOperation[] = [
           "schema": {
             "type": "string",
             "description": "The FAQ answer."
+          }
+        },
+        {
+          "name": "categoryId",
+          "required": false,
+          "description": "The category to place this FAQ in. Pass null to move to uncategorized. Omit to leave unchanged (on update) or default to uncategorized (on create).",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The category to place this FAQ in. Pass null to move to uncategorized. Omit to leave unchanged (on update) or default to uncategorized (on create)."
           }
         }
       ]
@@ -8499,6 +13894,17 @@ export const generatedOperations: GeneratedOperation[] = [
             "type": "string",
             "description": "The FAQ answer."
           }
+        },
+        {
+          "name": "categoryId",
+          "required": false,
+          "description": "The category to place this FAQ in. Pass null to move to uncategorized. Omit to leave unchanged (on update) or default to uncategorized (on create).",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The category to place this FAQ in. Pass null to move to uncategorized. Omit to leave unchanged (on update) or default to uncategorized (on create)."
+          }
         }
       ]
     }
@@ -8532,6 +13938,57 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       }
     ]
+  },
+  {
+    "toolName": "upload_trust_center_favicon",
+    "source": "manage",
+    "method": "post",
+    "path": "/trust-centers/{slugId}/favicon",
+    "operationId": "UploadTrustCenterFavicon",
+    "summary": "Upload Trust Center favicon",
+    "description": "Upload Trust Center favicon",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "multipart/form-data",
+      "kind": "multipart",
+      "fields": [
+        {
+          "name": "favicon",
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      ],
+      "fileFieldName": "favicon",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "favicon": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "favicon"
+        ]
+      }
+    }
   },
   {
     "toolName": "list_trust_center_historical_access_requests",
@@ -8568,6 +14025,192 @@ export const generatedOperations: GeneratedOperation[] = [
         "kind": "string",
         "schema": {
           "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_trust_center_resource_categories",
+    "source": "manage",
+    "method": "get",
+    "path": "/trust-centers/{slugId}/resource-categories",
+    "operationId": "ListTrustCenterResourceCategories",
+    "summary": "List Trust Center resource categories",
+    "description": "List Trust Center resource categories",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "add_trust_center_resource_category",
+    "source": "manage",
+    "method": "post",
+    "path": "/trust-centers/{slugId}/resource-categories",
+    "operationId": "AddTrustCenterResourceCategory",
+    "summary": "Add Trust Center resource category",
+    "description": "Add Trust Center resource category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddTrustCenterResourceCategoryInput"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "required": true,
+          "description": "Name of the category.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Name of the category."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "upsert_trust_center_resource_categories_order",
+    "source": "manage",
+    "method": "put",
+    "path": "/trust-centers/{slugId}/resource-categories/order",
+    "operationId": "UpsertTrustCenterResourceCategoriesOrder",
+    "summary": "Reorder Trust Center resource categories",
+    "description": "Reorder Trust Center resource categories",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/ReorderTrustCenterResourceCategoriesInput"
+      },
+      "fields": [
+        {
+          "name": "categoryIds",
+          "required": true,
+          "description": "Ordered list of all resource category IDs representing the desired order.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Ordered list of all resource category IDs representing the desired order."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "update_trust_center_resource_category",
+    "source": "manage",
+    "method": "patch",
+    "path": "/trust-centers/{slugId}/resource-categories/{categoryId}",
+    "operationId": "UpdateTrustCenterResourceCategory",
+    "summary": "Update Trust Center resource category",
+    "description": "Update Trust Center resource category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "categoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/EditTrustCenterResourceCategoryInput"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "required": true,
+          "description": "New name for the category.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "New name for the category."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "delete_trust_center_resource_category",
+    "source": "manage",
+    "method": "delete",
+    "path": "/trust-centers/{slugId}/resource-categories/{categoryId}",
+    "operationId": "DeleteTrustCenterResourceCategory",
+    "summary": "Delete Trust Center resource category",
+    "description": "Delete Trust Center resource category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "categoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
         }
       }
     ]
@@ -9322,6 +14965,15 @@ export const generatedOperations: GeneratedOperation[] = [
         "schema": {
           "$ref": "#/components/schemas/PageCursor"
         }
+      },
+      {
+        "name": "customerTrustAccountId",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -9361,6 +15013,26 @@ export const generatedOperations: GeneratedOperation[] = [
           "schema": {
             "type": "string",
             "description": "Email of the subscriber."
+          }
+        },
+        {
+          "name": "customerTrustAccountId",
+          "required": false,
+          "description": "Optional: Link subscriber to a customer trust account by ID.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Optional: Link subscriber to a customer trust account by ID."
+          }
+        },
+        {
+          "name": "shouldSkipEmailVerification",
+          "required": false,
+          "description": "When true, the subscriber is created as already verified and no\nverification email is sent. Defaults to false.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "When true, the subscriber is created as already verified and no\nverification email is sent. Defaults to false."
           }
         }
       ]
@@ -9583,20 +15255,20 @@ export const generatedOperations: GeneratedOperation[] = [
           "kind": "string",
           "schema": {
             "$ref": "#/components/schemas/UpdateVisibilityType",
-            "description": "Visibility type of the update. This field is in Beta and not widely used yet."
+            "description": "Visibility type of the update."
           }
         },
         {
           "name": "notifiedEmails",
           "required": false,
-          "description": "Emails to notify about the update. This field is in Beta and not widely used yet.",
+          "description": "Additional one-off email addresses to notify. These are always sent regardless of `notificationTarget`.",
           "kind": "array",
           "schema": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "description": "Emails to notify about the update. This field is in Beta and not widely used yet."
+            "description": "Additional one-off email addresses to notify. These are always sent regardless of `notificationTarget`."
           }
         },
         {
@@ -9606,20 +15278,20 @@ export const generatedOperations: GeneratedOperation[] = [
           "kind": "string",
           "schema": {
             "$ref": "#/components/schemas/UpdateNotificationTarget",
-            "description": "Target audience for notifications. Can hold a value of ALL, GROUPS, or NONE. This field is in Beta and not widely used yet."
+            "description": "Controls which Trust Center subscribers are notified.\n- `ALL`: notifies all active subscribers\n- `GROUPS`: notifies only subscribers in the specified `subscriberGroupIds`\n- `NONE`: no subscribers are notified\n\nNote: `notifiedEmails` are always sent regardless of this value."
           }
         },
         {
           "name": "subscriberGroupIds",
           "required": false,
-          "description": "IDs of subscriber groups to notify. Required if notificationTarget is GROUPS. This field is in Beta and not widely used yet.",
+          "description": "IDs of subscriber groups to notify. Required when `notificationTarget` is `GROUPS`.",
           "kind": "array",
           "schema": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "description": "IDs of subscriber groups to notify. Required if notificationTarget is GROUPS. This field is in Beta and not widely used yet."
+            "description": "IDs of subscriber groups to notify. Required when `notificationTarget` is `GROUPS`."
           }
         }
       ]
@@ -9729,7 +15401,7 @@ export const generatedOperations: GeneratedOperation[] = [
           "kind": "string",
           "schema": {
             "$ref": "#/components/schemas/UpdateVisibilityType",
-            "description": "Visibility type of the update. This field is in Beta and not widely used yet."
+            "description": "Visibility type of the update."
           }
         }
       ]
@@ -9849,15 +15521,69 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "subscriberGroupIds",
           "required": true,
-          "description": "IDs of subscriber groups to notify.",
+          "description": "IDs of subscriber groups to notify. When `customerTrustAccounts` is also provided,\nonly subscribers in these groups whose linked account matches are notified.",
           "kind": "array",
           "schema": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "description": "IDs of subscriber groups to notify.",
+            "description": "IDs of subscriber groups to notify. When `customerTrustAccounts` is also provided,\nonly subscribers in these groups whose linked account matches are notified.",
             "maxItems": 10
+          }
+        },
+        {
+          "name": "customerTrustAccounts",
+          "required": false,
+          "description": "Account selectors for narrowing `GROUPS` notifications to subscribers with a matching linked account.",
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/CustomerTrustAccountsInput",
+            "description": "Optional account filters. When provided, only subscribers in `subscriberGroupIds`\nwhose linked account matches all specified filters are notified."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "upsert_trust_center_videos",
+    "source": "manage",
+    "method": "put",
+    "path": "/trust-centers/{slugId}/videos",
+    "operationId": "UpsertTrustCenterVideos",
+    "summary": "Set Trust Center videos",
+    "description": "Set Trust Center videos",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/SetTrustCenterVideosInput"
+      },
+      "fields": [
+        {
+          "name": "videos",
+          "required": true,
+          "description": "The videos to display on the Trust Center. Replaces all existing videos.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/SetTrustCenterVideoItem"
+            },
+            "type": "array",
+            "description": "The videos to display on the Trust Center. Replaces all existing videos."
           }
         }
       ]
@@ -10013,6 +15739,16 @@ export const generatedOperations: GeneratedOperation[] = [
             "$ref": "#/components/schemas/ViewerAccessLevel",
             "description": "Access level for the viewer."
           }
+        },
+        {
+          "name": "customerTrustAccountId",
+          "required": false,
+          "description": "ID of a Customer Trust Account to associate with this viewer.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "ID of a Customer Trust Account to associate with this viewer."
+          }
         }
       ]
     }
@@ -10068,6 +15804,248 @@ export const generatedOperations: GeneratedOperation[] = [
       },
       {
         "name": "viewerId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "update_trust_center_viewer",
+    "source": "manage",
+    "method": "patch",
+    "path": "/trust-centers/{slugId}/viewers/{viewerId}",
+    "operationId": "UpdateTrustCenterViewer",
+    "summary": "Update Trust Center viewer",
+    "description": "Update Trust Center viewer",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "viewerId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateTrustCenterViewerInput"
+      },
+      "fields": [
+        {
+          "name": "accessLevel",
+          "required": false,
+          "description": "The access level of the viewer.\nFULL_ACCESS means having access to all resources on the trust center.\nPARTIAL_ACCESS means having access to all public resources and a select list of requestable resources.",
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/ViewerAccessLevel",
+            "description": "Access level for the viewer."
+          }
+        },
+        {
+          "name": "resourceIds",
+          "required": false,
+          "description": "Identifiers for the resources that this viewer should have access to.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Identifiers for the resources that this viewer should have access to."
+          }
+        },
+        {
+          "name": "expirationDate",
+          "required": false,
+          "description": "The date access should expire for this viewer. Set to null to remove\nexpiration.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date access should expire for this viewer. Set to null to remove\nexpiration."
+          }
+        },
+        {
+          "name": "isNdaRequired",
+          "required": false,
+          "description": "Whether to require an NDA for the viewer.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether to require an NDA for the viewer."
+          }
+        },
+        {
+          "name": "customerTrustAccountId",
+          "required": false,
+          "description": "ID of a Customer Trust Account to associate with this viewer.\nSet to null to remove the association.\nOmit to leave unchanged.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID of a Customer Trust Account to associate with this viewer.\nSet to null to remove the association.\nOmit to leave unchanged."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "send_trust_center_viewer_invite_reminder",
+    "source": "manage",
+    "method": "post",
+    "path": "/trust-centers/{slugId}/viewers/{viewerId}/send-invite-reminder",
+    "operationId": "SendTrustCenterViewerInviteReminder",
+    "summary": "Send Trust Center viewer invite reminder",
+    "description": "Send Trust Center viewer invite reminder",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "viewerId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_users",
+    "source": "manage",
+    "method": "get",
+    "path": "/users",
+    "operationId": "ListUsers",
+    "summary": "List active users",
+    "description": "List active users",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "get_user",
+    "source": "manage",
+    "method": "get",
+    "path": "/users/{userId}",
+    "operationId": "GetUser",
+    "summary": "Get user by ID",
+    "description": "Get user by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "userId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_vendor_assessment_types",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendor-assessment-types",
+    "operationId": "ListVendorAssessmentTypes",
+    "summary": "List assessment types",
+    "description": "List assessment types",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "description": "Filter assessment types to a single lifecycle status",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/VendorAssessmentTypeLifecycleStatus"
+        },
+        "enumValues": [
+          "ACTIVE",
+          "ARCHIVED"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "get_vendor_assessment_type_by_id",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendor-assessment-types/{assessmentTypeId}",
+    "operationId": "GetVendorAssessmentTypeById",
+    "summary": "Get assessment type by ID",
+    "description": "Get assessment type by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "assessmentTypeId",
         "in": "path",
         "required": true,
         "kind": "string",
@@ -10166,7 +16144,7 @@ export const generatedOperations: GeneratedOperation[] = [
           "schema": {
             "type": "string",
             "description": "Email of the external account manager for this vendor.",
-            "maxLength": 2000
+            "maxLength": 100
           }
         },
         {
@@ -10347,14 +16325,14 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "customFields",
           "required": false,
-          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors",
+          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/guides/use-custom-fields-with-vendors",
           "kind": "array",
           "schema": {
             "items": {
               "$ref": "#/components/schemas/CustomField"
             },
             "type": "array",
-            "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors"
+            "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/guides/use-custom-fields-with-vendors"
           }
         },
         {
@@ -10537,7 +16515,7 @@ export const generatedOperations: GeneratedOperation[] = [
           "schema": {
             "type": "string",
             "description": "Email of the external account manager for this vendor.",
-            "maxLength": 2000
+            "maxLength": 100
           }
         },
         {
@@ -10675,7 +16653,8 @@ export const generatedOperations: GeneratedOperation[] = [
           "kind": "string",
           "schema": {
             "$ref": "#/components/schemas/VendorStatus",
-            "description": "The current status of the vendor."
+            "description": "This field is ignored. Use `POST /vendors/{vendorId}/set-status` to change vendor status.",
+            "deprecated": true
           }
         },
         {
@@ -10759,14 +16738,14 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "customFields",
           "required": false,
-          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors",
+          "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/guides/use-custom-fields-with-vendors",
           "kind": "array",
           "schema": {
             "items": {
               "$ref": "#/components/schemas/CustomField"
             },
             "type": "array",
-            "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/use-custom-fields-with-vendors"
+            "description": "The custom fields for the vendor.\nFor more information on how to set custom fields via the API, visit https://developer.vanta.com/docs/guides/use-custom-fields-with-vendors"
           }
         },
         {
@@ -10781,6 +16760,103 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       ]
     }
+  },
+  {
+    "toolName": "get_assessments_by_vendor_id",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendors/{vendorId}/assessments",
+    "operationId": "GetAssessmentsByVendorId",
+    "summary": "List assessments by vendor ID",
+    "description": "List assessments by vendor ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "vendorId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "typeIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter assessments to any of the given assessment type IDs",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "statusMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter assessments to any of the given statuses",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AssessmentStatus"
+          }
+        },
+        "itemKind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "get_assessment_by_id",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendors/{vendorId}/assessments/{assessmentId}",
+    "operationId": "GetAssessmentById",
+    "summary": "Get assessment by ID",
+    "description": "Get assessment by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "vendorId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "assessmentId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
   },
   {
     "toolName": "list_vendor_documents",
@@ -11496,16 +17572,6 @@ export const generatedOperations: GeneratedOperation[] = [
     "isMutation": false,
     "parameters": [
       {
-        "name": "q",
-        "in": "query",
-        "required": false,
-        "description": "Filter vulnerabilities by search query",
-        "kind": "string",
-        "schema": {
-          "type": "string"
-        }
-      },
-      {
         "name": "pageSize",
         "in": "query",
         "required": false,
@@ -11567,7 +17633,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slaDeadlineAfterDate",
         "in": "query",
         "required": false,
-        "description": "Filter vulnerabilities with a fix due after a specific timestamp",
+        "description": "Filter vulnerabilities with a fix due after a specific timestamp.",
         "kind": "string",
         "schema": {
           "format": "date-time",
@@ -11578,7 +17644,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "slaDeadlineBeforeDate",
         "in": "query",
         "required": false,
-        "description": "Filter vulnerabilities with a fix due before a specific timestamp",
+        "description": "Filter vulnerabilities with a fix due before a specific timestamp.",
         "kind": "string",
         "schema": {
           "format": "date-time",
@@ -11630,6 +17696,16 @@ export const generatedOperations: GeneratedOperation[] = [
         "schema": {
           "type": "string"
         }
+      },
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Full-text filter on the vulnerability's name and description.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -11654,7 +17730,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "$ref": "#/components/schemas/VulnerabilityDeactivateRequest"
             },
             "type": "array",
-            "description": "List of vulnerabilities to deactivate",
+            "description": "List of vulnerabilities to deactivate.",
             "minItems": 1,
             "maxItems": 50
           }
@@ -11668,14 +17744,14 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "updates",
           "required": true,
-          "description": "List of vulnerabilities to deactivate",
+          "description": "List of vulnerabilities to deactivate.",
           "kind": "array",
           "schema": {
             "items": {
               "$ref": "#/components/schemas/VulnerabilityDeactivateRequest"
             },
             "type": "array",
-            "description": "List of vulnerabilities to deactivate",
+            "description": "List of vulnerabilities to deactivate.",
             "minItems": 1,
             "maxItems": 50
           }
@@ -12145,6 +18221,93 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "duplicate_audit",
+    "source": "audit",
+    "method": "post",
+    "path": "/audits/duplicate",
+    "operationId": "Duplicate",
+    "summary": "Duplicate an IRL audit",
+    "description": "Duplicate an IRL audit",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/DuplicateAuditRequest"
+      },
+      "fields": [
+        {
+          "name": "sourceAuditId",
+          "required": true,
+          "description": "ID of the source IRL audit to duplicate.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "ID of the source IRL audit to duplicate."
+          }
+        },
+        {
+          "name": "displayName",
+          "required": true,
+          "description": "Display name for the new audit engagement.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Display name for the new audit engagement."
+          }
+        },
+        {
+          "name": "auditStartDate",
+          "required": true,
+          "description": "Start of the audit window for the new audit.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start of the audit window for the new audit."
+          }
+        },
+        {
+          "name": "auditEndDate",
+          "required": true,
+          "description": "End of the audit window for the new audit.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the audit window for the new audit."
+          }
+        },
+        {
+          "name": "earlyAccessStartsAt",
+          "required": true,
+          "description": "When auditors gain access to the new audit.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When auditors gain access to the new audit."
+          }
+        },
+        {
+          "name": "allowAuditorEmails",
+          "required": true,
+          "description": "Emails of auditors who may access the new audit. Minimum one entry required.\nEach email must match an active user in the authenticated audit firm's domain.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Emails of auditors who may access the new audit. Minimum one entry required.\nEach email must match an active user in the authenticated audit firm's domain."
+          }
+        }
+      ]
+    }
+  },
+  {
     "toolName": "get_audit",
     "source": "audit",
     "method": "get",
@@ -12160,6 +18323,94 @@ export const generatedOperations: GeneratedOperation[] = [
         "required": true,
         "kind": "string",
         "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_code_changes",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/assets/code-changes",
+    "operationId": "ListCodeChanges",
+    "summary": "List code changes for an audit",
+    "description": "List code changes for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search term for filtering by code change title or repository name",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "sourcesMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter code changes by version control source (accepted values: github, gitlab, bitbucket, azuredevops)",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ApiCodeChangeSource"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "closedAfterDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter code changes closed on or after this date (ISO 8601)",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "closedBeforeDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter code changes closed on or before this date (ISO 8601)",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
           "type": "string"
         }
       }
@@ -12251,6 +18502,20 @@ export const generatedOperations: GeneratedOperation[] = [
         "schema": {
           "$ref": "#/components/schemas/PageCursor"
         }
+      },
+      {
+        "name": "externalIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter controls whose externalId matches any of the provided values (exact, case-sensitive match).",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
       }
     ]
   },
@@ -12364,6 +18629,396 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       ]
     }
+  },
+  {
+    "toolName": "upsert_assessment_for_control",
+    "source": "audit",
+    "method": "put",
+    "path": "/audits/{auditId}/controls/{controlId}/assessment",
+    "operationId": "UpsertAssessmentForControl",
+    "summary": "Upsert a control's assessment within an audit",
+    "description": "Upsert a control's assessment within an audit",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "controlId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpsertAuditControlAssessmentInput"
+      },
+      "fields": [
+        {
+          "name": "segmentId",
+          "required": false,
+          "description": "The program segment to assess. Required when the audit has more than one\nprogram segment. Optional on a single-program audit (the only program is\nused). Must be a program segment on the audit; system segments are rejected.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The program segment to assess. Required when the audit has more than one\nprogram segment. Optional on a single-program audit (the only program is\nused). Must be a program segment on the audit; system segments are rejected."
+          }
+        },
+        {
+          "name": "assessmentState",
+          "required": true,
+          "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); a given audit's\nframework only uses its own subset. `NOT_ASSESSED` is shared by all\nframeworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept.",
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/AuditControlAssessmentState",
+            "description": "The assessment state to record. Must be one of the states valid for the\nsegment's framework; the request is rejected otherwise."
+          }
+        },
+        {
+          "name": "justification",
+          "required": true,
+          "description": "Free-text reasoning for the assessment. Required, and at most 5000 characters.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Free-text reasoning for the assessment. Required, and at most 5000 characters."
+          }
+        },
+        {
+          "name": "auditorEmail",
+          "required": true,
+          "description": "Email of the auditor performing the assessment. Must match an existing Vanta\nuser who belongs to the audit firm making the API request.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email of the auditor performing the assessment. Must match an existing Vanta\nuser who belongs to the audit firm making the API request."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_comments_for_control",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/controls/{controlId}/comments",
+    "operationId": "ListCommentsForControl",
+    "summary": "List comments for a control within an audit",
+    "description": "List comments for a control within an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "controlId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of comments to return per page.",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from a previous response. Provide to fetch the next page of comments.",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "changedSinceDate",
+        "in": "query",
+        "required": false,
+        "description": "Includes all comments that have changed since changedSinceDate.\nConsiders creationDate, modificationDate, and deletionDate timestamps when determining changes.",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "create_comment_for_control",
+    "source": "audit",
+    "method": "post",
+    "path": "/audits/{auditId}/controls/{controlId}/comments",
+    "operationId": "CreateCommentForControl",
+    "summary": "Create a comment for a control within an audit",
+    "description": "Create a comment for a control within an audit",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "controlId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddAuditControlCommentInput"
+      },
+      "fields": [
+        {
+          "name": "text",
+          "required": true,
+          "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the control.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the control."
+          }
+        },
+        {
+          "name": "email",
+          "required": true,
+          "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+          }
+        },
+        {
+          "name": "creationDate",
+          "required": true,
+          "description": "Timestamp when the comment was created in the external audit management system.\nThis allows synchronizing comment timestamps from external systems.\nFormat: ISO 8601 UTC timestamp.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the comment was created in the external audit management system.\nThis allows synchronizing comment timestamps from external systems.\nFormat: ISO 8601 UTC timestamp."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "update_comment_for_control",
+    "source": "audit",
+    "method": "patch",
+    "path": "/audits/{auditId}/controls/{controlId}/comments/{commentId}",
+    "operationId": "UpdateCommentForControl",
+    "summary": "Update a comment for a control within an audit",
+    "description": "Update a comment for a control within an audit",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "controlId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "commentId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateAuditControlCommentInput"
+      },
+      "fields": [
+        {
+          "name": "text",
+          "required": true,
+          "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the control.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "The text content of the comment.\nMust be at least 1 character. Can include questions, clarifications,\nor explanations related to the control."
+          }
+        },
+        {
+          "name": "email",
+          "required": true,
+          "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "delete_comment_for_control",
+    "source": "audit",
+    "method": "delete",
+    "path": "/audits/{auditId}/controls/{controlId}/comments/{commentId}",
+    "operationId": "DeleteCommentForControl",
+    "summary": "Delete a comment for a control within an audit",
+    "description": "Delete a comment for a control within an audit",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "controlId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "commentId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/DeleteAuditControlCommentInput"
+      },
+      "fields": [
+        {
+          "name": "email",
+          "required": true,
+          "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Email address of the comment author.\nMust match an existing Vanta user who belongs to the audit firm making the API request.\nThis email uniquely identifies the author across systems."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_information_requests_for_control",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/controls/{controlId}/information-requests",
+    "operationId": "ListInformationRequestsForControl",
+    "summary": "List information requests linked to a control within an audit",
+    "description": "List information requests linked to a control within an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "controlId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of information requests to return per page.",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from a previous response. Provide to fetch the next page of results.",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
   },
   {
     "toolName": "list_audit_evidence",
@@ -12580,6 +19235,36 @@ export const generatedOperations: GeneratedOperation[] = [
     }
   },
   {
+    "toolName": "get_audit_evidence",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/evidence/{auditEvidenceId}",
+    "operationId": "GetAuditEvidence",
+    "summary": "Get an audit evidence item by ID",
+    "description": "Get an audit evidence item by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "auditEvidenceId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "create_comment_for_audit_evidence",
     "source": "audit",
     "method": "post",
@@ -12649,6 +19334,45 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       ]
     }
+  },
+  {
+    "toolName": "get_audit_evidence_comment",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/evidence/{auditEvidenceId}/comments/{commentId}",
+    "operationId": "GetAuditEvidenceComment",
+    "summary": "Get an audit evidence comment by ID",
+    "description": "Get an audit evidence comment by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "auditEvidenceId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "commentId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
   },
   {
     "toolName": "list_audit_evidence_urls",
@@ -12762,12 +19486,26 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "changedSinceDate",
         "in": "query",
         "required": false,
-        "description": "Includes all information requests that have changed since changedSinceDate.\nConsiders creationDate, modificationDate, and deletionDate timestamps when determining changes.",
+        "description": "Includes all information requests that have changed since changedSinceDate.\nConsiders creationDate, modificationDate, and deletionDate timestamps when determining changes.\nDoes not include requests whose only change is the derived `segmentIds`\nprojection after an audit-scope change.",
         "kind": "string",
         "schema": {
           "format": "date-time",
           "type": "string"
         }
+      },
+      {
+        "name": "segmentIdsMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Return requests whose stored segment assignment includes any of these\nIDs (OR). Omit to return all. A match can still come back with\n`segmentIds: []` if the stored ID is no longer in the audit's scope.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
       }
     ]
   },
@@ -12891,9 +19629,52 @@ export const generatedOperations: GeneratedOperation[] = [
             "nullable": true,
             "description": "Start date of the audit period. Evidence before this date may not be accepted.\nNull or omitted if not restricted.\nFormat: ISO 8601 UTC timestamp."
           }
+        },
+        {
+          "name": "additionalControlIds",
+          "required": false,
+          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control.\nOmit or pass an empty array for no direct control links.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control.\nOmit or pass an empty array for no direct control links."
+          }
         }
       ]
     }
+  },
+  {
+    "toolName": "get_information_request",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/information-requests/{requestId}",
+    "operationId": "GetInformationRequest",
+    "summary": "Get an information request by ID",
+    "description": "Get an information request by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "requestId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
   },
   {
     "toolName": "update_information_request",
@@ -12998,6 +19779,29 @@ export const generatedOperations: GeneratedOperation[] = [
           "schema": {
             "type": "string",
             "description": "Short, descriptive title."
+          }
+        },
+        {
+          "name": "cadence",
+          "required": false,
+          "description": "Frequency cadence for the information request, indicating how often it recurs.",
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/InformationRequestCadence",
+            "description": "How frequently this request recurs."
+          }
+        },
+        {
+          "name": "additionalControlIds",
+          "required": false,
+          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Replaces the existing set: pass the complete\ndesired list, an empty array to clear all direct control links, or omit to\nleave them unchanged. Each must be the `id` of an existing control in the\ncustomer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Replaces the existing set: pass the complete\ndesired list, an empty array to clear all direct control links, or omit to\nleave them unchanged. Each must be the `id` of an existing control in the\ncustomer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control."
           }
         }
       ]
@@ -13277,6 +20081,45 @@ export const generatedOperations: GeneratedOperation[] = [
     }
   },
   {
+    "toolName": "get_comment_for_information_request",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/information-requests/{requestId}/comments/{commentId}",
+    "operationId": "GetCommentForInformationRequest",
+    "summary": "Get an information request comment by ID",
+    "description": "Get an information request comment by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "requestId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "commentId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "update_comment_for_information_request",
     "source": "audit",
     "method": "patch",
@@ -13467,7 +20310,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "evidenceTypeMatchesAny",
         "in": "query",
         "required": false,
-        "description": "Limits results to the provided evidence types. Must include at least one of:\nUPLOADED_DOCUMENT, OBSERVATION, LINK, VANTA_DOCUMENT, VANTA_POLICY, VANTA_TEST.",
+        "description": "Limits results to the provided evidence types. Must include at least one of:\nUPLOADED_DOCUMENT, OBSERVATION, LINK, VANTA_DOCUMENT, VANTA_POLICY, VANTA_TEST,\nVANTA_TEST_SNAPSHOT.",
         "kind": "array",
         "schema": {
           "default": [],
@@ -13477,6 +20320,84 @@ export const generatedOperations: GeneratedOperation[] = [
           }
         },
         "itemKind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "get_information_request_evidence",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}",
+    "operationId": "GetInformationRequestEvidence",
+    "summary": "Get information request evidence by ID",
+    "description": "Get information request evidence by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "requestId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "evidenceId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "get_information_request_test_snapshot_evidence_detail",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}/test-snapshot",
+    "operationId": "GetInformationRequestTestSnapshotEvidenceDetail",
+    "summary": "Get test snapshot detail for an evidence row",
+    "description": "Get test snapshot detail for an evidence row",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "requestId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "evidenceId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -13541,6 +20462,385 @@ export const generatedOperations: GeneratedOperation[] = [
     }
   },
   {
+    "toolName": "list_integrations",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/integrations",
+    "operationId": "ListIntegrations",
+    "summary": "List integrations for an audit",
+    "description": "List integrations for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search term for filtering by integration name",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "tagsMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter integrations by tag values",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AuditIntegrationTag"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "categoriesMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter integrations by category values",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AuditIntegrationCategory"
+          }
+        },
+        "itemKind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "list_audit_issues",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/issues/items",
+    "operationId": "ListAuditIssues",
+    "summary": "List snapshotted issues for an audit",
+    "description": "List snapshotted issues for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search term for filtering by issue title and description",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "snapshotIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter issues to specific snapshots by snapshot ID",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "createdAfterDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues created on or after this date (ISO 8601)",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "createdBeforeDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues created on or before this date (ISO 8601)",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "detectedAfterDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues detected on or after this date (ISO 8601)",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "detectedBeforeDate",
+        "in": "query",
+        "required": false,
+        "description": "Filter to issues detected on or before this date (ISO 8601)",
+        "kind": "string",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      {
+        "name": "orderBy",
+        "in": "query",
+        "required": false,
+        "description": "Field to sort results by. Allowed: \"createdAt\", \"lastModifiedAt\", \"detectedAt\". Default: \"createdAt\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/IssueSnapshotItemOrderBy"
+        },
+        "enumValues": [
+          "createdAt",
+          "lastModifiedAt",
+          "detectedAt"
+        ]
+      },
+      {
+        "name": "orderDirection",
+        "in": "query",
+        "required": false,
+        "description": "Sort direction: \"asc\" or \"desc\". Default: \"desc\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/OrderDirection"
+        },
+        "enumValues": [
+          "asc",
+          "desc"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "list_audit_snapshots",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/issues/snapshots",
+    "operationId": "ListAuditSnapshots",
+    "summary": "List snapshotted issues for an audit",
+    "description": "List snapshotted issues for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search term for filtering by snapshot title and description",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "audit_list_vendors",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/managed-vendors",
+    "operationId": "ListVendors",
+    "summary": "List vendors for an audit",
+    "description": "List vendors for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search term for filtering by vendor name",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "vendorStatusesMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter vendors by status values",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AuditVendorStatus"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "inherentRiskMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter vendors by inherent risk level values",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AuditVendorRiskLevel"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "orderBy",
+        "in": "query",
+        "required": false,
+        "description": "Field to sort results by. Allowed: \"name\", \"inherentRisk\". Default: \"name\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/VendorOrderBy"
+        },
+        "enumValues": [
+          "name",
+          "inherentRisk"
+        ]
+      },
+      {
+        "name": "orderDirection",
+        "in": "query",
+        "required": false,
+        "description": "Sort direction: \"asc\" or \"desc\". Default: \"asc\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/OrderDirection"
+        },
+        "enumValues": [
+          "asc",
+          "desc"
+        ]
+      }
+    ]
+  },
+  {
     "toolName": "list_monitored_computers_in_audit_scope",
     "source": "audit",
     "method": "get",
@@ -13590,6 +20890,50 @@ export const generatedOperations: GeneratedOperation[] = [
           }
         },
         "itemKind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "get_organization_information",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/organization/information",
+    "operationId": "GetOrganizationInformation",
+    "summary": "Get organization information for an audit",
+    "description": "Get organization information for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "get_organization_notifications",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/organization/notifications",
+    "operationId": "GetOrganizationNotifications",
+    "summary": "Get organization notification settings for an audit",
+    "description": "Get organization notification settings for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -13671,6 +21015,474 @@ export const generatedOperations: GeneratedOperation[] = [
           }
         },
         "itemKind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "list_account_access_services",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/personnel/account-access/services",
+    "operationId": "ListAccountAccessServices",
+    "summary": "List account access services for an audit",
+    "description": "List account access services for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_personnel_account_access",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/personnel/account-access/{serviceId}",
+    "operationId": "ListPersonnelAccountAccess",
+    "summary": "List account access records for an audit",
+    "description": "List account access records for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "serviceId",
+        "in": "path",
+        "required": true,
+        "description": "The service ID from the /services endpoint",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search term for filtering by account name or email",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "description": "Filter by account status",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/AccountAccessStatus"
+        },
+        "enumValues": [
+          "ACTIVE",
+          "DEACTIVATED",
+          "UNKNOWN"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "list_personnel_groups",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/personnel/groups",
+    "operationId": "ListPersonnelGroups",
+    "summary": "List groups for an audit",
+    "description": "List groups for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search term for filtering by group name",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "sourcesMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter groups by IDP source service names",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "orderBy",
+        "in": "query",
+        "required": false,
+        "description": "Field to sort results by. Allowed: \"name\", \"members\", \"source\", \"tasksLastUpdated\", \"pointOfContact\". Default: \"name\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/GroupOrderBy"
+        },
+        "enumValues": [
+          "name",
+          "members",
+          "source",
+          "tasksLastUpdated",
+          "pointOfContact"
+        ]
+      },
+      {
+        "name": "orderDirection",
+        "in": "query",
+        "required": false,
+        "description": "Sort direction: \"asc\" or \"desc\". Default: \"asc\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/OrderDirection"
+        },
+        "enumValues": [
+          "asc",
+          "desc"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "list_personnel_people",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/personnel/people",
+    "operationId": "ListPersonnelPeople",
+    "summary": "List people for an audit",
+    "description": "List people for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search term for filtering by name or email",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "description": "Employment status filter",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PeopleEmploymentStatus"
+        },
+        "enumValues": [
+          "CURRENTLY_EMPLOYED",
+          "INACTIVE_EMPLOYEE",
+          "NOT_PEOPLE",
+          "ON_LEAVE",
+          "PREVIOUSLY_EMPLOYED",
+          "UPCOMING_EMPLOYEE"
+        ]
+      },
+      {
+        "name": "groupsMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter people by group IDs",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "orderBy",
+        "in": "query",
+        "required": false,
+        "description": "Field to sort results by. Allowed: \"name\", \"employmentStatus\". Default: \"name\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PeopleOrderBy"
+        },
+        "enumValues": [
+          "name",
+          "employmentStatus"
+        ]
+      },
+      {
+        "name": "orderDirection",
+        "in": "query",
+        "required": false,
+        "description": "Sort direction: \"asc\" or \"desc\". Default: \"asc\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/OrderDirection"
+        },
+        "enumValues": [
+          "asc",
+          "desc"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "list_risk_snapshots",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/risks/snapshots",
+    "operationId": "ListRiskSnapshots",
+    "summary": "List risk snapshots for an audit",
+    "description": "List risk snapshots for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_audit_risks",
+    "source": "audit",
+    "method": "get",
+    "path": "/audits/{auditId}/risks/{snapshotId}",
+    "operationId": "ListAuditRisks",
+    "summary": "List risks for an audit",
+    "description": "List risks for an audit",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "description": "The audit ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "snapshotId",
+        "in": "path",
+        "required": true,
+        "description": "The risk assessment snapshot ID",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results per page (1-100, default 10)",
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "description": "Pagination cursor from previous response",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search term for filtering by risk scenario description",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "orderBy",
+        "in": "query",
+        "required": false,
+        "description": "Field to sort results by. Allowed: \"riskId\", \"riskScenario\", \"inherentRisk\", \"treatment\", \"residualRisk\", \"reviewStatus\", \"owner\", \"categories\", \"ciaCategories\", \"identified\". Default: \"identified\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/RiskOrderBy"
+        },
+        "enumValues": [
+          "inherentRisk",
+          "riskId",
+          "riskScenario",
+          "treatment",
+          "residualRisk",
+          "reviewStatus",
+          "owner",
+          "categories",
+          "ciaCategories",
+          "identified"
+        ]
+      },
+      {
+        "name": "orderDirection",
+        "in": "query",
+        "required": false,
+        "description": "Sort direction: \"asc\" or \"desc\". Default: \"desc\"",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/OrderDirection"
+        },
+        "enumValues": [
+          "asc",
+          "desc"
+        ]
       }
     ]
   },
@@ -14688,6 +22500,85 @@ export const generatedOperations: GeneratedOperation[] = [
           }
         }
       ]
+    }
+  },
+  {
+    "toolName": "connector_upload_file_for_document",
+    "source": "connectors",
+    "method": "post",
+    "path": "/v1/documents/{documentId}/uploads",
+    "operationId": "UploadFileForDocument",
+    "summary": "Upload file for document",
+    "description": "Upload file for document",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "documentId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "multipart/form-data",
+      "kind": "multipart",
+      "fields": [
+        {
+          "name": "file",
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        {
+          "name": "effectiveAtDate",
+          "required": false,
+          "description": "Date indicating when the document is effective from.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Date indicating when the document is effective from."
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "Description of the uploaded document.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Description of the uploaded document."
+          }
+        }
+      ],
+      "fileFieldName": "file",
+      "fileRequired": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "effectiveAtDate": {
+            "type": "string",
+            "description": "Date indicating when the document is effective from."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the uploaded document."
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
     }
   },
   {
@@ -16885,7 +24776,8 @@ export const generatedOperations: GeneratedOperation[] = [
                     "CODE_REPOSITORY",
                     "SERVERLESS_FUNCTION",
                     "MANIFEST_FILE",
-                    "WORKSTATION"
+                    "WORKSTATION",
+                    "OTHER"
                   ]
                 }
               },
@@ -16957,7 +24849,8 @@ export const generatedOperations: GeneratedOperation[] = [
                     "CODE_REPOSITORY",
                     "SERVERLESS_FUNCTION",
                     "MANIFEST_FILE",
-                    "WORKSTATION"
+                    "WORKSTATION",
+                    "OTHER"
                   ]
                 }
               },
@@ -17763,16 +25656,16 @@ export const generatedOperations: GeneratedOperation[] = [
 ];
 export const generatedStats = {
   "manage": {
-    "operations": 167,
-    "mutations": 87
+    "operations": 241,
+    "mutations": 134
   },
   "audit": {
-    "operations": 31,
-    "mutations": 14
+    "operations": 57,
+    "mutations": 19
   },
   "connectors": {
-    "operations": 24,
-    "mutations": 12
+    "operations": 25,
+    "mutations": 13
   }
 } as const;
 export const generatedOperationCount = generatedOperations.length;
