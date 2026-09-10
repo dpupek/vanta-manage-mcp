@@ -41,7 +41,7 @@ export const buildHelpCatalog = (): HelpCatalog => {
       category: "workflow",
       source: "workflow",
       mode: tool.mode,
-      isMutation: true,
+      isMutation: tool.mode === "plan_execute_confirmed",
       enabled: isToolEnabled(tool.name),
     }),
   );

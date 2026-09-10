@@ -78,6 +78,148 @@ const getHandler = (
   return args => handler(args, { signal: new AbortController().signal });
 };
 
+test("issue/event plans keep inventory cursors and filters independent", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  registerWorkflowTools(server as never, client as never);
+  // Initial Assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = await getHandler(
+    server,
+    "workflow_issue_event_triage",
+  )({
+    mode: "plan",
+    issuePageCursor: "issues-next",
+    eventPageCursor: "events-next",
+    search: "access",
+    eventStartDate: "2026-09-01T00:00:00Z",
+  });
+  // Assert
+  assert.equal(parseToolEnvelope(result).success, true);
+  assert.deepEqual(
+    client.requests.map(request => request.query),
+    [
+      { search: "access", pageSize: 100, pageCursor: "issues-next" },
+      {
+        startDate: "2026-09-01T00:00:00Z",
+        pageSize: 100,
+        pageCursor: "events-next",
+      },
+    ],
+  );
+});
+
+test("issue/event workflow rejects execute without making requests", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  registerWorkflowTools(server as never, client as never);
+  // Initial Assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = await getHandler(
+    server,
+    "workflow_issue_event_triage",
+  )({ mode: "execute", confirm: true });
+  // Assert
+  assert.equal(parseToolEnvelope(result).success, false);
+  assert.equal(client.calls, 0);
+});
+
+for (const outcome of ["partial", "failed"] as const) {
+  test(`issue/event plan exposes ${outcome} event inventory`, async () => {
+    // Arrange
+    const server = new FakeServer();
+    const client = new FakeClient();
+    client.setResponse("GET", "/event-logs", {
+      status: outcome === "failed" ? 403 : 200,
+      ok: outcome !== "failed",
+      headers: {},
+      data: {
+        results: {
+          data: [],
+          pageInfo: { hasNextPage: true, endCursor: "next-event" },
+        },
+      },
+    });
+    registerWorkflowTools(server as never, client as never);
+    // Initial Assert
+    assert.equal(client.calls, 0);
+    // Act
+    const result = await getHandler(
+      server,
+      "workflow_issue_event_triage",
+    )({ mode: "plan", maxPages: 1 });
+    // Assert
+    const envelope = parseToolEnvelope(result);
+    assert.equal(envelope.success, outcome !== "failed");
+    if (outcome === "partial") {
+      assert.equal(
+        (envelope.metadata as Record<string, unknown>).complete,
+        false,
+      );
+      assert.ok((envelope.warnings as string[]).length);
+    }
+    assert.equal(client.calls, 2);
+  });
+}
+
+test("vendor plan scopes assessments to selected vendor and independent cursor", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  registerWorkflowTools(server as never, client as never);
+  // Initial Assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = await getHandler(
+    server,
+    "workflow_vendor_triage",
+  )({
+    mode: "plan",
+    vendorId: "vendor-1",
+    pageCursor: "vendors-next",
+    assessmentPageCursor: "assessments-next",
+  });
+  // Assert
+  assert.equal(parseToolEnvelope(result).success, true);
+  assert.equal(client.requests[1].path, "/vendors/vendor-1/assessments");
+  assert.deepEqual(client.requests[1].query, {
+    pageSize: 100,
+    pageCursor: "assessments-next",
+  });
+});
+
+test("vendor plan does not hide a failed assessment read", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  client.setResponse("GET", "/vendors/vendor-1/assessments", {
+    ok: false,
+    status: 403,
+    headers: {},
+    data: {},
+  });
+  registerWorkflowTools(server as never, client as never);
+  // Initial Assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = await getHandler(
+    server,
+    "workflow_vendor_triage",
+  )({ mode: "plan", vendorId: "vendor-1" });
+  // Assert
+  const envelope = parseToolEnvelope(result);
+  assert.equal(envelope.success, false);
+  assert.equal(
+    (envelope.error as Record<string, unknown>).code,
+    "workflow_read_failed",
+  );
+  assert.equal(client.calls, 2);
+});
+
 for (const operation of [
   {
     type: "deactivate_vulnerabilities",

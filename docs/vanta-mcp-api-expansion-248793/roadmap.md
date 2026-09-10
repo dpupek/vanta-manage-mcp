@@ -122,3 +122,12 @@ Evidence and exact limits: [DG validation report](dg-validation-2026-09-09.md). 
 - [x] Regenerate help and validate four new Manage reads on DG.
 
 Details: [contract refresh and migration](contract-refresh.md). Successful Audit/Connector access and new mutation lifecycle acceptance remain separate gates.
+
+### Focused workflow expansion checkpoint
+
+- [x] Add plan-only issue/event-log review with independent cursors and truthful completeness.
+- [x] Add selected-vendor assessment history to vendor triage using a separate assessment cursor.
+- [x] Validate 137 unit/mock tests and live DG planning reads.
+- [x] Validate disposable PRIVATE Knowledge Base document create/update/delete with readbacks and confirmed cleanup.
+
+Evidence and remaining acceptance boundaries: [workflow expansion](workflow-expansion.md). Seven workflows are implemented; Audit/Connector access and dedicated vendor/vulnerability/SLA lifecycle fixtures remain outstanding.

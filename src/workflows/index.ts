@@ -22,10 +22,16 @@ import {
 export interface WorkflowToolMetadata {
   name: string;
   description: string;
-  mode: "plan_execute_confirmed";
+  mode: "plan_execute_confirmed" | "plan_only";
 }
 
 export const workflowToolMetadata: WorkflowToolMetadata[] = [
+  {
+    name: "workflow_issue_event_triage",
+    description:
+      "Plan issue and event-log review with independent, bounded inventories; no mutations.",
+    mode: "plan_only",
+  },
   {
     name: "workflow_control_evidence",
     description:
@@ -907,6 +913,7 @@ const registerVendorWorkflow = (
       mode: workflowModeSchema,
       confirm: z.boolean().optional(),
       vendorId: z.string().optional(),
+      assessmentPageCursor: z.string().min(1).optional(),
       actions: z.array(actionSchema).optional(),
     },
     async args => {
@@ -917,6 +924,18 @@ const registerVendorWorkflow = (
 
       if (args.mode === "plan") {
         const vendors = await readInventory("ListVendors", {}, client, args);
+        const assessments = args.vendorId
+          ? await readInventory(
+              "GetAssessmentsByVendorId",
+              { vendorId: args.vendorId },
+              client,
+              {
+                pageSize: args.pageSize,
+                maxPages: args.maxPages,
+                pageCursor: args.assessmentPageCursor,
+              },
+            )
+          : undefined;
         return toToolResult(
           planEnvelope({
             summary: "Vendor triage plan.",
@@ -925,6 +944,8 @@ const registerVendorWorkflow = (
               "Execute targeted vendor/finding/document updates.",
             ],
             vendors,
+            selectedVendorId: args.vendorId ?? null,
+            ...(assessments ? { assessments } : {}),
           }),
         );
       }
@@ -1436,6 +1457,57 @@ export function registerWorkflowTools(
   client: VantaApiClient,
 ): number {
   let registered = 0;
+  const issueTool = "workflow_issue_event_triage";
+  if (isToolEnabled(issueTool)) {
+    registerWorkflow(
+      server,
+      issueTool,
+      "Plan issue and event-log review without mutations.",
+      {
+        mode: z.literal("plan"),
+        pageSize: collectionShape.pageSize,
+        maxPages: collectionShape.maxPages,
+        issuePageCursor: z.string().min(1).optional(),
+        eventPageCursor: z.string().min(1).optional(),
+        search: z.string().optional(),
+        eventStartDate: z.string().datetime({ offset: true }).optional(),
+      },
+      async args => {
+        const issues = await readInventory(
+          "List",
+          compactRecord({ search: args.search }),
+          client,
+          {
+            pageSize: args.pageSize,
+            maxPages: args.maxPages,
+            pageCursor: args.issuePageCursor,
+          },
+        );
+        const events = await readInventory(
+          "ListEventLogs",
+          compactRecord({ startDate: args.eventStartDate }),
+          client,
+          {
+            pageSize: args.pageSize,
+            maxPages: args.maxPages,
+            pageCursor: args.eventPageCursor,
+          },
+        );
+        return toToolResult(
+          planEnvelope({
+            summary:
+              "Review issues and event logs as separate evidence inventories; no causal relationship is inferred.",
+            recommendations: [
+              "Inspect issue details and relevant events before deciding on follow-up actions.",
+            ],
+            issues,
+            events,
+          }),
+        );
+      },
+    );
+    registered += 1;
+  }
   if (registerControlEvidenceWorkflow(server, client)) {
     registered += 1;
   }

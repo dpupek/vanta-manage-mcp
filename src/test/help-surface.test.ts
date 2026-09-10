@@ -71,7 +71,13 @@ test("help catalog includes generated, compatibility, and workflow families", ()
 
   // Assert
   assert.equal(catalog.summary.byCategory.compat_read, 15);
-  assert.equal(catalog.summary.byCategory.workflow, 6);
+  assert.equal(catalog.summary.byCategory.workflow, 7);
+  const issuePlan = catalog.entries.find(
+    entry => entry.name === "workflow_issue_event_triage",
+  );
+  assert.ok(issuePlan);
+  assert.equal(issuePlan.mode, "plan_only");
+  assert.equal(issuePlan.isMutation, false);
   assert.equal(hasGenerated, true);
   assert.equal(hasCompat, true);
   assert.equal(hasWorkflow, true);

@@ -4,11 +4,11 @@ Canonical reference generated from runtime metadata.
 
 ## Summary
 
-- Total tools: 344
-- Enabled tools: 344
+- Total tools: 345
+- Enabled tools: 345
 - Generated endpoint tools: 323
 - Compatibility read tools: 15
-- Workflow tools: 6
+- Workflow tools: 7
 - Mutating tools: 172
 - Generated manage tools: 241
 - Generated audit tools: 57
@@ -445,6 +445,7 @@ Canonical reference generated from runtime metadata.
 |---|---|---|
 | `workflow_control_evidence` | plan_execute_confirmed | yes |
 | `workflow_information_request_triage` | plan_execute_confirmed | yes |
+| `workflow_issue_event_triage` | plan_only | yes |
 | `workflow_people_assets_vuln_triage` | plan_execute_confirmed | yes |
 | `workflow_resource_owner_assignment` | plan_execute_confirmed | yes |
 | `workflow_triage_failing_controls` | plan_execute_confirmed | yes |
