@@ -198,6 +198,10 @@ test("capabilities and unsupported tools return agent-safe envelopes", async () 
     // Assert
     assert.equal(capabilities.success, true);
     assert.equal(typeof capabilities.correlationId, "string");
+    assert.equal(
+      harness.serverVersion(),
+      (capabilities.data as { mcp: { version: string } }).mcp.version,
+    );
     assert.equal(unsupported.success, false);
     assert.equal(
       (unsupported.error as Record<string, unknown>).code,

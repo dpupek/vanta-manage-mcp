@@ -109,6 +109,15 @@ export class McpStdioHarness {
     return result.tools.map(tool => tool.name);
   }
 
+  public serverVersion(): string {
+    assert.ok(this.client, "Harness is not started.");
+    const version = this.client.getServerVersion()?.version;
+    if (typeof version !== "string") {
+      throw new Error("Server did not report a version.");
+    }
+    return version;
+  }
+
   private async withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
     let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
     const timeoutPromise = new Promise<never>((_resolve, reject) => {

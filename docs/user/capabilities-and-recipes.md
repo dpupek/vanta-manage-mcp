@@ -9,6 +9,7 @@
 - Integration resource owner and description assignment.
 - Audit information-request operations.
 - Capability discovery with the `capabilities` tool.
+- Runtime identity from `capabilities.data.mcp`: semantic version, immutable release tag when available, and commit SHA.
 - Agent-safe unsupported-operation fallbacks for API surfaces Vanta does not publicly expose.
 
 ## Built-in Recipes and Prompts

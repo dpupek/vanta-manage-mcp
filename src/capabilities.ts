@@ -10,7 +10,7 @@ import {
   tenantIdentity,
   writeEnabled,
 } from "./config.js";
-import { MCP_NAME, MCP_VERSION } from "./version.js";
+import { MCP_BUILD_INFO, MCP_NAME, MCP_VERSION } from "./version.js";
 import { workflowToolMetadata } from "./workflows/index.js";
 import { unsupportedToolMetadata } from "./tools/unsupported-tools.js";
 
@@ -42,6 +42,8 @@ export interface CapabilitiesPayload {
   mcp: {
     name: string;
     version: string;
+    releaseTag: string | null;
+    commitSha: string | null;
   };
   tenant: typeof tenantIdentity;
   runtime: Record<string, unknown>;
@@ -101,6 +103,8 @@ export const buildCapabilitiesPayload = (): CapabilitiesPayload => {
     mcp: {
       name: MCP_NAME,
       version: MCP_VERSION,
+      releaseTag: MCP_BUILD_INFO.releaseTag,
+      commitSha: MCP_BUILD_INFO.commitSha,
     },
     tenant: tenantIdentity,
     runtime: {

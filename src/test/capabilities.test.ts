@@ -15,6 +15,15 @@ test("capabilities payload exposes tenant, spec, upload, and unsupported surface
   // Assert
   assert.equal(capabilities.mcp.name, "vanta-mcp-full");
   assert.equal(typeof capabilities.mcp.version, "string");
+  assert.ok(capabilities.mcp.version.length > 0);
+  assert.ok(
+    capabilities.mcp.releaseTag === null ||
+      /^v\d+\.\d+\.\d+$/.test(capabilities.mcp.releaseTag),
+  );
+  assert.ok(
+    capabilities.mcp.commitSha === null ||
+      /^[a-f0-9]{40}$/i.test(capabilities.mcp.commitSha),
+  );
   assert.equal(typeof capabilities.tenant.label, "string");
   assert.equal(typeof capabilities.runtime.writeEnabled, "boolean");
   assert.ok(capabilities.tools.generated.count > 0);

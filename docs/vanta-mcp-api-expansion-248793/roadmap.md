@@ -131,3 +131,9 @@ Details: [contract refresh and migration](contract-refresh.md). Successful Audit
 - [x] Validate disposable PRIVATE Knowledge Base document create/update/delete with readbacks and confirmed cleanup.
 
 Evidence and remaining acceptance boundaries: [workflow expansion](workflow-expansion.md). Seven workflows are implemented; Audit/Connector access and dedicated vendor/vulnerability/SLA lifecycle fixtures remain outstanding.
+
+### Runtime release identity
+
+- [x] Expose the built semantic version in the MCP initialization handshake and `capabilities` response.
+- [x] Include the immutable release tag and commit SHA in `capabilities` when build metadata is available.
+- [x] Generate build metadata during local/tagged Git installs and provide CI release metadata before validation.
