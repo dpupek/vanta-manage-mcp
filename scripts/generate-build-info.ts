@@ -26,29 +26,44 @@ const runGit = (args: string[]): string | null => {
 
 const isReleaseTag = (value: string): boolean => /^v\d+\.\d+\.\d+$/.test(value);
 
-const resolveReleaseTag = (): string | null => {
+const resolveReleaseTag = (commitSha: string | null): string | null => {
   const configuredTag = process.env.VANTA_MCP_RELEASE_TAG?.trim();
   if (configuredTag) {
     return configuredTag;
   }
 
   const exactTags = runGit(["tag", "--points-at", "HEAD"]);
-  return (
+  const localReleaseTag =
     exactTags
       ?.split(/\r?\n/)
       .map(tag => tag.trim())
-      .find(isReleaseTag) ?? null
-  );
+      .find(isReleaseTag) ?? null;
+  if (localReleaseTag !== null || commitSha === null) {
+    return localReleaseTag;
+  }
+
+  const remoteTags = runGit(["ls-remote", "--tags", "origin"]);
+  const matchedTag = remoteTags
+    ?.split(/\r?\n/)
+    .map(line => line.split("\t"))
+    .find(
+      ([sha, ref]) =>
+        sha === commitSha && /^refs\/tags\/v\d+\.\d+\.\d+\^?\{?\}?$/.test(ref),
+    )?.[1]
+    .replace("refs/tags/", "")
+    .replace("^{}", "");
+
+  return matchedTag && isReleaseTag(matchedTag) ? matchedTag : null;
 };
 
 const main = (): void => {
   const packageManifest = JSON.parse(
     fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8"),
   ) as PackageManifest;
-  const releaseTag = resolveReleaseTag();
   const commitSha =
     process.env.VANTA_MCP_RELEASE_COMMIT?.trim() ??
     runGit(["rev-parse", "HEAD"]);
+  const releaseTag = resolveReleaseTag(commitSha);
   const version = releaseTag?.replace(/^v/, "") ?? packageManifest.version;
   const buildInfo = {
     version,

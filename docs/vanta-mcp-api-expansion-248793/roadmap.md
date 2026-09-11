@@ -136,4 +136,4 @@ Evidence and remaining acceptance boundaries: [workflow expansion](workflow-expa
 
 - [x] Expose the built semantic version in the MCP initialization handshake and `capabilities` response.
 - [x] Include the immutable release tag and commit SHA in `capabilities` when build metadata is available.
-- [x] Generate build metadata during local/tagged Git installs and provide CI release metadata before validation.
+- [x] Generate build metadata during local/tagged Git installs, resolving tag refs from the repository when npm omits local tag refs, and provide CI release metadata before validation.
