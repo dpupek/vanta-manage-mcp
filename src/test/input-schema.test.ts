@@ -202,10 +202,10 @@ test("all generated schemas construct successfully", () => {
   // Arrange
   const operations = generatedOperations;
   // Initial Assert
-  assert.equal(operations.length, 323);
+  assert.equal(operations.length, 333);
   // Act
   const schemas = operations.map(buildOperationSchema);
   // Assert
-  assert.equal(schemas.length, 323);
+  assert.equal(schemas.length, 333);
   assert.ok(schemas.every(schema => typeof schema.safeParse === "function"));
 });

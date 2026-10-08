@@ -4,13 +4,13 @@ Canonical reference generated from runtime metadata.
 
 ## Summary
 
-- Total tools: 345
-- Enabled tools: 345
-- Generated endpoint tools: 323
+- Total tools: 355
+- Enabled tools: 355
+- Generated endpoint tools: 333
 - Compatibility read tools: 15
 - Workflow tools: 7
-- Mutating tools: 172
-- Generated manage tools: 241
+- Mutating tools: 175
+- Generated manage tools: 251
 - Generated audit tools: 57
 - Generated connector tools: 25
 
@@ -109,6 +109,7 @@ Canonical reference generated from runtime metadata.
 | `add_trust_center_faq_category` | manage | POST | `/trust-centers/{slugId}/faq-categories` | yes | yes |
 | `add_trust_center_resource_category` | manage | POST | `/trust-centers/{slugId}/resource-categories` | yes | yes |
 | `add_trust_center_viewer` | manage | POST | `/trust-centers/{slugId}/viewers` | yes | yes |
+| `add_vendor_finding_mappings` | manage | POST | `/risk-scenarios/{riskScenarioId}/mappings/vendor-findings` | yes | yes |
 | `approve_questionnaire` | manage | POST | `/customer-trust/questionnaires/{questionnaireId}/approve` | yes | yes |
 | `approve_trust_center_access_request` | manage | POST | `/trust-centers/{slugId}/access-requests/{accessRequestId}/approve` | yes | yes |
 | `audit_create_custom_control` | audit | POST | `/audits/{auditId}/controls/custom-controls` | yes | yes |
@@ -211,6 +212,7 @@ Canonical reference generated from runtime metadata.
 | `get_audit` | audit | GET | `/audits/{auditId}` | no | yes |
 | `get_audit_evidence` | audit | GET | `/audits/{auditId}/evidence/{auditEvidenceId}` | no | yes |
 | `get_audit_evidence_comment` | audit | GET | `/audits/{auditId}/evidence/{auditEvidenceId}/comments/{commentId}` | no | yes |
+| `get_business_unit` | manage | GET | `/business-units/{businessUnitId}` | no | yes |
 | `get_chatbot_conversation_messages` | manage | GET | `/trust-centers/{slugId}/chatbot/conversations/{conversationId}` | no | yes |
 | `get_comment_for_information_request` | audit | GET | `/audits/{auditId}/information-requests/{requestId}/comments/{commentId}` | no | yes |
 | `get_connected_integration` | manage | GET | `/integrations/{integrationId}` | no | yes |
@@ -228,10 +230,12 @@ Canonical reference generated from runtime metadata.
 | `get_issue` | manage | GET | `/issues/{issueId}` | no | yes |
 | `get_knowledge_base_resource` | manage | GET | `/knowledge-base/resources/{id}` | no | yes |
 | `get_monitored_computer` | manage | GET | `/monitored-computers/{computerId}` | no | yes |
+| `get_organization` | manage | GET | `/organization` | no | yes |
 | `get_organization_information` | audit | GET | `/audits/{auditId}/organization/information` | no | yes |
 | `get_organization_notifications` | audit | GET | `/audits/{auditId}/organization/notifications` | no | yes |
 | `get_person` | manage | GET | `/people/{personId}` | no | yes |
 | `get_policy` | manage | GET | `/policies/{policyId}` | no | yes |
+| `get_program_scope` | manage | GET | `/program-scopes/{programScopeId}` | no | yes |
 | `get_questionnaire` | manage | GET | `/customer-trust/questionnaires/{questionnaireId}` | no | yes |
 | `get_questionnaire_export` | manage | GET | `/customer-trust/questionnaires/exports/{id}` | no | yes |
 | `get_questionnaire_response` | manage | GET | `/customer-trust/questionnaires/{questionnaireId}/responses/{responseId}` | no | yes |
@@ -241,6 +245,7 @@ Canonical reference generated from runtime metadata.
 | `get_security_review_documents` | manage | GET | `/vendors/{vendorId}/security-reviews/{securityReviewId}/documents` | no | yes |
 | `get_security_reviews_by_id` | manage | GET | `/vendors/{vendorId}/security-reviews/{securityReviewId}` | no | yes |
 | `get_security_reviews_by_vendor_id` | manage | GET | `/vendors/{vendorId}/security-reviews` | no | yes |
+| `get_settings` | manage | GET | `/personnel-notification-settings` | no | yes |
 | `get_tags_for_category` | manage | GET | `/customer-trust/tag-categories/{tagCategoryId}` | no | yes |
 | `get_test` | manage | GET | `/tests/{testId}` | no | yes |
 | `get_test_entities` | manage | GET | `/tests/{testId}/entities` | no | yes |
@@ -278,6 +283,7 @@ Canonical reference generated from runtime metadata.
 | `list_audit_risks` | audit | GET | `/audits/{auditId}/risks/{snapshotId}` | no | yes |
 | `list_audit_snapshots` | audit | GET | `/audits/{auditId}/issues/snapshots` | no | yes |
 | `list_audits` | audit | GET | `/audits` | no | yes |
+| `list_business_units` | manage | GET | `/business-units` | no | yes |
 | `list_chatbot_conversations` | manage | GET | `/trust-centers/{slugId}/chatbot/conversations` | no | yes |
 | `list_code_changes` | audit | GET | `/audits/{auditId}/assets/code-changes` | no | yes |
 | `list_comments_for_control` | audit | GET | `/audits/{auditId}/controls/{controlId}/comments` | no | yes |
@@ -316,6 +322,7 @@ Canonical reference generated from runtime metadata.
 | `list_personnel_groups` | audit | GET | `/audits/{auditId}/personnel/groups` | no | yes |
 | `list_personnel_people` | audit | GET | `/audits/{auditId}/personnel/people` | no | yes |
 | `list_policies` | manage | GET | `/policies` | no | yes |
+| `list_program_scopes` | manage | GET | `/program-scopes` | no | yes |
 | `list_questionnaire_responses` | manage | GET | `/customer-trust/questionnaires/{questionnaireId}/responses` | no | yes |
 | `list_questionnaires` | manage | GET | `/customer-trust/questionnaires` | no | yes |
 | `list_resource_kind_summaries` | manage | GET | `/integrations/{integrationId}/resource-kinds` | no | yes |
@@ -343,6 +350,7 @@ Canonical reference generated from runtime metadata.
 | `list_users` | manage | GET | `/users` | no | yes |
 | `list_vendor_assessment_types` | manage | GET | `/vendor-assessment-types` | no | yes |
 | `list_vendor_documents` | manage | GET | `/vendors/{vendorId}/documents` | no | yes |
+| `list_vendor_finding_mappings` | manage | GET | `/risk-scenarios/{riskScenarioId}/mappings/vendor-findings` | no | yes |
 | `list_vendor_findings` | manage | GET | `/vendors/{vendorId}/findings` | no | yes |
 | `list_vendor_risk_attributes` | manage | GET | `/vendor-risk-attributes` | no | yes |
 | `list_vendors` | manage | GET | `/vendors` | no | yes |
@@ -360,6 +368,7 @@ Canonical reference generated from runtime metadata.
 | `remove_person_from_group` | manage | DELETE | `/groups/{groupId}/people/{personId}` | yes | yes |
 | `remove_tag_category_product_context` | manage | DELETE | `/customer-trust/tag-categories/{tagCategoryId}/product-contexts/{productContextId}` | yes | yes |
 | `remove_trust_center_viewer` | manage | DELETE | `/trust-centers/{slugId}/viewers/{viewerId}` | yes | yes |
+| `remove_vendor_finding_mappings` | manage | DELETE | `/risk-scenarios/{riskScenarioId}/mappings/vendor-findings` | yes | yes |
 | `replace_document_resource_file` | manage | POST | `/knowledge-base/resources/documents/{id}/upload` | yes | yes |
 | `send_notifications_to_all_subscribers` | manage | POST | `/trust-centers/{slugId}/updates/{updateId}/notify-all-subscribers` | yes | yes |
 | `send_trust_center_update_notifications` | manage | POST | `/trust-centers/{slugId}/updates/{updateId}/notify-specific-subscribers` | yes | yes |
@@ -389,6 +398,7 @@ Canonical reference generated from runtime metadata.
 | `update_resources` | manage | PATCH | `/integrations/{integrationId}/resource-kinds/{resourceKind}/resources` | yes | yes |
 | `update_risk_scenario` | manage | PATCH | `/risk-scenarios/{riskScenarioId}` | yes | yes |
 | `update_risk_scenario_control` | manage | PATCH | `/risk-scenarios/{riskScenarioId}/controls/{controlId}` | yes | yes |
+| `update_settings` | manage | PATCH | `/personnel-notification-settings` | yes | yes |
 | `update_trust_center` | manage | PATCH | `/trust-centers/{slugId}` | yes | yes |
 | `update_trust_center_control_category` | manage | PATCH | `/trust-centers/{slugId}/control-categories/{categoryId}` | yes | yes |
 | `update_trust_center_controls_in_category` | manage | PATCH | `/trust-centers/{slugId}/control-categories/{categoryId}/controls` | yes | yes |

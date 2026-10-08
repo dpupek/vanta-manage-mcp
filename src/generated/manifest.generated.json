@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-10T02:44:51.790536+00:00",
-  "totalOperations": 323,
-  "totalMutations": 166,
+  "generatedAt": "2026-10-08T16:23:45.6869978Z",
+  "totalOperations": 333,
+  "totalMutations": 169,
   "stats": {
     "manage": {
-      "operations": 241,
-      "mutations": 134
+      "operations": 251,
+      "mutations": 137
     },
     "audit": {
       "operations": 57,
@@ -17,6 +17,22 @@
     }
   },
   "tools": [
+    {
+      "toolName": "list_business_units",
+      "source": "manage",
+      "method": "get",
+      "path": "/business-units",
+      "operationId": "ListBusinessUnits",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_business_unit",
+      "source": "manage",
+      "method": "get",
+      "path": "/business-units/{businessUnitId}",
+      "operationId": "GetBusinessUnit",
+      "isMutation": false
+    },
     {
       "toolName": "upload_contract",
       "source": "manage",
@@ -842,6 +858,14 @@
       "isMutation": false
     },
     {
+      "toolName": "get_organization",
+      "source": "manage",
+      "method": "get",
+      "path": "/organization",
+      "operationId": "GetOrganization",
+      "isMutation": false
+    },
+    {
       "toolName": "list_people",
       "source": "manage",
       "method": "get",
@@ -906,6 +930,22 @@
       "isMutation": true
     },
     {
+      "toolName": "get_settings",
+      "source": "manage",
+      "method": "get",
+      "path": "/personnel-notification-settings",
+      "operationId": "GetSettings",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_settings",
+      "source": "manage",
+      "method": "patch",
+      "path": "/personnel-notification-settings",
+      "operationId": "UpdateSettings",
+      "isMutation": true
+    },
+    {
       "toolName": "list_policies",
       "source": "manage",
       "method": "get",
@@ -919,6 +959,22 @@
       "method": "get",
       "path": "/policies/{policyId}",
       "operationId": "GetPolicy",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_program_scopes",
+      "source": "manage",
+      "method": "get",
+      "path": "/program-scopes",
+      "operationId": "ListProgramScopes",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_program_scope",
+      "source": "manage",
+      "method": "get",
+      "path": "/program-scopes/{programScopeId}",
+      "operationId": "GetProgramScope",
       "isMutation": false
     },
     {
@@ -991,6 +1047,30 @@
       "method": "delete",
       "path": "/risk-scenarios/{riskScenarioId}/controls/{controlId}",
       "operationId": "DeleteRiskScenarioControl",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_vendor_finding_mappings",
+      "source": "manage",
+      "method": "get",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/vendor-findings",
+      "operationId": "ListVendorFindingMappings",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_vendor_finding_mappings",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/vendor-findings",
+      "operationId": "AddVendorFindingMappings",
+      "isMutation": true
+    },
+    {
+      "toolName": "remove_vendor_finding_mappings",
+      "source": "manage",
+      "method": "delete",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/vendor-findings",
+      "operationId": "RemoveVendorFindingMappings",
       "isMutation": true
     },
     {

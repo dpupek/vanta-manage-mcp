@@ -11,7 +11,7 @@ FogBugz epic: https://darwin-global.fogbugz.com/f/cases/248793/
 
 Notes:
 
-- Current pinned specs generate 323 operations (Manage 241, Audit 57, Connectors 25). See the September 10 contract-refresh checkpoint below.
+- Current pinned specs generate 333 operations (Manage 251, Audit 57, Connectors 25). See the October 8 capabilities iteration below.
 - September 9, 2026 review: authoritative public downloads are available at the [Manage](https://developer.vanta.com/reference/manage-vanta.json), [Audit](https://developer.vanta.com/reference/auditor-api.json), and [Integrations](https://developer.vanta.com/reference/build-integrations.json) reference URLs. The earlier download blocker is obsolete.
 - The September 9 comparison found 322 public operations against 222 pinned. The September 10 download contains 323; this refresh adds 101 operations. Earlier validation counts below are historical checkpoints.
 
@@ -97,9 +97,10 @@ This phase preserves the 222-operation pinned surface. Live tenant validation an
 1. [ ] Validate this checkpoint against an authorized test tenant: read-only calls across API families, then controlled upload and mutation readback. Record scope/permission failures separately from code defects.
 2. [x] Refresh all three public OpenAPI contracts and record source URLs, retrieval timestamps, hashes, operation identities, and request-schema differences before regeneration. The September 9 comparison identified 100 additional operations.
 3. [x] Regenerate tools and help, review breaking input changes, and add regression coverage for changed contracts; rerun parity and mock integration checks.
-4. [ ] Prioritize workflow expansion after contract refresh: issues/event logs and vendor assessments first, followed by risk/control and audit lifecycle capabilities.
+4. [x] Expand issue/event-log planning and selected-vendor assessment context after contract refresh.
+5. [ ] Extend risk/control and audit lifecycle workflows when operator needs justify them.
 
-Engineering implementation is complete; live tenant acceptance, deployment, and the broader contract refresh remain open.
+The September 9 runtime implementation is complete. Later checkpoints record contract refresh and workflow expansion; remaining live tenant acceptance is listed separately below.
 
 ### DG live validation checkpoint
 
@@ -137,3 +138,14 @@ Evidence and remaining acceptance boundaries: [workflow expansion](workflow-expa
 - [x] Expose the built semantic version in the MCP initialization handshake and `capabilities` response.
 - [x] Include the immutable release tag and commit SHA in `capabilities` when build metadata is available.
 - [x] Generate build metadata during local/tagged Git installs, resolving tag refs from the repository when npm omits local tag refs, and provide CI release metadata before validation.
+
+### October 8 capabilities iteration
+
+Baseline, workflow/CRC decomposition, decisions, plan, and validation: [capabilities-2026-10-08.md](capabilities-2026-10-08.md).
+
+- [x] Compare all three official specifications, record input/response deltas, and pin exact bytes with provenance (248793).
+- [x] Generate ten new Manage endpoints and refreshed inputs across all API families (248793).
+- [x] Verify control implementation editing, scoped reads, settings/mapping writes, new Trust Center inputs, audit linkage, and nullable connector payloads with unit/mock coverage (248793).
+- [x] Regenerate help and complete deterministic generation, name preservation, parity, lint, and test gates: 188 tests passed; 333 endpoint tools; all 323 baseline names preserved (248793).
+
+Live Audit/Connector and dedicated vendor/vulnerability/SLA acceptance remain separate from this locally validated API-capability implementation.

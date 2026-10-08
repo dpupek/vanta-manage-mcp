@@ -3,6 +3,9 @@
 ## What You Can Do
 
 - Controls and evidence operations.
+- Control implementation-details editing through `update_control_metadata`.
+- Organization, business-unit, and program-scope discovery and scoped personnel filtering.
+- Personnel reminder settings and vendor-finding mappings to risks.
 - Failing controls/tests/documents triage.
 - Vendor and finding lifecycle management.
 - People, assets, and vulnerability triage.
@@ -11,6 +14,38 @@
 - Capability discovery with the `capabilities` tool.
 - Runtime identity from `capabilities.data.mcp`: semantic version, immutable release tag when available, and commit SHA.
 - Agent-safe unsupported-operation fallbacks for API surfaces Vanta does not publicly expose.
+
+## October 8 API additions
+
+Read a control with `get_control`, then edit its Implementation details with:
+
+```json
+{
+  "tool": "update_control_metadata",
+  "input": {
+    "controlId": "control-123",
+    "body": {
+      "implementationDetails": "Managers review access quarterly and document exceptions."
+    },
+    "confirm": true
+  }
+}
+```
+
+Read back `get_control` to verify the saved text. Implementation details are separate from the control description and note. The write accepts a string; the response field may be null for controls without details.
+
+| Goal                                    | Tools and inputs                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Identify the authenticated organization | `get_organization`; the token chooses the organization, without an organization selector.                                                                                                                                                                                                                                                                            |
+| Discover business units                 | `list_business_units`, `get_business_unit` with businessUnitId. A tenant without business-unit scoping may return 403.                                                                                                                                                                                                                                               |
+| Discover program scopes                 | `list_program_scopes`, `get_program_scope` with programScopeId. List filters include businessUnitIdMatchesAny and frameworkIdMatchesAny arrays.                                                                                                                                                                                                                      |
+| Filter personnel                        | `list_people` accepts frameworkIdMatchesAny, programScopeIdMatchesAny, and businessUnitIdMatchesAny arrays. Use this endpoint tool for scoped filters.                                                                                                                                                                                                               |
+| Change personnel reminders              | Read `get_settings`, then `update_settings` with body.frequency (DAILY, WEEKLY, NEVER) and/or body.channels (EMAIL, SLACK), plus confirm:true. Omitted fields stay unchanged; channels replaces the complete set. An empty channel array or NEVER disables reminders. Read back get_settings.                                                                        |
+| Link vendor findings to risks           | Read `list_vendor_finding_mappings`; add with `add_vendor_finding_mappings` and body.vendorFindingIdsToLink; remove with `remove_vendor_finding_mappings` and body.vendorFindingIdsToUnlink. Supply riskScenarioId and confirm:true for writes. Each batch permits at most 100 finding IDs. Add rejects already-linked findings; read back mappings before retrying. |
+| Control denial emails                   | `deny_trust_center_access_request` accepts optional body.sendEmail. Explicit false is preserved; bodyless calls remain supported.                                                                                                                                                                                                                                    |
+| Use new Trust Center framework values   | `create_compliance_framework` and `update_compliance_framework` accept aiuc1_26q3, atc, and fedramp20x_classA.                                                                                                                                                                                                                                                       |
+
+Audit `update_information_request` now accepts body.linkedControlIds as the complete desired set of control links. Send the full list to replace the set, an empty array to clear it, or omit the property to preserve links. The older additionalControlIds and frameworkCodes write fields remain accepted but are deprecated upstream; use the audit controls endpoint to obtain control IDs. Connector resource uploads now accept explicit null for the fields marked nullable in the current contract; required fields remain required even when nullable.
 
 ## Built-in Recipes and Prompts
 

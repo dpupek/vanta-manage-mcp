@@ -14,7 +14,7 @@ test("generated parity count matches per-spec totals", () => {
     generatedStats.connectors.operations;
 
   // Initial Assert
-  assert.equal(generatedStats.manage.operations, 241);
+  assert.equal(generatedStats.manage.operations, 251);
   assert.equal(generatedStats.audit.operations, 57);
   assert.equal(generatedStats.connectors.operations, 25);
 
@@ -23,7 +23,7 @@ test("generated parity count matches per-spec totals", () => {
 
   // Assert
   assert.equal(actualTotal, expectedTotal);
-  assert.equal(actualTotal, 323);
+  assert.equal(actualTotal, 333);
 });
 
 test("requested latest Manage operations are generated with expected tool names", () => {

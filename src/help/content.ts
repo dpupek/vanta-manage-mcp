@@ -212,6 +212,26 @@ const renderWorkflowSteps = (): string[] => [
 ];
 
 const renderRecipeSteps = (): string[] => [
+  "## Recipe: Control Implementation Details",
+  "",
+  "1. Read the control with `get_control` and review its current implementationDetails.",
+  "2. Call `update_control_metadata` with controlId, body.implementationDetails, and confirm=true.",
+  "3. Read back with `get_control`; implementationDetails is separate from description and note.",
+  "",
+  "## Recipe: Scoped Personnel and Notification Settings",
+  "",
+  "1. Read `get_organization`, `list_business_units`, and `list_program_scopes` to select the authenticated organization and scope IDs.",
+  "2. Use `list_people` with frameworkIdMatchesAny, programScopeIdMatchesAny, and businessUnitIdMatchesAny arrays. Use endpoint tools for these filters.",
+  "3. Read `get_settings`; update_settings accepts body.frequency (DAILY, WEEKLY, NEVER) and body.channels (EMAIL, SLACK) with confirm=true.",
+  "4. Omitted settings stay unchanged. channels replaces the entire set; an empty array or frequency=NEVER disables reminders. Read back with get_settings.",
+  "",
+  "## Recipe: Vendor Findings Mapped to Risks",
+  "",
+  "1. Read `list_vendor_finding_mappings` using the risk scenario object ID and follow pagination.",
+  "2. Review finding IDs, then use `add_vendor_finding_mappings` with body.vendorFindingIdsToLink or `remove_vendor_finding_mappings` with body.vendorFindingIdsToUnlink and confirm=true.",
+  "3. Each request accepts at most 100 IDs. Add rejects already-linked findings; read back before retrying a rejected batch.",
+  "4. Verify mappings with list_vendor_finding_mappings after the write.",
+  "",
   "## Recipe: Top 5 Vulnerable Devices (Asset-First, Exact)",
   "",
   "1. Pull candidate assets first with `list_vulnerable_assets` (use `pageSize` 100 when supported).",
@@ -320,6 +340,18 @@ export const buildHelpResourceMarkdown = (
     lines.push("## Common Goals");
     lines.push("");
     lines.push("- Read controls: `controls`");
+    lines.push(
+      "- Edit control implementation details: `update_control_metadata` with `body.implementationDetails`",
+    );
+    lines.push(
+      "- Read organization and scope IDs: `get_organization`, `list_business_units`, `list_program_scopes`",
+    );
+    lines.push(
+      "- Read/update personnel reminders: `get_settings`, `update_settings`",
+    );
+    lines.push(
+      "- Map vendor findings to risks: `list_vendor_finding_mappings`, `add_vendor_finding_mappings`, `remove_vendor_finding_mappings`",
+    );
     lines.push("- Read control evidence links: `list_control_documents`");
     lines.push(
       "- Upload evidence to a document: `upload_file_for_document` with `filePath`",
@@ -343,6 +375,41 @@ export const buildHelpResourceMarkdown = (
     lines.push("## Minimal Call Shapes");
     lines.push("");
     lines.push(jsonBlock({ tool: "controls", input: { pageSize: 25 } }));
+    lines.push("");
+    lines.push(
+      jsonBlock({
+        tool: "update_control_metadata",
+        input: {
+          controlId: "control-123",
+          body: {
+            implementationDetails:
+              "Managers review access quarterly and document exceptions.",
+          },
+          confirm: true,
+        },
+      }),
+    );
+    lines.push("");
+    lines.push(
+      jsonBlock({
+        tool: "update_settings",
+        input: {
+          body: { frequency: "WEEKLY", channels: ["EMAIL"] },
+          confirm: true,
+        },
+      }),
+    );
+    lines.push("");
+    lines.push(
+      jsonBlock({
+        tool: "add_vendor_finding_mappings",
+        input: {
+          riskScenarioId: "risk-123",
+          body: { vendorFindingIdsToLink: ["finding-456"] },
+          confirm: true,
+        },
+      }),
+    );
     lines.push("");
     lines.push(
       jsonBlock({

@@ -45,6 +45,15 @@
           "INTERNAL"
         ]
       },
+      "AuditIrlGenerationStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "RUNNING",
+          "READY",
+          "FAILED"
+        ]
+      },
       "AuditSegmentKind": {
         "type": "string",
         "enum": [
@@ -265,6 +274,15 @@
             "$ref": "#/components/schemas/AuditFocus",
             "description": "Audit focus determines if the audit is internal or external facing"
           },
+          "irlGenerationStatus": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuditIrlGenerationStatus"
+              }
+            ],
+            "nullable": true,
+            "description": "Generation status of this audit's Vanta-generated information request list\n(IRL). `PENDING`/`RUNNING` defer initial sync, `READY` permits a full sync,\nand `FAILED` is terminal. Null means the audit has no generated IRL."
+          },
           "auditorRequestListMetadata": {
             "properties": {
               "requestsSharedWithCustomer": {
@@ -305,6 +323,7 @@
           "modificationDate",
           "completionDate",
           "auditFocus",
+          "irlGenerationStatus",
           "segments"
         ],
         "type": "object",
@@ -2481,14 +2500,14 @@
           "TRUE",
           "FALSE"
         ],
-        "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); a given audit's\nframework only uses its own subset. `NOT_ASSESSED` is shared by all\nframeworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept."
+        "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); the selected\nsegment's framework determines which subset applies. `NOT_ASSESSED` is shared\nby all frameworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept."
       },
       "AuditControlAssessment": {
-        "description": "An auditor's assessment of a control within one program segment of an audit.\nA control in scope for more than one program segment can carry a distinct\nassessment per segment; more than one assessment does not by itself imply\nmore than one framework. A segment with no recorded assessment coerces to\n`NOT_ASSESSED` with a `null` justification.",
+        "description": "An auditor's assessment of a control within one audit segment. Assessments\ncan be recorded for any segment on the audit, `PROGRAM` or `SYSTEM`, and a\ncontrol can carry a distinct assessment per segment.\nA segment with no recorded assessment returns `NOT_ASSESSED` with a `null`\njustification.",
         "properties": {
           "segmentId": {
             "type": "string",
-            "description": "The audit program segment this assessment belongs to."
+            "description": "The audit segment this assessment belongs to."
           },
           "assessmentState": {
             "$ref": "#/components/schemas/AuditControlAssessmentState",
@@ -2588,21 +2607,21 @@
               "$ref": "#/components/schemas/Section"
             },
             "type": "array",
-            "description": "Sections of a framework that this control satisfies"
+            "description": "Current framework sections this control satisfies within the audit\nsegments in which it is in scope."
           },
           "inScopeSegmentIds": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "description": "Audit segments in which this control is in scope. The array can be empty\nwhen a control is linked directly to the audit but has no framework-section\nmapping."
+            "description": "Audit segments in which this control is in scope. This can differ from\ncurrent framework mappings, and the array can be empty."
           },
           "assessments": {
             "items": {
               "$ref": "#/components/schemas/AuditControlAssessment"
             },
             "type": "array",
-            "description": "The auditor's assessments of this control, with one entry for each program\nsegment in which the control is in scope. More than one entry does not by\nitself imply more than one framework. Populated only for IRL audits when\nthe assessment feature is enabled; empty otherwise. Within an in-scope\nsegment a control with no recorded assessment coerces to `NOT_ASSESSED`; a\nsegment the control is not in scope for contributes no entry."
+            "description": "The auditor's assessments of this control, with one entry for each segment\nin `inScopeSegmentIds`, which can be any segment on the audit, `PROGRAM` or\n`SYSTEM`. Populated only for IRL audits when assessment access is allowed;\nempty otherwise. A segment with no recorded assessment returns\n`NOT_ASSESSED`."
           }
         },
         "required": [
@@ -2813,7 +2832,7 @@
         "type": "object",
         "additionalProperties": false
       },
-      "Control": {
+      "AuditorApiControl": {
         "properties": {
           "id": {
             "type": "string",
@@ -3488,9 +3507,9 @@
       "WorkpaperStatus": {
         "type": "string",
         "enum": [
+          "READY",
           "NOT_GENERATED",
-          "IN_PROGRESS",
-          "READY"
+          "IN_PROGRESS"
         ]
       },
       "TestWorkpaperResponse": {
@@ -5380,8 +5399,15 @@
               "type": "string"
             },
             "type": "array",
-            "description": "Deprecated control-linkage field retained for response compatibility. It\nmay contain control IDs supplied directly to the request, but it is not a\ncomplete or guaranteed-current list of controls linked to the request. To\nlist information requests linked to a particular control, use\n`GET /audits/{auditId}/controls/{controlId}/information-requests`.",
+            "description": "Deprecated control-linkage field retained for response compatibility. It\nmay contain control IDs supplied directly to the request, but it is not a\ncomplete or guaranteed-current list of controls linked to the request. Use\n`linkedControlIds` for the complete current list.",
             "deprecated": true
+          },
+          "linkedControlIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The complete current set of control IDs linked to this request, including\ncontrols linked through framework codes and controls added directly. Each\nID is returned by the audit controls endpoint."
           },
           "approvalStatus": {
             "$ref": "#/components/schemas/InformationRequestApprovalStatus",
@@ -5401,7 +5427,7 @@
               "type": "string"
             },
             "type": "array",
-            "description": "Always empty on read. To find requests for a control, use\n`GET /audits/{auditId}/controls/{controlId}/information-requests`.\nFor request assignment, use `segmentIds`.",
+            "description": "Always empty on read. Use `linkedControlIds` for control linkage and\n`segmentIds` for request assignment.",
             "deprecated": true
           },
           "segmentIds": {
@@ -5471,6 +5497,7 @@
           "id",
           "uniqueId",
           "additionalControlIds",
+          "linkedControlIds",
           "approvalStatus",
           "cadence",
           "frameworkCodes",
@@ -5569,7 +5596,7 @@
               "type": "string"
             },
             "type": "array",
-            "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control.\nOmit or pass an empty array for no direct control links."
+            "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nUnknown IDs and controls without an active mapping to a framework in the audit are skipped.\nOmit or pass an empty array for no direct control links."
           }
         },
         "required": [
@@ -5589,7 +5616,8 @@
               "type": "string"
             },
             "type": "array",
-            "description": "The framework codes this request addresses.\nAn empty array if no framework codes are associated."
+            "description": "Framework codes are assigned only at creation; on update this field is a\nsilent no-op — a value sent here is accepted for backwards compatibility\nbut ignored, leaving the request's framework codes unchanged.",
+            "deprecated": true
           },
           "description": {
             "type": "string",
@@ -5625,7 +5653,15 @@
               "type": "string"
             },
             "type": "array",
-            "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Replaces the existing set: pass the complete\ndesired list, an empty array to clear all direct control links, or omit to\nleave them unchanged. Each must be the `id` of an existing control in the\ncustomer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control."
+            "description": "This legacy field is accepted for backwards compatibility but ignored.\nUse `linkedControlIds` to replace the complete set of linked controls.",
+            "deprecated": true
+          },
+          "linkedControlIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The complete desired set of control IDs linked to this request. Send the\nfull list to replace the set, an empty array to clear it, or omit the\nproperty to leave links unchanged. Each ID must identify an existing control\nin the customer's organization and is returned by the audit controls\nendpoint. The request is rejected if any ID does not match a control."
           }
         },
         "type": "object",
@@ -6639,6 +6675,7 @@
         "additionalProperties": false
       },
       "InformationRequestActivityType": {
+        "type": "string",
         "enum": [
           "AUDIT_DUPLICATION_AUDIT_TRAIL",
           "AUDIT_INFORMATION_REQUEST_EVIDENCE_FILL",
@@ -6647,8 +6684,7 @@
           "REMOVE_EVIDENCE",
           "SHARE_EVIDENCE_WITH_AUDITOR",
           "UPLOAD_EVIDENCE"
-        ],
-        "type": "string"
+        ]
       },
       "EvidenceFillOutcome": {
         "enum": [
@@ -6659,7 +6695,7 @@
         "type": "string"
       },
       "InformationRequestActivityLog": {
-        "description": "Activity log entry tracking changes and actions on an information request.\n\nThe activity log provides a complete audit trail of all operations performed\non an information request, including status changes, evidence uploads, edits,\nand evidence sharing. This enables tracking compliance activities and understanding\nthe request's history.",
+        "description": "Activity log entry tracking changes and actions on an information request.\n\nThe activity log provides an audit trail of operations performed on an\ninformation request, including status changes, evidence uploads, edits,\nand evidence sharing. This enables tracking compliance activities and understanding\nthe request's history. Which entries are visible depends on the endpoint returning\nthem; see the endpoint's own description.",
         "properties": {
           "id": {
             "type": "string",
@@ -6667,7 +6703,7 @@
           },
           "activityType": {
             "$ref": "#/components/schemas/InformationRequestActivityType",
-            "description": "Type of activity that occurred on the information request.\nDetermines which additional fields are populated."
+            "description": "Type of activity that occurred on the information request.\nDetermines which additional fields are populated.\n`AUDIT_INFORMATION_REQUEST_EVIDENCE_FILL` is never returned — automated\nevidence fill activity is withheld — so no entry carries that value even\nthough the enum still lists it. Do not write a case for it."
           },
           "timestamp": {
             "type": "string",
@@ -6717,7 +6753,8 @@
               }
             ],
             "nullable": true,
-            "description": "Result of an automated evidence fill.\nOnly populated for evidence fill activities. Null for all other activity types."
+            "description": "Result of an automated evidence fill. Always null: only evidence fill activities\ncould populate it, and those are never returned, so nothing can set it. Do not\nbranch on it.",
+            "deprecated": true
           },
           "sourceInformationRequestId": {
             "type": "string",
@@ -6954,7 +6991,7 @@
         "additionalProperties": false
       },
       "AuditorControlAssessment": {
-        "description": "A control's auditor assessment, as persisted. Returned by the assessment\nwrite endpoint so the caller sees exactly what was recorded.",
+        "description": "A control's auditor assessment returned by the assessment write endpoint.",
         "properties": {
           "controlId": {
             "type": "string",
@@ -6962,7 +6999,7 @@
           },
           "segmentId": {
             "type": "string",
-            "description": "The program segment this assessment was written to."
+            "description": "The audit segment this assessment was written to."
           },
           "assessmentState": {
             "$ref": "#/components/schemas/AuditControlAssessmentState",
@@ -6983,11 +7020,11 @@
         "additionalProperties": false
       },
       "UpsertAuditControlAssessmentInput": {
-        "description": "Input for upserting a control's auditor assessment within an audit. Overwrites\nthe assessment for this control in the chosen program segment.",
+        "description": "Input for upserting a control's auditor assessment within an audit. Overwrites\nthe assessment for this control in the chosen audit segment.",
         "properties": {
           "segmentId": {
             "type": "string",
-            "description": "The program segment to assess. Required when the audit has more than one\nprogram segment. Optional on a single-program audit (the only program is\nused). Must be a program segment on the audit; system segments are rejected."
+            "description": "The segment to assess: any segment on the audit, `PROGRAM` or `SYSTEM`.\nMay be omitted only when the audit has exactly one segment; required\notherwise."
           },
           "assessmentState": {
             "$ref": "#/components/schemas/AuditControlAssessmentState",
@@ -8409,6 +8446,7 @@
                             "modificationDate": "2024-03-07T21:25:56.000Z",
                             "completionDate": "2024-03-07T21:25:56.000Z",
                             "auditFocus": "EXTERNAL",
+                            "irlGenerationStatus": "READY",
                             "auditorRequestListMetadata": {
                               "requestsSharedWithCustomer": "2024-03-07T21:25:56.000Z"
                             },
@@ -8447,7 +8485,7 @@
             }
           }
         },
-        "description": "Returns a paginated list of audits scoped to the audit firm.\n\nTo identify IRL (Information Request List) audits, check for the presence of the\n`auditorRequestListMetadata` field. This field is only present for IRL-based audits\nand will be `undefined` for standard audits.\n\nEach audit includes `segments`, the audit's scope. A live audit returns\nevery in-scope program and system segment; more than one segment does not\nby itself imply more than one framework. Soft-deleted audits return an\nempty list. The top-level `framework` field is deprecated; use `segments`\nfor in-scope frameworks.\n\nRate limit: 250 requests / minute.",
+        "description": "Returns a paginated list of audits scoped to the audit firm.\n\nTo identify IRL (Information Request List) audits, check for the presence of the\n`auditorRequestListMetadata` field. This field is only present for IRL-based audits\nand will be `undefined` for standard audits.\n\nEach audit includes `segments`, the audit's scope. A live audit returns\nevery in-scope program and system segment; more than one segment does not\nby itself imply more than one framework. The top-level `framework` field is\ndeprecated; use `segments` for in-scope frameworks.\n\nThis list may include soft-deleted audits so clients can reconcile\ndeletions. Check `deletionDate`; a deleted audit has an empty `segments`\nlist.\n\nRate limit: 250 requests / minute.",
         "summary": "List audits",
         "tags": [
           "Audits"
@@ -8475,7 +8513,7 @@
             }
           },
           {
-            "description": "Includes all audits that have changed since changedSinceDate.",
+            "description": "Includes all audits that have changed since changedSinceDate, including\nsoft-deleted audits whose deletionDate is on or after that timestamp.",
             "in": "query",
             "name": "changedSinceDate",
             "required": false,
@@ -8528,6 +8566,7 @@
                       "modificationDate": "2024-03-07T21:25:56.000Z",
                       "completionDate": "2024-03-07T21:25:56.000Z",
                       "auditFocus": "EXTERNAL",
+                      "irlGenerationStatus": "READY",
                       "auditorRequestListMetadata": {
                         "requestsSharedWithCustomer": "2024-03-07T21:25:56.000Z"
                       },
@@ -8612,6 +8651,7 @@
                       "modificationDate": "2024-03-07T21:25:56.000Z",
                       "completionDate": "2024-03-07T21:25:56.000Z",
                       "auditFocus": "EXTERNAL",
+                      "irlGenerationStatus": "READY",
                       "auditorRequestListMetadata": {
                         "requestsSharedWithCustomer": "2024-03-07T21:25:56.000Z"
                       },
@@ -8641,7 +8681,7 @@
             }
           }
         },
-        "description": "Returns a single audit by ID, scoped to the audit firm.\n\nTo identify IRL (Information Request List) audits, check for the presence of the\n`auditorRequestListMetadata` field. This field is only present for IRL-based audits\nand will be `undefined` for standard audits.\n\nThe response includes `segments`, the audit's scope. A live audit returns\nevery in-scope program and system segment; more than one segment does not\nby itself imply more than one framework. Soft-deleted audits return an\nempty list. The top-level `framework` field is deprecated; use `segments`\nfor in-scope frameworks.\n\nRate limit: 250 requests / minute.",
+        "description": "Returns a single audit by ID, scoped to the audit firm.\n\nTo identify IRL (Information Request List) audits, check for the presence of the\n`auditorRequestListMetadata` field. This field is only present for IRL-based audits\nand will be `undefined` for standard audits.\n\nThe response includes `segments`, the audit's scope. It returns every\nin-scope program and system segment; more than one segment does not by\nitself imply more than one framework. The top-level `framework` field is\ndeprecated; use `segments` for in-scope frameworks.\n\nThis endpoint returns 404 for a soft-deleted audit.\n\nRate limit: 250 requests / minute.",
         "summary": "Get audit by ID",
         "tags": [
           "Audits"
@@ -9004,7 +9044,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Control"
+                  "$ref": "#/components/schemas/AuditorApiControl"
                 },
                 "examples": {
                   "Example 1": {
@@ -9022,13 +9062,8 @@
                         "emailAddress": "example-person@email.com",
                         "displayName": "Example Owner"
                       },
-                      "role": "CONTROLLER",
-                      "customFields": [
-                        {
-                          "label": "Additional context",
-                          "value": "This control is critical for GDPR compliance"
-                        }
-                      ],
+                      "role": null,
+                      "customFields": [],
                       "creationDate": null,
                       "modificationDate": null
                     }
@@ -9095,7 +9130,7 @@
             }
           }
         },
-        "description": "Records (upserts) an auditor's assessment state and justification for a\ncontrol within an IRL audit — the API equivalent of assessing a control in\nthe web app. Overwrites the assessment for this control in the chosen\nprogram segment.\n\n`segmentId` is required when the audit has more than one program segment.\nOn a single-program audit it may be omitted. The `assessmentState` must be\nvalid for that segment's framework (the request is rejected otherwise). The\nacting auditor is identified by `auditorEmail`, which must belong to the\naudit firm making the request.\n\nReturns 404 when the control is not part of the audit or the auditor email\ndoes not resolve to a firm user. Returns 422 when `segmentId` is missing on\na multi-program audit, is not a program segment on the audit, or the\ncontrol is not assessment-eligible in that segment. Applies to both Full\nand Controlled Audit View audits.\n\nRate limit: 10 requests / minute.",
+        "description": "Records (upserts) an auditor's assessment state and justification for a\ncontrol within an IRL audit — the API equivalent of assessing a control in\nthe web app. Overwrites the assessment for this control in the chosen\naudit segment.\n\n`segmentId` may be any segment on the audit, `PROGRAM` or `SYSTEM` (see\n`segments` on the audit). It may be omitted only when the audit has\nexactly one segment. The `assessmentState` must be valid for that\nsegment's framework (the request is rejected otherwise). The acting\nauditor is identified by `auditorEmail`, which must belong to the audit\nfirm making the request.\n\nReturns 404 when the control is not part of the audit or the auditor email\ndoes not resolve to a firm user. Returns 422 when `segmentId` is omitted\non an audit with more than one segment, when `segmentId` is not a segment\non this audit, or when the control is not assigned to that segment for\nthis audit. Applies to both Full and Controlled Audit View audits.\n\nRate limit: 10 requests / minute.",
         "summary": "Upsert a control's assessment within an audit",
         "tags": [
           "Audits"
@@ -9449,6 +9484,9 @@
                             "id": "6890e473dce1da5d8406f5e7",
                             "uniqueId": "1466132",
                             "additionalControlIds": [],
+                            "linkedControlIds": [
+                              "c1a2b3c4d5e6f7a8b9c0d1e2"
+                            ],
                             "approvalStatus": "NEEDS_EVIDENCE",
                             "cadence": "ANNUALLY",
                             "frameworkCodes": [],
@@ -10181,6 +10219,9 @@
                             "id": "6890e473dce1da5d8406f5e7",
                             "uniqueId": "1466132",
                             "additionalControlIds": [],
+                            "linkedControlIds": [
+                              "c1a2b3c4d5e6f7a8b9c0d1e2"
+                            ],
                             "approvalStatus": "NEEDS_EVIDENCE",
                             "cadence": "ANNUALLY",
                             "frameworkCodes": [],
@@ -10217,7 +10258,7 @@
             }
           }
         },
-        "description": "Retrieves a paginated list of all information requests for an audit, enabling\nexternal audit management systems to display and track evidence requests.\n\nThis endpoint always includes soft-deleted records (where `deletionDate !== null`).\nClients should check the `deletionDate` field to identify and handle deleted records\nappropriately in their systems.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only requests created, modified, or deleted since that timestamp are returned\n4. Process updates and soft-deletes by checking the `deletionDate` field\n5. Update your last sync timestamp to the current time\n\n`segmentIds` on each returned request is resolved against the audit's\ncurrent scope. A scope-only change (a segment leaving or joining the audit\nwithout the request row being written) is not a delta-sync event. Re-fetch\nwithout `changedSinceDate`, or GET by id, to see the current projection.\n\nRate limit: 50 requests / minute.",
+        "description": "Retrieves a paginated list of all information requests for an audit, enabling\nexternal audit management systems to display and track evidence requests.\n\nThis endpoint always includes soft-deleted records (where `deletionDate !== null`).\nClients should check the `deletionDate` field to identify and handle deleted records\nappropriately in their systems.\n\nThis is the only endpoint that returns a deleted information request. No\nwebhook fires when a request is deleted. Endpoints under\n`/audits/{auditId}/information-requests/{requestId}` return a 4xx HTTP error\nfor a deleted request. To confirm deletion, check the request's `deletionDate`\nin this list. Deleting a request does not set `deletionDate` on its comments\nor evidence or send delete events for them. Once this list confirms the\nrequest was deleted, treat its comments and evidence as deleted too.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only requests created, modified, or deleted since that timestamp are returned\n4. Process updates and soft-deletes by checking the `deletionDate` field\n5. Update your last sync timestamp to the current time\n\n`segmentIds` on each returned request is resolved against the audit's\ncurrent scope. A scope-only change (a segment leaving or joining the audit\nwithout the request row being written) is not a delta-sync event. Re-fetch\nwithout `changedSinceDate`, or GET by id, to see the current projection.\n\nRate limit: 50 requests / minute.",
         "summary": "List information requests for an audit",
         "tags": [
           "Audits"
@@ -10294,6 +10335,9 @@
                       "id": "6890e473dce1da5d8406f5e7",
                       "uniqueId": "1466132",
                       "additionalControlIds": [],
+                      "linkedControlIds": [
+                        "c1a2b3c4d5e6f7a8b9c0d1e2"
+                      ],
                       "approvalStatus": "NEEDS_EVIDENCE",
                       "cadence": "ANNUALLY",
                       "frameworkCodes": [],
@@ -10370,6 +10414,9 @@
                       "id": "6890e473dce1da5d8406f5e7",
                       "uniqueId": "1466132",
                       "additionalControlIds": [],
+                      "linkedControlIds": [
+                        "c1a2b3c4d5e6f7a8b9c0d1e2"
+                      ],
                       "approvalStatus": "NEEDS_EVIDENCE",
                       "cadence": "ANNUALLY",
                       "frameworkCodes": [],
@@ -10397,7 +10444,7 @@
             }
           }
         },
-        "description": "Retrieves a single information request by its ID for an audit, allowing external\naudit management systems to fetch the latest state of a specific request without\npaginating through the full list.\n\nSoft-deleted records (where `deletionDate !== null`) are included in the response.\nClients should check `deletionDate` to determine whether the request has been deleted.\n\nRate limit: 50 requests / minute.",
+        "description": "Retrieves a single information request by its ID for an audit, allowing external\naudit management systems to fetch the latest state of a specific request without\npaginating through the full list.\n\nThis endpoint returns a 4xx HTTP error for a soft-deleted information\nrequest. To confirm deletion, use\n`GET /audits/{auditId}/information-requests`, which supports\n`changedSinceDate` and includes soft-deleted requests with `deletionDate`\nset.\n\nRate limit: 50 requests / minute.",
         "summary": "Get an information request by ID",
         "tags": [
           "Audits"
@@ -10442,6 +10489,9 @@
                       "id": "6890e473dce1da5d8406f5e7",
                       "uniqueId": "1466132",
                       "additionalControlIds": [],
+                      "linkedControlIds": [
+                        "c1a2b3c4d5e6f7a8b9c0d1e2"
+                      ],
                       "approvalStatus": "NEEDS_EVIDENCE",
                       "cadence": "ANNUALLY",
                       "frameworkCodes": [],
@@ -10515,7 +10565,7 @@
             "description": "No content"
           }
         },
-        "description": "Deletes an information request for an audit. This performs a soft delete, marking\nthe request as deleted (setting `deletionDate`) while preserving it in the system\nfor audit history and compliance tracking.\n\nSoft deletion allows:\n- Maintaining complete audit trail of all requests ever created\n- Retrieving deleted requests via `changedSinceDate` for synchronization\n\nAfter deletion:\n- The request will not appear in normal list responses (without `changedSinceDate`)\n- The request's `deletionDate` field will be populated\n\nRate limit: 50 requests / minute.",
+        "description": "Deletes an information request for an audit. This performs a soft delete, marking\nthe request as deleted (setting `deletionDate`) while preserving it in the system\nfor audit history and compliance tracking.\n\nSoft deletion allows:\n- Maintaining complete audit trail of all requests ever created\n- Retrieving deleted requests via `changedSinceDate` for synchronization\n\nAfter deletion:\n- The request remains in list responses with `deletionDate` set, even when\n\n  `changedSinceDate` is omitted\n\nRate limit: 50 requests / minute.",
         "summary": "Delete an information request for an audit",
         "tags": [
           "Audits"
@@ -10562,6 +10612,9 @@
                       "id": "6890e473dce1da5d8406f5e7",
                       "uniqueId": "1466132",
                       "additionalControlIds": [],
+                      "linkedControlIds": [
+                        "c1a2b3c4d5e6f7a8b9c0d1e2"
+                      ],
                       "approvalStatus": "NEEDS_EVIDENCE",
                       "cadence": "ANNUALLY",
                       "frameworkCodes": [],
@@ -10672,7 +10725,7 @@
             }
           }
         },
-        "description": "Retrieves a paginated list of activity logs for an information request, providing\na complete audit trail of all changes and actions.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only activity created since that timestamp is returned\n4. Process updates to track all changes to the information request\n5. Update your last sync timestamp to the current time\n\nRate limit: 50 requests / minute.",
+        "description": "Retrieves a paginated list of activity logs for an information request, providing\nan audit trail of the changes and actions taken on it.\n\nActivity recording Vanta's automated preparation of a request is never returned by\nthis endpoint, so `fillOutcome` is always null here. Some internal status transitions\nare also withheld, and those are removed after a page is selected, so a page can\ncontain fewer entries than `pageSize` — or none at all — while more pages remain.\nFollow `results.pageInfo.hasNextPage` rather than treating a short or empty page as\nthe end of the list.\n\nIf the information request has been deleted, this endpoint returns a 4xx\nHTTP error instead of its activity.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only activity created since that timestamp is returned\n4. Process updates to track all changes to the information request\n5. Update your last sync timestamp to the current time\n\nRate limit: 50 requests / minute.",
         "summary": "List information request activity",
         "tags": [
           "Audits"
@@ -10770,7 +10823,7 @@
             }
           }
         },
-        "description": "Retrieves a paginated list of comments for an information request, enabling\nauditors to view communication history and collaborate with customers.\n\nThis endpoint always includes soft-deleted records (where `deletionDate !== null`).\nClients should check the `deletionDate` field to identify and handle deleted records\nappropriately in their systems.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only comments created, modified, or deleted since that timestamp are returned\n4. Process updates, including soft-deletes (deletionDate !== null)\n5. Update your last sync timestamp to the current time\n\nRate limit: 50 requests / minute.",
+        "description": "Retrieves a paginated list of comments for an information request, enabling\nauditors to view communication history and collaborate with customers.\n\nThis endpoint always includes soft-deleted records (where `deletionDate !== null`).\nClients should check the `deletionDate` field to identify and handle deleted records\nappropriately in their systems.\n\nIf the information request itself has been deleted, this endpoint returns a\n4xx HTTP error instead of its comments.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only comments created, modified, or deleted since that timestamp are returned\n4. Process updates, including soft-deletes (deletionDate !== null)\n5. Update your last sync timestamp to the current time\n\nRate limit: 50 requests / minute.",
         "summary": "List comments for an information request",
         "tags": [
           "Audits"
@@ -10922,7 +10975,7 @@
             }
           }
         },
-        "description": "Retrieves a single comment on an information request by its ID.\n\nSoft-deleted comments (where `deletionDate !== null`) are included in the\nresponse. Clients should check `deletionDate` to determine whether the\ncomment has been deleted. This matches\n`GET /audits/{auditId}/information-requests/{requestId}/comments`, which\nsupports `changedSinceDate` and returns soft-deleted comments for delta sync.\n\nComments remain fetchable when the parent information request has been\nsoft-deleted, so delayed webhook consumers can still resolve a comment ID\nafter the request is deleted.\n\nRate limit: 50 requests / minute.",
+        "description": "Retrieves a single comment on an information request by its ID.\n\nSoft-deleted comments (where `deletionDate !== null`) are included in the\nresponse. Clients should check `deletionDate` to determine whether the\ncomment has been deleted. This matches\n`GET /audits/{auditId}/information-requests/{requestId}/comments`, which\nsupports `changedSinceDate` and returns soft-deleted comments for delta sync.\n\nComments are only resolvable while their information request exists. Once\nthe request itself is deleted, this endpoint returns a 4xx HTTP error\ninstead of the comment. Check the request's `deletionDate` using\n`GET /audits/{auditId}/information-requests` before treating its comments\nas deleted too.\n\nRate limit: 50 requests / minute.",
         "summary": "Get an information request comment by ID",
         "tags": [
           "Audits"
@@ -11133,7 +11186,7 @@
             }
           }
         },
-        "description": "Retrieves a paginated list of all evidence attached to an information request,\nenabling auditors to review evidence submitted by customers.\n\nThis endpoint always includes soft-deleted records (where `deletionDate !== null`).\nClients should check the `deletionDate` field to identify and handle deleted records\nappropriately in their systems.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only evidence created, modified, shared, or deleted since that timestamp is returned\n4. Process updates, including soft-deletes (deletionDate !== null)\n5. Update your last sync timestamp to the current time\n\nRate limit: 50 requests / minute.",
+        "description": "Retrieves a paginated list of all evidence attached to an information request,\nenabling auditors to review evidence submitted by customers.\n\nThis endpoint always includes soft-deleted records (where `deletionDate !== null`).\nClients should check the `deletionDate` field to identify and handle deleted records\nappropriately in their systems.\n\nIf the information request itself has been deleted, this endpoint returns a\n4xx HTTP error instead of its evidence.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only evidence created, modified, shared, or deleted since that timestamp is returned\n4. Process updates, including soft-deletes (deletionDate !== null)\n5. Update your last sync timestamp to the current time\n\nRate limit: 50 requests / minute.",
         "summary": "List evidence for an information request",
         "tags": [
           "Audits"
@@ -11237,7 +11290,7 @@
             }
           }
         },
-        "description": "Retrieves a single evidence item attached to an information request by its ID.\n\nThis endpoint always includes soft-deleted evidence (where `deletionDate !== null`),\nso an evidence ID surfaced by a `changedSinceDate` delta sync stays fetchable after\nthe evidence is deleted. Clients should check the `deletionDate` field to identify\nand handle deleted records appropriately in their systems.\n\nEvidence is only resolvable while its information request exists. Once the\nrequest itself is deleted, this endpoint reports the request as not found —\nmatching `GET /audits/{auditId}/information-requests/{requestId}/evidence`.\nClients reconciling a deleted request should treat its evidence as gone with it.\n\nEvidence that the customer has not shared with the auditor is reported as not\nfound, rather than distinguishing it from an ID that does not exist.\n\nRate limit: 250 requests / minute.",
+        "description": "Retrieves a single evidence item attached to an information request by its ID.\n\nThis endpoint always includes soft-deleted evidence (where `deletionDate !== null`),\nso an evidence ID surfaced by a `changedSinceDate` delta sync stays fetchable after\nthe evidence is deleted. Clients should check the `deletionDate` field to identify\nand handle deleted records appropriately in their systems.\n\nEvidence is only resolvable while its information request exists. Once the\nrequest itself is deleted, this endpoint returns a 4xx HTTP error instead\nof the evidence. Check the request's `deletionDate` using\n`GET /audits/{auditId}/information-requests` before treating its evidence\nas deleted too.\n\nEvidence that the customer has not shared with the auditor is reported as not\nfound, rather than distinguishing it from an ID that does not exist.\n\nRate limit: 250 requests / minute.",
         "summary": "Get information request evidence by ID",
         "tags": [
           "Audits"
@@ -11404,6 +11457,9 @@
                       "id": "6890e473dce1da5d8406f5e7",
                       "uniqueId": "1466132",
                       "additionalControlIds": [],
+                      "linkedControlIds": [
+                        "c1a2b3c4d5e6f7a8b9c0d1e2"
+                      ],
                       "approvalStatus": "NEEDS_EVIDENCE",
                       "cadence": "ANNUALLY",
                       "frameworkCodes": [],
@@ -13207,6 +13263,7 @@
                       "modificationDate": "2024-03-07T21:25:56.000Z",
                       "completionDate": "2024-03-07T21:25:56.000Z",
                       "auditFocus": "EXTERNAL",
+                      "irlGenerationStatus": "READY",
                       "auditorRequestListMetadata": {
                         "requestsSharedWithCustomer": "2024-03-07T21:25:56.000Z"
                       },

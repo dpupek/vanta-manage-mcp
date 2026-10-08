@@ -276,6 +276,10 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
     },
     "EditControlMetadataInput": {
       "properties": {
+        "implementationDetails": {
+          "type": "string",
+          "description": "How the control is implemented."
+        },
         "name": {
           "type": "string",
           "description": "A new name for the control."
@@ -1477,6 +1481,38 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ],
       "type": "string"
     },
+    "UpdatePersonnelNotificationSettingsInput": {
+      "properties": {
+        "frequency": {
+          "$ref": "#/components/schemas/NotificationFrequency",
+          "description": "Omit to preserve the current frequency. NEVER disables reminders."
+        },
+        "channels": {
+          "items": {
+            "$ref": "#/components/schemas/NotificationChannelType"
+          },
+          "type": "array",
+          "description": "Replaces the complete channel set. Omit to preserve it; an empty array disables reminders."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "NotificationFrequency": {
+      "enum": [
+        "DAILY",
+        "NEVER",
+        "WEEKLY"
+      ],
+      "type": "string"
+    },
+    "NotificationChannelType": {
+      "enum": [
+        "EMAIL",
+        "SLACK"
+      ],
+      "type": "string"
+    },
     "CIA": {
       "type": "string",
       "enum": [
@@ -1777,6 +1813,40 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "object",
       "additionalProperties": false
     },
+    "AddRiskScenarioVendorFindingMappingsInput": {
+      "properties": {
+        "vendorFindingIdsToLink": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Vendor finding IDs to link. Repeated IDs in this request are deduplicated.",
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "vendorFindingIdsToLink"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RemoveRiskScenarioVendorFindingMappingsInput": {
+      "properties": {
+        "vendorFindingIdsToUnlink": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Vendor finding IDs to unlink. Repeated IDs in this request are deduplicated.",
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "vendorFindingIdsToUnlink"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "SubmitRiskForApprovalInput": {
       "properties": {
         "comment": {
@@ -1981,6 +2051,10 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "reason": {
           "type": "string",
           "description": "Reason for denying the access request."
+        },
+        "sendEmail": {
+          "type": "boolean",
+          "description": "Whether to email the requester to notify them that their request was\ndenied. The email includes the reason when one is provided. Defaults to\nfalse."
         }
       },
       "type": "object",
@@ -2006,6 +2080,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           "enum": [
             "aiact",
             "aiuc1",
+            "aiuc1_26q3",
+            "atc",
             "aue8",
             "awsFTR",
             "bsic5",
@@ -2020,6 +2096,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "fedramp",
             "fedramp20x",
             "fedramp20x_2026",
+            "fedramp20x_classA",
             "gdpr",
             "hipaa",
             "hitruste1",
@@ -2084,6 +2161,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           "enum": [
             "aiact",
             "aiuc1",
+            "aiuc1_26q3",
+            "atc",
             "aue8",
             "awsFTR",
             "bsic5",
@@ -2098,6 +2177,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "fedramp",
             "fedramp20x",
             "fedramp20x_2026",
+            "fedramp20x_classA",
             "gdpr",
             "hipaa",
             "hitruste1",
@@ -3990,11 +4070,11 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "string"
     },
     "UpsertAuditControlAssessmentInput": {
-      "description": "Input for upserting a control's auditor assessment within an audit. Overwrites\nthe assessment for this control in the chosen program segment.",
+      "description": "Input for upserting a control's auditor assessment within an audit. Overwrites\nthe assessment for this control in the chosen audit segment.",
       "properties": {
         "segmentId": {
           "type": "string",
-          "description": "The program segment to assess. Required when the audit has more than one\nprogram segment. Optional on a single-program audit (the only program is\nused). Must be a program segment on the audit; system segments are rejected."
+          "description": "The segment to assess: any segment on the audit, `PROGRAM` or `SYSTEM`.\nMay be omitted only when the audit has exactly one segment; required\notherwise."
         },
         "assessmentState": {
           "$ref": "#/components/schemas/AuditControlAssessmentState",
@@ -4033,7 +4113,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "TRUE",
         "FALSE"
       ],
-      "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); a given audit's\nframework only uses its own subset. `NOT_ASSESSED` is shared by all\nframeworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept."
+      "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); the selected\nsegment's framework determines which subset applies. `NOT_ASSESSED` is shared\nby all frameworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept."
     },
     "AddAuditControlCommentInput": {
       "description": "Comments enable auditors and customers to collaborate on a control within an\naudit. All comments are immediately visible to authorized parties once created.",
@@ -4262,7 +4342,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "type": "string"
           },
           "type": "array",
-          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control.\nOmit or pass an empty array for no direct control links."
+          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nUnknown IDs and controls without an active mapping to a framework in the audit are skipped.\nOmit or pass an empty array for no direct control links."
         }
       },
       "required": [
@@ -4301,7 +4381,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "type": "string"
           },
           "type": "array",
-          "description": "The framework codes this request addresses.\nAn empty array if no framework codes are associated."
+          "description": "Framework codes are assigned only at creation; on update this field is a\nsilent no-op — a value sent here is accepted for backwards compatibility\nbut ignored, leaving the request's framework codes unchanged.",
+          "deprecated": true
         },
         "description": {
           "type": "string",
@@ -4337,7 +4418,15 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "type": "string"
           },
           "type": "array",
-          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Replaces the existing set: pass the complete\ndesired list, an empty array to clear all direct control links, or omit to\nleave them unchanged. Each must be the `id` of an existing control in the\ncustomer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control."
+          "description": "This legacy field is accepted for backwards compatibility but ignored.\nUse `linkedControlIds` to replace the complete set of linked controls.",
+          "deprecated": true
+        },
+        "linkedControlIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "The complete desired set of control IDs linked to this request. Send the\nfull list to replace the set, an empty array to clear it, or omit the\nproperty to leave links unchanged. Each ID must identify an existing control\nin the customer's organization and is returned by the audit controls\nendpoint. The request is rejected if any ID does not match a control."
         }
       },
       "type": "object",
@@ -4671,6 +4760,57 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
 };
 
 export const generatedOperations: GeneratedOperation[] = [
+  {
+    "toolName": "list_business_units",
+    "source": "manage",
+    "method": "get",
+    "path": "/business-units",
+    "operationId": "ListBusinessUnits",
+    "summary": "List business units",
+    "description": "List business units",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "get_business_unit",
+    "source": "manage",
+    "method": "get",
+    "path": "/business-units/{businessUnitId}",
+    "operationId": "GetBusinessUnit",
+    "summary": "Get business unit by ID",
+    "description": "Get business unit by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "businessUnitId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
   {
     "toolName": "upload_contract",
     "source": "manage",
@@ -5106,6 +5246,16 @@ export const generatedOperations: GeneratedOperation[] = [
         "$ref": "#/components/schemas/EditControlMetadataInput"
       },
       "fields": [
+        {
+          "name": "implementationDetails",
+          "required": false,
+          "description": "How the control is implemented.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "How the control is implemented."
+          }
+        },
         {
           "name": "name",
           "required": false,
@@ -10210,6 +10360,17 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "get_organization",
+    "source": "manage",
+    "method": "get",
+    "path": "/organization",
+    "operationId": "GetOrganization",
+    "summary": "Get connected organization",
+    "description": "Get connected organization",
+    "isMutation": false,
+    "parameters": []
+  },
+  {
     "toolName": "list_people",
     "source": "manage",
     "method": "get",
@@ -10319,6 +10480,48 @@ export const generatedOperations: GeneratedOperation[] = [
           "INACTIVE",
           "FORMER"
         ]
+      },
+      {
+        "name": "frameworkIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter people in scope for any of the given framework IDs.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "programScopeIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter people in scope for any of the given program scope IDs. Program scopes you cannot view are ignored. Blank IDs match nothing.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "businessUnitIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter people in scope for any of the given business unit IDs. Blank IDs match nothing.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
       }
     ]
   },
@@ -10751,6 +10954,60 @@ export const generatedOperations: GeneratedOperation[] = [
     }
   },
   {
+    "toolName": "get_settings",
+    "source": "manage",
+    "method": "get",
+    "path": "/personnel-notification-settings",
+    "operationId": "GetSettings",
+    "summary": "Get personnel notification settings",
+    "description": "Get personnel notification settings",
+    "isMutation": false,
+    "parameters": []
+  },
+  {
+    "toolName": "update_settings",
+    "source": "manage",
+    "method": "patch",
+    "path": "/personnel-notification-settings",
+    "operationId": "UpdateSettings",
+    "summary": "Update personnel notification settings",
+    "description": "Update personnel notification settings",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdatePersonnelNotificationSettingsInput"
+      },
+      "fields": [
+        {
+          "name": "frequency",
+          "required": false,
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/NotificationFrequency",
+            "description": "Omit to preserve the current frequency. NEVER disables reminders."
+          }
+        },
+        {
+          "name": "channels",
+          "required": false,
+          "description": "Replaces the complete channel set. Omit to preserve it; an empty array disables reminders.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationChannelType"
+            },
+            "type": "array",
+            "description": "Replaces the complete channel set. Omit to preserve it; an empty array disables reminders."
+          }
+        }
+      ]
+    }
+  },
+  {
     "toolName": "list_policies",
     "source": "manage",
     "method": "get",
@@ -10792,6 +11049,85 @@ export const generatedOperations: GeneratedOperation[] = [
     "parameters": [
       {
         "name": "policyId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_program_scopes",
+    "source": "manage",
+    "method": "get",
+    "path": "/program-scopes",
+    "operationId": "ListProgramScopes",
+    "summary": "List program scopes",
+    "description": "List program scopes",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "businessUnitIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter program scopes to those whose business unit ID matches any of the provided IDs.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "frameworkIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter program scopes to those whose framework ID matches any of the provided IDs.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "get_program_scope",
+    "source": "manage",
+    "method": "get",
+    "path": "/program-scopes/{programScopeId}",
+    "operationId": "GetProgramScope",
+    "summary": "Get program scope by ID",
+    "description": "Get program scope by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "programScopeId",
         "in": "path",
         "required": true,
         "kind": "string",
@@ -11610,6 +11946,135 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "list_vendor_finding_mappings",
+    "source": "manage",
+    "method": "get",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/vendor-findings",
+    "operationId": "ListVendorFindingMappings",
+    "summary": "List vendor findings mapped to a risk scenario",
+    "description": "List vendor findings mapped to a risk scenario",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "add_vendor_finding_mappings",
+    "source": "manage",
+    "method": "post",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/vendor-findings",
+    "operationId": "AddVendorFindingMappings",
+    "summary": "Bulk add vendor finding mappings",
+    "description": "Bulk add vendor finding mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddRiskScenarioVendorFindingMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "vendorFindingIdsToLink",
+          "required": true,
+          "description": "Vendor finding IDs to link. Repeated IDs in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Vendor finding IDs to link. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "remove_vendor_finding_mappings",
+    "source": "manage",
+    "method": "delete",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/vendor-findings",
+    "operationId": "RemoveVendorFindingMappings",
+    "summary": "Bulk remove vendor finding mappings",
+    "description": "Bulk remove vendor finding mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/RemoveRiskScenarioVendorFindingMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "vendorFindingIdsToUnlink",
+          "required": true,
+          "description": "Vendor finding IDs to unlink. Repeated IDs in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Vendor finding IDs to unlink. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
     "toolName": "submit_risk_for_approval",
     "source": "manage",
     "method": "post",
@@ -12345,6 +12810,16 @@ export const generatedOperations: GeneratedOperation[] = [
             "type": "string",
             "description": "Reason for denying the access request."
           }
+        },
+        {
+          "name": "sendEmail",
+          "required": false,
+          "description": "Whether to email the requester to notify them that their request was\ndenied. The email includes the reason when one is provided. Defaults to\nfalse.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether to email the requester to notify them that their request was\ndenied. The email includes the reason when one is provided. Defaults to\nfalse."
+          }
         }
       ]
     }
@@ -12571,6 +13046,8 @@ export const generatedOperations: GeneratedOperation[] = [
             "enum": [
               "aiact",
               "aiuc1",
+              "aiuc1_26q3",
+              "atc",
               "aue8",
               "awsFTR",
               "bsic5",
@@ -12585,6 +13062,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "fedramp",
               "fedramp20x",
               "fedramp20x_2026",
+              "fedramp20x_classA",
               "gdpr",
               "hipaa",
               "hitruste1",
@@ -12698,6 +13176,8 @@ export const generatedOperations: GeneratedOperation[] = [
             "enum": [
               "aiact",
               "aiuc1",
+              "aiuc1_26q3",
+              "atc",
               "aue8",
               "awsFTR",
               "bsic5",
@@ -12712,6 +13192,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "fedramp",
               "fedramp20x",
               "fedramp20x_2026",
+              "fedramp20x_classA",
               "gdpr",
               "hipaa",
               "hitruste1",
@@ -18201,7 +18682,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "changedSinceDate",
         "in": "query",
         "required": false,
-        "description": "Includes all audits that have changed since changedSinceDate.",
+        "description": "Includes all audits that have changed since changedSinceDate, including\nsoft-deleted audits whose deletionDate is on or after that timestamp.",
         "kind": "string",
         "schema": {
           "format": "date-time",
@@ -18670,17 +19151,17 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "segmentId",
           "required": false,
-          "description": "The program segment to assess. Required when the audit has more than one\nprogram segment. Optional on a single-program audit (the only program is\nused). Must be a program segment on the audit; system segments are rejected.",
+          "description": "The segment to assess: any segment on the audit, `PROGRAM` or `SYSTEM`.\nMay be omitted only when the audit has exactly one segment; required\notherwise.",
           "kind": "string",
           "schema": {
             "type": "string",
-            "description": "The program segment to assess. Required when the audit has more than one\nprogram segment. Optional on a single-program audit (the only program is\nused). Must be a program segment on the audit; system segments are rejected."
+            "description": "The segment to assess: any segment on the audit, `PROGRAM` or `SYSTEM`.\nMay be omitted only when the audit has exactly one segment; required\notherwise."
           }
         },
         {
           "name": "assessmentState",
           "required": true,
-          "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); a given audit's\nframework only uses its own subset. `NOT_ASSESSED` is shared by all\nframeworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept.",
+          "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); the selected\nsegment's framework determines which subset applies. `NOT_ASSESSED` is shared\nby all frameworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept.",
           "kind": "string",
           "schema": {
             "$ref": "#/components/schemas/AuditControlAssessmentState",
@@ -19633,14 +20114,14 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "additionalControlIds",
           "required": false,
-          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control.\nOmit or pass an empty array for no direct control links.",
+          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nUnknown IDs and controls without an active mapping to a framework in the audit are skipped.\nOmit or pass an empty array for no direct control links.",
           "kind": "array",
           "schema": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control.\nOmit or pass an empty array for no direct control links."
+            "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Each must be the `id` of an existing control in\nthe customer's organization (the identifier returned by the controls endpoints).\nUnknown IDs and controls without an active mapping to a framework in the audit are skipped.\nOmit or pass an empty array for no direct control links."
           }
         }
       ]
@@ -19716,14 +20197,15 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "frameworkCodes",
           "required": false,
-          "description": "The framework codes this request addresses.\nAn empty array if no framework codes are associated.",
+          "description": "Framework codes are assigned only at creation; on update this field is a\nsilent no-op — a value sent here is accepted for backwards compatibility\nbut ignored, leaving the request's framework codes unchanged.",
           "kind": "array",
           "schema": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "description": "The framework codes this request addresses.\nAn empty array if no framework codes are associated."
+            "description": "Framework codes are assigned only at creation; on update this field is a\nsilent no-op — a value sent here is accepted for backwards compatibility\nbut ignored, leaving the request's framework codes unchanged.",
+            "deprecated": true
           }
         },
         {
@@ -19794,14 +20276,28 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "additionalControlIds",
           "required": false,
-          "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Replaces the existing set: pass the complete\ndesired list, an empty array to clear all direct control links, or omit to\nleave them unchanged. Each must be the `id` of an existing control in the\ncustomer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control.",
+          "description": "This legacy field is accepted for backwards compatibility but ignored.\nUse `linkedControlIds` to replace the complete set of linked controls.",
           "kind": "array",
           "schema": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "description": "Control IDs to link directly to this request, beyond those automatically\nmapped from framework codes. Replaces the existing set: pass the complete\ndesired list, an empty array to clear all direct control links, or omit to\nleave them unchanged. Each must be the `id` of an existing control in the\ncustomer's organization (the identifier returned by the controls endpoints).\nThe request is rejected if any ID does not match a control."
+            "description": "This legacy field is accepted for backwards compatibility but ignored.\nUse `linkedControlIds` to replace the complete set of linked controls.",
+            "deprecated": true
+          }
+        },
+        {
+          "name": "linkedControlIds",
+          "required": false,
+          "description": "The complete desired set of control IDs linked to this request. Send the\nfull list to replace the set, an empty array to clear it, or omit the\nproperty to leave links unchanged. Each ID must identify an existing control\nin the customer's organization and is returned by the audit controls\nendpoint. The request is rejected if any ID does not match a control.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The complete desired set of control IDs linked to this request. Send the\nfull list to replace the set, an empty array to clear it, or omit the\nproperty to leave links unchanged. Each ID must identify an existing control\nin the customer's organization and is returned by the audit controls\nendpoint. The request is rejected if any ID does not match a control."
           }
         }
       ]
@@ -21962,7 +22458,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       },
                       "fromUrl": {
                         "type": "string",
-                        "description": "The API endpoint URL associated with this vulnerability occurrence."
+                        "description": "The API endpoint URL associated with this vulnerability occurrence.",
+                        "nullable": true
                       },
                       "queryParams": {
                         "items": {
@@ -21982,7 +22479,8 @@ export const generatedOperations: GeneratedOperation[] = [
                           ]
                         },
                         "type": "array",
-                        "description": "The API params associated with this vulnerability."
+                        "description": "The API params associated with this vulnerability.",
+                        "nullable": true
                       },
                       "headers": {
                         "items": {
@@ -22002,11 +22500,13 @@ export const generatedOperations: GeneratedOperation[] = [
                           ]
                         },
                         "type": "array",
-                        "description": "The API headers associated with this vulnerability."
+                        "description": "The API headers associated with this vulnerability.",
+                        "nullable": true
                       },
                       "body": {
                         "type": "string",
-                        "description": "The body of the request passed to the API, with sensitive information redacted."
+                        "description": "The body of the request passed to the API, with sensitive information redacted.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -22043,16 +22543,19 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "cveId": {
                   "type": "string",
-                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Vector": {
                   "type": "string",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Score": {
                   "type": "number",
                   "format": "float",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -22111,7 +22614,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       },
                       "fromUrl": {
                         "type": "string",
-                        "description": "The API endpoint URL associated with this vulnerability occurrence."
+                        "description": "The API endpoint URL associated with this vulnerability occurrence.",
+                        "nullable": true
                       },
                       "queryParams": {
                         "items": {
@@ -22131,7 +22635,8 @@ export const generatedOperations: GeneratedOperation[] = [
                           ]
                         },
                         "type": "array",
-                        "description": "The API params associated with this vulnerability."
+                        "description": "The API params associated with this vulnerability.",
+                        "nullable": true
                       },
                       "headers": {
                         "items": {
@@ -22151,11 +22656,13 @@ export const generatedOperations: GeneratedOperation[] = [
                           ]
                         },
                         "type": "array",
-                        "description": "The API headers associated with this vulnerability."
+                        "description": "The API headers associated with this vulnerability.",
+                        "nullable": true
                       },
                       "body": {
                         "type": "string",
-                        "description": "The body of the request passed to the API, with sensitive information redacted."
+                        "description": "The body of the request passed to the API, with sensitive information redacted.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -22192,16 +22699,19 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "cveId": {
                   "type": "string",
-                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Vector": {
                   "type": "string",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Score": {
                   "type": "number",
                   "format": "float",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -22304,7 +22814,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 "completionDate": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "If complete, the date of completion of the background check."
+                  "description": "If complete, the date of completion of the background check.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -22369,7 +22880,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 "completionDate": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "If complete, the date of completion of the background check."
+                  "description": "If complete, the date of completion of the background check.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -22679,7 +23191,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       "lastOpenedTimestamp": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "The last time the application was opened."
+                        "description": "The last time the application was opened.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -22738,7 +23251,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       },
                       "isBootVolume": {
                         "type": "boolean",
-                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
+                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -22798,7 +23312,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       "lastLoginTimestamp": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "The last time the user logged in to the device, if available."
+                        "description": "The last time the user logged in to the device, if available.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -22841,7 +23356,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "owner": {
                   "type": "string",
-                  "description": "The email address of the owner of the system, if it's known."
+                  "description": "The email address of the owner of the system, if it's known.",
+                  "nullable": true
                 },
                 "passwordPolicy": {
                   "properties": {
@@ -22853,16 +23369,19 @@ export const generatedOperations: GeneratedOperation[] = [
                   },
                   "required": [
                     "minimumLengthRequirement"
-                  ]
+                  ],
+                  "nullable": true
                 },
                 "lastEnrolledTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment."
+                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment.",
+                  "nullable": true
                 },
                 "isXProtectEnabled": {
                   "type": "boolean",
-                  "description": "Is XProtect enabled on the system."
+                  "description": "Is XProtect enabled on the system.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -22952,7 +23471,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       "lastOpenedTimestamp": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "The last time the application was opened."
+                        "description": "The last time the application was opened.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -23011,7 +23531,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       },
                       "isBootVolume": {
                         "type": "boolean",
-                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
+                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -23071,7 +23592,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       "lastLoginTimestamp": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "The last time the user logged in to the device, if available."
+                        "description": "The last time the user logged in to the device, if available.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -23114,7 +23636,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "owner": {
                   "type": "string",
-                  "description": "The email address of the owner of the system, if it's known."
+                  "description": "The email address of the owner of the system, if it's known.",
+                  "nullable": true
                 },
                 "passwordPolicy": {
                   "properties": {
@@ -23126,16 +23649,19 @@ export const generatedOperations: GeneratedOperation[] = [
                   },
                   "required": [
                     "minimumLengthRequirement"
-                  ]
+                  ],
+                  "nullable": true
                 },
                 "lastEnrolledTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment."
+                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment.",
+                  "nullable": true
                 },
                 "isXProtectEnabled": {
                   "type": "boolean",
-                  "description": "Is XProtect enabled on the system."
+                  "description": "Is XProtect enabled on the system.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -23255,20 +23781,24 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "isReachable": {
                   "type": "boolean",
-                  "description": "Whether there is a code path to the vulnerable code in this package. This field is optional."
+                  "description": "Whether there is a code path to the vulnerable code in this package. This field is optional.",
+                  "nullable": true
                 },
                 "cveId": {
                   "type": "string",
-                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Vector": {
                   "type": "string",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Score": {
                   "type": "number",
                   "format": "float",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -23349,20 +23879,24 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "isReachable": {
                   "type": "boolean",
-                  "description": "Whether there is a code path to the vulnerable code in this package. This field is optional."
+                  "description": "Whether there is a code path to the vulnerable code in this package. This field is optional.",
+                  "nullable": true
                 },
                 "cveId": {
                   "type": "string",
-                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Vector": {
                   "type": "string",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Score": {
                   "type": "number",
                   "format": "float",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -23470,17 +24004,20 @@ export const generatedOperations: GeneratedOperation[] = [
                 "updatedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the secret was last updated."
+                  "description": "When the secret was last updated.",
+                  "nullable": true
                 },
                 "lastAccessedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the secret was last accessed."
+                  "description": "When the secret was last accessed.",
+                  "nullable": true
                 },
                 "expiresTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the secret is set to expire, if relevant."
+                  "description": "When the secret is set to expire, if relevant.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -23552,17 +24089,20 @@ export const generatedOperations: GeneratedOperation[] = [
                 "updatedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the secret was last updated."
+                  "description": "When the secret was last updated.",
+                  "nullable": true
                 },
                 "lastAccessedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the secret was last accessed."
+                  "description": "When the secret was last accessed.",
+                  "nullable": true
                 },
                 "expiresTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the secret is set to expire, if relevant."
+                  "description": "When the secret is set to expire, if relevant.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -23698,12 +24238,14 @@ export const generatedOperations: GeneratedOperation[] = [
                 "closedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the task was closed, if the task was closed. Required if `taskState` is `CLOSED`, otherwise must be absent."
+                  "description": "When the task was closed, if the task was closed. Required if `taskState` is `CLOSED`, otherwise must be absent.",
+                  "nullable": true
                 },
                 "updatedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the task was last updated."
+                  "description": "When the task was last updated.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -23808,12 +24350,14 @@ export const generatedOperations: GeneratedOperation[] = [
                 "closedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the task was closed, if the task was closed. Required if `taskState` is `CLOSED`, otherwise must be absent."
+                  "description": "When the task was closed, if the task was closed. Required if `taskState` is `CLOSED`, otherwise must be absent.",
+                  "nullable": true
                 },
                 "updatedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the task was last updated."
+                  "description": "When the task was last updated.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -23965,16 +24509,19 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "cveId": {
                   "type": "string",
-                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Vector": {
                   "type": "string",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Score": {
                   "type": "number",
                   "format": "float",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -24091,16 +24638,19 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "cveId": {
                   "type": "string",
-                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerabilities and Exposures (CVE) identifier for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Vector": {
                   "type": "string",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 vector for the vulnerability. This field is optional.",
+                  "nullable": true
                 },
                 "cvss3Score": {
                   "type": "number",
                   "format": "float",
-                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional."
+                  "description": "The Common Vulnerability Scoring System (CVSS) version 3 score for the vulnerability. This field is optional.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -24218,7 +24768,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "mfaEnabled": {
                   "type": "boolean",
-                  "description": "This value is ignored if `authMethod` is SSO."
+                  "description": "This value is ignored if `authMethod` is SSO. Send `null` if the MFA state is unknown.",
+                  "nullable": true
                 },
                 "mfaMethods": {
                   "items": {
@@ -24234,7 +24785,7 @@ export const generatedOperations: GeneratedOperation[] = [
                     ]
                   },
                   "type": "array",
-                  "description": "The MFA settings of the user. This helps customers verify that their users are adequately protecting their accounts. This value is ignored if authMethod is SSO."
+                  "description": "The MFA settings of the user. This helps customers verify that their users are adequately protecting their accounts. This value is ignored if authMethod is SSO. Send an empty array if `mfaEnabled` is `null`, since an unknown MFA state says nothing about which methods are active."
                 },
                 "authMethod": {
                   "description": "How the user logs into the system. This is useful for us to validate security properties, like ensuring MFA is enabled if the user logs in with a password.",
@@ -24247,27 +24798,32 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "roleDescription": {
                   "type": "string",
-                  "description": "A human readable description of the user's role."
+                  "description": "A human readable description of the user's role.",
+                  "nullable": true
                 },
                 "updatedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "The last time the user was updated in the system."
+                  "description": "The last time the user was updated in the system.",
+                  "nullable": true
                 },
                 "deactivatedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "If the user is deactivated, the timestamp of that deactivation."
+                  "description": "If the user is deactivated, the timestamp of that deactivation.",
+                  "nullable": true
                 },
                 "lastLoginTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "The time at which the user last logged in."
+                  "description": "The time at which the user last logged in.",
+                  "nullable": true
                 },
                 "lastPasswordResetTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "The time at which the user last reset their password. Helps with future Vanta functionality."
+                  "description": "The time at which the user last reset their password. Helps with future Vanta functionality.",
+                  "nullable": true
                 },
                 "groupIds": {
                   "items": {
@@ -24275,7 +24831,8 @@ export const generatedOperations: GeneratedOperation[] = [
                     "description": "The individual group identifier."
                   },
                   "type": "array",
-                  "description": "If the user belongs to any groups/teams in the product, those corresponding group IDs. We'll map these to groups in our product in the future."
+                  "description": "If the user belongs to any groups/teams in the product, those corresponding group IDs. We'll map these to groups in our product in the future.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -24361,7 +24918,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "mfaEnabled": {
                   "type": "boolean",
-                  "description": "This value is ignored if `authMethod` is SSO."
+                  "description": "This value is ignored if `authMethod` is SSO. Send `null` if the MFA state is unknown.",
+                  "nullable": true
                 },
                 "mfaMethods": {
                   "items": {
@@ -24377,7 +24935,7 @@ export const generatedOperations: GeneratedOperation[] = [
                     ]
                   },
                   "type": "array",
-                  "description": "The MFA settings of the user. This helps customers verify that their users are adequately protecting their accounts. This value is ignored if authMethod is SSO."
+                  "description": "The MFA settings of the user. This helps customers verify that their users are adequately protecting their accounts. This value is ignored if authMethod is SSO. Send an empty array if `mfaEnabled` is `null`, since an unknown MFA state says nothing about which methods are active."
                 },
                 "authMethod": {
                   "description": "How the user logs into the system. This is useful for us to validate security properties, like ensuring MFA is enabled if the user logs in with a password.",
@@ -24390,27 +24948,32 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "roleDescription": {
                   "type": "string",
-                  "description": "A human readable description of the user's role."
+                  "description": "A human readable description of the user's role.",
+                  "nullable": true
                 },
                 "updatedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "The last time the user was updated in the system."
+                  "description": "The last time the user was updated in the system.",
+                  "nullable": true
                 },
                 "deactivatedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "If the user is deactivated, the timestamp of that deactivation."
+                  "description": "If the user is deactivated, the timestamp of that deactivation.",
+                  "nullable": true
                 },
                 "lastLoginTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "The time at which the user last logged in."
+                  "description": "The time at which the user last logged in.",
+                  "nullable": true
                 },
                 "lastPasswordResetTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "The time at which the user last reset their password. Helps with future Vanta functionality."
+                  "description": "The time at which the user last reset their password. Helps with future Vanta functionality.",
+                  "nullable": true
                 },
                 "groupIds": {
                   "items": {
@@ -24418,7 +24981,8 @@ export const generatedOperations: GeneratedOperation[] = [
                     "description": "The individual group identifier."
                   },
                   "type": "array",
-                  "description": "If the user belongs to any groups/teams in the product, those corresponding group IDs. We'll map these to groups in our product in the future."
+                  "description": "If the user belongs to any groups/teams in the product, those corresponding group IDs. We'll map these to groups in our product in the future.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -24559,7 +25123,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 "trainingCompletedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "The time at which this training course was completed by the user."
+                  "description": "The time at which this training course was completed by the user.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -24666,7 +25231,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 "trainingCompletedTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "The time at which this training course was completed by the user."
+                  "description": "The time at which this training course was completed by the user.",
+                  "nullable": true
                 }
               },
               "required": [
@@ -24963,7 +25529,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       "lastOpenedTimestamp": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "The last time the application was opened."
+                        "description": "The last time the application was opened.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -25017,7 +25584,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       },
                       "isBootVolume": {
                         "type": "boolean",
-                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
+                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -25076,7 +25644,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       "lastLoginTimestamp": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "The last time the user logged in to the device, if available."
+                        "description": "The last time the user logged in to the device, if available.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -25119,7 +25688,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "owner": {
                   "type": "string",
-                  "description": "The email address of the owner of the system, if it's known."
+                  "description": "The email address of the owner of the system, if it's known.",
+                  "nullable": true
                 },
                 "passwordPolicy": {
                   "properties": {
@@ -25131,12 +25701,14 @@ export const generatedOperations: GeneratedOperation[] = [
                   },
                   "required": [
                     "minimumLengthRequirement"
-                  ]
+                  ],
+                  "nullable": true
                 },
                 "lastEnrolledTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment."
+                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment.",
+                  "nullable": true
                 },
                 "windowsSecurityProducts": {
                   "items": {
@@ -25180,7 +25752,8 @@ export const generatedOperations: GeneratedOperation[] = [
                     ]
                   },
                   "type": "array",
-                  "description": "A list of services that are monitored by Windows Security Center (WSC)."
+                  "description": "A list of services that are monitored by Windows Security Center (WSC).",
+                  "nullable": true
                 },
                 "windowsSecurityCenter": {
                   "properties": {
@@ -25252,7 +25825,8 @@ export const generatedOperations: GeneratedOperation[] = [
                     "internetSetting",
                     "userAccountControl",
                     "windowsSecurityCenterService"
-                  ]
+                  ],
+                  "nullable": true
                 }
               },
               "required": [
@@ -25338,7 +25912,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       "lastOpenedTimestamp": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "The last time the application was opened."
+                        "description": "The last time the application was opened.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -25392,7 +25967,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       },
                       "isBootVolume": {
                         "type": "boolean",
-                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives."
+                        "description": "Metadata about the boot volume helps Vanta skip checking volumes that aren't relevant, like USB Drives.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -25451,7 +26027,8 @@ export const generatedOperations: GeneratedOperation[] = [
                       "lastLoginTimestamp": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "The last time the user logged in to the device, if available."
+                        "description": "The last time the user logged in to the device, if available.",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -25494,7 +26071,8 @@ export const generatedOperations: GeneratedOperation[] = [
                 },
                 "owner": {
                   "type": "string",
-                  "description": "The email address of the owner of the system, if it's known."
+                  "description": "The email address of the owner of the system, if it's known.",
+                  "nullable": true
                 },
                 "passwordPolicy": {
                   "properties": {
@@ -25506,12 +26084,14 @@ export const generatedOperations: GeneratedOperation[] = [
                   },
                   "required": [
                     "minimumLengthRequirement"
-                  ]
+                  ],
+                  "nullable": true
                 },
                 "lastEnrolledTimestamp": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment."
+                  "description": "A timestamp that indicates when the host computer was last enrolled within your system. If the computer has been un-enrolled and then re-enrolled, send data for the most recent enrollment.",
+                  "nullable": true
                 },
                 "windowsSecurityProducts": {
                   "items": {
@@ -25555,7 +26135,8 @@ export const generatedOperations: GeneratedOperation[] = [
                     ]
                   },
                   "type": "array",
-                  "description": "A list of services that are monitored by Windows Security Center (WSC)."
+                  "description": "A list of services that are monitored by Windows Security Center (WSC).",
+                  "nullable": true
                 },
                 "windowsSecurityCenter": {
                   "properties": {
@@ -25627,7 +26208,8 @@ export const generatedOperations: GeneratedOperation[] = [
                     "internetSetting",
                     "userAccountControl",
                     "windowsSecurityCenterService"
-                  ]
+                  ],
+                  "nullable": true
                 }
               },
               "required": [
@@ -25656,8 +26238,8 @@ export const generatedOperations: GeneratedOperation[] = [
 ];
 export const generatedStats = {
   "manage": {
-    "operations": 241,
-    "mutations": 134
+    "operations": 251,
+    "mutations": 137
   },
   "audit": {
     "operations": 57,

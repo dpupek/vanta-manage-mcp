@@ -6,7 +6,7 @@ Use this before tagging or publishing a new server version.
 
 - Run `npm run generate`.
 - Run `npm run verify:spec-parity`.
-- Confirm expected operation totals (current baseline: 323).
+- Confirm expected operation totals (current baseline: 333; Manage 251, Audit 57, Connectors 25).
 
 ## Quality Gates
 

@@ -1,0 +1,870 @@
+{
+  "baselineCommit": "e7efef3",
+  "sources": {
+    "manage": {
+      "before": 241,
+      "after": 251,
+      "added": [
+        {
+          "identity": "GET /business-units",
+          "operationId": "ListBusinessUnits"
+        },
+        {
+          "identity": "GET /business-units/{businessUnitId}",
+          "operationId": "GetBusinessUnit"
+        },
+        {
+          "identity": "GET /organization",
+          "operationId": "GetOrganization"
+        },
+        {
+          "identity": "GET /personnel-notification-settings",
+          "operationId": "GetSettings"
+        },
+        {
+          "identity": "PATCH /personnel-notification-settings",
+          "operationId": "UpdateSettings"
+        },
+        {
+          "identity": "GET /program-scopes",
+          "operationId": "ListProgramScopes"
+        },
+        {
+          "identity": "GET /program-scopes/{programScopeId}",
+          "operationId": "GetProgramScope"
+        },
+        {
+          "identity": "GET /risk-scenarios/{riskScenarioId}/mappings/vendor-findings",
+          "operationId": "ListVendorFindingMappings"
+        },
+        {
+          "identity": "POST /risk-scenarios/{riskScenarioId}/mappings/vendor-findings",
+          "operationId": "AddVendorFindingMappings"
+        },
+        {
+          "identity": "DELETE /risk-scenarios/{riskScenarioId}/mappings/vendor-findings",
+          "operationId": "RemoveVendorFindingMappings"
+        }
+      ],
+      "removed": [],
+      "changedInputs": [
+        {
+          "identity": "PATCH /controls/{controlId}",
+          "operationId": "UpdateControlMetadata",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/implementationDetails",
+              "added": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        {
+          "identity": "GET /people",
+          "operationId": "ListPeople",
+          "changes": [
+            {
+              "path": "/parameters/query:businessUnitIdMatchesAny",
+              "added": {
+                "in": "query",
+                "name": "businessUnitIdMatchesAny",
+                "required": false,
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            {
+              "path": "/parameters/query:frameworkIdMatchesAny",
+              "added": {
+                "in": "query",
+                "name": "frameworkIdMatchesAny",
+                "required": false,
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            {
+              "path": "/parameters/query:programScopeIdMatchesAny",
+              "added": {
+                "in": "query",
+                "name": "programScopeIdMatchesAny",
+                "required": false,
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "identity": "POST /trust-centers/{slugId}/access-requests/{accessRequestId}/deny",
+          "operationId": "DenyTrustCenterAccessRequest",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/sendEmail",
+              "added": {
+                "type": "boolean"
+              }
+            }
+          ]
+        },
+        {
+          "identity": "POST /trust-centers/{slugId}/compliance-frameworks",
+          "operationId": "CreateComplianceFramework",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/standard/enum",
+              "before": [
+                "aiact",
+                "aiuc1",
+                "aue8",
+                "awsFTR",
+                "bsic5",
+                "ccpa",
+                "cisv8",
+                "cjis",
+                "cmmc2",
+                "cps234",
+                "cri",
+                "dora",
+                "fedRAMPr5",
+                "fedramp",
+                "fedramp20x",
+                "fedramp20x_2026",
+                "gdpr",
+                "hipaa",
+                "hitruste1",
+                "iso9001",
+                "iso27001",
+                "iso27001_2022",
+                "iso27017",
+                "iso27018",
+                "iso27701",
+                "iso27701_2025",
+                "iso42001",
+                "msftSSPA",
+                "mvsp",
+                "nis2d",
+                "nist53",
+                "nist171",
+                "nist171r3",
+                "nistAiRmf",
+                "nistCSF",
+                "nistcsf2",
+                "ofdss",
+                "pciDss4",
+                "pciSaqA",
+                "pciSaqAEP",
+                "pciSaqDMerchant",
+                "pciSaqDSP",
+                "soc2",
+                "soxITGC",
+                "t23nycrr500",
+                "tisax",
+                "tisax2027",
+                "iso22301",
+                "trust",
+                "ukCyberEssentials",
+                "ukCyberEssentials33",
+                "usDataPrivacy",
+                "fedrampKSI",
+                null
+              ],
+              "after": [
+                "aiact",
+                "aiuc1",
+                "aiuc1_26q3",
+                "atc",
+                "aue8",
+                "awsFTR",
+                "bsic5",
+                "ccpa",
+                "cisv8",
+                "cjis",
+                "cmmc2",
+                "cps234",
+                "cri",
+                "dora",
+                "fedRAMPr5",
+                "fedramp",
+                "fedramp20x",
+                "fedramp20x_2026",
+                "fedramp20x_classA",
+                "gdpr",
+                "hipaa",
+                "hitruste1",
+                "iso9001",
+                "iso27001",
+                "iso27001_2022",
+                "iso27017",
+                "iso27018",
+                "iso27701",
+                "iso27701_2025",
+                "iso42001",
+                "msftSSPA",
+                "mvsp",
+                "nis2d",
+                "nist53",
+                "nist171",
+                "nist171r3",
+                "nistAiRmf",
+                "nistCSF",
+                "nistcsf2",
+                "ofdss",
+                "pciDss4",
+                "pciSaqA",
+                "pciSaqAEP",
+                "pciSaqDMerchant",
+                "pciSaqDSP",
+                "soc2",
+                "soxITGC",
+                "t23nycrr500",
+                "tisax",
+                "tisax2027",
+                "iso22301",
+                "trust",
+                "ukCyberEssentials",
+                "ukCyberEssentials33",
+                "usDataPrivacy",
+                "fedrampKSI",
+                null
+              ]
+            }
+          ]
+        },
+        {
+          "identity": "PATCH /trust-centers/{slugId}/compliance-frameworks/{frameworkId}",
+          "operationId": "UpdateComplianceFramework",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/standard/enum",
+              "before": [
+                "aiact",
+                "aiuc1",
+                "aue8",
+                "awsFTR",
+                "bsic5",
+                "ccpa",
+                "cisv8",
+                "cjis",
+                "cmmc2",
+                "cps234",
+                "cri",
+                "dora",
+                "fedRAMPr5",
+                "fedramp",
+                "fedramp20x",
+                "fedramp20x_2026",
+                "gdpr",
+                "hipaa",
+                "hitruste1",
+                "iso9001",
+                "iso27001",
+                "iso27001_2022",
+                "iso27017",
+                "iso27018",
+                "iso27701",
+                "iso27701_2025",
+                "iso42001",
+                "msftSSPA",
+                "mvsp",
+                "nis2d",
+                "nist53",
+                "nist171",
+                "nist171r3",
+                "nistAiRmf",
+                "nistCSF",
+                "nistcsf2",
+                "ofdss",
+                "pciDss4",
+                "pciSaqA",
+                "pciSaqAEP",
+                "pciSaqDMerchant",
+                "pciSaqDSP",
+                "soc2",
+                "soxITGC",
+                "t23nycrr500",
+                "tisax",
+                "tisax2027",
+                "iso22301",
+                "trust",
+                "ukCyberEssentials",
+                "ukCyberEssentials33",
+                "usDataPrivacy",
+                "fedrampKSI",
+                null
+              ],
+              "after": [
+                "aiact",
+                "aiuc1",
+                "aiuc1_26q3",
+                "atc",
+                "aue8",
+                "awsFTR",
+                "bsic5",
+                "ccpa",
+                "cisv8",
+                "cjis",
+                "cmmc2",
+                "cps234",
+                "cri",
+                "dora",
+                "fedRAMPr5",
+                "fedramp",
+                "fedramp20x",
+                "fedramp20x_2026",
+                "fedramp20x_classA",
+                "gdpr",
+                "hipaa",
+                "hitruste1",
+                "iso9001",
+                "iso27001",
+                "iso27001_2022",
+                "iso27017",
+                "iso27018",
+                "iso27701",
+                "iso27701_2025",
+                "iso42001",
+                "msftSSPA",
+                "mvsp",
+                "nis2d",
+                "nist53",
+                "nist171",
+                "nist171r3",
+                "nistAiRmf",
+                "nistCSF",
+                "nistcsf2",
+                "ofdss",
+                "pciDss4",
+                "pciSaqA",
+                "pciSaqAEP",
+                "pciSaqDMerchant",
+                "pciSaqDSP",
+                "soc2",
+                "soxITGC",
+                "t23nycrr500",
+                "tisax",
+                "tisax2027",
+                "iso22301",
+                "trust",
+                "ukCyberEssentials",
+                "ukCyberEssentials33",
+                "usDataPrivacy",
+                "fedrampKSI",
+                null
+              ]
+            }
+          ]
+        }
+      ],
+      "changedResponses": [
+        {
+          "identity": "POST /controls",
+          "operationId": "CreateCustomControl"
+        },
+        {
+          "identity": "GET /controls",
+          "operationId": "ListControls"
+        },
+        {
+          "identity": "POST /controls/add-from-library",
+          "operationId": "AddControlFromLibrary"
+        },
+        {
+          "identity": "GET /controls/controls-library",
+          "operationId": "ListLibraryControls"
+        },
+        {
+          "identity": "GET /controls/deactivated-controls",
+          "operationId": "ListDeactivatedControls"
+        },
+        {
+          "identity": "PATCH /controls/{controlId}",
+          "operationId": "UpdateControlMetadata"
+        },
+        {
+          "identity": "GET /controls/{controlId}",
+          "operationId": "GetControl"
+        },
+        {
+          "identity": "POST /controls/{controlId}/add-document-to-control",
+          "operationId": "AddDocumentToControl"
+        },
+        {
+          "identity": "POST /controls/{controlId}/add-test-to-control",
+          "operationId": "AddTestToControl"
+        },
+        {
+          "identity": "POST /controls/{controlId}/set-owner",
+          "operationId": "SetOwnerForControl"
+        },
+        {
+          "identity": "GET /customer-trust/questionnaires/{questionnaireId}/responses",
+          "operationId": "ListQuestionnaireResponses"
+        },
+        {
+          "identity": "GET /customer-trust/questionnaires/{questionnaireId}/responses/{responseId}",
+          "operationId": "GetQuestionnaireResponse"
+        },
+        {
+          "identity": "PATCH /customer-trust/questionnaires/{questionnaireId}/responses/{responseId}",
+          "operationId": "UpdateQuestionnaireResponseContent"
+        },
+        {
+          "identity": "PATCH /customer-trust/questionnaires/{questionnaireId}/responses/{responseId}/owner",
+          "operationId": "UpdateQuestionnaireResponseOwner"
+        },
+        {
+          "identity": "GET /documents/{documentId}/controls",
+          "operationId": "ListControlsForDocument"
+        },
+        {
+          "identity": "GET /frameworks/{frameworkId}/controls",
+          "operationId": "ListControlsForFramework"
+        },
+        {
+          "identity": "GET /groups/{groupId}/people",
+          "operationId": "GetGroupMembers"
+        },
+        {
+          "identity": "POST /groups/{groupId}/people",
+          "operationId": "AddPersonToGroup"
+        },
+        {
+          "identity": "DELETE /groups/{groupId}/people/{personId}",
+          "operationId": "RemovePersonFromGroup"
+        },
+        {
+          "identity": "GET /people",
+          "operationId": "ListPeople"
+        },
+        {
+          "identity": "GET /people/{personId}",
+          "operationId": "GetPerson"
+        },
+        {
+          "identity": "PATCH /people/{personId}",
+          "operationId": "UpdatePerson"
+        },
+        {
+          "identity": "POST /people/{personId}/clear-leave",
+          "operationId": "ClearLeaveForPerson"
+        },
+        {
+          "identity": "POST /people/{personId}/set-leave",
+          "operationId": "SetLeaveForPerson"
+        },
+        {
+          "identity": "GET /risk-scenarios",
+          "operationId": "ListRiskScenario"
+        },
+        {
+          "identity": "POST /risk-scenarios",
+          "operationId": "CreateRiskScenario"
+        },
+        {
+          "identity": "GET /risk-scenarios/{riskScenarioId}",
+          "operationId": "GetRiskScenario"
+        },
+        {
+          "identity": "PATCH /risk-scenarios/{riskScenarioId}",
+          "operationId": "UpdateRiskScenario"
+        },
+        {
+          "identity": "POST /risk-scenarios/{riskScenarioId}/cancel-approval-request",
+          "operationId": "CancelRiskScenarioApprovalRequest"
+        },
+        {
+          "identity": "POST /risk-scenarios/{riskScenarioId}/submit-for-approval",
+          "operationId": "SubmitRiskForApproval"
+        },
+        {
+          "identity": "GET /vendor-risk-attributes",
+          "operationId": "ListVendorRiskAttributes"
+        },
+        {
+          "identity": "GET /vendors/{vendorId}/assessments",
+          "operationId": "GetAssessmentsByVendorId"
+        }
+      ],
+      "renamed": []
+    },
+    "audit": {
+      "before": 57,
+      "after": 57,
+      "added": [],
+      "removed": [],
+      "changedInputs": [
+        {
+          "identity": "PATCH /audits/{auditId}/information-requests/{requestId}",
+          "operationId": "UpdateInformationRequest",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/additionalControlIds/deprecated",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/frameworkCodes/deprecated",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/linkedControlIds",
+              "added": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          ]
+        }
+      ],
+      "changedResponses": [
+        {
+          "identity": "GET /audits",
+          "operationId": "ListAudits"
+        },
+        {
+          "identity": "POST /audits/duplicate",
+          "operationId": "Duplicate"
+        },
+        {
+          "identity": "GET /audits/{auditId}",
+          "operationId": "GetAudit"
+        },
+        {
+          "identity": "GET /audits/{auditId}/controls/{controlId}/information-requests",
+          "operationId": "ListInformationRequestsForControl"
+        },
+        {
+          "identity": "GET /audits/{auditId}/information-requests",
+          "operationId": "ListInformationRequests"
+        },
+        {
+          "identity": "POST /audits/{auditId}/information-requests",
+          "operationId": "CreateInformationRequest"
+        },
+        {
+          "identity": "GET /audits/{auditId}/information-requests/{requestId}",
+          "operationId": "GetInformationRequest"
+        },
+        {
+          "identity": "PATCH /audits/{auditId}/information-requests/{requestId}",
+          "operationId": "UpdateInformationRequest"
+        },
+        {
+          "identity": "POST /audits/{auditId}/information-requests/{requestId}/accept-evidence",
+          "operationId": "AcceptInformationRequestEvidence"
+        },
+        {
+          "identity": "GET /audits/{auditId}/information-requests/{requestId}/activity",
+          "operationId": "ListInformationRequestActivity"
+        },
+        {
+          "identity": "POST /audits/{auditId}/information-requests/{requestId}/flag-evidence",
+          "operationId": "FlagInformationRequestEvidence"
+        },
+        {
+          "identity": "POST /audits/{auditId}/share-information-request-list",
+          "operationId": "ShareInformationRequestList"
+        }
+      ],
+      "renamed": []
+    },
+    "connectors": {
+      "before": 25,
+      "after": 25,
+      "added": [],
+      "removed": [],
+      "changedInputs": [
+        {
+          "identity": "PUT /v1/resources/api_endpoint_vulnerability_connectors",
+          "operationId": "put-ApiEndpointVulnerabilityConnectors",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/cveId/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/cvss3Score/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/cvss3Vector/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/occurrences/items/properties/body/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/occurrences/items/properties/fromUrl/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/occurrences/items/properties/headers/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/occurrences/items/properties/queryParams/nullable",
+              "added": true
+            }
+          ]
+        },
+        {
+          "identity": "PUT /v1/resources/background_check_connector",
+          "operationId": "put-BackgroundCheckConnector",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/completionDate/nullable",
+              "added": true
+            }
+          ]
+        },
+        {
+          "identity": "PUT /v1/resources/macos_user_computer",
+          "operationId": "put-MacosUserComputer",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/applications/items/properties/lastOpenedTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/drives/items/properties/isBootVolume/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/isXProtectEnabled/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/lastEnrolledTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/owner/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/passwordPolicy/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/users/items/properties/lastLoginTimestamp/nullable",
+              "added": true
+            }
+          ]
+        },
+        {
+          "identity": "PUT /v1/resources/package_vulnerability_connectors",
+          "operationId": "put-PackageVulnerabilityConnectors",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/cveId/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/cvss3Score/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/cvss3Vector/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/isReachable/nullable",
+              "added": true
+            }
+          ]
+        },
+        {
+          "identity": "PUT /v1/resources/secret",
+          "operationId": "put-Secret",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/expiresTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/lastAccessedTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/updatedTimestamp/nullable",
+              "added": true
+            }
+          ]
+        },
+        {
+          "identity": "PUT /v1/resources/security_task",
+          "operationId": "put-SecurityTask",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/closedTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/updatedTimestamp/nullable",
+              "added": true
+            }
+          ]
+        },
+        {
+          "identity": "PUT /v1/resources/static_analysis_code_vulnerability_connectors",
+          "operationId": "put-StaticAnalysisCodeVulnerabilityConnectors",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/cveId/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/cvss3Score/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/cvss3Vector/nullable",
+              "added": true
+            }
+          ]
+        },
+        {
+          "identity": "PUT /v1/resources/user_account",
+          "operationId": "put-UserAccount",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/deactivatedTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/groupIds/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/lastLoginTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/lastPasswordResetTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/mfaEnabled/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/roleDescription/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/updatedTimestamp/nullable",
+              "added": true
+            }
+          ]
+        },
+        {
+          "identity": "PUT /v1/resources/user_security_training_status",
+          "operationId": "put-UserSecurityTrainingStatus",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/trainingCompletedTimestamp/nullable",
+              "added": true
+            }
+          ]
+        },
+        {
+          "identity": "PUT /v1/resources/windows_user_computer",
+          "operationId": "put-WindowsUserComputer",
+          "changes": [
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/drives/items/properties/isBootVolume/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/lastEnrolledTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/owner/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/passwordPolicy/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/programs/items/properties/lastOpenedTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/users/items/properties/lastLoginTimestamp/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/windowsSecurityCenter/nullable",
+              "added": true
+            },
+            {
+              "path": "/requestBody/content/application/json/schema/properties/resources/items/properties/windowsSecurityProducts/nullable",
+              "added": true
+            }
+          ]
+        }
+      ],
+      "changedResponses": [
+        {
+          "identity": "GET /v1/resources/api_endpoint_vulnerability_connectors",
+          "operationId": "get-ApiEndpointVulnerabilityConnectors"
+        },
+        {
+          "identity": "GET /v1/resources/background_check_connector",
+          "operationId": "get-BackgroundCheckConnector"
+        },
+        {
+          "identity": "GET /v1/resources/macos_user_computer",
+          "operationId": "get-MacosUserComputer"
+        },
+        {
+          "identity": "GET /v1/resources/package_vulnerability_connectors",
+          "operationId": "get-PackageVulnerabilityConnectors"
+        },
+        {
+          "identity": "GET /v1/resources/secret",
+          "operationId": "get-Secret"
+        },
+        {
+          "identity": "GET /v1/resources/security_task",
+          "operationId": "get-SecurityTask"
+        },
+        {
+          "identity": "GET /v1/resources/static_analysis_code_vulnerability_connectors",
+          "operationId": "get-StaticAnalysisCodeVulnerabilityConnectors"
+        },
+        {
+          "identity": "GET /v1/resources/user_account",
+          "operationId": "get-UserAccount"
+        },
+        {
+          "identity": "GET /v1/resources/user_security_training_status",
+          "operationId": "get-UserSecurityTrainingStatus"
+        },
+        {
+          "identity": "GET /v1/resources/windows_user_computer",
+          "operationId": "get-WindowsUserComputer"
+        }
+      ],
+      "renamed": []
+    }
+  }
+}

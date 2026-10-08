@@ -1984,6 +1984,54 @@
         "type": "object",
         "additionalProperties": false
       },
+      "VendorAssessmentQuestionCounts": {
+        "properties": {
+          "all": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The total number of visible questions.",
+            "minimum": 0
+          },
+          "needsReview": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of visible questions that need review.",
+            "minimum": 0
+          },
+          "notAnswered": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of visible questions without an answer.",
+            "minimum": 0
+          },
+          "flaggedByAI": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of visible questions flagged by Vanta AI.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "all",
+          "needsReview",
+          "notAnswered",
+          "flaggedByAI"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "VendorAssessmentQuestionnaire": {
+        "properties": {
+          "questionCounts": {
+            "$ref": "#/components/schemas/VendorAssessmentQuestionCounts"
+          }
+        },
+        "required": [
+          "questionCounts"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
       "AssessmentStatus": {
         "description": "The lifecycle status of an assessment:\n- NOT_STARTED: The assessment has not yet been started.\n- IN_PROGRESS: The assessment is underway.\n- COMPLETED: The assessment has been completed.",
         "enum": [
@@ -1992,6 +2040,146 @@
           "COMPLETED"
         ],
         "type": "string"
+      },
+      "VendorAssessmentWithQuestionnaire": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the assessment."
+          },
+          "vendorId": {
+            "type": "string",
+            "description": "Unique identifier for the vendor."
+          },
+          "status": {
+            "$ref": "#/components/schemas/AssessmentStatus",
+            "description": "The lifecycle status of the assessment."
+          },
+          "completedByUserId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The Vanta user ID of the person who completed this assessment."
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The timestamp of when the assessment was started."
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The timestamp of when the assessment is due."
+          },
+          "overrideDueDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "A manual override timestamp of when the assessment is due."
+          },
+          "completionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The timestamp of when the assessment was marked as completed."
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp of when the assessment was created."
+          },
+          "decision": {
+            "properties": {
+              "comments": {
+                "type": "string",
+                "nullable": true,
+                "description": "Comments about the assessment decision."
+              },
+              "lastUpdatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The timestamp of when the assessment decision was last set."
+              },
+              "status": {
+                "$ref": "#/components/schemas/AssessmentDecision",
+                "description": "The status of the current decision."
+              }
+            },
+            "required": [
+              "comments",
+              "lastUpdatedAt",
+              "status"
+            ],
+            "type": "object",
+            "nullable": true,
+            "description": "An object containing information about the decision of the assessment."
+          },
+          "assessmentType": {
+            "$ref": "#/components/schemas/AssessmentType",
+            "description": "The assessment type for this assessment."
+          },
+          "owner": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssessmentOwner"
+              }
+            ],
+            "nullable": true,
+            "description": "The owner of this assessment, if assigned."
+          },
+          "questionnaire": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VendorAssessmentQuestionnaire"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "vendorId",
+          "status",
+          "completedByUserId",
+          "startDate",
+          "dueDate",
+          "overrideDueDate",
+          "completionDate",
+          "createdDate",
+          "decision",
+          "assessmentType",
+          "owner"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "PaginatedResponse_VendorAssessmentWithQuestionnaire_": {
+        "properties": {
+          "results": {
+            "properties": {
+              "data": {
+                "items": {
+                  "$ref": "#/components/schemas/VendorAssessmentWithQuestionnaire"
+                },
+                "type": "array"
+              },
+              "pageInfo": {
+                "$ref": "#/components/schemas/PageInfo"
+              }
+            },
+            "required": [
+              "data",
+              "pageInfo"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object",
+        "additionalProperties": false
       },
       "VendorAssessment": {
         "properties": {
@@ -2094,33 +2282,6 @@
           "decision",
           "assessmentType",
           "owner"
-        ],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "PaginatedResponse_VendorAssessment_": {
-        "properties": {
-          "results": {
-            "properties": {
-              "data": {
-                "items": {
-                  "$ref": "#/components/schemas/VendorAssessment"
-                },
-                "type": "array"
-              },
-              "pageInfo": {
-                "$ref": "#/components/schemas/PageInfo"
-              }
-            },
-            "required": [
-              "data",
-              "pageInfo"
-            ],
-            "type": "object"
-          }
-        },
-        "required": [
-          "results"
         ],
         "type": "object",
         "additionalProperties": false
@@ -2298,6 +2459,24 @@
         "type": "object",
         "additionalProperties": false
       },
+      "VendorRiskSection": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the risk section."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the risk section."
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
       "VendorRiskAttribute": {
         "properties": {
           "id": {
@@ -2326,6 +2505,10 @@
           "riskLevel": {
             "$ref": "#/components/schemas/VendorRiskLevel",
             "description": "Risk level of this attribute."
+          },
+          "riskSection": {
+            "$ref": "#/components/schemas/VendorRiskSection",
+            "description": "Risk section this attribute belongs to."
           }
         },
         "required": [
@@ -2334,7 +2517,8 @@
           "description",
           "vendorCategories",
           "enabled",
-          "riskLevel"
+          "riskLevel",
+          "riskSection"
         ],
         "type": "object",
         "additionalProperties": false
@@ -4693,6 +4877,8 @@
             "enum": [
               "aiact",
               "aiuc1",
+              "aiuc1_26q3",
+              "atc",
               "aue8",
               "awsFTR",
               "bsic5",
@@ -4707,6 +4893,7 @@
               "fedramp",
               "fedramp20x",
               "fedramp20x_2026",
+              "fedramp20x_classA",
               "gdpr",
               "hipaa",
               "hitruste1",
@@ -4771,6 +4958,8 @@
             "enum": [
               "aiact",
               "aiuc1",
+              "aiuc1_26q3",
+              "atc",
               "aue8",
               "awsFTR",
               "bsic5",
@@ -4785,6 +4974,7 @@
               "fedramp",
               "fedramp20x",
               "fedramp20x_2026",
+              "fedramp20x_classA",
               "gdpr",
               "hipaa",
               "hitruste1",
@@ -5198,6 +5388,10 @@
           "reason": {
             "type": "string",
             "description": "Reason for denying the access request."
+          },
+          "sendEmail": {
+            "type": "boolean",
+            "description": "Whether to email the requester to notify them that their request was\ndenied. The email includes the reason when one is provided. Defaults to\nfalse."
           }
         },
         "type": "object",
@@ -5562,6 +5756,987 @@
         "type": "object",
         "additionalProperties": false
       },
+      "RequirementNotApplied": {
+        "description": "A requirement the set does not apply to the personnel it covers.",
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "enum": [
+              false
+            ],
+            "nullable": false
+          }
+        },
+        "required": [
+          "required"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AllPoliciesRequired": {
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          },
+          "acceptAll": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          }
+        },
+        "required": [
+          "required",
+          "acceptAll"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "SelectedPoliciesRequired": {
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          },
+          "acceptAll": {
+            "type": "boolean",
+            "enum": [
+              false
+            ],
+            "nullable": false
+          },
+          "policyTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Policy types personnel must accept."
+          }
+        },
+        "required": [
+          "required",
+          "acceptAll",
+          "policyTypes"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "PolicyAcceptanceRequirement": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/RequirementNotApplied"
+          },
+          {
+            "$ref": "#/components/schemas/AllPoliciesRequired"
+          },
+          {
+            "$ref": "#/components/schemas/SelectedPoliciesRequired"
+          }
+        ]
+      },
+      "BackgroundCheckRequired": {
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          },
+          "cutoffDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Personnel hired after this date require a check. Null requires a check for everyone in scope."
+          }
+        },
+        "required": [
+          "required",
+          "cutoffDate"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "BackgroundCheckRequirement": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/RequirementNotApplied"
+          },
+          {
+            "$ref": "#/components/schemas/BackgroundCheckRequired"
+          }
+        ]
+      },
+      "SecurityTrainingCategory": {
+        "type": "string",
+        "enum": [
+          "aiRisk",
+          "c5",
+          "ccpa",
+          "gdpr",
+          "general",
+          "hipaa",
+          "insiderThreat",
+          "pci",
+          "secureCode",
+          "socialEngineering"
+        ]
+      },
+      "SecurityTrainingRequired": {
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          },
+          "requiredCategories": {
+            "items": {
+              "$ref": "#/components/schemas/SecurityTrainingCategory"
+            },
+            "type": "array"
+          },
+          "requirementIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "required",
+          "requiredCategories",
+          "requirementIds"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "SecurityTrainingRequirement": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/RequirementNotApplied"
+          },
+          {
+            "$ref": "#/components/schemas/SecurityTrainingRequired"
+          }
+        ]
+      },
+      "PasswordManager": {
+        "type": "string",
+        "enum": [
+          "BITWARDEN",
+          "DASHLANE",
+          "ENPASS",
+          "KEEPER",
+          "LASTPASS",
+          "NORDPASS",
+          "ONEPASSWORD",
+          "PROTON",
+          "ROBOFORM",
+          "SAFEINCLOUD",
+          "TRENDMICRO"
+        ]
+      },
+      "DeviceMonitoringInstallPrompt": {
+        "type": "string",
+        "enum": [
+          "INSTALL_VANTA_AGENT",
+          "NONE"
+        ]
+      },
+      "DeviceMonitoringRequired": {
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          },
+          "preferredPasswordManagerId": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PasswordManager"
+              }
+            ],
+            "nullable": true
+          },
+          "installPrompt": {
+            "$ref": "#/components/schemas/DeviceMonitoringInstallPrompt"
+          }
+        },
+        "required": [
+          "required",
+          "preferredPasswordManagerId",
+          "installPrompt"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "DeviceMonitoringRequirement": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/RequirementNotApplied"
+          },
+          {
+            "$ref": "#/components/schemas/DeviceMonitoringRequired"
+          }
+        ]
+      },
+      "CustomRequirementAssignment": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "effectiveDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Applies to personnel whose employment start date is after this. Null applies to everyone."
+          }
+        },
+        "required": [
+          "id",
+          "effectiveDate"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CustomRequirementsRequired": {
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          },
+          "requirements": {
+            "items": {
+              "$ref": "#/components/schemas/CustomRequirementAssignment"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "required",
+          "requirements"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CustomRequirements": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/RequirementNotApplied"
+          },
+          {
+            "$ref": "#/components/schemas/CustomRequirementsRequired"
+          }
+        ]
+      },
+      "OnboardingRequirements": {
+        "properties": {
+          "policyAcceptance": {
+            "$ref": "#/components/schemas/PolicyAcceptanceRequirement"
+          },
+          "backgroundCheck": {
+            "$ref": "#/components/schemas/BackgroundCheckRequirement"
+          },
+          "securityTraining": {
+            "$ref": "#/components/schemas/SecurityTrainingRequirement"
+          },
+          "deviceMonitoring": {
+            "$ref": "#/components/schemas/DeviceMonitoringRequirement"
+          },
+          "custom": {
+            "$ref": "#/components/schemas/CustomRequirements"
+          }
+        },
+        "required": [
+          "policyAcceptance",
+          "backgroundCheck",
+          "securityTraining",
+          "deviceMonitoring",
+          "custom"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "DeactivateAllAccounts": {
+        "properties": {
+          "deactivateAll": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          }
+        },
+        "required": [
+          "deactivateAll"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "DeactivateSelectedAccounts": {
+        "properties": {
+          "deactivateAll": {
+            "type": "boolean",
+            "enum": [
+              false
+            ],
+            "nullable": false
+          },
+          "accountIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "deactivateAll",
+          "accountIds"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AccountSelection": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/DeactivateAllAccounts"
+          },
+          {
+            "$ref": "#/components/schemas/DeactivateSelectedAccounts"
+          }
+        ]
+      },
+      "AccountDeactivationRequired": {
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          },
+          "accounts": {
+            "$ref": "#/components/schemas/AccountSelection"
+          }
+        },
+        "required": [
+          "required",
+          "accounts"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AccountDeactivationRequirement": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/RequirementNotApplied"
+          },
+          {
+            "$ref": "#/components/schemas/AccountDeactivationRequired"
+          }
+        ]
+      },
+      "OffboardingRequirements": {
+        "properties": {
+          "accountDeactivation": {
+            "$ref": "#/components/schemas/AccountDeactivationRequirement"
+          },
+          "custom": {
+            "$ref": "#/components/schemas/CustomRequirements"
+          }
+        },
+        "required": [
+          "accountDeactivation",
+          "custom"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "TaskRequirements": {
+        "properties": {
+          "onboarding": {
+            "$ref": "#/components/schemas/OnboardingRequirements"
+          },
+          "offboarding": {
+            "$ref": "#/components/schemas/OffboardingRequirements"
+          }
+        },
+        "required": [
+          "onboarding",
+          "offboarding"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "TaskRequirementSet": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The task requirement set's unique ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "The task requirement set's display name."
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "The task requirement set's description."
+          },
+          "isReusable": {
+            "type": "boolean",
+            "description": "Whether groups other than the one that owns this set may also apply it."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the set was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the set was last updated."
+          },
+          "taskRequirements": {
+            "$ref": "#/components/schemas/TaskRequirements",
+            "description": "The onboarding and offboarding requirements the set applies to its personnel."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "isReusable",
+          "createdAt",
+          "updatedAt",
+          "taskRequirements"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "PaginatedResponse_TaskRequirementSet_": {
+        "properties": {
+          "results": {
+            "properties": {
+              "data": {
+                "items": {
+                  "$ref": "#/components/schemas/TaskRequirementSet"
+                },
+                "type": "array"
+              },
+              "pageInfo": {
+                "$ref": "#/components/schemas/PageInfo"
+              }
+            },
+            "required": [
+              "data",
+              "pageInfo"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CustomRequirementType": {
+        "type": "string",
+        "enum": [
+          "ONBOARDING",
+          "OFFBOARDING"
+        ]
+      },
+      "CustomRequirementOwnerType": {
+        "type": "string",
+        "enum": [
+          "ADMIN",
+          "EMPLOYEE"
+        ]
+      },
+      "CustomRequirement": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The custom requirement's unique ID."
+          },
+          "title": {
+            "type": "string",
+            "description": "The custom requirement's display title."
+          },
+          "requirementType": {
+            "$ref": "#/components/schemas/CustomRequirementType",
+            "description": "Whether the requirement applies during onboarding or offboarding."
+          },
+          "ownerType": {
+            "$ref": "#/components/schemas/CustomRequirementOwnerType",
+            "description": "Who completes the requirement. Offboarding requirements are always completed by an admin."
+          },
+          "textInputLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Label for the requirement's text input, or null if it has none."
+          },
+          "fileInputLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Label for the requirement's file input, or null if it has none."
+          },
+          "instructions": {
+            "type": "string",
+            "nullable": true,
+            "description": "Instructions for completing the requirement, or null if it has none."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the requirement was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the requirement was last updated."
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "requirementType",
+          "ownerType",
+          "textInputLabel",
+          "fileInputLabel",
+          "instructions",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "PaginatedResponse_CustomRequirement_": {
+        "properties": {
+          "results": {
+            "properties": {
+              "data": {
+                "items": {
+                  "$ref": "#/components/schemas/CustomRequirement"
+                },
+                "type": "array"
+              },
+              "pageInfo": {
+                "$ref": "#/components/schemas/PageInfo"
+              }
+            },
+            "required": [
+              "data",
+              "pageInfo"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "VantaSecurityTrainingInput": {
+        "description": "A training supplied by Vanta.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "VANTA"
+            ],
+            "nullable": false
+          },
+          "category": {
+            "$ref": "#/components/schemas/SecurityTrainingCategory"
+          },
+          "instructions": {
+            "type": "string",
+            "nullable": true,
+            "description": "Completion instructions shown to personnel. Null uses Vanta's own."
+          },
+          "url": {
+            "type": "number",
+            "enum": [
+              null
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "category",
+          "instructions",
+          "url"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CustomSecurityTrainingInput": {
+        "description": "A training the organization hosts itself.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM"
+            ],
+            "nullable": false
+          },
+          "category": {
+            "$ref": "#/components/schemas/SecurityTrainingCategory"
+          },
+          "instructions": {
+            "type": "string",
+            "nullable": true,
+            "description": "Completion instructions shown to personnel."
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "description": "Where personnel complete the training."
+          }
+        },
+        "required": [
+          "type",
+          "category",
+          "instructions",
+          "url"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "IntegrationSecurityTrainingInput": {
+        "description": "A training completed in a connected integration",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "INTEGRATION"
+            ],
+            "nullable": false
+          },
+          "category": {
+            "$ref": "#/components/schemas/SecurityTrainingCategory"
+          },
+          "instructions": {
+            "type": "number",
+            "enum": [
+              null
+            ],
+            "nullable": true
+          },
+          "url": {
+            "type": "number",
+            "enum": [
+              null
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "category",
+          "instructions",
+          "url"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "SecurityTrainingInput": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/VantaSecurityTrainingInput"
+          },
+          {
+            "$ref": "#/components/schemas/CustomSecurityTrainingInput"
+          },
+          {
+            "$ref": "#/components/schemas/IntegrationSecurityTrainingInput"
+          }
+        ]
+      },
+      "SecurityTrainingRequiredInput": {
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "nullable": false
+          },
+          "trainings": {
+            "items": {
+              "$ref": "#/components/schemas/SecurityTrainingInput"
+            },
+            "type": "array",
+            "description": "Replaces the set's trainings wholesale. At most one per category."
+          }
+        },
+        "required": [
+          "required",
+          "trainings"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "SecurityTrainingRequirementInput": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/RequirementNotApplied"
+          },
+          {
+            "$ref": "#/components/schemas/SecurityTrainingRequiredInput"
+          }
+        ],
+        "description": "Security training is written as the trainings to require and read back as the\ncategories and requirement records the server resolved them into."
+      },
+      "OnboardingRequirementsInput": {
+        "properties": {
+          "policyAcceptance": {
+            "$ref": "#/components/schemas/PolicyAcceptanceRequirement"
+          },
+          "backgroundCheck": {
+            "$ref": "#/components/schemas/BackgroundCheckRequirement"
+          },
+          "securityTraining": {
+            "$ref": "#/components/schemas/SecurityTrainingRequirementInput"
+          },
+          "deviceMonitoring": {
+            "$ref": "#/components/schemas/DeviceMonitoringRequirement"
+          },
+          "custom": {
+            "$ref": "#/components/schemas/CustomRequirements"
+          }
+        },
+        "type": "object",
+        "additionalProperties": false
+      },
+      "OffboardingRequirementsInput": {
+        "properties": {
+          "accountDeactivation": {
+            "$ref": "#/components/schemas/AccountDeactivationRequirement"
+          },
+          "custom": {
+            "$ref": "#/components/schemas/CustomRequirements"
+          }
+        },
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateTaskRequirementSetInput": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name for the set."
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Description of the set. Omit for none."
+          },
+          "isReusable": {
+            "type": "boolean",
+            "description": "Whether groups other than the one that owns this set may also apply it."
+          },
+          "onboarding": {
+            "$ref": "#/components/schemas/OnboardingRequirementsInput",
+            "description": "Onboarding requirements to apply. Omitted requirements default to not required."
+          },
+          "offboarding": {
+            "$ref": "#/components/schemas/OffboardingRequirementsInput",
+            "description": "Offboarding requirements to apply. Omitted requirements default to not required."
+          }
+        },
+        "required": [
+          "name",
+          "isReusable"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateCustomOffboardingRequirementInput": {
+        "properties": {
+          "requirementType": {
+            "type": "string",
+            "enum": [
+              "OFFBOARDING"
+            ],
+            "nullable": false
+          },
+          "title": {
+            "type": "string",
+            "description": "Display title for the requirement."
+          },
+          "instructions": {
+            "type": "string",
+            "nullable": true,
+            "description": "Instructions for completing the requirement. Omit for none."
+          }
+        },
+        "required": [
+          "requirementType",
+          "title"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateCustomOnboardingRequirementInput": {
+        "properties": {
+          "requirementType": {
+            "type": "string",
+            "enum": [
+              "ONBOARDING"
+            ],
+            "nullable": false
+          },
+          "title": {
+            "type": "string",
+            "description": "Display title for the requirement."
+          },
+          "instructions": {
+            "type": "string",
+            "nullable": true,
+            "description": "Instructions for completing the requirement. Omit for none."
+          },
+          "ownerType": {
+            "$ref": "#/components/schemas/CustomRequirementOwnerType",
+            "description": "Who completes the requirement."
+          },
+          "textInputLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Label for the requirement's text input. Omit for none."
+          },
+          "fileInputLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Label for the requirement's file input. Omit for none."
+          }
+        },
+        "required": [
+          "requirementType",
+          "title",
+          "ownerType"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateCustomRequirementInput": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/CreateCustomOffboardingRequirementInput"
+          },
+          {
+            "$ref": "#/components/schemas/CreateCustomOnboardingRequirementInput"
+          }
+        ]
+      },
+      "UpdateCustomOffboardingRequirementInput": {
+        "properties": {
+          "requirementType": {
+            "type": "string",
+            "enum": [
+              "OFFBOARDING"
+            ],
+            "nullable": false
+          },
+          "title": {
+            "type": "string",
+            "description": "New display title. Omit to preserve."
+          },
+          "instructions": {
+            "type": "string",
+            "nullable": true,
+            "description": "New instructions. Omit to preserve, null to clear."
+          }
+        },
+        "required": [
+          "requirementType"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "UpdateCustomOnboardingRequirementInput": {
+        "properties": {
+          "requirementType": {
+            "type": "string",
+            "enum": [
+              "ONBOARDING"
+            ],
+            "nullable": false
+          },
+          "title": {
+            "type": "string",
+            "description": "New display title. Omit to preserve."
+          },
+          "instructions": {
+            "type": "string",
+            "nullable": true,
+            "description": "New instructions. Omit to preserve, null to clear."
+          },
+          "ownerType": {
+            "$ref": "#/components/schemas/CustomRequirementOwnerType",
+            "description": "Who completes the requirement. Omit to preserve."
+          },
+          "textInputLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "New label for the requirement's text input. Omit to preserve, null to clear."
+          },
+          "fileInputLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "New label for the requirement's file input. Omit to preserve, null to clear."
+          }
+        },
+        "required": [
+          "requirementType"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "UpdateCustomRequirementInput": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/UpdateCustomOffboardingRequirementInput"
+          },
+          {
+            "$ref": "#/components/schemas/UpdateCustomOnboardingRequirementInput"
+          }
+        ]
+      },
+      "TaskRequirementsInput": {
+        "properties": {
+          "onboarding": {
+            "$ref": "#/components/schemas/OnboardingRequirementsInput",
+            "description": "Onboarding requirements to replace. Omit a requirement to leave it unchanged."
+          },
+          "offboarding": {
+            "$ref": "#/components/schemas/OffboardingRequirementsInput",
+            "description": "Offboarding requirements to replace. Omit a requirement to leave it unchanged."
+          }
+        },
+        "type": "object",
+        "additionalProperties": false
+      },
       "CIA": {
         "type": "string",
         "enum": [
@@ -5622,6 +6797,77 @@
           "Risk Scenario",
           "Enterprise Risk"
         ]
+      },
+      "ScoreBreakdownEntryKind": {
+        "type": "string",
+        "enum": [
+          "SCORE",
+          "DIMENSION",
+          "FACTOR"
+        ],
+        "description": "`SCORE` is the root, `DIMENSION` is a direct child, and `FACTOR` is any deeper node."
+      },
+      "ScoreBreakdownEntryStatus": {
+        "type": "string",
+        "enum": [
+          "SCORED",
+          "MISSING",
+          "NOT_APPLICABLE"
+        ],
+        "description": "`SCORED` has an entered value; `MISSING` is unscored; `NOT_APPLICABLE`\nis excluded from its parent's calculation."
+      },
+      "ScoreBreakdownEntry": {
+        "description": "One node in the inherent risk scoring tree. Entries are ordered parents before\nchildren, with `parentId` linking each child to its parent.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Config node ID, unique within this breakdown. IDs can change when the scoring\nconfig is restructured; re-read the breakdown instead of storing them long-term."
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ScoreBreakdownEntryKind",
+            "description": "Whether this entry is the overall score, a dimension, or a factor."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of this node, from the scoring config."
+          },
+          "score": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "description": "Entered or calculated value, which may be fractional. `null` when unscored,\nnot applicable, or no aggregate value is available; see `status` for leaf nodes."
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ScoreBreakdownEntryStatus"
+              }
+            ],
+            "nullable": true,
+            "description": "Scoring status for a directly scored node. `null` for aggregates; read their\nchildren's statuses instead."
+          },
+          "scoreLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Matching option label for a directly scored node, or the register's range-band\nlabel for the overall score. `null` when no label applies, including non-root\naggregates and overall scores on registers using matrix-based severity."
+          },
+          "parentId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Parent entry's ID, or `null` for the overall score."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "score",
+          "status",
+          "scoreLabel",
+          "parentId"
+        ],
+        "type": "object",
+        "additionalProperties": false
       },
       "RiskScenario": {
         "properties": {
@@ -5736,6 +6982,14 @@
             "type": "string",
             "format": "date-time",
             "description": "The date this risk was identified. Matches the \"Identified Date\" field in the Vanta UI. Set by the customer when a risk is created; defaults to the scenario's creation time when not explicitly provided."
+          },
+          "scoreBreakdown": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreBreakdownEntry"
+            },
+            "type": "array",
+            "nullable": true,
+            "description": "Overall inherent score, dimensions, and nested factors, ordered parents before\nchildren and linked by `parentId`. `null` when Flexible Risk Scoring is off or\nthe scenario has no score or matching config. Closed beta."
           }
         },
         "required": [
@@ -5757,7 +7011,8 @@
           "reviewStatus",
           "requiredApprovers",
           "type",
-          "identificationDate"
+          "identificationDate",
+          "scoreBreakdown"
         ],
         "type": "object",
         "additionalProperties": false
@@ -6084,12 +7339,102 @@
         "type": "object",
         "additionalProperties": false
       },
+      "RiskScenarioVendorFindingMapping": {
+        "properties": {
+          "vendorFindingId": {
+            "type": "string",
+            "description": "The ID of a vendor finding mapped to the risk scenario."
+          }
+        },
+        "required": [
+          "vendorFindingId"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "PaginatedResponse_RiskScenarioVendorFindingMapping_": {
+        "properties": {
+          "results": {
+            "properties": {
+              "data": {
+                "items": {
+                  "$ref": "#/components/schemas/RiskScenarioVendorFindingMapping"
+                },
+                "type": "array"
+              },
+              "pageInfo": {
+                "$ref": "#/components/schemas/PageInfo"
+              }
+            },
+            "required": [
+              "data",
+              "pageInfo"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AddRiskScenarioVendorFindingMappingsInput": {
+        "properties": {
+          "vendorFindingIdsToLink": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Vendor finding IDs to link. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "vendorFindingIdsToLink"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "RemoveRiskScenarioVendorFindingMappingsInput": {
+        "properties": {
+          "vendorFindingIdsToUnlink": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Vendor finding IDs to unlink. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "vendorFindingIdsToUnlink"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
       "RestRiskRegisterType": {
         "type": "string",
         "enum": [
           "SCOPED",
           "ENTERPRISE"
         ]
+      },
+      "RiskRegisterSettings": {
+        "properties": {
+          "applicableCustomFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Labels of the custom fields that apply to risk scenarios in this register.\nThese are the labels accepted in the `customFields` field on risk-scenario\ncreate and update requests for this register. The enterprise register\nlists every custom field, since enterprise risks accept all of them."
+          }
+        },
+        "required": [
+          "applicableCustomFields"
+        ],
+        "type": "object",
+        "additionalProperties": false
       },
       "RiskRegister": {
         "description": "A risk register — a grouping of risk scenarios.\n\nRisk scenarios reference their register by **name** (the `riskRegister`\nfield on `CreateRiskScenarioInput` and `RiskScenario`). Domains with\nmultiple registers must specify a register name on create.",
@@ -6115,6 +7460,10 @@
             "type": "string",
             "format": "date-time",
             "description": "When this risk register was created."
+          },
+          "settings": {
+            "$ref": "#/components/schemas/RiskRegisterSettings",
+            "description": "Configuration that applies to the risk scenarios in this register."
           }
         },
         "required": [
@@ -6122,7 +7471,8 @@
           "name",
           "description",
           "registerType",
-          "creationDate"
+          "creationDate",
+          "settings"
         ],
         "type": "object",
         "additionalProperties": false
@@ -7285,6 +8635,13 @@
             ],
             "type": "object",
             "description": "The person's tasks summary, which aggregates their current status across\nall of their relevant tasks."
+          },
+          "programScopeIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Program scopes this person belongs to and the caller can view, when enabled and loaded."
           }
         },
         "required": [
@@ -7324,6 +8681,26 @@
         },
         "required": [
           "results"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "OrganizationIdentity": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "region"
         ],
         "type": "object",
         "additionalProperties": false
@@ -10596,6 +11973,11 @@
             "format": "date-time",
             "nullable": true,
             "description": "When the control was last modified. Returns null for Vanta library controls."
+          },
+          "implementationDetails": {
+            "type": "string",
+            "nullable": true,
+            "description": "How the control is implemented."
           }
         },
         "required": [
@@ -11563,6 +12945,21 @@
           "QUESTIONNAIRE"
         ]
       },
+      "CreateTagCategoryInput": {
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "description": "Must be unique within your organization. Surrounding whitespace is trimmed.",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "displayName"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
       "UserDefinedTag": {
         "properties": {
           "id": {
@@ -12240,37 +13637,6 @@
         "type": "object",
         "additionalProperties": false
       },
-      "QuestionnaireResponseMultipleChoiceAnswer": {
-        "enum": [
-          "NO",
-          "NOT_APPLICABLE",
-          "YES"
-        ],
-        "type": "string"
-      },
-      "DeprecatedQAutoAnswerForAPI": {
-        "description": "Frozen local clone of the shared `QAutoAnswer` shape, scoped to the\ndeprecated REST `answer` field so that field's contract does not track\nchanges to the shared answer-library type. No longer populated at runtime;\nremoval is tracked by CTAUTO-1973.",
-        "properties": {
-          "explanation": {
-            "type": "string",
-            "nullable": true
-          },
-          "multipleChoice": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/QuestionnaireResponseMultipleChoiceAnswer"
-              }
-            ],
-            "nullable": true
-          },
-          "multipleChoiceCustom": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "type": "object",
-        "additionalProperties": false
-      },
       "QuestionnaireResponseOriginType": {
         "type": "string",
         "enum": [
@@ -12616,11 +13982,6 @@
             "type": "string",
             "description": "The actual question text"
           },
-          "answer": {
-            "$ref": "#/components/schemas/DeprecatedQAutoAnswerForAPI",
-            "description": "The current answer for the question.",
-            "deprecated": true
-          },
           "editedBy": {
             "allOf": [
               {
@@ -12657,7 +14018,7 @@
           },
           "answerPartsValues": {
             "$ref": "#/components/schemas/Record_string.AnswerPartValue_",
-            "description": "Flat map of part-id → current value (via `toAnswerPartsValues`).\nSame key set as `answerPartsSchema.properties`. Absent when the\nresponse has no stored parts."
+            "description": "Flat map of part-id → current value (via `toAnswerPartsValues`).\nSame key set as `answerPartsSchema.properties`, which each question\ndefines for itself. Absent when the response has no stored parts."
           },
           "attachedEvidence": {
             "items": {
@@ -13344,6 +14705,11 @@
             "nullable": true,
             "description": "When the control was last modified. Returns null for Vanta library controls."
           },
+          "implementationDetails": {
+            "type": "string",
+            "nullable": true,
+            "description": "How the control is implemented."
+          },
           "numDocumentsPassing": {
             "type": "number",
             "format": "double",
@@ -13397,6 +14763,10 @@
       },
       "EditControlMetadataInput": {
         "properties": {
+          "implementationDetails": {
+            "type": "string",
+            "description": "How the control is implemented."
+          },
           "name": {
             "type": "string",
             "description": "A new name for the control."
@@ -13536,6 +14906,11 @@
             "nullable": true,
             "description": "When the control was last modified. Returns null for Vanta library controls."
           },
+          "implementationDetails": {
+            "type": "string",
+            "nullable": true,
+            "description": "How the control is implemented."
+          },
           "frameworks": {
             "items": {
               "$ref": "#/components/schemas/DeactivatedControlFramework"
@@ -13606,6 +14981,38 @@
         "type": "object",
         "additionalProperties": false
       },
+      "AddControlDocumentsMappingResult": {
+        "properties": {
+          "mappedCount": {
+            "type": "number",
+            "format": "double",
+            "description": "The number of mappings this request created. Documents that were already\nmapped to the control are not counted, so re-submitting the same list\nreturns 0."
+          }
+        },
+        "required": [
+          "mappedCount"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AddControlDocumentsMappingInput": {
+        "properties": {
+          "documentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The IDs of the documents to map to the control. Documents already mapped to\nthe control are ignored and are not counted in `mappedCount`.",
+            "minItems": 1,
+            "maxItems": 300
+          }
+        },
+        "required": [
+          "documentIds"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
       "AddControlTestMappingInput": {
         "properties": {
           "testId": {
@@ -13615,6 +15022,412 @@
         },
         "required": [
           "testId"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AddControlTestsMappingResult": {
+        "properties": {
+          "mappedCount": {
+            "type": "number",
+            "format": "double",
+            "description": "The number of mappings this request created. Tests that were already\nmapped to the control are not counted, so re-submitting the same list\nreturns 0."
+          }
+        },
+        "required": [
+          "mappedCount"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AddControlTestsMappingInput": {
+        "properties": {
+          "testIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The IDs of the tests to map to the control. Tests already mapped to the\ncontrol are ignored and are not counted in `mappedCount`.",
+            "minItems": 1,
+            "maxItems": 300
+          }
+        },
+        "required": [
+          "testIds"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "EvidenceSuggestionJobStatus": {
+        "type": "string",
+        "enum": [
+          "NOT_STARTED",
+          "GENERATING",
+          "EXPORTING",
+          "COMPLETED"
+        ],
+        "description": "Lifecycle of a suggestion job, from accepted through finished."
+      },
+      "EvidenceSuggestionJobScopeAll": {
+        "description": "Every in-scope control in the organization.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ALL"
+            ],
+            "nullable": false
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "EvidenceSuggestionJobScopeFramework": {
+        "description": "The controls mapped to one framework.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FRAMEWORK"
+            ],
+            "nullable": false
+          },
+          "frameworkId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "frameworkId"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "EvidenceSuggestionJobScopeControls": {
+        "description": "Exactly the controls named.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CONTROLS"
+            ],
+            "nullable": false
+          },
+          "controlIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "type",
+          "controlIds"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "EvidenceSuggestionJobScope": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/EvidenceSuggestionJobScopeAll"
+          },
+          {
+            "$ref": "#/components/schemas/EvidenceSuggestionJobScopeFramework"
+          },
+          {
+            "$ref": "#/components/schemas/EvidenceSuggestionJobScopeControls"
+          }
+        ],
+        "description": "Which controls a suggestion job covers."
+      },
+      "EvidenceSuggestionJobError": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "CONTROL_NOT_FOUND",
+              "CONTROL_IGNORED",
+              "AI_WORKFLOW_FAILED",
+              "EXPORT_FAILED"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "controlId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The control the error is about, or null for a job-level error."
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "controlId"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "EvidenceSuggestionJobResult": {
+        "properties": {
+          "completedControls": {
+            "type": "number",
+            "format": "double",
+            "description": "Covered controls the job has finished, successfully or not."
+          },
+          "failedControls": {
+            "type": "number",
+            "format": "double",
+            "description": "Covered controls the job failed to process."
+          },
+          "totalSuggestions": {
+            "type": "number",
+            "format": "double",
+            "description": "Suggestions produced so far."
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceSuggestionJobError"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "completedControls",
+          "failedControls",
+          "totalSuggestions",
+          "errors"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "EvidenceSuggestionJobControlStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "SUCCESS",
+          "FAILURE"
+        ],
+        "description": "Per-control progress within a job. `PENDING` at creation, then `SUCCESS` or\n`FAILURE` once the job records that control's outcome."
+      },
+      "EvidenceSuggestionJobControl": {
+        "properties": {
+          "controlId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EvidenceSuggestionJobControlStatus"
+          }
+        },
+        "required": [
+          "controlId",
+          "status"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "EvidenceSuggestionJob": {
+        "description": "An asynchronous job that generates evidence suggestions for a set of\ncontrols.",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "description": "Poll the job by this ID to follow its progress."
+          },
+          "status": {
+            "$ref": "#/components/schemas/EvidenceSuggestionJobStatus"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/EvidenceSuggestionJobScope"
+          },
+          "result": {
+            "$ref": "#/components/schemas/EvidenceSuggestionJobResult"
+          },
+          "controls": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceSuggestionJobControl"
+            },
+            "type": "array"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Null until the job finishes."
+          }
+        },
+        "required": [
+          "jobId",
+          "status",
+          "scope",
+          "result",
+          "controls",
+          "createdAt",
+          "completedAt"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateEvidenceSuggestionJobInputAll": {
+        "description": "Every custom control in the organization that is not ignored. An\norganization whose controls all come from the Vanta library has nothing in\nscope and is rejected.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ALL"
+            ],
+            "nullable": false
+          },
+          "includeInactive": {
+            "type": "boolean",
+            "description": "Whether to include deactivated controls. Defaults to `false`."
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateEvidenceSuggestionJobInputFramework": {
+        "description": "The framework's custom controls that are not ignored.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FRAMEWORK"
+            ],
+            "nullable": false
+          },
+          "frameworkId": {
+            "type": "string",
+            "description": "A Vanta framework name, such as `soc2`, or a custom framework's ID."
+          },
+          "includeInactive": {
+            "type": "boolean",
+            "description": "Whether to include deactivated controls. Defaults to `false`."
+          }
+        },
+        "required": [
+          "type",
+          "frameworkId"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateEvidenceSuggestionJobInputControls": {
+        "description": "Exactly the controls named.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CONTROLS"
+            ],
+            "nullable": false
+          },
+          "controlIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Duplicates are ignored. The cap bounds how much LLM work one request can\nqueue; use `ALL` or `FRAMEWORK` to cover a larger set.",
+            "minItems": 1,
+            "maxItems": 300
+          },
+          "includeInactive": {
+            "type": "boolean",
+            "description": "Whether to include deactivated controls. Defaults to `false`."
+          }
+        },
+        "required": [
+          "type",
+          "controlIds"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateEvidenceSuggestionJobInput": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/CreateEvidenceSuggestionJobInputAll"
+          },
+          {
+            "$ref": "#/components/schemas/CreateEvidenceSuggestionJobInputFramework"
+          },
+          {
+            "$ref": "#/components/schemas/CreateEvidenceSuggestionJobInputControls"
+          }
+        ],
+        "description": "Which controls to generate evidence suggestions for."
+      },
+      "EvidenceSuggestionEvidenceType": {
+        "type": "string",
+        "enum": [
+          "DOCUMENT",
+          "TEST"
+        ],
+        "description": "Whether a suggestion points at a document or at an automated test."
+      },
+      "EvidenceSuggestionStatus": {
+        "type": "string",
+        "enum": [
+          "READY_FOR_REVIEW",
+          "APPROVED",
+          "REJECTED"
+        ],
+        "description": "Where a suggestion stands with your organization. `READY_FOR_REVIEW` until\nsomeone decides on it, then `APPROVED` or `REJECTED`."
+      },
+      "EvidenceSuggestion": {
+        "description": "One piece of evidence Vanta proposes mapping to a control. A suggestion is a\nproposal only; it is not a mapping until you create one.\n\n`evidenceId` and `evidenceType` identify the suggestion within its control;\nthere is at most one suggestion per control and piece of evidence.",
+        "properties": {
+          "evidenceId": {
+            "type": "string",
+            "description": "The ID of the suggested document or test, per `evidenceType`."
+          },
+          "evidenceType": {
+            "$ref": "#/components/schemas/EvidenceSuggestionEvidenceType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EvidenceSuggestionStatus"
+          }
+        },
+        "required": [
+          "evidenceId",
+          "evidenceType",
+          "status"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ControlEvidenceSuggestions": {
+        "description": "A control's evidence suggestions.\n\nSuggestions whose evidence has since been deactivated are left out, because\nthey can no longer be mapped.",
+        "properties": {
+          "controlId": {
+            "type": "string",
+            "description": "The control identifier as you supplied it in the request path."
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceSuggestion"
+            },
+            "type": "array"
+          },
+          "generationRequired": {
+            "type": "boolean",
+            "description": "Whether this control still needs an evidence suggestion job run for it."
+          }
+        },
+        "required": [
+          "controlId",
+          "suggestions",
+          "generationRequired"
         ],
         "type": "object",
         "additionalProperties": false
@@ -13886,6 +15699,116 @@
     }
   },
   "paths": {
+    "/business-units": {
+      "get": {
+        "operationId": "ListBusinessUnits",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_BusinessUnit_"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "results": {
+                        "data": [
+                          {
+                            "id": "00206cf50ff41cfcc8b71921",
+                            "displayName": "Default Business Unit"
+                          }
+                        ],
+                        "pageInfo": {
+                          "hasNextPage": false,
+                          "hasPreviousPage": false,
+                          "startCursor": "MDAyMDZjZjUwZmY0MWNmY2M4YjcxOTIx",
+                          "endCursor": "MDAyMDZjZjUwZmY0MWNmY2M4YjcxOTIx"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Lists the business units for your organization.\nReturns 403 when business unit scoping is disabled for the domain.",
+        "summary": "List business units",
+        "tags": [
+          "Business Units"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PageSize"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageCursor",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PageCursor"
+            }
+          }
+        ]
+      }
+    },
+    "/business-units/{businessUnitId}": {
+      "get": {
+        "operationId": "GetBusinessUnit",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessUnit"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "id": "00206cf50ff41cfcc8b71921",
+                      "displayName": "Default Business Unit"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Get a business unit by ID.\nReturns 403 when business unit scoping is disabled for the domain.",
+        "summary": "Get business unit by ID",
+        "tags": [
+          "Business Units"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessUnitId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
     "/contracts": {
       "post": {
         "operationId": "UploadContract",
@@ -14137,7 +16060,8 @@
                         }
                       ],
                       "creationDate": null,
-                      "modificationDate": null
+                      "modificationDate": null,
+                      "implementationDetails": "Encryption is enforced for data at rest and in transit."
                     }
                   }
                 }
@@ -14204,7 +16128,8 @@
                               }
                             ],
                             "creationDate": null,
-                            "modificationDate": null
+                            "modificationDate": null,
+                            "implementationDetails": "Encryption is enforced for data at rest and in transit."
                           }
                         ],
                         "pageInfo": {
@@ -14299,7 +16224,8 @@
                         }
                       ],
                       "creationDate": null,
-                      "modificationDate": null
+                      "modificationDate": null,
+                      "implementationDetails": "Encryption is enforced for data at rest and in transit."
                     }
                   }
                 }
@@ -14568,7 +16494,8 @@
                         }
                       ],
                       "creationDate": null,
-                      "modificationDate": null
+                      "modificationDate": null,
+                      "implementationDetails": "Encryption is enforced for data at rest and in transit."
                     }
                   }
                 }
@@ -14675,7 +16602,8 @@
                         }
                       ],
                       "creationDate": null,
-                      "modificationDate": null
+                      "modificationDate": null,
+                      "implementationDetails": "Encryption is enforced for data at rest and in transit."
                     }
                   }
                 }
@@ -14753,7 +16681,8 @@
                           }
                         ],
                         "creationDate": null,
-                        "modificationDate": null
+                        "modificationDate": null,
+                        "implementationDetails": "Encryption is enforced for data at rest and in transit."
                       },
                       "document": {
                         "id": "1",
@@ -14853,7 +16782,8 @@
                           }
                         ],
                         "creationDate": null,
-                        "modificationDate": null
+                        "modificationDate": null,
+                        "implementationDetails": "Encryption is enforced for data at rest and in transit."
                       },
                       "test": {
                         "id": "aws-account-access-removed-on-termination",
@@ -15076,7 +17006,8 @@
                         }
                       ],
                       "creationDate": null,
-                      "modificationDate": null
+                      "modificationDate": null,
+                      "implementationDetails": "Encryption is enforced for data at rest and in transit."
                     }
                   }
                 }
@@ -16445,7 +18376,16 @@
                             "id": "000000000000000000000001",
                             "question": "Do you encrypt customer data at rest?",
                             "isPendingAnswerGeneration": false,
-                            "answer": {
+                            "answerPartsSchema": {
+                              "type": "object",
+                              "properties": {
+                                "explanation": {
+                                  "type": "string",
+                                  "title": "Explanation"
+                                }
+                              }
+                            },
+                            "answerPartsValues": {
                               "explanation": "Yes, we encrypt all customer data at rest with AES-256."
                             },
                             "ownerAssignment": {
@@ -16533,7 +18473,16 @@
                       "id": "000000000000000000000001",
                       "question": "Do you encrypt customer data at rest?",
                       "isPendingAnswerGeneration": false,
-                      "answer": {
+                      "answerPartsSchema": {
+                        "type": "object",
+                        "properties": {
+                          "explanation": {
+                            "type": "string",
+                            "title": "Explanation"
+                          }
+                        }
+                      },
+                      "answerPartsValues": {
                         "explanation": "Yes, we encrypt all customer data at rest with AES-256."
                       },
                       "ownerAssignment": {
@@ -16593,7 +18542,16 @@
                       "id": "000000000000000000000001",
                       "question": "Do you encrypt customer data at rest?",
                       "isPendingAnswerGeneration": false,
-                      "answer": {
+                      "answerPartsSchema": {
+                        "type": "object",
+                        "properties": {
+                          "explanation": {
+                            "type": "string",
+                            "title": "Explanation"
+                          }
+                        }
+                      },
+                      "answerPartsValues": {
                         "explanation": "Yes, we encrypt all customer data at rest with AES-256."
                       },
                       "ownerAssignment": {
@@ -16665,7 +18623,16 @@
                       "id": "000000000000000000000001",
                       "question": "Do you encrypt customer data at rest?",
                       "isPendingAnswerGeneration": false,
-                      "answer": {
+                      "answerPartsSchema": {
+                        "type": "object",
+                        "properties": {
+                          "explanation": {
+                            "type": "string",
+                            "title": "Explanation"
+                          }
+                        }
+                      },
+                      "answerPartsValues": {
                         "explanation": "Yes, we encrypt all customer data at rest with AES-256."
                       },
                       "ownerAssignment": {
@@ -17471,7 +19438,8 @@
                               }
                             ],
                             "creationDate": null,
-                            "modificationDate": null
+                            "modificationDate": null,
+                            "implementationDetails": "Encryption is enforced for data at rest and in transit."
                           }
                         ],
                         "pageInfo": {
@@ -18454,7 +20422,8 @@
                               }
                             ],
                             "creationDate": null,
-                            "modificationDate": null
+                            "modificationDate": null,
+                            "implementationDetails": "Encryption is enforced for data at rest and in transit."
                           }
                         ],
                         "pageInfo": {
@@ -18801,7 +20770,7 @@
             }
           }
         },
-        "description": "Partially updates a group. At least one field must be provided.\n\nOmitted fields remain unchanged. Set `description` or `pointOfContactEmail` to `null` to clear that field. Groups imported from an identity provider (IdP) may update their description or point of contact, but cannot be renamed.",
+        "description": "Partially updates a group. At least one field must be provided.",
         "summary": "Update group",
         "tags": [
           "Groups"
@@ -21345,7 +23314,7 @@
             }
           }
         },
-        "description": "Mark an Answer Library entry as verified. Stamps `lastVerifiedAt` to the\ncurrent time; the entry's question, answer, tags, owner, and expiration\nare left unchanged.",
+        "description": "Mark an Answer Library entry as verified. Stamps `lastVerifiedAt` to the\ncurrent time and uses the supplied expiration date or configured review cadence.\nThe entry's question, answer, tags, and owner are left unchanged.",
         "summary": "Verify Answer Library entry",
         "tags": [
           "Knowledge Base"
@@ -21401,7 +23370,7 @@
                             "type": "FILE",
                             "title": "SOC 2 Type II Report",
                             "description": "Annual SOC 2 Type II report covering 2024.",
-                            "fileUrl": "https://vanta-uploaded-documents.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
+                            "fileUrl": "https://files.example.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
                             "customerVisibility": "REQUEST_ACCESS",
                             "downloadPermission": "VIEW_AND_DOWNLOAD",
                             "isUsedInQuestionnaires": true,
@@ -21575,7 +23544,7 @@
                       "type": "FILE",
                       "title": "SOC 2 Type II Report",
                       "description": "Annual SOC 2 Type II report covering 2024.",
-                      "fileUrl": "https://vanta-uploaded-documents.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
+                      "fileUrl": "https://files.example.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
                       "customerVisibility": "REQUEST_ACCESS",
                       "downloadPermission": "VIEW_AND_DOWNLOAD",
                       "isUsedInQuestionnaires": true,
@@ -21690,7 +23659,7 @@
                       "type": "FILE",
                       "title": "SOC 2 Type II Report",
                       "description": "Annual SOC 2 Type II report covering 2024.",
-                      "fileUrl": "https://vanta-uploaded-documents.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
+                      "fileUrl": "https://files.example.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
                       "customerVisibility": "REQUEST_ACCESS",
                       "downloadPermission": "VIEW_AND_DOWNLOAD",
                       "isUsedInQuestionnaires": true,
@@ -21773,7 +23742,7 @@
                       "type": "FILE",
                       "title": "SOC 2 Type II Report",
                       "description": "Annual SOC 2 Type II report covering 2024.",
-                      "fileUrl": "https://vanta-uploaded-documents.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
+                      "fileUrl": "https://files.example.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
                       "customerVisibility": "REQUEST_ACCESS",
                       "downloadPermission": "VIEW_AND_DOWNLOAD",
                       "isUsedInQuestionnaires": true,
@@ -22026,7 +23995,7 @@
                       "type": "FILE",
                       "title": "SOC 2 Type II Report",
                       "description": "Annual SOC 2 Type II report covering 2024.",
-                      "fileUrl": "https://vanta-uploaded-documents.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
+                      "fileUrl": "https://files.example.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
                       "customerVisibility": "REQUEST_ACCESS",
                       "downloadPermission": "VIEW_AND_DOWNLOAD",
                       "isUsedInQuestionnaires": true,
@@ -22121,7 +24090,7 @@
                       "type": "FILE",
                       "title": "SOC 2 Type II Report",
                       "description": "Annual SOC 2 Type II report covering 2024.",
-                      "fileUrl": "https://vanta-uploaded-documents.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
+                      "fileUrl": "https://files.example.s3.amazonaws.com/507f1f77bcf86cd799439021?X-Amz-Expires=3600&X-Amz-Signature=...",
                       "customerVisibility": "REQUEST_ACCESS",
                       "downloadPermission": "VIEW_AND_DOWNLOAD",
                       "isUsedInQuestionnaires": true,
@@ -22351,6 +24320,43 @@
             }
           }
         ]
+      }
+    },
+    "/organization": {
+      "get": {
+        "operationId": "GetOrganization",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationIdentity"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "id": "69c55d93ca5e7c5217d4c993",
+                      "displayName": "Example Organization",
+                      "region": "us-east-1"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns the organization selected by the authenticated token.\nRequires vanta-api.all:read or vanta-api.all:write. No organization selector\nis accepted.\nThe region is the organization's home AWS region identifier (for example,\nus-east-1), not the serving endpoint.",
+        "summary": "Get connected organization",
+        "tags": [
+          "Organization"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
       }
     },
     "/people": {
@@ -22626,6 +24632,42 @@
             "required": false,
             "schema": {
               "$ref": "#/components/schemas/EmploymentStatus"
+            }
+          },
+          {
+            "description": "Filter people in scope for any of the given framework IDs.",
+            "in": "query",
+            "name": "frameworkIdMatchesAny",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "description": "Filter people in scope for any of the given program scope IDs. Program scopes you cannot view are ignored. Blank IDs match nothing.",
+            "in": "query",
+            "name": "programScopeIdMatchesAny",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "description": "Filter people in scope for any of the given business unit IDs. Blank IDs match nothing.",
+            "in": "query",
+            "name": "businessUnitIdMatchesAny",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ]
@@ -23708,6 +25750,96 @@
         }
       }
     },
+    "/personnel-notification-settings": {
+      "get": {
+        "operationId": "GetSettings",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonnelNotificationSettings"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "enabled": true,
+                      "employeeDigestFrequency": "WEEKLY",
+                      "enabledChannels": [
+                        "EMAIL",
+                        "SLACK"
+                      ],
+                      "nextReminderAt": "2026-08-17T09:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns the organization's personnel reminder and employee-digest settings.",
+        "summary": "Get personnel notification settings",
+        "tags": [
+          "Personnel Notification Settings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      },
+      "patch": {
+        "operationId": "UpdateSettings",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonnelNotificationSettings"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "enabled": true,
+                      "employeeDigestFrequency": "WEEKLY",
+                      "enabledChannels": [
+                        "EMAIL",
+                        "SLACK"
+                      ],
+                      "nextReminderAt": "2026-08-17T09:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Partially updates the organization's personnel reminder and employee-digest settings.\nOmitted fields remain unchanged.",
+        "summary": "Update personnel notification settings",
+        "tags": [
+          "Personnel Notification Settings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePersonnelNotificationSettingsInput"
+              }
+            }
+          }
+        }
+      }
+    },
     "/policies": {
       "get": {
         "operationId": "ListPolicies",
@@ -23851,6 +25983,148 @@
         ]
       }
     },
+    "/program-scopes": {
+      "get": {
+        "operationId": "ListProgramScopes",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_ProgramScope_"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "results": {
+                        "data": [
+                          {
+                            "id": "6a1c939a52855e725c8d5824",
+                            "businessUnitId": "5f2c939a52855e725c8d5824",
+                            "frameworkId": "soc2"
+                          }
+                        ],
+                        "pageInfo": {
+                          "hasNextPage": false,
+                          "hasPreviousPage": false,
+                          "startCursor": "NmExYzkzOWE1Mjg1NWU3MjVjOGQ1ODI0",
+                          "endCursor": "NmExYzkzOWE1Mjg1NWU3MjVjOGQ1ODI0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Lists the program scopes for your organization. A program scope pairs a\nbusiness unit with a framework that business unit is in scope for.\nWhen business unit scoping is disabled, businessUnitId is null.",
+        "summary": "List program scopes",
+        "tags": [
+          "Program Scopes"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PageSize"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageCursor",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PageCursor"
+            }
+          },
+          {
+            "description": "Filter program scopes to those whose business unit ID matches any of the provided IDs.",
+            "in": "query",
+            "name": "businessUnitIdMatchesAny",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "5f2c939a52855e725c8d5824"
+            ]
+          },
+          {
+            "description": "Filter program scopes to those whose framework ID matches any of the provided IDs.",
+            "in": "query",
+            "name": "frameworkIdMatchesAny",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "soc2"
+            ]
+          }
+        ]
+      }
+    },
+    "/program-scopes/{programScopeId}": {
+      "get": {
+        "operationId": "GetProgramScope",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgramScope"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "id": "6a1c939a52855e725c8d5824",
+                      "businessUnitId": "5f2c939a52855e725c8d5824",
+                      "frameworkId": "soc2"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Get a program scope by ID.\nWhen business unit scoping is disabled, businessUnitId is null.",
+        "summary": "Get program scope by ID",
+        "tags": [
+          "Program Scopes"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "programScopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
     "/risk-scenarios": {
       "get": {
         "operationId": "ListRiskScenario",
@@ -23891,7 +26165,36 @@
                             "reviewStatus": "DRAFT",
                             "requiredApprovers": [],
                             "type": "Risk Scenario",
-                            "identificationDate": "2024-03-07T18:46:05.944Z"
+                            "identificationDate": "2024-03-07T18:46:05.944Z",
+                            "scoreBreakdown": [
+                              {
+                                "id": "inherent-risk",
+                                "kind": "SCORE",
+                                "name": "Inherent risk",
+                                "score": 16,
+                                "status": null,
+                                "scoreLabel": "High",
+                                "parentId": null
+                              },
+                              {
+                                "id": "impact",
+                                "kind": "DIMENSION",
+                                "name": "Impact",
+                                "score": 4,
+                                "status": "SCORED",
+                                "scoreLabel": "High",
+                                "parentId": "inherent-risk"
+                              },
+                              {
+                                "id": "likelihood",
+                                "kind": "DIMENSION",
+                                "name": "Likelihood",
+                                "score": 4,
+                                "status": "SCORED",
+                                "scoreLabel": "High",
+                                "parentId": "inherent-risk"
+                              }
+                            ]
                           }
                         ],
                         "pageInfo": {
@@ -24106,7 +26409,36 @@
                       "reviewStatus": "DRAFT",
                       "requiredApprovers": [],
                       "type": "Risk Scenario",
-                      "identificationDate": "2024-03-07T18:46:05.944Z"
+                      "identificationDate": "2024-03-07T18:46:05.944Z",
+                      "scoreBreakdown": [
+                        {
+                          "id": "inherent-risk",
+                          "kind": "SCORE",
+                          "name": "Inherent risk",
+                          "score": 16,
+                          "status": null,
+                          "scoreLabel": "High",
+                          "parentId": null
+                        },
+                        {
+                          "id": "impact",
+                          "kind": "DIMENSION",
+                          "name": "Impact",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        },
+                        {
+                          "id": "likelihood",
+                          "kind": "DIMENSION",
+                          "name": "Likelihood",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        }
+                      ]
                     }
                   }
                 }
@@ -24174,7 +26506,36 @@
                       "reviewStatus": "DRAFT",
                       "requiredApprovers": [],
                       "type": "Risk Scenario",
-                      "identificationDate": "2024-03-07T18:46:05.944Z"
+                      "identificationDate": "2024-03-07T18:46:05.944Z",
+                      "scoreBreakdown": [
+                        {
+                          "id": "inherent-risk",
+                          "kind": "SCORE",
+                          "name": "Inherent risk",
+                          "score": 16,
+                          "status": null,
+                          "scoreLabel": "High",
+                          "parentId": null
+                        },
+                        {
+                          "id": "impact",
+                          "kind": "DIMENSION",
+                          "name": "Impact",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        },
+                        {
+                          "id": "likelihood",
+                          "kind": "DIMENSION",
+                          "name": "Likelihood",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        }
+                      ]
                     }
                   }
                 }
@@ -24239,7 +26600,36 @@
                       "reviewStatus": "DRAFT",
                       "requiredApprovers": [],
                       "type": "Risk Scenario",
-                      "identificationDate": "2024-03-07T18:46:05.944Z"
+                      "identificationDate": "2024-03-07T18:46:05.944Z",
+                      "scoreBreakdown": [
+                        {
+                          "id": "inherent-risk",
+                          "kind": "SCORE",
+                          "name": "Inherent risk",
+                          "score": 16,
+                          "status": null,
+                          "scoreLabel": "High",
+                          "parentId": null
+                        },
+                        {
+                          "id": "impact",
+                          "kind": "DIMENSION",
+                          "name": "Impact",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        },
+                        {
+                          "id": "likelihood",
+                          "kind": "DIMENSION",
+                          "name": "Likelihood",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        }
+                      ]
                     }
                   }
                 }
@@ -24316,7 +26706,36 @@
                       "reviewStatus": "DRAFT",
                       "requiredApprovers": [],
                       "type": "Risk Scenario",
-                      "identificationDate": "2024-03-07T18:46:05.944Z"
+                      "identificationDate": "2024-03-07T18:46:05.944Z",
+                      "scoreBreakdown": [
+                        {
+                          "id": "inherent-risk",
+                          "kind": "SCORE",
+                          "name": "Inherent risk",
+                          "score": 16,
+                          "status": null,
+                          "scoreLabel": "High",
+                          "parentId": null
+                        },
+                        {
+                          "id": "impact",
+                          "kind": "DIMENSION",
+                          "name": "Impact",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        },
+                        {
+                          "id": "likelihood",
+                          "kind": "DIMENSION",
+                          "name": "Likelihood",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        }
+                      ]
                     }
                   }
                 }
@@ -24575,6 +26994,135 @@
         ]
       }
     },
+    "/risk-scenarios/{riskScenarioId}/mappings/vendor-findings": {
+      "get": {
+        "operationId": "ListVendorFindingMappings",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_RiskScenarioVendorFindingMapping_"
+                }
+              }
+            }
+          }
+        },
+        "description": "List the vendor finding IDs mapped to a risk scenario, including findings\nattached directly to vendors and findings attached to security reviews.\nSupply the risk scenario's object ID.",
+        "summary": "List vendor findings mapped to a risk scenario",
+        "tags": [
+          "Risk Scenarios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "riskScenarioId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PageSize"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageCursor",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PageCursor"
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "AddVendorFindingMappings",
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        },
+        "description": "Link vendor findings, deriving each finding's vendor and security review.\nRepeated IDs within the request are deduplicated; already-linked findings\nare rejected. All IDs are validated before writes.\nSupply the risk scenario's object ID.",
+        "summary": "Bulk add vendor finding mappings",
+        "tags": [
+          "Risk Scenarios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "riskScenarioId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddRiskScenarioVendorFindingMappingsInput"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "RemoveVendorFindingMappings",
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        },
+        "description": "Unlink vendor findings, preserving other mappings. Findings must exist in\nthis domain; an existing finding without a mapping is left unchanged.\nRepeated IDs within the request are deduplicated. Supply the risk\nscenario's object ID.",
+        "summary": "Bulk remove vendor finding mappings",
+        "tags": [
+          "Risk Scenarios"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "riskScenarioId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveRiskScenarioVendorFindingMappingsInput"
+              }
+            }
+          }
+        }
+      }
+    },
     "/risk-scenarios/{riskScenarioId}/submit-for-approval": {
       "post": {
         "operationId": "SubmitRiskForApproval",
@@ -24612,7 +27160,36 @@
                       "reviewStatus": "DRAFT",
                       "requiredApprovers": [],
                       "type": "Risk Scenario",
-                      "identificationDate": "2024-03-07T18:46:05.944Z"
+                      "identificationDate": "2024-03-07T18:46:05.944Z",
+                      "scoreBreakdown": [
+                        {
+                          "id": "inherent-risk",
+                          "kind": "SCORE",
+                          "name": "Inherent risk",
+                          "score": 16,
+                          "status": null,
+                          "scoreLabel": "High",
+                          "parentId": null
+                        },
+                        {
+                          "id": "impact",
+                          "kind": "DIMENSION",
+                          "name": "Impact",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        },
+                        {
+                          "id": "likelihood",
+                          "kind": "DIMENSION",
+                          "name": "Likelihood",
+                          "score": 4,
+                          "status": "SCORED",
+                          "scoreLabel": "High",
+                          "parentId": "inherent-risk"
+                        }
+                      ]
                     }
                   }
                 }
@@ -25400,7 +27977,7 @@
             "description": "No content"
           }
         },
-        "description": "Denies an access request on a Trust Center.",
+        "description": "Denies an access request on a Trust Center. The requester is only notified\nby email when `sendEmail` is true.",
         "summary": "Deny Trust Center access request",
         "tags": [
           "Trust Centers"
@@ -30296,7 +32873,11 @@
                               "Other"
                             ],
                             "enabled": true,
-                            "riskLevel": "LOW"
+                            "riskLevel": "LOW",
+                            "riskSection": {
+                              "id": "b3a8f2c0e1d4a5b6c7d8e9f0",
+                              "name": "Types of data processed"
+                            }
                           }
                         ],
                         "pageInfo": {
@@ -30788,7 +33369,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_VendorAssessment_"
+                  "$ref": "#/components/schemas/PaginatedResponse_VendorAssessmentWithQuestionnaire_"
                 },
                 "examples": {
                   "Example 1": {
@@ -30820,6 +33401,14 @@
                               "type": "USER",
                               "displayName": "Jane Doe",
                               "email": "jane.doe@example.com"
+                            },
+                            "questionnaire": {
+                              "questionCounts": {
+                                "all": 125,
+                                "needsReview": 125,
+                                "notAnswered": 116,
+                                "flaggedByAI": 0
+                              }
                             }
                           }
                         ],

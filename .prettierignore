@@ -1,0 +1,7 @@
+# Preserve upstream OpenAPI bytes recorded in openapi/sources.json.
+openapi/manage-v1.json
+openapi/audit-v1.json
+openapi/connectors-v1.json
+
+# Reproduce this document with npm run generate:help.
+docs/dev/help-surface-reference.md

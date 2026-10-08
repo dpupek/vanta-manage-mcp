@@ -68,6 +68,10 @@ Workflow collections default to 100 items per page and ten pages per inventory. 
 
 ## September 10 provenance and migration
 
-Pinned surface: Manage 241, Audit 57, Connectors 25 (323 operations). openapi/sources.json records official URLs, UTC retrieval timestamps, and SHA-256 hashes of pinned bytes. The generated manifest timestamp derives from provenance, so unchanged specs produce identical artifacts. Do not reformat pinned JSON without recording its new hash.
+September 10 surface: Manage 241, Audit 57, Connectors 25 (323 operations). openapi/sources.json records official URLs, UTC retrieval timestamps, and SHA-256 hashes of pinned bytes. The generated manifest timestamp derives from provenance, so unchanged specs produce identical artifacts. Do not reformat pinned JSON without recording its new hash.
 
 Parity checks source/method/path/operationId identities exactly once and verifies each source hash. Upstream renames retain link_controls_to_risk_scenario and initiate_export. Risk-control linking now requires body.controlId and optionally body.controlType, replacing controlLinks. See the epic contract-refresh migration notes.
+
+## October 8 contract refresh
+
+Current pinned surface: Manage 251, Audit 57, Connectors 25 (333 operations, 169 mutations). All 323 existing names remain stable. Ten new Manage operations cover organization, business units, program scopes, personnel notification settings, and risk-to-vendor-finding mappings. Existing Manage writes gain implementationDetails, denial sendEmail, and three framework enum values; list_people gains scope filters. Audit gains linkedControlIds and deprecates older linkage fields. Ten Connector PUT contracts gain nullable fields. See [iteration evidence and decisions](../vanta-mcp-api-expansion-248793/capabilities-2026-10-08.md) and [exact contract differences](../vanta-mcp-api-expansion-248793/contract-diff-2026-10-08.json).
