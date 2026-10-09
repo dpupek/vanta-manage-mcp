@@ -149,3 +149,17 @@ Baseline, workflow/CRC decomposition, decisions, plan, and validation: [capabili
 - [x] Regenerate help and complete deterministic generation, name preservation, parity, lint, and test gates: 188 tests passed; 333 endpoint tools; all 323 baseline names preserved (248793).
 
 Live Audit/Connector and dedicated vendor/vulnerability/SLA acceptance remain separate from this locally validated API-capability implementation.
+
+### Implementation-details persistence verification (248793)
+
+- [x] Require independent exact GET readback before reporting success for implementation-details writes; preserve accepted-write context when verification fails.
+- [x] Validate locally with 199 unit/mock tests, including 11 new regressions, and confirm the new `write_unverified` outcome on a disposable DG control.
+- [x] Attempt a CMMC-mapped fixture, record the API mapping rejection, and confirm no partial creation; deactivate the separate negative-test fixture and verify cleanup.
+- [x] Compare direct REST and UI edits on an existing DG CMMC control; confirm API writes have no visible effect, UI writes persist, API reads omit UI-saved values, and original content is restored.
+- [x] Compare other metadata on the same existing CMMC control: five scalar fields persist and restore, an unconfigured custom-field label is rejected, and note null-to-empty normalization is recorded.
+- [ ] Verify public-API implementation-details persistence after Vanta resolves the confirmed REST/UI discrepancy and CMMC mapping questions.
+- [x] Retest October 9 after the reported vendor fix and requested support-email review: direct PATCH on the exact existing CMMC control returns 200, GET omits the field, and full UI reload remains blank. Explicit restoration and another reload confirm the original blank value. Disposable MCP write/replacement/clear also remain unverified and fixture cleanup passes.
+- [x] Reply in the existing Vanta support thread with sanitized reproduction details and request verification of the affected workspace's public Controls API rollout; response pending.
+- [ ] Release the locally validated readback guard when publishing is authorized.
+
+Baseline, workflow, evidence, and Vanta support request: [implementation write verification](implementation-write-verification.md). The readback fix is local and has not been released.

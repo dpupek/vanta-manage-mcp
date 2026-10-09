@@ -154,6 +154,10 @@ test("control implementation update preserves description and note on readback",
   );
   // Assert
   assert.equal(result.success, true);
+  assert.deepEqual(result.metadata, {
+    verification: { field: "implementationDetails", status: "verified" },
+  });
+  assert.equal(server.getCallCount("GET", "/controls/control-1"), 2);
   const readback = parseToolEnvelope(
     await harness.callTool("get_control", { controlId: "control-1" }),
   );
@@ -166,6 +170,53 @@ test("control implementation update preserves description and note on readback",
   assert.deepEqual(
     server.getCalls("PATCH", "/controls/control-1")[0].jsonBody,
     { implementationDetails: details },
+  );
+});
+
+test("control implementation write accepted over HTTP with missing readback is unverified", async t => {
+  // Arrange
+  const server = new FakeVantaServer();
+  const control = { id: "control-1", note: "Other metadata changed" };
+  server.setRoute("PATCH", "/controls/control-1", () => ({
+    status: 200,
+    body: control,
+  }));
+  server.setRoute("GET", "/controls/control-1", () => ({
+    status: 200,
+    body: control,
+  }));
+  const harness = await startHarness(server, t);
+  // Initial Assert
+  assert.equal(server.getCallCount("PATCH", "/controls/control-1"), 0);
+  assert.equal(server.getCallCount("GET", "/controls/control-1"), 0);
+  // Act
+  const result = await harness.callTool("update_control_metadata", {
+    controlId: "control-1",
+    body: {
+      implementationDetails: "Requested details",
+      note: "Other metadata changed",
+    },
+    confirm: true,
+  });
+  // Assert
+  const envelope = parseToolEnvelope(result);
+  const error = envelope.error as {
+    code: string;
+    details: { mutationAccepted: boolean; verification: { reason: string } };
+  };
+  assert.equal(result.isError, true);
+  assert.equal(envelope.success, false);
+  assert.equal(error.code, "write_unverified");
+  assert.equal(error.details.mutationAccepted, true);
+  assert.equal(error.details.verification.reason, "field_missing");
+  assert.equal(server.getCallCount("PATCH", "/controls/control-1"), 1);
+  assert.equal(server.getCallCount("GET", "/controls/control-1"), 1);
+  assert.deepEqual(
+    server.getCalls("PATCH", "/controls/control-1")[0].jsonBody,
+    {
+      implementationDetails: "Requested details",
+      note: "Other metadata changed",
+    },
   );
 });
 

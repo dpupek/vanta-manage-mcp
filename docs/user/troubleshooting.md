@@ -11,6 +11,12 @@ Fix:
 - Endpoint tools: set `confirm:true`.
 - Workflow tools: set `mode:"execute"` and `confirm:true`.
 
+## `write_unverified`
+
+Vanta accepted an `implementationDetails` PATCH, but an independent GET failed, omitted the field, or returned a different value. The MCP returns verified success only when GET returns the exact requested string, including an empty string when clearing the field.
+
+Inspect `error.details.verification` for the reason and read result. Other fields supplied in the PATCH may have changed; this error does not mean the write was rolled back. Read the control again before deciding whether to repeat the PATCH. Check that implementation details are available for the selected control and framework in Vanta, and ask Vanta support to investigate accepted writes that cannot be verified.
+
 ## Authentication Errors
 
 Cause:

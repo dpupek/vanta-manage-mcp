@@ -1,5 +1,15 @@
 # Progress Log
 
+## 2026-10-09 — Case 248793 implementation-details verification
+
+- [x] Require exact independent GET readback for implementation-details PATCH requests, including clearing. Missing or different values and failed reads return `write_unverified` while preserving the accepted mutation context; verification does not replay PATCH.
+- [x] Add 11 regression cases and update help/troubleshooting guidance. Before commit, `npm test` passed 199 tests including the build; lint, 333-operation exact spec parity, scoped Prettier, and diff whitespace checks passed.
+- [x] Compare direct REST and UI behavior on an existing CMMC control. October 9 retest after Vanta's reported fix still returned HTTP 200 with no field in GET and no UI-visible text after full reload. Original blank content was verified after restoration and another reload.
+- [x] Send the sanitized retest to Vanta support in the existing thread under explicit user authorization. Request timestamps, request/response bodies, UI results, and restoration were included; vendor response is pending.
+- [ ] Verify public-API persistence after the vendor correction and publish the guard in a separately authorized release. The local commit is engineering progress; it is not production acceptance or a released artifact.
+
+Evidence, workflow, remaining mapping questions, and support links: [implementation write verification](../../docs/vanta-mcp-api-expansion-248793/implementation-write-verification.md). Living plan: [case 248793 roadmap](../../docs/vanta-mcp-api-expansion-248793/roadmap.md).
+
 ## 2026-02-26
 
 - [x] Implemented full OpenAPI parity generation (Manage + Audit + Connectors, 219 operations).

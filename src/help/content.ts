@@ -535,6 +535,18 @@ export const buildHelpResourceMarkdown = (
   lines.push("- Add `confirm=true` for endpoint writes.");
   lines.push("- For workflows, set `mode=execute` and `confirm=true`.");
   lines.push("");
+  lines.push("## write_unverified");
+  lines.push("");
+  lines.push(
+    "- Vanta accepted an implementation-details PATCH, but an independent GET failed or did not return the exact requested value.",
+  );
+  lines.push(
+    "- Other fields in the PATCH may have changed. Read the control again and inspect `error.details.verification` before deciding whether to repeat the write.",
+  );
+  lines.push(
+    "- Check implementation-details availability for the selected control and framework in Vanta. A successful HTTP status alone does not verify persistence.",
+  );
+  lines.push("");
   lines.push("## validation_error");
   lines.push("");
   lines.push("- Symptom: missing required IDs or invalid payload structure.");

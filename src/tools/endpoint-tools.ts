@@ -506,6 +506,79 @@ export async function invokeGeneratedOperation(
       );
     }
 
+    const expectedImplementationDetails =
+      readObject(body)?.implementationDetails;
+    if (
+      toolName === "update_control_metadata" &&
+      typeof expectedImplementationDetails === "string"
+    ) {
+      const unverified = (
+        reason: string,
+        verificationDetails: Record<string, unknown>,
+      ) =>
+        toToolResult(
+          errorEnvelope(
+            "write_unverified",
+            "Vanta accepted the control metadata PATCH, but implementation details persistence was not verified.",
+            "The PATCH may have changed other supplied fields. Inspect the control in Vanta and repeat GET before deciding whether another PATCH is needed.",
+            {
+              controlId: rawArgs.controlId,
+              mutationAccepted: true,
+              writeStatus: response.status,
+              apiResponse: response.data,
+              verification: {
+                field: "implementationDetails",
+                reason,
+                ...verificationDetails,
+              },
+            },
+          ),
+        );
+      try {
+        const readback = await client.request({
+          source: operation.source,
+          method: "get",
+          path,
+        });
+        if (!readback.ok) {
+          return unverified("read_failed", {
+            readStatus: readback.status,
+            apiResponse: readback.data,
+          });
+        }
+        const actualImplementationDetails = readObject(
+          readback.data,
+        )?.implementationDetails;
+        if (actualImplementationDetails !== expectedImplementationDetails) {
+          return unverified(
+            actualImplementationDetails === undefined
+              ? "field_missing"
+              : "value_mismatch",
+            { readStatus: readback.status, readback: readback.data },
+          );
+        }
+        return toToolResult(
+          successEnvelope(
+            readback.data,
+            `${operation.method.toUpperCase()} ${operation.path}`,
+            undefined,
+            {
+              metadata: {
+                verification: {
+                  field: "implementationDetails",
+                  status: "verified",
+                },
+              },
+            },
+          ),
+        );
+      } catch (error) {
+        return unverified("read_failed", {
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
     return toToolResult(
       successEnvelope(
         response.data,
