@@ -123,12 +123,12 @@ Local follow-up: the full 44-operation structural review is recorded in the [mig
 ### Read context and operator workflow
 
 - [x] 4.1 Extend existing selected-vendor triage with external findings, vendor alerts, incident alerts, settings, categories, and selected vendor relationship fields. General alerts are explicitly labeled organization-wide, not assumed to belong to the selected vendor (248793).
-- [ ] 4.2 Give each inventory independent pagination, limits, cursors, and completeness; detail reads target selected IDs. Preserve existing assessment history (248793).
+- [x] 4.2 Give each inventory independent pagination, limits, cursors, and completeness; detail reads target selected IDs. Preserve existing assessment history (248793).
 
 ### Actions and readback
 
-- [ ] 4.3 Add only justified action types for alert/status/settings updates, category lifecycle, and engagement attach/detach. Read current state; present proposed fields/relationships; confirm; dispatch generated operation; inspect bulk results; read back affected state (248793).
-- [ ] 4.4 Preserve unrelated settings/relationships; apply verified categoryId semantics; document permission/feature gates, eventual consistency, deletion impact, and unverified outcomes (248793).
+- [x] 4.3 Provide alert/status workflow and settings/category/engagement endpoint writes with confirmation, pre-read where available, and independent readback. Alert bulk results are inspected; category deletion requires complete fresh inventories (248793).
+- [x] 4.4 Verify requested settings/relationships and categoryId semantics; warn about unrelated observed drift, permission limitations, concurrency and unverified outcomes (248793).
 
 ### Decisions needed
 
@@ -137,7 +137,7 @@ Local follow-up: the full 44-operation structural review is recorded in the [mig
 
 ### Validation
 
-Local follow-up: vendor planning includes selected vendor details, settings, separately paginated categories, organization-wide alerts, vendor external findings and filtered incident alerts. `workflow_vendor_alerts` verifies each accepted alert update and checks the bulk response; tests cover matching, stale and missing results and disabled writes. Category, settings and engagement changes use documented direct tools with operator readback. Dedicated live mutation lifecycle and fixture validation remain open.
+Local follow-up: vendor planning includes selected vendor details, settings, separately paginated categories, organization-wide alerts, vendor external findings and filtered incident alerts. `workflow_vendor_alerts` verifies each accepted alert update and checks the bulk response. Settings, category and engagement endpoint tools now independently verify accepted writes. Stateful mocks cover settings omission, category rename/null clearing/deletion, engagement attachment/conflict/no-op removal, 403 and mixed results. DG disposable vendor/category/engagement fixture acceptance and cleanup are recorded in [administrative write verification](administrative-write-verification.md); global settings remain mock-tested only.
 
 ## Phase 5 — Risk mappings and issues
 
@@ -179,7 +179,7 @@ Local follow-up: confirmed account, custom-asset, integration and issue mapping 
 
 ### Validation
 
-Local follow-up: operator recipes cover bounded manual polling and distinguish evaluation 404 from a definite job status. Mock stdio tests cover evaluation acceptance with no saved result and an export progressing from RUNNING to COMPLETED. Framework export status returns an expiring presigned URL; it is not downloaded by the media tool. Automated polling, downloaded export-byte receipts, and live lifecycle/fixture validation remain open.
+Local follow-up: operator recipes cover bounded manual polling and distinguish evaluation 404 from a definite job status. Framework variant, snooze and reactivate tools independently verify accepted writes. A snooze remains `write_unverified` when the framework read does not expose the requested end date. Mock stdio tests cover evaluation acceptance with no saved result, an export progressing from RUNNING to COMPLETED, variant replacement and empty-selection rejection, snooze readback, and 403 without replay. Framework export status returns an expiring presigned URL; it is not downloaded by the media tool. Automated polling, downloaded export-byte receipts, and live lifecycle/fixture validation remain open.
 
 ## Phase 7 — Personnel requirement sets
 
@@ -200,7 +200,7 @@ Local follow-up: operator recipes cover bounded manual polling and distinguish e
 
 ### Validation
 
-Local follow-up: operator recipes describe group scope, per-requirement replacement versus omission, explicit confirmation, and manual readback using generated tools. A mock stdio test verifies an update request and readback with an omitted offboarding requirement. Broader personnel lifecycle and live mutation fixtures remain open.
+Local follow-up: requirement-set detail and requirement update tools independently verify requested fields; pre-read drift produces warnings. Operator recipes describe group scope and per-requirement replacement versus omission. Stateful mock stdio tests verify replacement, preservation of omitted requirements, 403 without replay, and distinction between 204 no assignment and 403 denied. Broader personnel lifecycle and live mutation fixtures remain open.
 
 ## Phase 8 — Acceptance, release, and adoption
 

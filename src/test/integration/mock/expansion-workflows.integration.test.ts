@@ -115,30 +115,21 @@ test("personnel requirement update preserves omitted requirement fields in reque
   const body = {
     onboarding: { policyAcceptance: { required: true, acceptAll: true } },
   };
-  server.queueRoute("PATCH", route, [
-    {
-      status: 200,
-      body: {
-        id: "set-1",
-        taskRequirements: {
-          ...body,
-          offboarding: { custom: { required: false } },
-        },
-      },
-    },
-  ]);
-  server.queueRoute("GET", "/task-requirement-sets/set-1", [
-    {
-      status: 200,
-      body: {
-        id: "set-1",
-        taskRequirements: {
-          ...body,
-          offboarding: { custom: { required: false } },
-        },
-      },
-    },
-  ]);
+  let taskRequirements = {
+    onboarding: { policyAcceptance: { required: false } },
+    offboarding: { custom: { required: false } },
+  };
+  server.setRoute("PATCH", route, request => {
+    taskRequirements = {
+      ...taskRequirements,
+      ...(request.jsonBody as typeof body),
+    };
+    return { status: 200, body: { id: "set-1", taskRequirements } };
+  });
+  server.setRoute("GET", "/task-requirement-sets/set-1", () => ({
+    status: 200,
+    body: { id: "set-1", taskRequirements },
+  }));
   await server.start();
   const harness = new McpStdioHarness({
     envOverrides: {

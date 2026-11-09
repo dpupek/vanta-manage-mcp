@@ -50,6 +50,7 @@ export interface VantaRequest {
   headers?: Record<string, string>;
   formData?: FormData;
   signal?: AbortSignal;
+  maxRetries?: number;
   download?: (response: Response, signal: AbortSignal) => Promise<unknown>;
 }
 
@@ -139,6 +140,7 @@ export class VantaApiClient {
     const wait = this.options.wait ?? waitForRetry;
     const method = input.method.toUpperCase();
     const retrySafe = ["GET", "HEAD", "OPTIONS"].includes(method);
+    const maxRetries = input.maxRetries ?? MAX_RETRIES;
     let token = await abortable(signal, () => tokens.getValidToken());
     let refreshed = false;
     const url = resolveVantaUrl(BASE_API_URL, input.path, input.source);
@@ -148,7 +150,7 @@ export class VantaApiClient {
       });
     const scopedLogger = logger.child({ method, path: input.path });
 
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
       signal.throwIfAborted();
       const headers: Record<string, string> = {
         "Authorization": `Bearer ${token}`,
@@ -173,7 +175,7 @@ export class VantaApiClient {
         );
       } catch (error) {
         signal.throwIfAborted();
-        if (!retrySafe || attempt === MAX_RETRIES) throw error;
+        if (!retrySafe || attempt === maxRetries) throw error;
         scopedLogger.warn(
           "api_transport_retry",
           "Retrying a read after transport failure.",
@@ -189,7 +191,7 @@ export class VantaApiClient {
         "Received Vanta API response.",
         { status: response.status, attempt },
       );
-      if (response.status === 401 && !refreshed && attempt < MAX_RETRIES) {
+      if (response.status === 401 && !refreshed && attempt < maxRetries) {
         await response.body?.cancel();
         token = await abortable(signal, () => tokens.refreshToken());
         refreshed = true;
@@ -198,7 +200,7 @@ export class VantaApiClient {
       // 429 rejects the request before execution. Other ambiguous write failures
       // require caller readback, not a blind replay of create/upload/patch actions.
       if (
-        attempt < MAX_RETRIES &&
+        attempt < maxRetries &&
         (response.status === 429 ||
           (retrySafe && RETRYABLE_STATUS_CODES.has(response.status)))
       ) {

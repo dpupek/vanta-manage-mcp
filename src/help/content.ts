@@ -569,6 +569,12 @@ export const buildHelpResourceMarkdown = (
     "- Other fields in the PATCH may have changed. Read the control again and inspect `error.details.verification` before deciding whether to repeat the write.",
   );
   lines.push(
+    "- Administrative settings, category, engagement, framework, and personnel tools can also return `write_unverified`: the write was accepted but independent readback could not establish the requested state. Inspect the accepted response and verification details; never blindly replay the write.",
+  );
+  lines.push(
+    "- Snooze verification reports status and end-date evidence separately. A verified status does not establish that the requested end date persisted; the write response is not independent readback.",
+  );
+  lines.push(
     "- Check implementation-details availability for the selected control and framework in Vanta. A successful HTTP status alone does not verify persistence.",
   );
   lines.push("");

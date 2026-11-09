@@ -12,6 +12,10 @@ import { appendUploadFile } from "../uploads/multipart.js";
 import { cleanupMarkdownConversionArtifacts } from "../uploads/markdown-conversion.js";
 import { withRequestSignal } from "../client/request-context.js";
 import { isDownloadOperation, saveDownload } from "../downloads/download.js";
+import {
+  prepareAdministrativeVerification,
+  verifyAdministrativeWrite,
+} from "./administrative-verification.js";
 
 const encodePath = (template: string, args: Record<string, unknown>): string =>
   template.replace(/\{([^}]+)\}/g, (_match: string, key: string) => {
@@ -328,6 +332,7 @@ export async function invokeGeneratedOperation(
   rawArgs: Record<string, unknown>,
   client: VantaApiClient,
   prepareUpload: typeof prepareUploadFileInput = prepareUploadFileInput,
+  verificationWait?: (ms: number, signal?: AbortSignal) => Promise<void>,
 ): Promise<ReturnType<typeof toToolResult>> {
   const operation = generatedOperationByToolName[toolName];
   if (!operation) {
@@ -429,6 +434,21 @@ export async function invokeGeneratedOperation(
 
   let cleanupPaths: string[] | undefined;
   try {
+    const preparedVerification = await prepareAdministrativeVerification(
+      toolName,
+      rawArgs,
+      client,
+    );
+    if (preparedVerification.error) {
+      return toToolResult(
+        errorEnvelope(
+          "precondition_failed",
+          "The administrative change was not sent because its required preflight failed.",
+          "Resolve the inventory or read permission problem before retrying.",
+          { reason: preparedVerification.error, mutationAccepted: false },
+        ),
+      );
+    }
     const bodyDescriptor = operation.requestBody;
     let body: unknown;
     let formData: FormData | undefined;
@@ -612,6 +632,52 @@ export async function invokeGeneratedOperation(
           message: error instanceof Error ? error.message : String(error),
         });
       }
+    }
+
+    if (preparedVerification.context) {
+      const verification = await verifyAdministrativeWrite(
+        preparedVerification.context,
+        client,
+        response,
+        verificationWait,
+      );
+      if (!verification.verified) {
+        return toToolResult(
+          errorEnvelope(
+            "write_unverified",
+            "Vanta accepted the administrative change, but independent readback did not verify the requested state.",
+            "Inspect current state before retrying; do not automatically replay the write.",
+            {
+              mutationAccepted: true,
+              writeStatus: response.status,
+              apiResponse: response.data,
+              verification,
+            },
+            undefined,
+            undefined,
+            { warnings: verification.warnings },
+          ),
+        );
+      }
+      return toToolResult(
+        successEnvelope(
+          response.data,
+          `${operation.method.toUpperCase()} ${operation.path}`,
+          undefined,
+          {
+            warnings: [...uploadWarnings, ...verification.warnings],
+            metadata: {
+              ...uploadMetadata,
+              verification: {
+                status: "verified",
+                attempts: verification.attempts,
+                readback: verification.readback,
+                ...(verification.fields ? { fields: verification.fields } : {}),
+              },
+            },
+          },
+        ),
+      );
     }
 
     return toToolResult(

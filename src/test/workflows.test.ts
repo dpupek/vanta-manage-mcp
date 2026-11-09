@@ -448,6 +448,71 @@ test("vendor alert update reports unverified when the bulk result omits an alert
   );
 });
 
+test("vendor alert batch exposes mixed readback outcomes without replaying the write", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  const response = (id: string, status: string): VantaResponse => ({
+    status: 200,
+    ok: true,
+    headers: {},
+    data: { id, status },
+  });
+  client.queueResponses("GET", "/vendor-alerts/alert-1", [
+    response("alert-1", "OPEN"),
+    response("alert-1", "RESOLVED"),
+  ]);
+  client.queueResponses("GET", "/vendor-alerts/alert-2", [
+    response("alert-2", "OPEN"),
+    response("alert-2", "OPEN"),
+  ]);
+  client.setResponse("PATCH", "/vendor-alerts", {
+    status: 200,
+    ok: true,
+    headers: {},
+    data: {
+      results: [
+        { id: "alert-1", status: "RESOLVED" },
+        { id: "alert-2", status: "RESOLVED" },
+      ],
+    },
+  });
+  registerWorkflowTools(server as never, client as never);
+  // Initial assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = parseToolEnvelope(
+    await getHandler(
+      server,
+      "workflow_vendor_alerts",
+    )({
+      mode: "execute",
+      confirm: true,
+      kind: "vendor",
+      alertIds: ["alert-1", "alert-2"],
+      status: "RESOLVED",
+    }),
+  );
+  // Assert
+  assert.equal(result.success, false);
+  const error = result.error as {
+    code: string;
+    details: { outcomes: { id: string; verified: boolean }[] };
+  };
+  assert.equal(error.code, "write_unverified");
+  assert.deepEqual(
+    error.details.outcomes.map(({ id, verified }) => ({ id, verified })),
+    [
+      { id: "alert-1", verified: true },
+      { id: "alert-2", verified: false },
+    ],
+  );
+  assert.equal(
+    client.requests.filter(request => request.method === "patch").length,
+    1,
+  );
+});
+
 test("issue/event plans keep inventory cursors and filters independent", async () => {
   // Arrange
   const server = new FakeServer();

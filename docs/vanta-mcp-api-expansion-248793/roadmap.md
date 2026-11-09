@@ -6,6 +6,26 @@ FogBugz epic: https://darwin-global.fogbugz.com/f/cases/248793/
 
 November 9, 2026: the [implementation plan](download-integrity-and-api-refresh-plan.md) decomposes the reported binary download failures and the API recommendations into ordered iterations, workflows, CRCs, proposed child cases, decisions, and acceptance gates. [Baseline](baseline.md), [epic definition](epic-definition.md), [workflows](workflows.md), [edge cases](edge-cases.md), [CRCs](crcs.md), and [stakeholder summary](stakeholder-summary.md) provide the supporting blueprint. Earlier checkpoints below remain historical evidence.
 
+### Administrative endpoint verification slice
+
+Snooze follow-up: field-level verification now distinguishes independently verified status from the requested, write-response and independently observed end date. When status matches but the date is absent, the tool returns `write_unverified` immediately rather than repeating reads solely for the absent field; stale status still receives bounded readback attempts. [Vanta support request](vanta-snooze-support-draft.md) is prepared but not sent. The current local suite passed 281 tests; no live framework mutation was performed.
+
+- [x] Add targeted preflight and independent readback inside existing vendor settings, category/assignment, engagement, framework variants/status, and personnel requirement-set update tools. Accepted-but-unverified writes preserve mutation context and are never automatically replayed; unrelated observed drift is a warning.
+- [x] Require two complete paginated vendor inventories before category deletion, stop before the write on an incomplete or denied preflight, and verify the captured vendors after deletion. Warn that concurrent assignments cannot be ruled out.
+- [x] Bound verification to three read attempts. The documented framework detail response does not expose the snooze-until date, so a successful snooze remains `write_unverified` when the date cannot be independently observed.
+- [x] Run mock regression coverage and DG disposable-fixture acceptance for vendor category creation/update/assignment/deletion and engagement attachment/removal. The first category deletion was stopped by preflight and its fixture was subsequently removed; a fresh fixture run verified deletion and uncategorization. Every fixture was independently confirmed absent. No existing tenant records, global settings, personnel requirement sets, or frameworks were changed. Evidence and limitations: [administrative write verification](administrative-write-verification.md).
+- [x] Validate locally: `npm test` passed 278 tests; lint, generated help, 383-operation parity and `git diff --check` passed.
+- [ ] Live verification of settings, framework, and personnel writes remains outside the approved disposable-fixture scope; release and installed-runtime acceptance remain separate.
+
+### Administrative lifecycle mock-coverage slice
+
+- [x] Exercise vendor settings partial updates; category rename, null clearing, deletion and uncategorization; engagement attachment, conflict and successful no-op removal, with independent reads of mock state.
+- [x] Exercise framework variant replacement, empty-selection rejection and snoozing; personnel requirement replacement/omission; and the difference between a group with no requirement set and a 403 denial.
+- [x] Cover 403 responses without mutation replay for settings, category, engagement, framework and personnel operations, plus a two-alert batch with mixed readback outcomes and no repeated PATCH.
+- [x] Document that engagement removal may return HTTP 200 without altering a different existing parent; operator readback remains necessary.
+- [x] Validate locally: `npm test` passed 258 tests; lint and 383-operation spec parity passed. The tests use stateful HTTP mocks and establish request/response and caller-readback behavior, not live Vanta persistence or tenant permissions.
+- [ ] Complete live mutation acceptance only with separately authorized dedicated fixtures; installed MCP adoption and release remain separate. Settings, category, engagement, framework and personnel direct tools still rely on operator readback rather than automatic verification workflows.
+
 - [x] Capture source baseline and compare official contracts: 333 pinned versus 383 published operations; 50 additions, 44 existing operations with structural changes, no removals. Exact identities and source hashes: [November 9 inventory](contract-review-2026-11-09.json) (248793).
 - [ ] Phase 0: reproduce the installed connector failure and settle file delivery, limits, identity, and fixture decisions (248793).
 - [ ] Phase 1: preserve raw bytes through the active generated MCP path, persist files safely, and return SHA-256 receipts (248793).
@@ -32,7 +52,7 @@ Validation for this follow-up: `npm test` passed 239 tests; lint, 383-to-383 spe
 - Vendor planning has an opt-in extended context for independently paginated organization-wide alerts, categories, selected-vendor external findings, and filtered security incidents. Issue planning accepts the documented filters and an optional issue detail. Alert and risk-mapping writes have verified local workflows; the other administrative paths remain direct-tool recipes with operator readback.
 - A read-only review found that cancellation during file publication could leave a destination without a receipt. The fix waits for download cleanup, removes a destination published after cancellation, and has a deterministic race regression test.
 - After the review fix `npm test` passed 212 tests; `npm run lint` and `git diff --check` passed. The earlier refreshed-spec parity check passed 383-to-383. The connected AST MCP reported version 1.0.22 and 333 operations; the new local implementation has not been installed there. These results do not establish live tenant acceptance. No live mutations, publication, or release were performed.
-- Next slice: expand mock lifecycle and readback coverage for vendor settings/category/engagement and framework/personnel changes, including partial failures and permission denials. Retain direct-tool recipes until a verified operator need justifies additional orchestration; record live mutation acceptance separately.
+- The planned administrative mock-coverage slice is recorded above. Next, evaluate remaining direct-tool safety and fixture requirements for separately authorized live acceptance; retain direct-tool recipes until an operator need justifies additional orchestration.
 
 ## Phase 1: OpenAPI Parity Refresh
 
