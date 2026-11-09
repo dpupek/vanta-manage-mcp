@@ -1,5 +1,33 @@
 # Capabilities and Recipes
 
+## November API workflows
+
+### Vendor and risk review
+
+Run `workflow_vendor_triage` in plan mode with `includeExtendedContext: true` and a `vendorId` to retrieve the selected vendor, assessments, external findings, and filtered security incident alerts. Category and general alert inventories are organization-wide; do not assume every alert belongs to the selected vendor. Each inventory has its own cursor and completeness indicator. Read `get_vendor_alert_settings` to review alert settings.
+
+Use `workflow_vendor_alerts` with `mode: "plan"`, `kind: "vendor"` or `"incident"`, `alertIds`, and target `status`. Execute the same selection with `mode: "execute"` and `confirm: true`. Each alert is independently read before and after the update; an unverified result requires inspection before retrying.
+
+Use `workflow_risk_mappings` with `mode: "plan"`, `riskScenarioId`, `kind` (`accounts`, `customAssets`, `integrations`, or `issues`), `change` (`add` or `remove`), and `items`. Accounts are objects with `serviceId`, `accountId`, and optional `subunitId`; other kinds use IDs. Execute the reviewed change with `mode: "execute"` and `confirm: true`. The workflow requires a complete pre-read and verifies the requested changes and preservation of unrelated mappings. `write_unverified` means the API accepted the change but readback did not establish the intended state; inspect before retrying.
+
+Use `list_custom_assets` to discover assets and `list_enterprise_risk_mappings` to read enterprise-risk relationships. These reads do not establish a public enterprise-risk mapping write. `workflow_issue_event_triage` accepts documented issue filters and an optional `issueId` for detail; issue and event inventories remain separate and independently paginated.
+
+For category or engagement maintenance, read `get_vendor` and `get_vendor_category_by_id` first; use the generated category or `set_engagement`/`remove_engagement` tool with explicit confirmation; then re-read both relevant vendor/category records. A category deletion requires the explicitly reviewed `replacementCategoryId`; null leaves vendors uncategorized. The vendor `category` input is deprecated. Use `categoryId`; the two fields cannot be sent together. A null `categoryId` clears the category on update, while omission preserves it.
+
+### Document evaluation and framework controls
+
+Read the current draft, then call `evaluate_document` with its `documentId` and `confirm: true`. A 202 response means the request was accepted; 204 means an equivalent successful evaluation already exists. Poll `get_document_draft_evaluation` at a bounded interval for up to two minutes. A 404 can mean pending or no saved result, so report an unresolved outcome at timeout; do not claim failure, compliance, or automatically replay the POST. Sensitive documents and organizations without the required AI feature cannot be evaluated.
+
+For a framework export, call `create_framework_controls_export` with `body.frameworkId` and `confirm: true`, then read `get_framework_controls_export` with the returned export ID until `COMPLETED`, `FAILED`, or a two-minute timeout. A completed response contains a presigned CSV URL valid for one hour; read status again to refresh it. Treat the URL as a secret and do not send Vanta OAuth credentials to it. The media downloader does not fetch this cross-origin URL.
+
+Read `get_framework` before and after `snooze_framework`, `reactivate_framework`, or `set_framework_variant`. Snoozing hides tests/documents and affects policy activity until the specified UTC date. Variant selection replaces the entire set and cannot be empty; review the complete desired set and use `confirm: true`.
+
+### Personnel requirements
+
+Read `get_group_task_requirement_set`, `list_task_requirement_sets`, and `list_custom_requirements` before changing obligations. Review the target group and requirement set, then use the generated create/update tool with `confirm: true`; read back `get_task_requirement_set` and the group association. When updating requirements, each supplied requirement replaces its prior value; omitted requirements stay unchanged. Review the full replacement before execution. A group deletion is a separate destructive action: inspect its members and requirements before using `delete_group` and verify the outcome independently.
+
+API permissions and feature availability vary by tenant. Preserve API permission errors and record readback or scope limitations instead of interpreting them as empty inventories or verified updates.
+
 ## What You Can Do
 
 - Controls and evidence operations.

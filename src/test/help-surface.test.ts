@@ -71,7 +71,7 @@ test("help catalog includes generated, compatibility, and workflow families", ()
 
   // Assert
   assert.equal(catalog.summary.byCategory.compat_read, 15);
-  assert.equal(catalog.summary.byCategory.workflow, 7);
+  assert.equal(catalog.summary.byCategory.workflow, 9);
   const issuePlan = catalog.entries.find(
     entry => entry.name === "workflow_issue_event_triage",
   );

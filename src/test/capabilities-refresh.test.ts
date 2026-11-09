@@ -15,6 +15,70 @@ const schemaFor = (name: string) => {
   return buildOperationSchema(operation);
 };
 
+test("refreshed vendor categoryId accepts null for clearing", () => {
+  // Arrange
+  const schema = schemaFor("update_vendor");
+  const input = { vendorId: "vendor-1", body: { categoryId: null } };
+  // Initial assert
+  assert.equal(input.body.categoryId, null);
+  // Act
+  const result = schema.safeParse(input);
+  // Assert
+  assert.equal(result.success, true);
+});
+
+test("vendor update rejects simultaneous old and new category fields before HTTP", async () => {
+  // Arrange
+  let calls = 0;
+  const client = {
+    request: async () => {
+      calls += 1;
+      throw new Error("unexpected HTTP");
+    },
+  };
+  // Initial assert
+  assert.equal(calls, 0);
+  // Act
+  const result = parseToolEnvelope(
+    await invokeGeneratedOperation(
+      "update_vendor",
+      {
+        vendorId: "vendor-1",
+        body: { category: "OTHER", categoryId: "category-1" },
+        confirm: true,
+      },
+      client as never,
+    ),
+  );
+  // Assert
+  assert.equal(result.success, false);
+  assert.equal(
+    (result.error as Record<string, unknown>).code,
+    "validation_error",
+  );
+  assert.equal(calls, 0);
+});
+
+test("new risk mapping contract requires the documented issue key", () => {
+  // Arrange
+  const schema = schemaFor("add_issue_mappings");
+  const valid = {
+    riskScenarioId: "risk-1",
+    body: { issueIdsToLink: ["issue-1"] },
+  };
+  const invalid = {
+    riskScenarioId: "risk-1",
+    body: { issueIdsToUnlink: ["issue-1"] },
+  };
+  // Initial assert
+  assert.equal(valid.body.issueIdsToLink.length, 1);
+  // Act
+  const results = [schema.safeParse(valid), schema.safeParse(invalid)];
+  // Assert
+  assert.equal(results[0].success, true);
+  assert.equal(results[1].success, false);
+});
+
 const contractCases = [
   {
     name: "control details accept text",
@@ -459,7 +523,7 @@ test("generated help lists every endpoint exactly once", () => {
   // Arrange
   const context = helpContext();
   // Initial Assert
-  assert.equal(context.catalog.summary.byCategory.generated_endpoint, 333);
+  assert.equal(context.catalog.summary.byCategory.generated_endpoint, 383);
   // Act
   const text = buildHelpResourceMarkdown(
     "resource://vanta-manage/tool-catalog",
@@ -469,7 +533,7 @@ test("generated help lists every endpoint exactly once", () => {
   const rows = [
     ...text.matchAll(/^\| `([^`]+)` \| (manage|audit|connectors) \|/gm),
   ].map(match => match[1]);
-  assert.equal(rows.length, 333);
+  assert.equal(rows.length, 383);
   assert.deepEqual(
     new Set(rows),
     new Set(generatedOperations.map(operation => operation.toolName)),

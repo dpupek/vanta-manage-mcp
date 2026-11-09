@@ -187,6 +187,31 @@ const renderWorkflowSteps = (): string[] => [
   "3. Execute with explicit actions and `confirm=true`.",
   "4. Validate vendor status/findings and review document linkage.",
   "",
+  "### workflow_vendor_alerts",
+  "",
+  "1. Plan with `kind` vendor or incident, selected `alertIds`, and target `status`.",
+  "2. Execute the reviewed update with `mode=execute` and `confirm=true`.",
+  "3. Inspect each outcome; `write_unverified` means the accepted update must be inspected before retrying.",
+  "",
+  "### workflow_risk_mappings",
+  "",
+  "1. Plan with `riskScenarioId`, `kind` (accounts, customAssets, integrations, issues), `change` (add or remove), and `items`.",
+  "2. Accounts use objects with serviceId, accountId, and optional subunitId; other kinds use string IDs.",
+  "3. Execute with `confirm=true`. Complete pre- and post-inventories verify every item and preserve unrelated mappings.",
+  "",
+  "### Evidence evaluation and framework exports",
+  "",
+  "1. Read the draft and request `evaluate_document` with `confirm=true`; sensitive documents and disabled AI features are not eligible.",
+  "2. Read `get_document_draft_evaluation` with bounded polling. A 404 can mean pending or unavailable; it does not establish job status or compliance.",
+  "3. Request `create_framework_controls_export` with `body.frameworkId` and `confirm=true`; read `get_framework_controls_export` until COMPLETED, FAILED, or your timeout.",
+  "4. A completed export returns a temporary presigned URL; do not send Vanta credentials to that URL or assume it is a media endpoint.",
+  "",
+  "### Personnel requirement sets",
+  "",
+  "1. Read `get_group_task_requirement_set`, `list_task_requirement_sets`, and `list_custom_requirements` before changing requirements.",
+  "2. Review affected scope and use the relevant create or update tool with `confirm=true`; re-read `get_task_requirement_set` and group state.",
+  "3. Requirement updates replace each supplied requirement; omitted requirements remain unchanged. Review the complete desired value before writing.",
+  "",
   "### workflow_people_assets_vuln_triage",
   "",
   "1. Read people/assets/vulnerabilities (`people`, `list_vulnerable_assets`, `vulnerabilities`).",
@@ -569,6 +594,21 @@ export const buildHelpResourceMarkdown = (
   );
   lines.push(
     "- Set `mimeType` when known (for example `application/pdf`) and keep it aligned with the file extension.",
+  );
+  lines.push("");
+  lines.push("## Downloading file bytes");
+  lines.push("");
+  lines.push(
+    "- Use `get_uploadedfile_media` or `get_trust_center_resource_media` with `downloadFileName`; the result is a receipt and a file on the MCP host, not file text.",
+  );
+  lines.push(
+    "- Set `expectedSha256` to verify source identity. A saved hash alone does not prove that the file matches the original; a mismatch is retained and reported.",
+  );
+  lines.push(
+    "- Configure `VANTA_MCP_DOWNLOAD_DIR`, `VANTA_MCP_DOWNLOAD_MAX_BYTES`, and `VANTA_MCP_DOWNLOAD_TIMEOUT_MS` as needed. Existing files are not overwritten and redirects are rejected.",
+  );
+  lines.push(
+    "- Approved policy-version artifacts are not necessarily evidence document IDs; obtain unsupported policy files from the authenticated Vanta UI or the owner, and verify the selected version and hash.",
   );
   lines.push("");
   lines.push("## Unsupported Vanta API Surfaces");

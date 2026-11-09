@@ -113,3 +113,11 @@ Fix:
   - `VANTA_MCP_LOG_LEVEL=verbose` for request/retry diagnostics
   - `VANTA_MCP_LOG_LEVEL=all` for full trace metadata
 - Return to `minimal` after troubleshooting.
+
+# Downloading document and Trust Center files
+
+The generated `get_uploadedfile_media` and `get_trust_center_resource_media` tools require `downloadFileName`, a file name without a directory. The server writes the file to `VANTA_MCP_DOWNLOAD_DIR`, or `~/VantaMcpDownloads` by default, and returns the server-local path, SHA-256, byte count, MIME type, and identity status. Set `VANTA_MCP_DOWNLOAD_MAX_BYTES` to change the default 100 MiB limit, or `VANTA_MCP_DOWNLOAD_TIMEOUT_MS` to change the default 120-second deadline. Existing files are not overwritten. Redirects are rejected.
+
+Supply `expectedSha256` to compare against a known source. `unknown` means no source hash was provided; `mismatch` retains the retrieved representation but does not establish original identity. For example, Vanta may return JPEG bytes for a file named PNG. The saved path is on the MCP server host, which may differ from the client host.
+
+For an approved policy, inspect the policy and its approved version before selecting an artifact. An approved-version document slug is not necessarily a Vanta evidence document ID. The current public Manage contract lists policy inventory and policy detail reads but no policy-specific artifact download route. If the approved artifact cannot be retrieved through a documented endpoint, download that exact approved version through the authenticated Vanta UI or obtain it from its owner; record the policy, version, source and SHA-256. A browser preview alone does not establish a local download or byte identity.

@@ -128,12 +128,45 @@ Full sanitized request/response bodies and timestamps are saved in `C:/Users/dan
 - [x] Include exact UTC/CDT request timing, sanitized PATCH body, complete matching PATCH/GET response bodies, full UI reload result, and verified restoration.
 - [x] Request confirmation that the public Controls endpoint has the change enabled for the affected workspace and investigation of the remaining read/write discrepancy.
 - [x] Revalidate the pending guard before commit: `npm test` passed all 199 unit/mock tests, including the build; lint, exact spec parity, and scoped formatting passed.
-- [ ] Confirm a corrected vendor rollout with independent GET and UI readback before reporting public-API persistence as verified.
+- [x] Confirm a corrected vendor rollout with independent GET and UI readback before reporting public-API persistence as verified; completed October 13 on the existing CMMC control below.
 - [ ] Publish the local readback guard in a separately authorized release.
 
 The [sent support reply](https://mail.google.com/mail/u/?authuser=dpupek%40nexportengineering.com#all/1a121c98228f1b91) was sent from the Nexport account to `support@vanta.com`; Gmail returned the `SENT` label and the original thread ID. Vendor follow-up is pending. This checkpoint commits the local guard, regression coverage, help guidance, and investigation/progress documentation; it does not establish production acceptance of implementation-details writes or create a release.
 
-### Vanta support request draft
+### October 13 rollout retest: persistence verified
+
+Vanta's [October 12 support reply](https://mail.google.com/mail/u/?authuser=dpupek%40nexportengineering.com#all/1a1326ca1e04a320) says Engineering found the flag had not been fully enabled for this workspace and subsequently enabled it for all workspaces. The user authorized another retry of the same existing CMMC control. This test verifies the selected Darwin Global control only; the vendor's statement about all workspaces was not independently tested.
+
+- [x] Capture the current original value before mutation: direct GET now returns `implementationDetails: ""`, and the authenticated UI shows `Add implementation details...` after reload.
+- [x] PATCH only a temporary multiline/Unicode implementation-details string through direct public REST, then independently GET the control.
+- [x] Fully reload Vanta and inspect the same control; both lines of the temporary text appear in the implementation-details field.
+- [x] Restore `implementationDetails: ""` through public REST; independently GET and fully reload the UI to verify the original blank value.
+- [x] Retain sanitized request/response evidence and screenshots; preserve October 8/9 failures as historical results.
+
+| Request / observation                 | October 13 UTC timestamp | Result                                                          |
+| ------------------------------------- | ------------------------ | --------------------------------------------------------------- |
+| Initial GET                           | 14:42:11.081             | HTTP 200; `implementationDetails: ""` present                   |
+| Prewrite GET                          | 14:42:46.950             | HTTP 200; original blank string confirmed                       |
+| PATCH temporary text                  | 14:42:47.159             | HTTP 200; exact requested string returned                       |
+| Independent GET                       | 14:42:47.418             | HTTP 200; exact requested string returned                       |
+| Full UI reload and control inspection | After independent GET    | Temporary text visible in the control drawer                    |
+| Restore PATCH                         | 14:44:20.318             | HTTP 200; exact original blank string returned                  |
+| Independent restoration GET           | 14:44:20.607             | HTTP 200; `implementationDetails: ""` present                   |
+| Full UI reload after restoration      | After restoration GET    | `Add implementation details...`; original blank value confirmed |
+
+The successful write started at **9:42:47 AM CDT**. The temporary request was:
+
+```json
+{
+  "implementationDetails": "Temporary API persistence verification 2026-10-13. Not compliance evidence.\nExact read-back check: duties and separation – restore original blank after test."
+}
+```
+
+This supersedes the failed October 9 persistence result for `6oteid1n` (`HRS-123`, `03.01.04.a`, CMMC requirement `AC.L2-3.1.4`). Public REST reading, writing, and empty-string clearing now work on the tested control, with independent UI confirmation. The runtime guard should remain: HTTP acceptance alone still does not establish persistence, and exact readback protects against future omissions or mismatches. This retest used direct REST, not the local MCP tool; it does not independently certify all tool execution paths, all controls/workspaces, or custom-control CMMC mapping.
+
+Evidence: `C:/Users/dan.pupek/AppData/Local/Temp/vanta-existing-cmmc-retest-20261013.json`; UI screenshots `vanta-existing-cmmc-written-20261013.jpg` and `vanta-existing-cmmc-restored-20261013.jpg` in the same folder. No other metadata was included in these PATCH requests. This retest made no runtime code change, commit, release, or new support reply.
+
+### Vanta support request draft (October 8 historical reproduction)
 
 Subject: DG existing CMMC implementationDetails: REST writes silently ineffective and reads omit UI-saved content
 

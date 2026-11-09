@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-08T16:23:45.6869978Z",
-  "totalOperations": 333,
-  "totalMutations": 169,
+  "generatedAt": "2026-11-09T14:56:43.486Z",
+  "totalOperations": 383,
+  "totalMutations": 197,
   "stats": {
     "manage": {
-      "operations": 251,
-      "mutations": 137
+      "operations": 301,
+      "mutations": 165
     },
     "audit": {
       "operations": 57,
@@ -184,6 +184,14 @@
       "path": "/controls/{controlId}/tests/{testId}",
       "operationId": "DeleteTestForControl",
       "isMutation": true
+    },
+    {
+      "toolName": "list_custom_assets",
+      "source": "manage",
+      "method": "get",
+      "path": "/custom-assets",
+      "operationId": "ListCustomAssets",
+      "isMutation": false
     },
     {
       "toolName": "list_customer_trust_accounts",
@@ -450,6 +458,22 @@
       "isMutation": false
     },
     {
+      "toolName": "evaluate_document",
+      "source": "manage",
+      "method": "post",
+      "path": "/documents/{documentId}/evaluate",
+      "operationId": "EvaluateDocument",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_document_draft_evaluation",
+      "source": "manage",
+      "method": "get",
+      "path": "/documents/{documentId}/evaluation",
+      "operationId": "GetDocumentDraftEvaluation",
+      "isMutation": false
+    },
+    {
       "toolName": "list_links_for_document",
       "source": "manage",
       "method": "get",
@@ -538,6 +562,30 @@
       "isMutation": false
     },
     {
+      "toolName": "create_framework_controls_export",
+      "source": "manage",
+      "method": "post",
+      "path": "/frameworks/exports",
+      "operationId": "CreateFrameworkControlsExport",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_framework_controls_export",
+      "source": "manage",
+      "method": "get",
+      "path": "/frameworks/exports/{exportId}",
+      "operationId": "GetFrameworkControlsExport",
+      "isMutation": false
+    },
+    {
+      "toolName": "delete_custom_framework",
+      "source": "manage",
+      "method": "delete",
+      "path": "/frameworks/{frameworkId}",
+      "operationId": "DeleteCustomFramework",
+      "isMutation": true
+    },
+    {
       "toolName": "get_framework",
       "source": "manage",
       "method": "get",
@@ -552,6 +600,30 @@
       "path": "/frameworks/{frameworkId}/controls",
       "operationId": "ListControlsForFramework",
       "isMutation": false
+    },
+    {
+      "toolName": "reactivate_framework",
+      "source": "manage",
+      "method": "post",
+      "path": "/frameworks/{frameworkId}/reactivate",
+      "operationId": "ReactivateFramework",
+      "isMutation": true
+    },
+    {
+      "toolName": "snooze_framework",
+      "source": "manage",
+      "method": "post",
+      "path": "/frameworks/{frameworkId}/snooze",
+      "operationId": "SnoozeFramework",
+      "isMutation": true
+    },
+    {
+      "toolName": "set_framework_variant",
+      "source": "manage",
+      "method": "put",
+      "path": "/frameworks/{frameworkId}/variants",
+      "operationId": "SetFrameworkVariant",
+      "isMutation": true
     },
     {
       "toolName": "create_group",
@@ -591,6 +663,14 @@
       "method": "patch",
       "path": "/groups/{groupId}",
       "operationId": "UpdateGroup",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_group",
+      "source": "manage",
+      "method": "delete",
+      "path": "/groups/{groupId}",
+      "operationId": "DeleteGroup",
       "isMutation": true
     },
     {
@@ -640,6 +720,14 @@
       "path": "/groups/{groupId}/remove-people",
       "operationId": "RemovePeopleFromGroup",
       "isMutation": true
+    },
+    {
+      "toolName": "get_group_task_requirement_set",
+      "source": "manage",
+      "method": "get",
+      "path": "/groups/{groupId}/task-requirement-set",
+      "operationId": "GetGroupTaskRequirementSet",
+      "isMutation": false
     },
     {
       "toolName": "list_connected_integrations",
@@ -1050,6 +1138,110 @@
       "isMutation": true
     },
     {
+      "toolName": "list_account_mappings",
+      "source": "manage",
+      "method": "get",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/accounts",
+      "operationId": "ListAccountMappings",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_account_mappings",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/accounts",
+      "operationId": "AddAccountMappings",
+      "isMutation": true
+    },
+    {
+      "toolName": "remove_account_mappings",
+      "source": "manage",
+      "method": "delete",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/accounts",
+      "operationId": "RemoveAccountMappings",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_custom_asset_mappings",
+      "source": "manage",
+      "method": "get",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/custom-assets",
+      "operationId": "ListCustomAssetMappings",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_custom_asset_mappings",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/custom-assets",
+      "operationId": "AddCustomAssetMappings",
+      "isMutation": true
+    },
+    {
+      "toolName": "remove_custom_asset_mappings",
+      "source": "manage",
+      "method": "delete",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/custom-assets",
+      "operationId": "RemoveCustomAssetMappings",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_enterprise_risk_mappings",
+      "source": "manage",
+      "method": "get",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/enterprise-risk",
+      "operationId": "ListEnterpriseRiskMappings",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_integration_mappings",
+      "source": "manage",
+      "method": "get",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/integrations",
+      "operationId": "ListIntegrationMappings",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_integration_mappings",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/integrations",
+      "operationId": "AddIntegrationMappings",
+      "isMutation": true
+    },
+    {
+      "toolName": "remove_integration_mappings",
+      "source": "manage",
+      "method": "delete",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/integrations",
+      "operationId": "RemoveIntegrationMappings",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_issue_mappings",
+      "source": "manage",
+      "method": "get",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/issues",
+      "operationId": "ListIssueMappings",
+      "isMutation": false
+    },
+    {
+      "toolName": "add_issue_mappings",
+      "source": "manage",
+      "method": "post",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/issues",
+      "operationId": "AddIssueMappings",
+      "isMutation": true
+    },
+    {
+      "toolName": "remove_issue_mappings",
+      "source": "manage",
+      "method": "delete",
+      "path": "/risk-scenarios/{riskScenarioId}/mappings/issues",
+      "operationId": "RemoveIssueMappings",
+      "isMutation": true
+    },
+    {
       "toolName": "list_vendor_finding_mappings",
       "source": "manage",
       "method": "get",
@@ -1079,6 +1271,70 @@
       "method": "post",
       "path": "/risk-scenarios/{riskScenarioId}/submit-for-approval",
       "operationId": "SubmitRiskForApproval",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_task_requirement_sets",
+      "source": "manage",
+      "method": "get",
+      "path": "/task-requirement-sets",
+      "operationId": "ListTaskRequirementSets",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_task_requirement_set",
+      "source": "manage",
+      "method": "post",
+      "path": "/task-requirement-sets",
+      "operationId": "CreateTaskRequirementSet",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_custom_requirements",
+      "source": "manage",
+      "method": "get",
+      "path": "/task-requirement-sets/custom-requirements",
+      "operationId": "ListCustomRequirements",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_custom_requirement",
+      "source": "manage",
+      "method": "post",
+      "path": "/task-requirement-sets/custom-requirements",
+      "operationId": "CreateCustomRequirement",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_custom_requirement",
+      "source": "manage",
+      "method": "patch",
+      "path": "/task-requirement-sets/custom-requirements/{customRequirementId}",
+      "operationId": "UpdateCustomRequirement",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_task_requirement_set",
+      "source": "manage",
+      "method": "get",
+      "path": "/task-requirement-sets/{requirementSetId}",
+      "operationId": "GetTaskRequirementSet",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_task_requirement_set_details",
+      "source": "manage",
+      "method": "patch",
+      "path": "/task-requirement-sets/{requirementSetId}/details",
+      "operationId": "UpdateTaskRequirementSetDetails",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_task_requirement_set_requirements",
+      "source": "manage",
+      "method": "patch",
+      "path": "/task-requirement-sets/{requirementSetId}/requirements",
+      "operationId": "UpdateTaskRequirementSetRequirements",
       "isMutation": true
     },
     {
@@ -1714,6 +1970,14 @@
       "isMutation": true
     },
     {
+      "toolName": "list_trust_center_videos",
+      "source": "manage",
+      "method": "get",
+      "path": "/trust-centers/{slugId}/videos",
+      "operationId": "ListTrustCenterVideos",
+      "isMutation": false
+    },
+    {
       "toolName": "upsert_trust_center_videos",
       "source": "manage",
       "method": "put",
@@ -1786,6 +2050,46 @@
       "isMutation": false
     },
     {
+      "toolName": "get_vendor_alert_settings",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-alert-settings",
+      "operationId": "GetVendorAlertSettings",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_vendor_alert_settings",
+      "source": "manage",
+      "method": "patch",
+      "path": "/vendor-alert-settings",
+      "operationId": "UpdateVendorAlertSettings",
+      "isMutation": true
+    },
+    {
+      "toolName": "update_vendor_alerts",
+      "source": "manage",
+      "method": "patch",
+      "path": "/vendor-alerts",
+      "operationId": "UpdateVendorAlerts",
+      "isMutation": true
+    },
+    {
+      "toolName": "list_vendor_alerts",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-alerts",
+      "operationId": "ListVendorAlerts",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_vendor_alert",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-alerts/{alertId}",
+      "operationId": "GetVendorAlert",
+      "isMutation": false
+    },
+    {
       "toolName": "list_vendor_assessment_types",
       "source": "manage",
       "method": "get",
@@ -1802,11 +2106,75 @@
       "isMutation": false
     },
     {
+      "toolName": "list_vendor_categories",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-categories",
+      "operationId": "ListVendorCategories",
+      "isMutation": false
+    },
+    {
+      "toolName": "create_vendor_category",
+      "source": "manage",
+      "method": "post",
+      "path": "/vendor-categories",
+      "operationId": "CreateVendorCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_vendor_category_by_id",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-categories/{categoryId}",
+      "operationId": "GetVendorCategoryById",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_vendor_category",
+      "source": "manage",
+      "method": "patch",
+      "path": "/vendor-categories/{categoryId}",
+      "operationId": "UpdateVendorCategory",
+      "isMutation": true
+    },
+    {
+      "toolName": "delete_vendor_category",
+      "source": "manage",
+      "method": "delete",
+      "path": "/vendor-categories/{categoryId}",
+      "operationId": "DeleteVendorCategory",
+      "isMutation": true
+    },
+    {
       "toolName": "list_vendor_risk_attributes",
       "source": "manage",
       "method": "get",
       "path": "/vendor-risk-attributes",
       "operationId": "ListVendorRiskAttributes",
+      "isMutation": false
+    },
+    {
+      "toolName": "list_vendor_security_incident_alerts",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-security-incident-alerts",
+      "operationId": "ListVendorSecurityIncidentAlerts",
+      "isMutation": false
+    },
+    {
+      "toolName": "update_vendor_security_incident_alerts",
+      "source": "manage",
+      "method": "patch",
+      "path": "/vendor-security-incident-alerts",
+      "operationId": "UpdateVendorSecurityIncidentAlerts",
+      "isMutation": true
+    },
+    {
+      "toolName": "get_vendor_security_incident_alert",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendor-security-incident-alerts/{alertId}",
+      "operationId": "GetVendorSecurityIncidentAlert",
       "isMutation": false
     },
     {
@@ -1824,6 +2192,22 @@
       "path": "/vendors",
       "operationId": "ListVendors",
       "isMutation": false
+    },
+    {
+      "toolName": "set_engagement",
+      "source": "manage",
+      "method": "put",
+      "path": "/vendors/{parentVendorId}/engagement-relationship/{engagementVendorId}",
+      "operationId": "SetEngagement",
+      "isMutation": true
+    },
+    {
+      "toolName": "remove_engagement",
+      "source": "manage",
+      "method": "delete",
+      "path": "/vendors/{parentVendorId}/engagement-relationship/{engagementVendorId}",
+      "operationId": "RemoveEngagement",
+      "isMutation": true
     },
     {
       "toolName": "get_vendor",
@@ -1880,6 +2264,22 @@
       "path": "/vendors/{vendorId}/documents",
       "operationId": "UploadDocumentToVendor",
       "isMutation": true
+    },
+    {
+      "toolName": "list_vendor_external_findings",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}/external-findings",
+      "operationId": "ListVendorExternalFindings",
+      "isMutation": false
+    },
+    {
+      "toolName": "get_vendor_external_finding",
+      "source": "manage",
+      "method": "get",
+      "path": "/vendors/{vendorId}/external-findings/{findingId}",
+      "operationId": "GetVendorExternalFinding",
+      "isMutation": false
     },
     {
       "toolName": "list_vendor_findings",

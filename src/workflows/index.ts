@@ -51,6 +51,17 @@ export const workflowToolMetadata: WorkflowToolMetadata[] = [
     mode: "plan_execute_confirmed",
   },
   {
+    name: "workflow_risk_mappings",
+    description:
+      "Review and verify account, asset, integration, or issue risk mappings.",
+    mode: "plan_execute_confirmed",
+  },
+  {
+    name: "workflow_vendor_alerts",
+    description: "Review and verify vendor alert status changes.",
+    mode: "plan_execute_confirmed",
+  },
+  {
     name: "workflow_people_assets_vuln_triage",
     description:
       "Plan or execute people/assets/vulnerability triage actions including vulnerability lifecycle updates.",
@@ -914,6 +925,11 @@ const registerVendorWorkflow = (
       confirm: z.boolean().optional(),
       vendorId: z.string().optional(),
       assessmentPageCursor: z.string().min(1).optional(),
+      includeExtendedContext: z.boolean().optional(),
+      externalFindingPageCursor: z.string().min(1).optional(),
+      incidentPageCursor: z.string().min(1).optional(),
+      alertPageCursor: z.string().min(1).optional(),
+      categoryPageCursor: z.string().min(1).optional(),
       actions: z.array(actionSchema).optional(),
     },
     async args => {
@@ -936,16 +952,69 @@ const registerVendorWorkflow = (
               },
             )
           : undefined;
+        const options = (pageCursor?: string) => ({
+          pageSize: args.pageSize,
+          maxPages: args.maxPages,
+          pageCursor,
+        });
+        const extended = args.includeExtendedContext
+          ? {
+              alertSettings: getResultPayload(
+                await executeOperation("GetVendorAlertSettings", {}, client),
+              ),
+              vendorAlerts: await readInventory(
+                "ListVendorAlerts",
+                {},
+                client,
+                options(args.alertPageCursor),
+              ),
+              vendorCategories: await readInventory(
+                "ListVendorCategories",
+                {},
+                client,
+                options(args.categoryPageCursor),
+              ),
+              ...(args.vendorId
+                ? {
+                    selectedVendor: getResultPayload(
+                      await executeOperation(
+                        "GetVendor",
+                        { vendorId: args.vendorId },
+                        client,
+                      ),
+                    ),
+                    externalFindings: await readInventory(
+                      "ListVendorExternalFindings",
+                      { vendorId: args.vendorId },
+                      client,
+                      options(args.externalFindingPageCursor),
+                    ),
+                    securityIncidentAlerts: await readInventory(
+                      "ListVendorSecurityIncidentAlerts",
+                      { vendorIdMatchesAny: [args.vendorId] },
+                      client,
+                      options(args.incidentPageCursor),
+                    ),
+                  }
+                : {}),
+            }
+          : undefined;
         return toToolResult(
           planEnvelope({
             summary: "Vendor triage plan.",
             recommendations: [
               "Review vendor statuses and open findings.",
               "Execute targeted vendor/finding/document updates.",
+              ...(extended
+                ? [
+                    "Vendor alerts are organization-wide; do not assume they concern the selected vendor.",
+                  ]
+                : []),
             ],
             vendors,
             selectedVendorId: args.vendorId ?? null,
             ...(assessments ? { assessments } : {}),
+            ...(extended ?? {}),
           }),
         );
       }
@@ -977,6 +1046,355 @@ const registerVendorWorkflow = (
     },
   );
 
+  return true;
+};
+
+const registerVendorAlertsWorkflow = (
+  server: McpServer,
+  client: VantaApiClient,
+): boolean => {
+  const toolName = "workflow_vendor_alerts";
+  if (!isToolEnabled(toolName)) return false;
+  registerWorkflow(
+    server,
+    toolName,
+    "Review or update vendor alerts with independent per-alert readback.",
+    {
+      mode: workflowModeSchema,
+      confirm: z.boolean().optional(),
+      kind: z.enum(["vendor", "incident"]),
+      alertIds: z.array(z.string().min(1)).min(1).max(100),
+      status: z.string().min(1),
+    },
+    async args => {
+      const gate = workflowExecuteGate(args.mode, args.confirm);
+      if (gate) return toToolResult(gate);
+      if (new Set(args.alertIds).size !== args.alertIds.length)
+        return toToolResult(
+          errorEnvelope("validation_error", "Alert IDs must be unique."),
+        );
+      const incident = args.kind === "incident";
+      const getOperation = incident
+        ? "GetVendorSecurityIncidentAlert"
+        : "GetVendorAlert";
+      const updateOperation = incident
+        ? "UpdateVendorSecurityIncidentAlerts"
+        : "UpdateVendorAlerts";
+      const field = incident ? "resolutionState" : "status";
+      const writeArgs = {
+        body: { alertIds: args.alertIds, [field]: args.status },
+        confirm: true,
+      };
+      const name = getGeneratedToolNameByOperationId(updateOperation, "manage");
+      const operation = name ? generatedOperationByToolName[name] : undefined;
+      const parsed = operation
+        ? buildOperationSchema(operation).safeParse(writeArgs)
+        : undefined;
+      if (!parsed?.success)
+        return toToolResult(
+          errorEnvelope(
+            "validation_error",
+            "Alert update does not match the public contract.",
+            undefined,
+            { issues: parsed?.error.issues },
+          ),
+        );
+      const readAlerts = async () => {
+        const rows: { id: string; result: unknown }[] = [];
+        for (const id of args.alertIds)
+          rows.push({
+            id,
+            result: getResultPayload(
+              await executeOperation(getOperation, { alertId: id }, client),
+            ),
+          });
+        return rows;
+      };
+      const before = await readAlerts();
+      if (before.some(item => readRecord(item.result)?.success !== true))
+        return toToolResult(
+          errorEnvelope(
+            "workflow_read_failed",
+            "Unable to read every selected alert; no update was sent.",
+            undefined,
+            { before },
+          ),
+        );
+      if (args.mode === "plan")
+        return toToolResult(
+          planEnvelope({ kind: args.kind, targetStatus: args.status, before }),
+        );
+      const mutation = getResultPayload(
+        await executeOperation(updateOperation, writeArgs, client),
+      );
+      if (readRecord(mutation)?.success !== true)
+        return toToolResult(
+          errorEnvelope(
+            "workflow_failed",
+            "Alert update was not confirmed by Vanta.",
+            undefined,
+            { mutation },
+          ),
+        );
+      const after = await readAlerts();
+      const outcomes = after.map(item => {
+        const envelope = readRecord(item.result);
+        const alert = readRecord(envelope?.data);
+        return {
+          id: item.id,
+          verified:
+            envelope?.success === true &&
+            alert?.id === item.id &&
+            alert[field] === args.status,
+          readback: item.result,
+        };
+      });
+      const results = readRecord(readRecord(mutation)?.data)?.results;
+      const confirmed =
+        Array.isArray(results) &&
+        args.alertIds.every(
+          id =>
+            results.filter(
+              value =>
+                readRecord(value)?.id === id &&
+                readRecord(value)?.[field] === args.status,
+            ).length === 1,
+        ) &&
+        results.length === args.alertIds.length;
+      if (!confirmed || outcomes.some(item => !item.verified))
+        return toToolResult(
+          errorEnvelope(
+            "write_unverified",
+            "Vanta accepted the alert update, but the per-alert result or readback was not verified.",
+            "Inspect each alert before retrying; do not replay automatically.",
+            { mutation, outcomes },
+          ),
+        );
+      return toToolResult(
+        successEnvelope({ mutation, outcomes }, "Alert updates verified."),
+      );
+    },
+  );
+  return true;
+};
+
+const riskMappingContracts = {
+  accounts: {
+    list: "ListAccountMappings",
+    add: "AddAccountMappings",
+    remove: "RemoveAccountMappings",
+    addKey: "accountsToLink",
+    removeKey: "accountsToUnlink",
+    field: null,
+  },
+  customAssets: {
+    list: "ListCustomAssetMappings",
+    add: "AddCustomAssetMappings",
+    remove: "RemoveCustomAssetMappings",
+    addKey: "customAssetIdsToLink",
+    removeKey: "customAssetIdsToUnlink",
+    field: "customAssetId",
+  },
+  integrations: {
+    list: "ListIntegrationMappings",
+    add: "AddIntegrationMappings",
+    remove: "RemoveIntegrationMappings",
+    addKey: "integrationIdsToAdd",
+    removeKey: "integrationIdsToRemove",
+    field: "integrationId",
+  },
+  issues: {
+    list: "ListIssueMappings",
+    add: "AddIssueMappings",
+    remove: "RemoveIssueMappings",
+    addKey: "issueIdsToLink",
+    removeKey: "issueIdsToUnlink",
+    field: "issueId",
+  },
+} as const;
+
+const registerRiskMappingWorkflow = (
+  server: McpServer,
+  client: VantaApiClient,
+): boolean => {
+  const toolName = "workflow_risk_mappings";
+  if (!isToolEnabled(toolName)) return false;
+  const account = z
+    .object({
+      serviceId: z.string().min(1),
+      accountId: z.string().min(1),
+      subunitId: z.string().min(1).optional(),
+    })
+    .strict();
+  registerWorkflow(
+    server,
+    toolName,
+    "Plan or execute a single risk mapping change and independently verify it.",
+    {
+      mode: workflowModeSchema,
+      confirm: z.boolean().optional(),
+      riskScenarioId: z.string().min(1),
+      kind: z.enum(["accounts", "customAssets", "integrations", "issues"]),
+      change: z.enum(["add", "remove"]),
+      items: z
+        .array(z.union([z.string().min(1), account]))
+        .min(1)
+        .max(100),
+      maxPages: collectionShape.maxPages,
+    },
+    async args => {
+      const gate = workflowExecuteGate(args.mode, args.confirm);
+      if (gate) return toToolResult(gate);
+      if (
+        args.items.some(item =>
+          args.kind === "accounts"
+            ? typeof item === "string"
+            : typeof item !== "string",
+        )
+      )
+        return toToolResult(
+          errorEnvelope(
+            "validation_error",
+            "Accounts require serviceId/accountId objects; other mappings require string IDs.",
+          ),
+        );
+      const spec = riskMappingContracts[args.kind];
+      const keyFor = (item: unknown): string | undefined => {
+        if (typeof item === "string") return item;
+        const entry = readRecord(item);
+        if (!entry) return undefined;
+        if (spec.field)
+          return typeof entry[spec.field] === "string"
+            ? String(entry[spec.field])
+            : undefined;
+        if (
+          typeof entry.serviceId !== "string" ||
+          typeof entry.accountId !== "string"
+        )
+          return undefined;
+        return JSON.stringify([
+          entry.serviceId,
+          entry.accountId,
+          entry.subunitId ?? null,
+        ]);
+      };
+      const requested = args.items.map(keyFor);
+      if (new Set(requested).size !== requested.length)
+        return toToolResult(
+          errorEnvelope("validation_error", "Mapping items must be unique."),
+        );
+      const operationId = args.change === "add" ? spec.add : spec.remove;
+      const bodyKey = args.change === "add" ? spec.addKey : spec.removeKey;
+      const writeArgs = {
+        riskScenarioId: args.riskScenarioId,
+        body: { [bodyKey]: args.items },
+        confirm: true,
+      };
+      const name = getGeneratedToolNameByOperationId(operationId, "manage");
+      const operation = name ? generatedOperationByToolName[name] : undefined;
+      const parsed = operation
+        ? buildOperationSchema(operation).safeParse(writeArgs)
+        : undefined;
+      if (!parsed?.success)
+        return toToolResult(
+          errorEnvelope(
+            "validation_error",
+            "Mapping request does not match the public contract.",
+            undefined,
+            { issues: parsed?.error.issues },
+          ),
+        );
+      const read = () =>
+        readInventory(
+          spec.list,
+          { riskScenarioId: args.riskScenarioId },
+          client,
+          { maxPages: args.maxPages },
+        );
+      const extract = (inventory: unknown): string[] | undefined => {
+        const envelope = readRecord(inventory);
+        const data = readRecord(envelope?.data);
+        const collection = readRecord(data?.collection);
+        const rows = readRecord(data?.results)?.data;
+        if (
+          envelope?.success !== true ||
+          collection?.complete !== true ||
+          !Array.isArray(rows)
+        )
+          return undefined;
+        const keys = rows.map(keyFor);
+        return keys.some(key => key === undefined)
+          ? undefined
+          : (keys as string[]);
+      };
+      const before = await read();
+      const beforeKeys = extract(before);
+      if (!beforeKeys)
+        return toToolResult(
+          errorEnvelope(
+            "workflow_read_failed",
+            "A complete mapping inventory is required before making changes.",
+            undefined,
+            { inventory: before },
+          ),
+        );
+      if (args.mode === "plan")
+        return toToolResult(
+          planEnvelope({
+            riskScenarioId: args.riskScenarioId,
+            kind: args.kind,
+            change: args.change,
+            items: args.items,
+            before,
+          }),
+        );
+      const write = getResultPayload(
+        await executeOperation(operationId, writeArgs, client),
+      );
+      if (readRecord(write)?.success !== true)
+        return toToolResult(
+          errorEnvelope(
+            "workflow_failed",
+            "Vanta did not confirm the mapping change.",
+            undefined,
+            { mutation: write },
+          ),
+        );
+      const after = await read();
+      const afterKeys = extract(after);
+      const requestedKeys = requested as string[];
+      const items = requestedKeys.map(item => ({
+        item,
+        verified: afterKeys
+          ? args.change === "add"
+            ? afterKeys.includes(item)
+            : !afterKeys.includes(item)
+          : false,
+      }));
+      const missingUnrelated = beforeKeys.filter(
+        item => !requestedKeys.includes(item) && !afterKeys?.includes(item),
+      );
+      if (
+        !afterKeys ||
+        items.some(item => !item.verified) ||
+        missingUnrelated.length
+      )
+        return toToolResult(
+          errorEnvelope(
+            "write_unverified",
+            "Vanta accepted the mapping change but independent readback did not verify it.",
+            "Inspect current mappings before retrying; do not replay automatically.",
+            { mutation: write, after, items, missingUnrelated },
+          ),
+        );
+      return toToolResult(
+        successEnvelope(
+          { mutation: write, items, after },
+          "Risk mapping change verified.",
+        ),
+      );
+    },
+  );
   return true;
 };
 
@@ -1470,12 +1888,60 @@ export function registerWorkflowTools(
         issuePageCursor: z.string().min(1).optional(),
         eventPageCursor: z.string().min(1).optional(),
         search: z.string().optional(),
+        statusMatchesAny: z.array(z.string()).optional(),
+        severityMatchesAny: z.array(z.string()).optional(),
+        sourceMatchesAny: z.array(z.string()).optional(),
+        typeMatchesAny: z.array(z.string()).optional(),
+        ownerIdMatchesAny: z.array(z.string()).optional(),
+        readableIssueIdMatchesAny: z.array(z.string()).optional(),
+        templateMatchesAny: z.array(z.string()).optional(),
+        closeReasonMatchesAny: z.array(z.string()).optional(),
+        auditIdMatchesAny: z.array(z.string()).optional(),
+        controlIdMatchesAny: z.array(z.string()).optional(),
+        includeIssuesWithoutDueDate: z.boolean().optional(),
+        includeOnlyIssuesWithoutDueDate: z.boolean().optional(),
+        closedAfterDate: z.string().optional(),
+        closedBeforeDate: z.string().optional(),
+        dueAfterDate: z.string().optional(),
+        dueBeforeDate: z.string().optional(),
+        detectedAfterDate: z.string().optional(),
+        detectedBeforeDate: z.string().optional(),
+        createdAfterDate: z.string().optional(),
+        createdBeforeDate: z.string().optional(),
+        orderBy: z.string().optional(),
+        orderDirection: z.string().optional(),
+        issueId: z.string().min(1).optional(),
         eventStartDate: z.string().datetime({ offset: true }).optional(),
       },
       async args => {
         const issues = await readInventory(
           "List",
-          compactRecord({ search: args.search }),
+          compactRecord({
+            search: args.search,
+            statusMatchesAny: args.statusMatchesAny,
+            severityMatchesAny: args.severityMatchesAny,
+            sourceMatchesAny: args.sourceMatchesAny,
+            typeMatchesAny: args.typeMatchesAny,
+            ownerIdMatchesAny: args.ownerIdMatchesAny,
+            readableIssueIdMatchesAny: args.readableIssueIdMatchesAny,
+            templateMatchesAny: args.templateMatchesAny,
+            closeReasonMatchesAny: args.closeReasonMatchesAny,
+            auditIdMatchesAny: args.auditIdMatchesAny,
+            controlIdMatchesAny: args.controlIdMatchesAny,
+            includeIssuesWithoutDueDate: args.includeIssuesWithoutDueDate,
+            includeOnlyIssuesWithoutDueDate:
+              args.includeOnlyIssuesWithoutDueDate,
+            closedAfterDate: args.closedAfterDate,
+            closedBeforeDate: args.closedBeforeDate,
+            dueAfterDate: args.dueAfterDate,
+            dueBeforeDate: args.dueBeforeDate,
+            detectedAfterDate: args.detectedAfterDate,
+            detectedBeforeDate: args.detectedBeforeDate,
+            createdAfterDate: args.createdAfterDate,
+            createdBeforeDate: args.createdBeforeDate,
+            orderBy: args.orderBy,
+            orderDirection: args.orderDirection,
+          }),
           client,
           {
             pageSize: args.pageSize,
@@ -1493,6 +1959,15 @@ export function registerWorkflowTools(
             pageCursor: args.eventPageCursor,
           },
         );
+        const issueDetail = args.issueId
+          ? getResultPayload(
+              await executeOperation(
+                "GetIssue",
+                { issueId: args.issueId },
+                client,
+              ),
+            )
+          : undefined;
         return toToolResult(
           planEnvelope({
             summary:
@@ -1502,6 +1977,7 @@ export function registerWorkflowTools(
             ],
             issues,
             events,
+            ...(issueDetail ? { issueDetail } : {}),
           }),
         );
       },
@@ -1515,6 +1991,12 @@ export function registerWorkflowTools(
     registered += 1;
   }
   if (registerVendorWorkflow(server, client)) {
+    registered += 1;
+  }
+  if (registerVendorAlertsWorkflow(server, client)) {
+    registered += 1;
+  }
+  if (registerRiskMappingWorkflow(server, client)) {
     registered += 1;
   }
   if (registerPeopleAssetsVulnWorkflow(server, client)) {

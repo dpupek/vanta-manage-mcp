@@ -45,6 +45,13 @@
           "INTERNAL"
         ]
       },
+      "AuditView": {
+        "type": "string",
+        "enum": [
+          "FULL",
+          "CONTROLLED"
+        ]
+      },
       "AuditIrlGenerationStatus": {
         "type": "string",
         "enum": [
@@ -274,6 +281,10 @@
             "$ref": "#/components/schemas/AuditFocus",
             "description": "Audit focus determines if the audit is internal or external facing"
           },
+          "auditView": {
+            "$ref": "#/components/schemas/AuditView",
+            "description": "How much population data the auditor can see: `FULL` (Full Audit View) or `CONTROLLED` (Controlled Audit View). Some population endpoints serve only one view; each endpoint's description says which."
+          },
           "irlGenerationStatus": {
             "allOf": [
               {
@@ -323,6 +334,7 @@
           "modificationDate",
           "completionDate",
           "auditFocus",
+          "auditView",
           "irlGenerationStatus",
           "segments"
         ],
@@ -764,6 +776,35 @@
         "type": "object",
         "additionalProperties": false
       },
+      "VendorRelationshipSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The vendor's unique ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "The vendor's display name."
+          },
+          "status": {
+            "$ref": "#/components/schemas/VendorStatus",
+            "description": "The vendor's current status."
+          },
+          "websiteUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "The vendor's website URL, or null when none is set."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "websiteUrl"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
       "Vendor": {
         "properties": {
           "id": {
@@ -856,6 +897,11 @@
             "type": "array",
             "description": "The list of risk attribute IDs the vendor has been assigned to."
           },
+          "categoryId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The ID of the vendor's category."
+          },
           "category": {
             "properties": {
               "displayName": {
@@ -867,7 +913,8 @@
             ],
             "type": "object",
             "nullable": true,
-            "description": "The vendor's category."
+            "description": "The vendor's category.",
+            "deprecated": true
           },
           "authDetails": {
             "properties": {
@@ -975,6 +1022,23 @@
             "type": "object",
             "nullable": true,
             "description": "The task tracker procurement request associated with this vendor (if linked)."
+          },
+          "engagements": {
+            "items": {
+              "$ref": "#/components/schemas/VendorRelationshipSummary"
+            },
+            "type": "array",
+            "description": "A product, service, or subsidiary you use from a vendor. Each engagement\nbelongs to one parent vendor, has its own risk score and assessments, and\ncannot have engagements of its own. Returned engagements are sorted by name.\nEmpty when there are none.",
+            "maxItems": 100
+          },
+          "parentVendor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VendorRelationshipSummary"
+              }
+            ],
+            "nullable": true,
+            "description": "The parent vendor of this engagement, or null when there is no accessible parent."
           }
         },
         "required": [
@@ -995,6 +1059,7 @@
           "isVisibleToAuditors",
           "isRiskAutoScored",
           "riskAttributeIds",
+          "categoryId",
           "category",
           "authDetails",
           "status",
@@ -1348,6 +1413,7 @@
         "type": "string"
       },
       "VantaBasedPersonInfoSource": {
+        "title": "VantaBasedPersonInfoSource",
         "description": "The person's information comes from what is set in Vanta.",
         "properties": {
           "type": {
@@ -1367,6 +1433,7 @@
         "type": "string"
       },
       "ScimBasedPersonInfoSource": {
+        "title": "ScimBasedPersonInfoSource",
         "description": "The person's information comes from SCIM.",
         "properties": {
           "type": {
@@ -1386,6 +1453,7 @@
         "type": "string"
       },
       "IntegrationBasedPersonInfoSource": {
+        "title": "IntegrationBasedPersonInfoSource",
         "description": "The person's information comes from an integration.",
         "properties": {
           "integrationId": {
@@ -2438,238 +2506,6 @@
         "type": "object",
         "additionalProperties": false
       },
-      "SectionPrinciple": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The principle's unique ID."
-          },
-          "name": {
-            "type": "string",
-            "description": "The principle's name."
-          }
-        },
-        "required": [
-          "id",
-          "name"
-        ],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "Section": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "The section name"
-          },
-          "framework": {
-            "type": "string",
-            "description": "The section framework"
-          },
-          "principle": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SectionPrinciple"
-              }
-            ],
-            "nullable": true,
-            "description": "The principle that groups this section, if any."
-          }
-        },
-        "required": [
-          "name",
-          "framework",
-          "principle"
-        ],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "AuditControlAssessmentState": {
-        "type": "string",
-        "enum": [
-          "IN_PLACE",
-          "NOT_IN_PLACE",
-          "PARTIAL",
-          "NOT_ASSESSED",
-          "CONFORMING",
-          "MINOR_NON_CONFORMITY",
-          "MAJOR_NON_CONFORMITY",
-          "SATISFIED",
-          "NOT_SATISFIED",
-          "OTHER_THAN_SATISFIED",
-          "TRUE",
-          "FALSE"
-        ],
-        "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); the selected\nsegment's framework determines which subset applies. `NOT_ASSESSED` is shared\nby all frameworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept."
-      },
-      "AuditControlAssessment": {
-        "description": "An auditor's assessment of a control within one audit segment. Assessments\ncan be recorded for any segment on the audit, `PROGRAM` or `SYSTEM`, and a\ncontrol can carry a distinct assessment per segment.\nA segment with no recorded assessment returns `NOT_ASSESSED` with a `null`\njustification.",
-        "properties": {
-          "segmentId": {
-            "type": "string",
-            "description": "The audit segment this assessment belongs to."
-          },
-          "assessmentState": {
-            "$ref": "#/components/schemas/AuditControlAssessmentState",
-            "description": "The auditor's assessment of the control for this segment; `NOT_ASSESSED`\nwhen no assessment has been recorded."
-          },
-          "justification": {
-            "type": "string",
-            "nullable": true,
-            "description": "Free-text reasoning for the assessment; `null` when none has been recorded."
-          }
-        },
-        "required": [
-          "segmentId",
-          "assessmentState",
-          "justification"
-        ],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "ControlSource": {
-        "enum": [
-          "Vanta",
-          "Custom"
-        ],
-        "type": "string"
-      },
-      "AuditorControl": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The control's unique ID."
-          },
-          "externalId": {
-            "type": "string",
-            "nullable": true,
-            "description": "The control's external ID."
-          },
-          "name": {
-            "type": "string",
-            "description": "The control's name."
-          },
-          "description": {
-            "type": "string",
-            "description": "The control's description."
-          },
-          "source": {
-            "$ref": "#/components/schemas/ControlSource",
-            "description": "The control's source, either \"VANTA\" or \"CUSTOM\"."
-          },
-          "domains": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "description": "The security domains that the control belongs to."
-          },
-          "owner": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Owner"
-              }
-            ],
-            "nullable": true,
-            "description": "The control's owner."
-          },
-          "role": {
-            "type": "string",
-            "nullable": true,
-            "description": "The control's GDPR role, if the control is a GDPR control."
-          },
-          "customFields": {
-            "items": {
-              "$ref": "#/components/schemas/CustomField"
-            },
-            "type": "array",
-            "description": "The control's custom field values, if control custom fields is included in your Vanta instance."
-          },
-          "creationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "When the control was created. Returns null for Vanta library controls."
-          },
-          "modificationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "When the control was last modified. Returns null for Vanta library controls."
-          },
-          "framework": {
-            "type": "string",
-            "description": "The report standard framework fulfilled by the control.\nIncomplete once a control is in scope for more than one framework.",
-            "deprecated": true
-          },
-          "sections": {
-            "items": {
-              "$ref": "#/components/schemas/Section"
-            },
-            "type": "array",
-            "description": "Current framework sections this control satisfies within the audit\nsegments in which it is in scope."
-          },
-          "inScopeSegmentIds": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "description": "Audit segments in which this control is in scope. This can differ from\ncurrent framework mappings, and the array can be empty."
-          },
-          "assessments": {
-            "items": {
-              "$ref": "#/components/schemas/AuditControlAssessment"
-            },
-            "type": "array",
-            "description": "The auditor's assessments of this control, with one entry for each segment\nin `inScopeSegmentIds`, which can be any segment on the audit, `PROGRAM` or\n`SYSTEM`. Populated only for IRL audits when assessment access is allowed;\nempty otherwise. A segment with no recorded assessment returns\n`NOT_ASSESSED`."
-          }
-        },
-        "required": [
-          "id",
-          "externalId",
-          "name",
-          "description",
-          "source",
-          "domains",
-          "owner",
-          "customFields",
-          "creationDate",
-          "modificationDate",
-          "framework",
-          "sections",
-          "inScopeSegmentIds",
-          "assessments"
-        ],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "PaginatedResponse_AuditorControl_": {
-        "properties": {
-          "results": {
-            "properties": {
-              "data": {
-                "items": {
-                  "$ref": "#/components/schemas/AuditorControl"
-                },
-                "type": "array"
-              },
-              "pageInfo": {
-                "$ref": "#/components/schemas/PageInfo"
-              }
-            },
-            "required": [
-              "data",
-              "pageInfo"
-            ],
-            "type": "object"
-          }
-        },
-        "required": [
-          "results"
-        ],
-        "type": "object",
-        "additionalProperties": false
-      },
       "AddCommentInput": {
         "properties": {
           "text": {
@@ -2828,252 +2664,6 @@
           "reminderWindow",
           "isRestricted",
           "auditorEmail"
-        ],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "AuditorApiControl": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The control's unique ID."
-          },
-          "externalId": {
-            "type": "string",
-            "nullable": true,
-            "description": "The control's external ID."
-          },
-          "name": {
-            "type": "string",
-            "description": "The control's name."
-          },
-          "description": {
-            "type": "string",
-            "description": "The control's description."
-          },
-          "source": {
-            "$ref": "#/components/schemas/ControlSource",
-            "description": "The control's source, either \"VANTA\" or \"CUSTOM\"."
-          },
-          "domains": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "description": "The security domains that the control belongs to."
-          },
-          "owner": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Owner"
-              }
-            ],
-            "nullable": true,
-            "description": "The control's owner."
-          },
-          "role": {
-            "type": "string",
-            "nullable": true,
-            "description": "The control's GDPR role, if the control is a GDPR control."
-          },
-          "customFields": {
-            "items": {
-              "$ref": "#/components/schemas/CustomField"
-            },
-            "type": "array",
-            "description": "The control's custom field values, if control custom fields is included in your Vanta instance."
-          },
-          "creationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "When the control was created. Returns null for Vanta library controls."
-          },
-          "modificationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "When the control was last modified. Returns null for Vanta library controls."
-          }
-        },
-        "required": [
-          "id",
-          "externalId",
-          "name",
-          "description",
-          "source",
-          "domains",
-          "owner",
-          "customFields",
-          "creationDate",
-          "modificationDate"
-        ],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "ControlDomain": {
-        "enum": [
-          "ARTIFICIAL_&_AUTONOMOUS_TECHNOLOGY",
-          "ASSET_MANAGEMENT",
-          "BUSINESS_CONTINUITY_&_DISASTER_RECOVERY",
-          "CAPACITY_&_PERFORMANCE_PLANNING",
-          "CHANGE_MANAGEMENT",
-          "CLOUD_SECURITY",
-          "COMPLIANCE",
-          "CONFIGURATION_MANAGEMENT",
-          "CONTINUOUS_MONITORING",
-          "CRYPTOGRAPHIC_PROTECTIONS",
-          "DATA_CLASSIFICATION_&_HANDLING",
-          "EMBEDDED_TECHNOLOGY",
-          "ENDPOINT_SECURITY",
-          "HUMAN_RESOURCES_SECURITY",
-          "IDENTIFICATION_&_AUTHENTICATION",
-          "INCIDENT_RESPONSE",
-          "INFORMATION_ASSURANCE",
-          "MAINTENANCE",
-          "MOBILE_DEVICE_MANAGEMENT",
-          "NETWORK SECURITY",
-          "PHYSICAL_&_ENVIRONMENTAL_SECURITY",
-          "PRIVACY",
-          "PROJECT_&_RESOURCE MANAGEMENT",
-          "RISK_MANAGEMENT",
-          "SECURE_ENGINEERING_&_ARCHITECTURE",
-          "SECURITY_AWARENESS_&_TRAINING",
-          "SECURITY_OPERATIONS",
-          "SECURITY_&_PRIVACY_GOVERNANCE",
-          "TECHNOLOGY_DEVELOPMENT_&_ACQUISITION",
-          "THIRD-PARTY_MANAGEMENT",
-          "THREAT_MANAGEMENT",
-          "VULNERABILITY_&_PATCH_MANAGEMENT",
-          "WEB_SECURITY",
-          "ADMINISTRATIVE",
-          "PHYSICAL",
-          "TECHNICAL",
-          "BASIC",
-          "DERIVED"
-        ],
-        "type": "string"
-      },
-      "FrameworkId": {
-        "enum": [
-          "AU_E_8",
-          "AWS_FTR",
-          "CCPA",
-          "CIS_V8",
-          "CPS_234",
-          "DORA",
-          "FEDRAMP",
-          "GDPR",
-          "HIPAA",
-          "HITRUST_E1",
-          "ISO_27001",
-          "ISO_27001_2022",
-          "ISO_27017",
-          "ISO_27018",
-          "ISO_27701",
-          "ISO_42001",
-          "ISO_9001",
-          "MSFT_SSPA",
-          "MVSP",
-          "NIS_2D",
-          "NIST_171",
-          "NIST_171_R3",
-          "NIST_53",
-          "NIST_AI_RMF",
-          "NIST_CSF",
-          "NIST_CSF_2",
-          "OFDSS",
-          "PCI_SAQ_A",
-          "PCI_SAQ_A_EP",
-          "PCI_SAQ_D_MERCHANT",
-          "PCI_SAQ_D_SP",
-          "PCI_DDS_4",
-          "SOC_2",
-          "SOX_ITGC",
-          "UK_CYBER_ESSENTIALS",
-          "US_DATA_PRIVACY"
-        ],
-        "type": "string"
-      },
-      "FrameworkSection": {
-        "properties": {
-          "frameworkId": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FrameworkId"
-              },
-              {
-                "type": "string"
-              }
-            ]
-          },
-          "sectionId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "frameworkId",
-          "sectionId"
-        ],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "GdprRole": {
-        "enum": [
-          "BOTH",
-          "CONTROLLER",
-          "PROCESSOR"
-        ],
-        "type": "string"
-      },
-      "CreateCustomControlInput": {
-        "properties": {
-          "externalId": {
-            "type": "string",
-            "description": "The external id of the control."
-          },
-          "name": {
-            "type": "string",
-            "nullable": true,
-            "description": "The name of the control."
-          },
-          "description": {
-            "type": "string",
-            "description": "The description of the control."
-          },
-          "effectiveDate": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The effective date of the control."
-          },
-          "category": {
-            "$ref": "#/components/schemas/ControlDomain",
-            "description": "The category of the control. See the ControlDomain enum for possible values."
-          },
-          "sections": {
-            "items": {
-              "$ref": "#/components/schemas/FrameworkSection"
-            },
-            "type": "array",
-            "nullable": true,
-            "description": "Framework sections that the control should be mapped to."
-          },
-          "role": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/GdprRole"
-              }
-            ],
-            "nullable": true,
-            "description": "The GDPR role of the control, which specifies whether the data is being \"collected\" or \"processed\". See the GdprRole enum for possible values.\nThis field should only be included for controls that are to be mapped to the GDPR framework."
-          }
-        },
-        "required": [
-          "externalId",
-          "name",
-          "description",
-          "effectiveDate",
-          "category"
         ],
         "type": "object",
         "additionalProperties": false
@@ -3570,6 +3160,13 @@
             "description": "Vendor name.",
             "example": "Acme Corp"
           },
+          "segmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the audit segments this vendor is in scope for.\nOmitted when segment scoping is disabled."
+          },
           "inherentRisk": {
             "$ref": "#/components/schemas/AuditVendorRiskLevel",
             "description": "Inherent risk level of the vendor.",
@@ -3604,7 +3201,14 @@
             "type": "string",
             "nullable": true,
             "description": "Vendor category (e.g. cloud provider, SaaS).",
-            "example": "cloudProvider"
+            "example": "cloudProvider",
+            "deprecated": true
+          },
+          "vendorCategoryId": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID of the vendor's category.",
+            "example": "000000000000000000000002"
           },
           "residualRisk": {
             "allOf": [
@@ -4001,6 +3605,13 @@
             "description": "Display name of the group.",
             "example": "Engineering"
           },
+          "segmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the audit segments this group is in scope for.\nOmitted when segment scoping is disabled."
+          },
           "members": {
             "type": "number",
             "format": "double",
@@ -4241,6 +3852,13 @@
             "type": "string",
             "description": "Email address of the person - always present.",
             "example": "john.doe@example.com"
+          },
+          "segmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the audit segments this person is in scope for.\nOmitted when segment scoping is disabled."
           },
           "jobTitle": {
             "type": "string",
@@ -4496,6 +4114,13 @@
             "type": "string",
             "description": "Account name or email address (primary identifier).",
             "example": "john.doe@example.com"
+          },
+          "segmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the audit segments this account is in scope for.\nOmitted when segment attribution is unavailable or scoping is disabled."
           },
           "owner": {
             "type": "string",
@@ -5194,6 +4819,13 @@
             "description": "Display name of the integration.",
             "example": "GitHub"
           },
+          "segmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the audit segments this integration is in scope for.\nOmitted when segment scoping is disabled."
+          },
           "tags": {
             "items": {
               "type": "string"
@@ -5760,6 +5392,7 @@
         ]
       },
       "UploadedDocumentEvidence": {
+        "title": "UploadedDocumentEvidence",
         "description": "Evidence in the form of an uploaded document file.\nThe URL is a temporary presigned URL that expires after a certain period.",
         "properties": {
           "id": {
@@ -5788,6 +5421,7 @@
         "additionalProperties": false
       },
       "LinkEvidence": {
+        "title": "LinkEvidence",
         "description": "Evidence in the form of a link to external documentation or resources.",
         "properties": {
           "title": {
@@ -5811,6 +5445,7 @@
         "additionalProperties": false
       },
       "ObservationEvidence": {
+        "title": "ObservationEvidence",
         "description": "Evidence in the form of a text observation or note.",
         "properties": {
           "observationDetails": {
@@ -5825,6 +5460,7 @@
         "additionalProperties": false
       },
       "VantaDocumentUploadedEvidence": {
+        "title": "VantaDocumentUploadedEvidence",
         "description": "Represents an uploaded file in a Vanta Document.\nThe file is stored in Vanta's system and accessed via a presigned URL.",
         "properties": {
           "type": {
@@ -5862,6 +5498,7 @@
         "additionalProperties": false
       },
       "VantaDocumentLinkEvidence": {
+        "title": "VantaDocumentLinkEvidence",
         "description": "Represents an external link in a Vanta Document.\nThe link points to documentation hosted outside of Vanta's system.",
         "properties": {
           "type": {
@@ -5890,6 +5527,7 @@
         "additionalProperties": false
       },
       "VantaDocumentEvidence": {
+        "title": "VantaDocumentEvidence",
         "description": "Evidence in the form of a Vanta Document.\nVanta Documents are managed documents with metadata like expiration dates\nand versioning. They can either be uploaded files stored in Vanta or\nlinks to external documentation.",
         "properties": {
           "title": {
@@ -5946,6 +5584,7 @@
         "additionalProperties": false
       },
       "VantaPolicyEvidence": {
+        "title": "VantaPolicyEvidence",
         "description": "Evidence in the form of a Vanta Policy.\nVanta Policies are compliance policies with metadata like locale,\neffective dates, and versioning. Policies are always uploaded files\nstored in Vanta's system.",
         "properties": {
           "title": {
@@ -6059,7 +5698,8 @@
         ]
       },
       "VantaTestEvidence": {
-        "description": "Evidence in the form of a Vanta automated test run.\nVanta Tests are automated compliance tests with metadata like test status,\nexecution time, and file type. Tests generate evidence files that can be\nworkpapers, raw data, or API request logs.",
+        "title": "VantaTestEvidence",
+        "description": "Evidence in the form of a Vanta automated test run.\nVanta Tests are automated compliance tests with metadata like test status,\nexecution time, and file type. Tests generate evidence files that can be\nworkpapers, raw data, or API request logs.\nEach file in a snapshot is returned as a separate evidence item. These\nitems share `testId` and `snapshotId` and differ by `fileType`.",
         "properties": {
           "title": {
             "type": "string",
@@ -6118,6 +5758,7 @@
         "additionalProperties": false
       },
       "VantaTestSnapshotEvidence": {
+        "title": "VantaTestSnapshotEvidence",
         "description": "Evidence in the form of a Vanta automated test run snapshot.\n\nUnlike VantaTestEvidence (which represents a single file within a test run's\nevidence packet), a snapshot represents the entire test-run bundle. Use the\ndedicated snapshot detail endpoint to retrieve the files associated with a\nsnapshot.",
         "properties": {
           "snapshotId": {
@@ -6195,7 +5836,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "The unique identifier for the evidence within Vanta's system.\nFormat: ObjectId as a string (e.g., \"6890e473dce1da5d8406f5e7\")."
+            "description": "The unique identifier for the evidence within Vanta's system.\nUse it as the key when you sync evidence of any type.\nEach evidence item has at most one file. A file attached to two\ninformation requests appears as two evidence items with\ndifferent IDs.\nFormat: ObjectId as a string (e.g., \"6890e473dce1da5d8406f5e7\")."
           },
           "evidenceType": {
             "$ref": "#/components/schemas/InformationRequestSupportedEvidenceType",
@@ -6223,6 +5864,13 @@
             "nullable": true,
             "description": "Timestamp when the evidence was soft-deleted.\nNull if the evidence has not been deleted.\nSoft deletes retain evidence in the system for audit history while hiding\nit from normal operations.\nFormat: ISO 8601 UTC timestamp."
           },
+          "capturedSegmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the audit segments this evidence was relevant to when captured.\nEmpty for uploaded, link and observation evidence, and for evidence captured before attribution was recorded."
+          },
           "evidence": {
             "$ref": "#/components/schemas/InformationRequestEvidenceUnion",
             "description": "The evidence content. Structure varies based on evidenceType."
@@ -6233,6 +5881,7 @@
           "evidenceType",
           "creationDate",
           "modificationDate",
+          "capturedSegmentIds",
           "evidence"
         ],
         "type": "object",
@@ -6854,6 +6503,486 @@
         "type": "object",
         "additionalProperties": false
       },
+      "SectionPrinciple": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The principle's unique ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "The principle's name."
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "Section": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The section name"
+          },
+          "framework": {
+            "type": "string",
+            "description": "The section framework"
+          },
+          "principle": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SectionPrinciple"
+              }
+            ],
+            "nullable": true,
+            "description": "The principle that groups this section, if any."
+          }
+        },
+        "required": [
+          "name",
+          "framework",
+          "principle"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AuditControlAssessmentState": {
+        "type": "string",
+        "enum": [
+          "IN_PLACE",
+          "NOT_IN_PLACE",
+          "PARTIAL",
+          "NOT_ASSESSED",
+          "CONFORMING",
+          "MINOR_NON_CONFORMITY",
+          "MAJOR_NON_CONFORMITY",
+          "SATISFIED",
+          "NOT_SATISFIED",
+          "OTHER_THAN_SATISFIED",
+          "TRUE",
+          "FALSE"
+        ],
+        "description": "An auditor's assessment of a control within an audit. This is the full flat\nunion of every framework's assessment states (the superset); the selected\nsegment's framework determines which subset applies. `NOT_ASSESSED` is shared\nby all frameworks and is the default for a control that has not yet been assessed.\n\nWhich states apply to which framework:\n- Most frameworks (e.g. SOC 2): `IN_PLACE`, `NOT_IN_PLACE`, `PARTIAL`, `NOT_ASSESSED`\n- ISO 27001: `CONFORMING`, `MINOR_NON_CONFORMITY`, `MAJOR_NON_CONFORMITY`, `NOT_ASSESSED`\n- FedRAMP: `SATISFIED`, `NOT_SATISFIED`, `OTHER_THAN_SATISFIED`, `NOT_ASSESSED`\n- FedRAMP Key Security Indicators (KSI): `TRUE`, `FALSE`, `PARTIAL`, `NOT_ASSESSED`\n\nDistinct from `ControlStatus`, which is the computed tests/documents-passing\nstatus — a different concept."
+      },
+      "AuditControlAssessment": {
+        "description": "An auditor's assessment of a control within one audit segment. Assessments\ncan be recorded for any segment on the audit, `PROGRAM` or `SYSTEM`, and a\ncontrol can carry a distinct assessment per segment.\nA segment with no recorded assessment returns `NOT_ASSESSED` with a `null`\njustification.",
+        "properties": {
+          "segmentId": {
+            "type": "string",
+            "description": "The audit segment this assessment belongs to."
+          },
+          "assessmentState": {
+            "$ref": "#/components/schemas/AuditControlAssessmentState",
+            "description": "The auditor's assessment of the control for this segment; `NOT_ASSESSED`\nwhen no assessment has been recorded."
+          },
+          "justification": {
+            "type": "string",
+            "nullable": true,
+            "description": "Free-text reasoning for the assessment; `null` when none has been recorded."
+          }
+        },
+        "required": [
+          "segmentId",
+          "assessmentState",
+          "justification"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ControlSource": {
+        "enum": [
+          "Vanta",
+          "Custom"
+        ],
+        "type": "string"
+      },
+      "AuditorControl": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The control's unique ID."
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The control's external ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "The control's name."
+          },
+          "description": {
+            "type": "string",
+            "description": "The control's description."
+          },
+          "source": {
+            "$ref": "#/components/schemas/ControlSource",
+            "description": "The control's source, either \"VANTA\" or \"CUSTOM\"."
+          },
+          "domains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The security domains that the control belongs to."
+          },
+          "owner": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Owner"
+              }
+            ],
+            "nullable": true,
+            "description": "The control's owner."
+          },
+          "role": {
+            "type": "string",
+            "nullable": true,
+            "description": "The control's GDPR role, if the control is a GDPR control."
+          },
+          "customFields": {
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "type": "array",
+            "description": "The control's custom field values, if control custom fields is included in your Vanta instance."
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the control was created. Returns null for Vanta library controls."
+          },
+          "modificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the control was last modified. Returns null for Vanta library controls."
+          },
+          "framework": {
+            "type": "string",
+            "description": "The report standard framework fulfilled by the control.\nIncomplete once a control is in scope for more than one framework.",
+            "deprecated": true
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/Section"
+            },
+            "type": "array",
+            "description": "Current framework sections this control satisfies within the audit\nsegments in which it is in scope."
+          },
+          "inScopeSegmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Audit segments in which this control is in scope. This can differ from\ncurrent framework mappings, and the array can be empty."
+          },
+          "assessments": {
+            "items": {
+              "$ref": "#/components/schemas/AuditControlAssessment"
+            },
+            "type": "array",
+            "description": "The auditor's assessments of this control, with one entry for each segment\nin `inScopeSegmentIds`, which can be any segment on the audit, `PROGRAM` or\n`SYSTEM`. Populated only for IRL audits when assessment access is allowed;\nempty otherwise. A segment with no recorded assessment returns\n`NOT_ASSESSED`."
+          }
+        },
+        "required": [
+          "id",
+          "externalId",
+          "name",
+          "description",
+          "source",
+          "domains",
+          "owner",
+          "customFields",
+          "creationDate",
+          "modificationDate",
+          "framework",
+          "sections",
+          "inScopeSegmentIds",
+          "assessments"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "PaginatedResponse_AuditorControl_": {
+        "properties": {
+          "results": {
+            "properties": {
+              "data": {
+                "items": {
+                  "$ref": "#/components/schemas/AuditorControl"
+                },
+                "type": "array"
+              },
+              "pageInfo": {
+                "$ref": "#/components/schemas/PageInfo"
+              }
+            },
+            "required": [
+              "data",
+              "pageInfo"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AuditorApiControl": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The control's unique ID."
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The control's external ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "The control's name."
+          },
+          "description": {
+            "type": "string",
+            "description": "The control's description."
+          },
+          "source": {
+            "$ref": "#/components/schemas/ControlSource",
+            "description": "The control's source, either \"VANTA\" or \"CUSTOM\"."
+          },
+          "domains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The security domains that the control belongs to."
+          },
+          "owner": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Owner"
+              }
+            ],
+            "nullable": true,
+            "description": "The control's owner."
+          },
+          "role": {
+            "type": "string",
+            "nullable": true,
+            "description": "The control's GDPR role, if the control is a GDPR control."
+          },
+          "customFields": {
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "type": "array",
+            "description": "The control's custom field values, if control custom fields is included in your Vanta instance."
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the control was created. Returns null for Vanta library controls."
+          },
+          "modificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the control was last modified. Returns null for Vanta library controls."
+          }
+        },
+        "required": [
+          "id",
+          "externalId",
+          "name",
+          "description",
+          "source",
+          "domains",
+          "owner",
+          "customFields",
+          "creationDate",
+          "modificationDate"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ControlDomain": {
+        "enum": [
+          "ARTIFICIAL_&_AUTONOMOUS_TECHNOLOGY",
+          "ASSET_MANAGEMENT",
+          "BUSINESS_CONTINUITY_&_DISASTER_RECOVERY",
+          "CAPACITY_&_PERFORMANCE_PLANNING",
+          "CHANGE_MANAGEMENT",
+          "CLOUD_SECURITY",
+          "COMPLIANCE",
+          "CONFIGURATION_MANAGEMENT",
+          "CONTINUOUS_MONITORING",
+          "CRYPTOGRAPHIC_PROTECTIONS",
+          "DATA_CLASSIFICATION_&_HANDLING",
+          "EMBEDDED_TECHNOLOGY",
+          "ENDPOINT_SECURITY",
+          "HUMAN_RESOURCES_SECURITY",
+          "IDENTIFICATION_&_AUTHENTICATION",
+          "INCIDENT_RESPONSE",
+          "INFORMATION_ASSURANCE",
+          "MAINTENANCE",
+          "MOBILE_DEVICE_MANAGEMENT",
+          "NETWORK SECURITY",
+          "PHYSICAL_&_ENVIRONMENTAL_SECURITY",
+          "PRIVACY",
+          "PROJECT_&_RESOURCE MANAGEMENT",
+          "RISK_MANAGEMENT",
+          "SECURE_ENGINEERING_&_ARCHITECTURE",
+          "SECURITY_AWARENESS_&_TRAINING",
+          "SECURITY_OPERATIONS",
+          "SECURITY_&_PRIVACY_GOVERNANCE",
+          "TECHNOLOGY_DEVELOPMENT_&_ACQUISITION",
+          "THIRD-PARTY_MANAGEMENT",
+          "THREAT_MANAGEMENT",
+          "VULNERABILITY_&_PATCH_MANAGEMENT",
+          "WEB_SECURITY",
+          "ADMINISTRATIVE",
+          "PHYSICAL",
+          "TECHNICAL",
+          "BASIC",
+          "DERIVED"
+        ],
+        "type": "string"
+      },
+      "FrameworkId": {
+        "title": "FrameworkId",
+        "enum": [
+          "AU_E_8",
+          "AWS_FTR",
+          "CCPA",
+          "CIS_V8",
+          "CPS_234",
+          "DORA",
+          "FEDRAMP",
+          "GDPR",
+          "HIPAA",
+          "HITRUST_E1",
+          "ISO_27001",
+          "ISO_27001_2022",
+          "ISO_27017",
+          "ISO_27018",
+          "ISO_27701",
+          "ISO_42001",
+          "ISO_9001",
+          "MSFT_SSPA",
+          "MVSP",
+          "NIS_2D",
+          "NIST_171",
+          "NIST_171_R3",
+          "NIST_53",
+          "NIST_AI_RMF",
+          "NIST_CSF",
+          "NIST_CSF_2",
+          "OFDSS",
+          "PCI_SAQ_A",
+          "PCI_SAQ_A_EP",
+          "PCI_SAQ_D_MERCHANT",
+          "PCI_SAQ_D_SP",
+          "PCI_DDS_4",
+          "SOC_2",
+          "SOX_ITGC",
+          "UK_CYBER_ESSENTIALS",
+          "US_DATA_PRIVACY"
+        ],
+        "type": "string"
+      },
+      "FrameworkSection": {
+        "properties": {
+          "frameworkId": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FrameworkId"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "The framework's id, such as `soc2` or the id of a custom framework. The `FrameworkId` enum values are deprecated aliases that are still accepted."
+          },
+          "sectionId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "frameworkId",
+          "sectionId"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "GdprRole": {
+        "enum": [
+          "BOTH",
+          "CONTROLLER",
+          "PROCESSOR"
+        ],
+        "type": "string"
+      },
+      "CreateCustomControlInput": {
+        "properties": {
+          "externalId": {
+            "type": "string",
+            "description": "The external id of the control."
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The name of the control."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the control."
+          },
+          "effectiveDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The effective date of the control."
+          },
+          "category": {
+            "$ref": "#/components/schemas/ControlDomain",
+            "description": "The category of the control. See the ControlDomain enum for possible values."
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/FrameworkSection"
+            },
+            "type": "array",
+            "nullable": true,
+            "description": "Framework sections that the control should be mapped to."
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GdprRole"
+              }
+            ],
+            "nullable": true,
+            "description": "The GDPR role of the control, which specifies whether the data is being \"collected\" or \"processed\". See the GdprRole enum for possible values.\nThis field should only be included for controls that are to be mapped to the GDPR framework."
+          }
+        },
+        "required": [
+          "externalId",
+          "name",
+          "description",
+          "effectiveDate",
+          "category"
+        ],
+        "type": "object",
+        "additionalProperties": false
+      },
       "AuditControlComment": {
         "description": "A comment on a control within an audit. These threaded discussions let\nauditors and customers collaborate on a specific control — asking questions,\ndocumenting reasoning, or recording follow-ups — directly against the control\nbeing assessed.\n\nAudit control comments are scoped to a single audit engagement and are\ndistinct from any organization-internal control comments.",
         "properties": {
@@ -7060,6 +7189,13 @@
             "description": "Code change title (e.g. PR title) - always present.",
             "example": "fix-auth-bug"
           },
+          "segmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the audit segments this code change is in scope for.\nOmitted when segment scoping is disabled."
+          },
           "identifier": {
             "type": "string",
             "description": "Code change identifier (e.g. PR number).",
@@ -7187,6 +7323,7 @@
         "type": "string"
       },
       "AtlasClusterDatabase": {
+        "title": "AtlasClusterDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7235,6 +7372,7 @@
         "type": "string"
       },
       "AzureCosmosDBDatabase": {
+        "title": "AzureCosmosDBDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7278,6 +7416,7 @@
         "type": "string"
       },
       "AzureCosmosDBForPostgreSQLDatabase": {
+        "title": "AzureCosmosDBForPostgreSQLDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7328,6 +7467,7 @@
         "type": "string"
       },
       "AzureDatabaseForExternalSQLVariantDatabase": {
+        "title": "AzureDatabaseForExternalSQLVariantDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7378,6 +7518,7 @@
         "type": "string"
       },
       "AzureSQLDatabaseDatabase": {
+        "title": "AzureSQLDatabaseDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7428,6 +7569,7 @@
         "type": "string"
       },
       "AzureSQLManagedInstanceDatabase": {
+        "title": "AzureSQLManagedInstanceDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7475,6 +7617,7 @@
         "type": "string"
       },
       "AzureSQLServerOnVMsDatabase": {
+        "title": "AzureSQLServerOnVMsDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7518,6 +7661,7 @@
         "type": "string"
       },
       "AzureSynapseWarehouseDatabase": {
+        "title": "AzureSynapseWarehouseDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7564,6 +7708,7 @@
         "type": "string"
       },
       "BigQueryDatasetDatabase": {
+        "title": "BigQueryDatasetDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7606,6 +7751,7 @@
         "type": "string"
       },
       "BigtableInstanceDatabase": {
+        "title": "BigtableInstanceDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7648,6 +7794,7 @@
         "type": "string"
       },
       "CloudSQLInstanceDatabase": {
+        "title": "CloudSQLInstanceDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7693,6 +7840,7 @@
         "type": "string"
       },
       "DatastoreProjectDatabase": {
+        "title": "DatastoreProjectDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7736,6 +7884,7 @@
         "type": "string"
       },
       "DigitalOceanMongodbClusterDatabase": {
+        "title": "DigitalOceanMongodbClusterDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7778,6 +7927,7 @@
         "type": "string"
       },
       "DigitalOceanRedisClusterDatabase": {
+        "title": "DigitalOceanRedisClusterDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7820,6 +7970,7 @@
         "type": "string"
       },
       "DigitalOceanRelationalDbClusterDatabase": {
+        "title": "DigitalOceanRelationalDbClusterDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7865,6 +8016,7 @@
         "type": "string"
       },
       "DynamoDBTableDatabase": {
+        "title": "DynamoDBTableDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7919,6 +8071,7 @@
         "type": "string"
       },
       "FirestoreProjectDatabase": {
+        "title": "FirestoreProjectDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -7962,6 +8115,7 @@
         "type": "string"
       },
       "OracleCloudAutonomousDatabaseDatabase": {
+        "title": "OracleCloudAutonomousDatabaseDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -8004,6 +8158,7 @@
         "type": "string"
       },
       "RDSInstanceDatabase": {
+        "title": "RDSInstanceDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -8065,6 +8220,7 @@
         "type": "string"
       },
       "RedshiftClusterDatabase": {
+        "title": "RedshiftClusterDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -8113,6 +8269,7 @@
         "type": "string"
       },
       "SpannerInstanceDatabase": {
+        "title": "SpannerInstanceDatabase",
         "properties": {
           "id": {
             "type": "string",
@@ -8446,6 +8603,7 @@
                             "modificationDate": "2024-03-07T21:25:56.000Z",
                             "completionDate": "2024-03-07T21:25:56.000Z",
                             "auditFocus": "EXTERNAL",
+                            "auditView": "FULL",
                             "irlGenerationStatus": "READY",
                             "auditorRequestListMetadata": {
                               "requestsSharedWithCustomer": "2024-03-07T21:25:56.000Z"
@@ -8566,6 +8724,7 @@
                       "modificationDate": "2024-03-07T21:25:56.000Z",
                       "completionDate": "2024-03-07T21:25:56.000Z",
                       "auditFocus": "EXTERNAL",
+                      "auditView": "FULL",
                       "irlGenerationStatus": "READY",
                       "auditorRequestListMetadata": {
                         "requestsSharedWithCustomer": "2024-03-07T21:25:56.000Z"
@@ -8651,6 +8810,7 @@
                       "modificationDate": "2024-03-07T21:25:56.000Z",
                       "completionDate": "2024-03-07T21:25:56.000Z",
                       "auditFocus": "EXTERNAL",
+                      "auditView": "FULL",
                       "irlGenerationStatus": "READY",
                       "auditorRequestListMetadata": {
                         "requestsSharedWithCustomer": "2024-03-07T21:25:56.000Z"
@@ -8728,6 +8888,9 @@
                           {
                             "id": "code_change_12345",
                             "codeChange": "fix-auth-bug",
+                            "segmentIds": [
+                              "5f2c939a52855e725c8d5825"
+                            ],
                             "identifier": "101",
                             "service": "github",
                             "repository": "vanta/obsidian",
@@ -8743,7 +8906,7 @@
             }
           }
         },
-        "description": "Retrieves code changes population data for an audit.\n\nThis endpoint provides access to code change records (pull requests)\nvisible to auditors during an audit engagement.\n\nSupports filtering by:\n- `search`: Searches code change titles and repository names (case-insensitive)\n- `sourcesMatchesAny`: Filters by version control source (accepted values: github, gitlab, bitbucket, azuredevops)\n- `closedAfterDate` / `closedBeforeDate`: Filters by the closed date range\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nResults are sorted by closed date (newest first). This sort order is\nfixed and cannot be customized via query parameters.\n\nReturns 422 when the audit does not have exactly one program segment\n(multi-framework audits are not supported on this endpoint).\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves code changes population data for an audit.\n\nThis endpoint provides access to code change records (pull requests)\nvisible to auditors during an audit engagement.\n\nSupports filtering by:\n- `search`: Searches code change titles and repository names (case-insensitive)\n- `sourcesMatchesAny`: Filters by version control source (accepted values: github, gitlab, bitbucket, azuredevops)\n- `closedAfterDate` / `closedBeforeDate`: Filters by the closed date range\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nResults are sorted by closed date (newest first). This sort order is\nfixed and cannot be customized via query parameters.\n\nOn an audit that covers more than one framework, each code change in\nscope for any of the audit's frameworks is returned once.\n\nAudits with system segments are not supported by this endpoint.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "List code changes for an audit",
         "tags": [
           "Audits"
@@ -9024,6 +9187,18 @@
             "description": "Filter controls whose externalId matches any of the provided values (exact, case-sensitive match).",
             "in": "query",
             "name": "externalIdMatchesAny",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "description": "Return only controls whose `inScopeSegmentIds` include at least one of\nthese segment IDs from the audit's `segments[].id` (exact,\ncase-sensitive). IDs that aren't segments on this audit match nothing.\nRepeat the parameter for several IDs, and send the same filters with\nevery `pageCursor`.",
+            "in": "query",
+            "name": "segmentIdsMatchesAny",
             "required": false,
             "schema": {
               "type": "array",
@@ -11159,16 +11334,24 @@
                         "data": [
                           {
                             "id": "6890e473dce1da5d8406f5e8",
-                            "evidenceType": "UPLOADED_DOCUMENT",
+                            "evidenceType": "VANTA_DOCUMENT",
                             "visibleToAuditorDate": "2025-10-16T12:00:00.000Z",
                             "creationDate": "2025-10-15T10:30:00.000Z",
                             "modificationDate": "2025-10-16T12:00:00.000Z",
                             "deletionDate": null,
+                            "capturedSegmentIds": [
+                              "6890e473dce1da5d8406f5ec"
+                            ],
                             "evidence": {
-                              "id": "6890e473dce1da5d8406f5ea",
-                              "filename": "security-policy.pdf",
-                              "mimeType": "application/pdf",
-                              "url": "https://example.com/presigned-url"
+                              "title": "System boundary diagram",
+                              "documentVersionId": "6890e473dce1da5d8406f5ee",
+                              "file": {
+                                "type": "uploaded",
+                                "id": "6890e473dce1da5d8406f5ef",
+                                "filename": "system-boundary.pdf",
+                                "mimeType": "application/pdf",
+                                "url": "https://example.com/presigned-url"
+                              }
                             }
                           }
                         ],
@@ -11186,7 +11369,7 @@
             }
           }
         },
-        "description": "Retrieves a paginated list of all evidence attached to an information request,\nenabling auditors to review evidence submitted by customers.\n\nThis endpoint always includes soft-deleted records (where `deletionDate !== null`).\nClients should check the `deletionDate` field to identify and handle deleted records\nappropriately in their systems.\n\nIf the information request itself has been deleted, this endpoint returns a\n4xx HTTP error instead of its evidence.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only evidence created, modified, shared, or deleted since that timestamp is returned\n4. Process updates, including soft-deletes (deletionDate !== null)\n5. Update your last sync timestamp to the current time\n\nRate limit: 50 requests / minute.",
+        "description": "Retrieves a paginated list of all evidence attached to an information request,\nenabling auditors to review evidence submitted by customers.\n\nThis endpoint always includes soft-deleted records (where `deletionDate !== null`).\nClients should check the `deletionDate` field to identify and handle deleted records\nappropriately in their systems.\n\nIf the information request itself has been deleted, this endpoint returns a\n4xx HTTP error instead of its evidence.\n\nThis endpoint supports delta synchronization via the `changedSinceDate` parameter,\nallowing efficient polling for changes without retrieving the entire dataset.\n\nPagination usage:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage` to see if more data exists\n3. If true, use `results.pageInfo.endCursor` as `pageCursor` in next request\n4. Repeat until `hasNextPage` is false\n\nDelta sync usage:\n1. Store the timestamp of your last sync\n2. Pass that timestamp as `changedSinceDate`\n3. Only evidence created, modified, shared, or deleted since that timestamp is returned\n4. Process updates, including soft-deletes (deletionDate !== null)\n5. Update your last sync timestamp to the current time\n\nIdentifying evidence and files:\n- Use `id` as the key for each evidence item, whatever its type.\n- To recognize the same file across information requests, use the\n\n  file key for the evidence type. UPLOADED_DOCUMENT uses `evidence.id`.\n  VANTA_DOCUMENT and VANTA_POLICY use `evidence.file.id`, which\n  identifies the source document or policy file. VANTA_TEST uses\n  `evidence.snapshotId` plus `evidence.fileType`. LINK, OBSERVATION,\n  and VANTA_TEST_SNAPSHOT evidence has no file.\n- Do not use `file.url` as a key. It is a temporary download link.\n\nRate limit: 50 requests / minute.",
         "summary": "List evidence for an information request",
         "tags": [
           "Audits"
@@ -11272,16 +11455,24 @@
                   "Example 1": {
                     "value": {
                       "id": "6890e473dce1da5d8406f5e8",
-                      "evidenceType": "UPLOADED_DOCUMENT",
+                      "evidenceType": "VANTA_DOCUMENT",
                       "visibleToAuditorDate": "2025-10-16T12:00:00.000Z",
                       "creationDate": "2025-10-15T10:30:00.000Z",
                       "modificationDate": "2025-10-16T12:00:00.000Z",
                       "deletionDate": null,
+                      "capturedSegmentIds": [
+                        "6890e473dce1da5d8406f5ec"
+                      ],
                       "evidence": {
-                        "id": "6890e473dce1da5d8406f5ea",
-                        "filename": "security-policy.pdf",
-                        "mimeType": "application/pdf",
-                        "url": "https://example.com/presigned-url"
+                        "title": "System boundary diagram",
+                        "documentVersionId": "6890e473dce1da5d8406f5ee",
+                        "file": {
+                          "type": "uploaded",
+                          "id": "6890e473dce1da5d8406f5ef",
+                          "filename": "system-boundary.pdf",
+                          "mimeType": "application/pdf",
+                          "url": "https://example.com/presigned-url"
+                        }
                       }
                     }
                   }
@@ -11552,6 +11743,9 @@
                           {
                             "id": "github",
                             "name": "GitHub",
+                            "segmentIds": [
+                              "5f2c939a52855e725c8d5825"
+                            ],
                             "tags": [
                               "Vulnerabilities",
                               "Code changes"
@@ -11569,7 +11763,7 @@
             }
           }
         },
-        "description": "Retrieves integration population data for an audit.\n\nThis endpoint provides access to integration records visible to auditors\nduring an audit engagement. Integrations represent connected services\n(e.g., GitHub, AWS, Slack) that provide data for the audit.\n\nSupports filtering by:\n- `search`: Searches integration names (case-insensitive)\n- `tagsMatchesAny`: Filters by integration tag (ACCESS, COMPUTERS, etc.)\n- `categoriesMatchesAny`: Filters by category (CLOUD_PROVIDER, HR_PROVIDER, etc.)\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nResults are sorted by integration display name (ascending). This sort order\nis fixed and cannot be customized via query parameters.\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves integration population data for an audit.\n\nThis endpoint provides access to integration records visible to auditors\nduring an audit engagement. Integrations represent connected services\n(e.g., GitHub, AWS, Slack) that provide data for the audit.\n\nSupports filtering by:\n- `search`: Searches integration names (case-insensitive)\n- `tagsMatchesAny`: Filters by integration tag (ACCESS, COMPUTERS, etc.)\n- `categoriesMatchesAny`: Filters by category (CLOUD_PROVIDER, HR_PROVIDER, etc.)\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nResults are sorted by integration display name (ascending). This sort order\nis fixed and cannot be customized via query parameters.\n\nSupports audits with one or more program segments.\nAudits with system segments are not supported by this endpoint.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "List integrations for an audit",
         "tags": [
           "Audits"
@@ -11923,7 +12117,11 @@
                           {
                             "id": "5f2c939a52855e725c8d5824",
                             "name": "Acme Corp",
+                            "segmentIds": [
+                              "5f2c939a52855e725c8d5825"
+                            ],
                             "vendorCategory": "SaaS",
+                            "vendorCategoryId": "5f2c939a52855e725c8d5826",
                             "inherentRisk": "HIGH",
                             "status": "ACTIVE",
                             "findings": 3,
@@ -11944,7 +12142,7 @@
             }
           }
         },
-        "description": "Retrieves vendor population data for an audit.\n\nThis endpoint provides access to vendor records visible to auditors\nduring an audit engagement.\n\nSupports filtering by:\n- `search`: Searches vendor names (case-insensitive)\n- `vendorStatusesMatchesAny`: Filters by vendor status (ACTIVE, ARCHIVED, IN_PROCUREMENT)\n- `inherentRiskMatchesAny`: Filters by inherent risk level\n\nResults are sorted by name (ascending) by default.\nUse `orderBy` and `orderDirection` to customize sorting.\nSort parameters must remain consistent across paginated requests.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves vendor population data for an audit.\n\nThis endpoint provides access to vendor records visible to auditors\nduring an audit engagement.\n\nSupports filtering by:\n- `search`: Searches vendor names (case-insensitive)\n- `vendorStatusesMatchesAny`: Filters by vendor status (ACTIVE, ARCHIVED, IN_PROCUREMENT)\n- `inherentRiskMatchesAny`: Filters by inherent risk level\n\nResults are sorted by name (ascending) by default.\nUse `orderBy` and `orderDirection` to customize sorting.\nSort parameters must remain consistent across paginated requests.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nSupports audits with one or more program segments.\nAudits with system segments are not supported by this endpoint.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "List vendors for an audit",
         "tags": [
           "Audits"
@@ -12177,7 +12375,7 @@
             }
           }
         },
-        "description": "Retrieves organization information for an audit.\n\nThis endpoint returns a single record containing the organization's\nbusiness information visible to auditors during an audit engagement.\n\nSorting and pagination are not applicable.\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves organization information for an audit.\n\nThis endpoint returns a single record containing the organization's\nbusiness information visible to auditors during an audit engagement.\n\nSorting and pagination are not applicable.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "Get organization information for an audit",
         "tags": [
           "Audits"
@@ -12243,7 +12441,7 @@
             }
           }
         },
-        "description": "Retrieves organization notification settings for an audit.\n\nThis endpoint returns a single record containing the auditee\norganization's notification configuration — schedule, personnel\nreminder settings, and external notification subscriptions\n(Compliance, Vendors, Access Reviews, Trust Center).\n\nThe response is a single aggregate object per domain. Sorting and\npagination are not applicable. Under a controlled audit view\n(TRIMMED_DOWN), only CAV-approved fields are included.\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves organization notification settings for an audit.\n\nThis endpoint returns a single record containing the auditee\norganization's notification configuration — schedule, personnel\nreminder settings, and external notification subscriptions\n(Compliance, Vendors, Access Reviews, Trust Center).\n\nThe response is a single aggregate object per domain. Sorting and\npagination are not applicable. Only CAV-approved fields are included.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "Get organization notification settings for an audit",
         "tags": [
           "Audits"
@@ -12560,7 +12758,7 @@
             }
           }
         },
-        "description": "Retrieves connected account access services for an audit.\n\nReturns the list of identity providers and access integrations (such as\nOkta, Azure AD, Google Workspace, AWS IAM) that are connected to the\norganization and provide account access data for personnel.\n\nThese integrations are used to verify user access and identity management\nduring an audit engagement.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nResults are returned in connection order. Sort order is not guaranteed\nand cannot be customized via query parameters.\n\nReturns 422 when the audit does not have exactly one program segment\n(multi-framework audits are not supported on this endpoint).\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves connected account access services for an audit.\n\nReturns the list of identity providers and access integrations (such as\nOkta, Azure AD, Google Workspace, AWS IAM) that are connected to the\norganization and provide account access data for personnel.\n\nThese integrations are used to verify user access and identity management\nduring an audit engagement.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nResults are returned in connection order. Sort order is not guaranteed\nand cannot be customized via query parameters.\n\nOn an audit that covers more than one framework, each service in scope\nfor any of the audit's frameworks is listed once.\n\nAudits with system segments are not supported by this endpoint.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "List account access services for an audit",
         "tags": [
           "Audits"
@@ -12626,6 +12824,9 @@
                           {
                             "id": "5f2c939a52855e725c8d5824",
                             "accountName": "john.doe@example.com",
+                            "segmentIds": [
+                              "5f2c939a52855e725c8d5825"
+                            ],
                             "owner": "John Doe",
                             "role": [
                               "Admin"
@@ -12644,7 +12845,7 @@
             }
           }
         },
-        "description": "Retrieves account access population data for an audit.\n\nThis endpoint provides access to account access records visible to auditors\nduring an audit engagement. Account access data comes from various sources:\n\n- **IDP Services** (Identity Providers): Okta, Azure AD, Google Workspace, OneLogin, PingOne\n\n  - Returns user accounts from identity providers\n  - Supports filtering by search and status\n\n- **Role Grants Services**: GCP, Azure (when role grants are enabled)\n\n  - Returns accounts with role-based access grants\n  - Supports filtering by search and status\n\n- **First-Party Account Services**: AWS, Oracle Cloud, Azure (when not using role grants), etc.\n\n  - Returns cloud provider account access records\n  - Supports filtering by search and status\n\n- **Received Account Services**: External applications (Jira, GitHub, Slack, etc.)\n\n  - Returns user accounts from third-party integrations\n  - Supports filtering by search and status\n\n\nSupports filtering by:\n- `search`: Searches account names/emails (case-insensitive)\n- `status`: Filters by account status\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nThe default sort order depends on the service type:\n- Identity provider services (e.g. Okta, Azure AD): sorted by email, ascending\n- Cloud provider services (e.g. AWS, GCP): sorted by account name, ascending\n- Role grant services: sorted by account name, ascending\n- Third-party application services (e.g. GitHub, Jira): sorted by account name, ascending\n\nSort order cannot be customized via query parameters.\n\nReturns 422 when the audit does not have exactly one program segment\n(multi-framework audits are not supported on this endpoint).\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves account access population data for an audit.\n\nThis endpoint provides access to account access records visible to auditors\nduring an audit engagement. Account access data comes from various sources:\n\n- **IDP Services** (Identity Providers): Okta, Azure AD, Google Workspace, OneLogin, PingOne\n\n  - Returns user accounts from identity providers\n  - Supports filtering by search and status\n\n- **Role Grants Services**: GCP, Azure (when role grants are enabled)\n\n  - Returns accounts with role-based access grants\n  - Supports filtering by search and status\n\n- **First-Party Account Services**: AWS, Oracle Cloud, Azure (when not using role grants), etc.\n\n  - Returns cloud provider account access records\n  - Supports filtering by search and status\n\n- **Received Account Services**: External applications (Jira, GitHub, Slack, etc.)\n\n  - Returns user accounts from third-party integrations\n  - Supports filtering by search and status\n\n\nSupports filtering by:\n- `search`: Searches account names/emails (case-insensitive)\n- `status`: Filters by account status\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nThe default sort order depends on the service type:\n- Identity provider services (e.g. Okta, Azure AD): sorted by email, ascending\n- Cloud provider services (e.g. AWS, GCP): sorted by account name, ascending\n- Role grant services: sorted by account name, ascending\n- Third-party application services (e.g. GitHub, Jira): sorted by account name, ascending\n\nSort order cannot be customized via query parameters.\n\nReturns 404 when `serviceId` is not listed by the\n`/personnel/account-access/services` endpoint for this audit.\n\nAudits with system segments are not supported by this endpoint.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "List account access records for an audit",
         "tags": [
           "Audits"
@@ -12737,6 +12938,9 @@
                           {
                             "id": "5f2c939a52855e725c8d5824",
                             "name": "Engineering",
+                            "segmentIds": [
+                              "5f2c939a52855e725c8d5825"
+                            ],
                             "members": 42,
                             "source": "Okta",
                             "tasks": [
@@ -12759,7 +12963,7 @@
             }
           }
         },
-        "description": "Retrieves groups population data for an audit.\n\nThis endpoint provides access to the group records visible to auditors\nduring an audit engagement. Groups represent organizational units that\ncontain people, either imported from an identity provider (IDP) or\ncreated manually in Vanta.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit\nView audits are rejected with 403.\n\nSupports filtering by:\n- `search`: Searches group names (case-insensitive)\n- `sourcesMatchesAny`: Filters by IDP source service names\n\nResults are sorted by name (ascending) by default.\nUse `orderBy` and `orderDirection` to customize sorting.\nSort parameters must remain consistent across paginated requests.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves groups population data for an audit.\n\nThis endpoint provides access to the group records visible to auditors\nduring an audit engagement. Groups represent organizational units that\ncontain people, either imported from an identity provider (IDP) or\ncreated manually in Vanta.\n\nSupports filtering by:\n- `search`: Searches group names (case-insensitive)\n- `sourcesMatchesAny`: Filters by IDP source service names\n\nResults are sorted by name (ascending) by default.\nUse `orderBy` and `orderDirection` to customize sorting.\nSort parameters must remain consistent across paginated requests.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nSupports audits with one or more program segments.\nAudits with system segments are not supported by this endpoint.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "List groups for an audit",
         "tags": [
           "Audits"
@@ -12865,6 +13069,9 @@
                             "id": "person_12345",
                             "name": "John Doe",
                             "email": "john.doe@example.com",
+                            "segmentIds": [
+                              "5f2c939a52855e725c8d5825"
+                            ],
                             "jobTitle": "Software Engineer",
                             "employmentStatus": "CURRENTLY_EMPLOYED",
                             "startDate": "2021-01-15",
@@ -12930,7 +13137,7 @@
             }
           }
         },
-        "description": "Retrieves people population data for an audit.\n\nThis endpoint provides access to the people records visible to auditors\nduring an audit engagement. Only Controlled Audit View (CAV) audits\nare supported. Full Audit View audits are rejected with 403.\n\nSupports filtering by:\n- `search`: Searches names and email addresses\n- `status`: Filters by employment status\n- `groupsMatchesAny`: Filter people by group/role IDs\n\nResults are sorted by name (ascending) by default.\nUse `orderBy` and `orderDirection` to customize sorting.\nSort parameters must remain consistent across paginated requests.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves people population data for an audit.\n\nThis endpoint provides access to the people records visible to auditors\nduring an audit engagement.\n\nSupports filtering by:\n- `search`: Searches names and email addresses\n- `status`: Filters by employment status\n- `groupsMatchesAny`: Filter people by group/role IDs\n\nResults are sorted by name (ascending) by default.\nUse `orderBy` and `orderDirection` to customize sorting.\nSort parameters must remain consistent across paginated requests.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nSupports audits with one or more program segments.\nAudits with system segments are not supported by this endpoint.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "List people for an audit",
         "tags": [
           "Audits"
@@ -13054,7 +13261,7 @@
             }
           }
         },
-        "description": "Returns a paginated list of risk assessment snapshots available for an audit.\n\nRisk snapshots capture the state of an organization's risk register at a\npoint in time. Each snapshot has an `id` that can be used with the\n`/audits/{auditId}/risks` endpoint to retrieve the individual risk\nscenarios within that snapshot.\n\nResults are sorted by creation date (newest first). This sort order is\nfixed and cannot be customized via query parameters. Only snapshots\nthat are shared with auditors are included.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nRate limit: 10 requests / minute.",
+        "description": "Returns a paginated list of risk assessment snapshots available for an audit.\n\nRisk snapshots capture the state of an organization's risk register at a\npoint in time. Each snapshot has an `id` that can be used with the\n`/audits/{auditId}/risks` endpoint to retrieve the individual risk\nscenarios within that snapshot.\n\nResults are sorted by creation date (newest first). This sort order is\nfixed and cannot be customized via query parameters. Only snapshots\nthat are shared with auditors are included.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nSupports audits with one or more program segments.\nAudits with system segments are not supported by this endpoint.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "List risk snapshots for an audit",
         "tags": [
           "Audits"
@@ -13154,7 +13361,7 @@
             }
           }
         },
-        "description": "Retrieves risk population data for an audit.\n\nThis endpoint provides access to the risk records visible to auditors\nduring an audit engagement. Risk data is scoped to a specific risk\nassessment snapshot identified by the `snapshotId` parameter.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit\nView audits are rejected with 403.\n\nSupports filtering by:\n- `search`: Searches risk scenario descriptions (case-insensitive)\n\nResults are sorted by identified date (newest first) by default.\nUse `orderBy` and `orderDirection` to customize sorting.\nSort parameters must remain consistent across paginated requests.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nRate limit: 10 requests / minute.",
+        "description": "Retrieves risk population data for an audit.\n\nThis endpoint provides access to the risk records visible to auditors\nduring an audit engagement. Risk data is scoped to a specific risk\nassessment snapshot identified by the `snapshotId` parameter.\n\nSupports filtering by:\n- `search`: Searches risk scenario descriptions (case-insensitive)\n\nResults are sorted by identified date (newest first) by default.\nUse `orderBy` and `orderDirection` to customize sorting.\nSort parameters must remain consistent across paginated requests.\n\nUses cursor-based pagination. To paginate:\n1. Make initial request with desired `pageSize`\n2. Check `results.pageInfo.hasNextPage`\n3. Use `results.pageInfo.endCursor` as `pageCursor` for next request\n\nSupports audits with one or more program segments.\nAudits with system segments are not supported by this endpoint.\n\nOnly Controlled Audit View (CAV) audits are supported. Full Audit View\naudits are rejected with 403. Returns 403 if the customer has not made\nthis population page visible to auditors. Also returns 403 if the\nsnapshot is not shared with auditors, and 404 if the snapshot does not\nexist. Use snapshot IDs from `GET /audits/{auditId}/risks/snapshots`,\nwhich lists only snapshots shared with auditors.\n\nRate limit: 10 requests / minute.",
         "summary": "List risks for an audit",
         "tags": [
           "Audits"
@@ -13263,6 +13470,7 @@
                       "modificationDate": "2024-03-07T21:25:56.000Z",
                       "completionDate": "2024-03-07T21:25:56.000Z",
                       "auditFocus": "EXTERNAL",
+                      "auditView": "FULL",
                       "irlGenerationStatus": "READY",
                       "auditorRequestListMetadata": {
                         "requestsSharedWithCustomer": "2024-03-07T21:25:56.000Z"
@@ -13355,6 +13563,7 @@
                             "nextSecurityReviewDueDate": "2025-01-01T00:00:00.000Z",
                             "isVisibleToAuditors": true,
                             "isRiskAutoScored": true,
+                            "categoryId": "000000000000000000000001",
                             "category": {
                               "displayName": "cloudMonitoring"
                             },

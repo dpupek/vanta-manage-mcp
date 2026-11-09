@@ -1,12 +1,24 @@
 # Progress Log
 
+## 2026-11-09 — Case 248793 download and API expansion
+
+Follow-up: the local generated download operation matched an authorized direct AST PDF retrieval byte-for-byte (42,093 bytes; SHA-256 `524b82609ab1d72a315cb945454d2d0e76f6cab10cef6dee226958863fec4f3b`); temporary output was removed. The 44 changed operations have a field-level migration review. Vendor-alert and risk-mapping workflows now verify accepted writes through independent readback, and framework/evaluation/personnel operations have direct-tool recipes with operator readback and representative mock integration tests. `npm test` passed 239 tests, lint and 383-to-383 parity passed, generated help was refreshed, and regenerated operation/manifest hashes were unchanged. Live mutation fixtures, broader lifecycle coverage, release and installed-runtime verification remain open.
+
+- Implemented local byte-preserving document and Trust Center downloads with SHA-256 receipts and explicit source identity status; no-overwrite and configurable server-local limits apply.
+- Refreshed the three public API contracts to 383 generated operations, retaining all 333 prior tool identities. Added partial extended vendor and issue planning context; remaining workflow phases are open.
+- Fixed the review finding in which cancellation during publication could leave an unreceipted file. Cancellation waits for cleanup; a deterministic regression exercises that race.
+- Validation: after the review fix, `npm test` passed 212 tests; the later follow-up above passed 239 tests, lint, 383-to-383 parity, and diff checks. One read-only live PDF comparison passed; installed-runtime acceptance remains open.
+- The connected AST MCP was observed at v1.0.22 with 333 operations; this work has not been released or installed. Preserve the control implementation-write guard and its October 13 evidence.
+- Next slice: expand mock lifecycle and readback coverage for vendor settings/category/engagement and framework/personnel changes, including partial failures and permission denials. Live mutation acceptance and release remain separate. See the [epic roadmap](../../docs/vanta-mcp-api-expansion-248793/roadmap.md).
+
 ## 2026-10-09 — Case 248793 implementation-details verification
 
 - [x] Require exact independent GET readback for implementation-details PATCH requests, including clearing. Missing or different values and failed reads return `write_unverified` while preserving the accepted mutation context; verification does not replay PATCH.
 - [x] Add 11 regression cases and update help/troubleshooting guidance. Before commit, `npm test` passed 199 tests including the build; lint, 333-operation exact spec parity, scoped Prettier, and diff whitespace checks passed.
 - [x] Compare direct REST and UI behavior on an existing CMMC control. October 9 retest after Vanta's reported fix still returned HTTP 200 with no field in GET and no UI-visible text after full reload. Original blank content was verified after restoration and another reload.
 - [x] Send the sanitized retest to Vanta support in the existing thread under explicit user authorization. Request timestamps, request/response bodies, UI results, and restoration were included; vendor response is pending.
-- [ ] Verify public-API persistence after the vendor correction and publish the guard in a separately authorized release. The local commit is engineering progress; it is not production acceptance or a released artifact.
+- [x] Verify public-API persistence after the vendor correction on the tested existing DG control, with independent REST and UI readback on October 13.
+- [ ] Publish the guard in a separately authorized release. The local commit is engineering progress; it does not establish acceptance across all controls or workspaces.
 
 Evidence, workflow, remaining mapping questions, and support links: [implementation write verification](../../docs/vanta-mcp-api-expansion-248793/implementation-write-verification.md). Living plan: [case 248793 roadmap](../../docs/vanta-mcp-api-expansion-248793/roadmap.md).
 

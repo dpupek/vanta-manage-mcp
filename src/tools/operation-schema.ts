@@ -5,6 +5,7 @@ import {
   generatedSchemaDefinitions,
 } from "../generated/operations.generated.js";
 import { buildInputSchema } from "./input-schema.js";
+import { isDownloadOperation } from "../downloads/download.js";
 
 const schemaForKind = (
   kind: PrimitiveKind,
@@ -51,6 +52,20 @@ export const buildOperationSchema = (
 ): z.ZodObject<z.ZodRawShape> => {
   const shape: z.ZodRawShape = {};
   const definitions = generatedSchemaDefinitions[operation.source];
+
+  if (isDownloadOperation(operation)) {
+    shape.downloadFileName = z
+      .string()
+      .min(1)
+      .describe("File name in the server's configured download directory.");
+    shape.expectedSha256 = z
+      .string()
+      .regex(/^[a-fA-F0-9]{64}$/u)
+      .optional()
+      .describe(
+        "Optional SHA-256 of the original file for identity comparison.",
+      );
+  }
 
   for (const parameter of operation.parameters) {
     shape[parameter.name] = withOptional(

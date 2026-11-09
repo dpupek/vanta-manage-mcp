@@ -78,6 +78,376 @@ const getHandler = (
   return args => handler(args, { signal: new AbortController().signal });
 };
 
+test("extended vendor plan scopes incidents and external findings with independent cursors", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  registerWorkflowTools(server as never, client as never);
+  // Initial Assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = await getHandler(
+    server,
+    "workflow_vendor_triage",
+  )({
+    mode: "plan",
+    vendorId: "vendor-1",
+    includeExtendedContext: true,
+    externalFindingPageCursor: "findings-next",
+    incidentPageCursor: "incident-next",
+  });
+  // Assert
+  assert.equal(parseToolEnvelope(result).success, true);
+  const external = client.requests.find(
+    request => request.path === "/vendors/vendor-1/external-findings",
+  );
+  const incidents = client.requests.find(
+    request => request.path === "/vendor-security-incident-alerts",
+  );
+  assert.equal(
+    (external?.query as Record<string, unknown>).pageCursor,
+    "findings-next",
+  );
+  assert.deepEqual(
+    (incidents?.query as Record<string, unknown>).vendorIdMatchesAny,
+    ["vendor-1"],
+  );
+  assert.equal(
+    (incidents?.query as Record<string, unknown>).pageCursor,
+    "incident-next",
+  );
+});
+
+test("issue planning forwards scoped filters and retrieves the selected issue", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  registerWorkflowTools(server as never, client as never);
+  // Initial Assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = await getHandler(
+    server,
+    "workflow_issue_event_triage",
+  )({
+    mode: "plan",
+    ownerIdMatchesAny: ["owner-1"],
+    sourceMatchesAny: ["VULNERABILITY_SCANNER"],
+    dueBeforeDate: "2026-12-01T00:00:00Z",
+    issueId: "issue-1",
+  });
+  // Assert
+  assert.equal(parseToolEnvelope(result).success, true);
+  const request = client.requests.find(item => item.path === "/issues");
+  assert.deepEqual(
+    (request?.query as Record<string, unknown>).ownerIdMatchesAny,
+    ["owner-1"],
+  );
+  assert.deepEqual(
+    (request?.query as Record<string, unknown>).sourceMatchesAny,
+    ["VULNERABILITY_SCANNER"],
+  );
+  assert.equal(
+    (request?.query as Record<string, unknown>).dueBeforeDate,
+    "2026-12-01T00:00:00Z",
+  );
+  assert.ok(client.requests.some(item => item.path === "/issues/issue-1"));
+});
+
+for (const verified of [true, false]) {
+  test(`risk mapping write ${verified ? "verifies" : "reports unverified"} independent readback`, async () => {
+    // Arrange
+    const server = new FakeServer();
+    const client = new FakeClient();
+    const page = (ids: string[]): VantaResponse => ({
+      status: 200,
+      ok: true,
+      headers: {},
+      data: {
+        results: {
+          data: ids.map(issueId => ({ issueId })),
+          pageInfo: { hasNextPage: false },
+        },
+      },
+    });
+    client.queueResponses("GET", "/risk-scenarios/risk-1/mappings/issues", [
+      page(["existing"]),
+      page(verified ? ["existing", "new"] : ["existing"]),
+    ]);
+    client.setResponse("POST", "/risk-scenarios/risk-1/mappings/issues", {
+      status: 204,
+      ok: true,
+      headers: {},
+      data: null,
+    });
+    registerWorkflowTools(server as never, client as never);
+    // Initial assert
+    assert.equal(client.calls, 0);
+    // Act
+    const result = parseToolEnvelope(
+      await getHandler(
+        server,
+        "workflow_risk_mappings",
+      )({
+        mode: "execute",
+        confirm: true,
+        riskScenarioId: "risk-1",
+        kind: "issues",
+        change: "add",
+        items: ["new"],
+      }),
+    );
+    // Assert
+    assert.equal(result.success, verified);
+    if (!verified)
+      assert.equal(
+        (result.error as Record<string, unknown>).code,
+        "write_unverified",
+      );
+    assert.deepEqual(
+      client.requests.map(request => request.method),
+      ["get", "post", "get"],
+    );
+    assert.deepEqual(client.requests[1].body, { issueIdsToLink: ["new"] });
+  });
+}
+
+test("risk mapping workflow refuses writes when inventory is incomplete", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  client.setResponse("GET", "/risk-scenarios/risk-1/mappings/issues", {
+    status: 200,
+    ok: true,
+    headers: {},
+    data: {
+      results: { data: [], pageInfo: { hasNextPage: true, endCursor: "more" } },
+    },
+  });
+  registerWorkflowTools(server as never, client as never);
+  // Initial assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = parseToolEnvelope(
+    await getHandler(
+      server,
+      "workflow_risk_mappings",
+    )({
+      mode: "execute",
+      confirm: true,
+      riskScenarioId: "risk-1",
+      kind: "issues",
+      change: "remove",
+      items: ["old"],
+      maxPages: 1,
+    }),
+  );
+  // Assert
+  assert.equal(result.success, false);
+  assert.equal(
+    (result.error as Record<string, unknown>).code,
+    "workflow_read_failed",
+  );
+  assert.equal(
+    client.requests.some(request => request.method === "delete"),
+    false,
+  );
+});
+
+test("risk mapping execution requires confirmation before reading or writing", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  registerWorkflowTools(server as never, client as never);
+  // Initial assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = parseToolEnvelope(
+    await getHandler(
+      server,
+      "workflow_risk_mappings",
+    )({
+      mode: "execute",
+      riskScenarioId: "risk-1",
+      kind: "issues",
+      change: "add",
+      items: ["issue-1"],
+    }),
+  );
+  // Assert
+  assert.equal(result.success, false);
+  assert.equal(
+    (result.error as Record<string, unknown>).code,
+    "confirmation_required",
+  );
+  assert.equal(client.calls, 0);
+});
+
+for (const fixture of [
+  {
+    kind: "accounts",
+    suffix: "accounts",
+    item: { serviceId: "service-1", accountId: "account-1" },
+    row: { serviceId: "service-1", accountId: "account-1" },
+    key: "accountsToLink",
+  },
+  {
+    kind: "customAssets",
+    suffix: "custom-assets",
+    item: "asset-1",
+    row: { customAssetId: "asset-1" },
+    key: "customAssetIdsToLink",
+  },
+  {
+    kind: "integrations",
+    suffix: "integrations",
+    item: "integration-1",
+    row: { integrationId: "integration-1" },
+    key: "integrationIdsToAdd",
+  },
+]) {
+  test(`risk mapping workflow verifies ${fixture.kind} using its documented body key`, async () => {
+    // Arrange
+    const server = new FakeServer();
+    const client = new FakeClient();
+    const path = `/risk-scenarios/risk-1/mappings/${fixture.suffix}`;
+    const page = (data: unknown[]): VantaResponse => ({
+      status: 200,
+      ok: true,
+      headers: {},
+      data: { results: { data, pageInfo: { hasNextPage: false } } },
+    });
+    client.queueResponses("GET", path, [page([]), page([fixture.row])]);
+    client.setResponse("POST", path, {
+      status: 204,
+      ok: true,
+      headers: {},
+      data: null,
+    });
+    registerWorkflowTools(server as never, client as never);
+    // Initial assert
+    assert.equal(client.calls, 0);
+    // Act
+    const result = parseToolEnvelope(
+      await getHandler(
+        server,
+        "workflow_risk_mappings",
+      )({
+        mode: "execute",
+        confirm: true,
+        riskScenarioId: "risk-1",
+        kind: fixture.kind,
+        change: "add",
+        items: [fixture.item],
+      }),
+    );
+    // Assert
+    assert.equal(result.success, true);
+    assert.deepEqual(client.requests[1].body, {
+      [fixture.key]: [fixture.item],
+    });
+  });
+}
+
+for (const verified of [true, false]) {
+  test(`vendor alert update ${verified ? "verifies" : "reports unverified"} each selected alert`, async () => {
+    // Arrange
+    const server = new FakeServer();
+    const client = new FakeClient();
+    const response = (status: string): VantaResponse => ({
+      status: 200,
+      ok: true,
+      headers: {},
+      data: { id: "alert-1", status },
+    });
+    client.queueResponses("GET", "/vendor-alerts/alert-1", [
+      response("OPEN"),
+      response(verified ? "RESOLVED" : "OPEN"),
+    ]);
+    client.setResponse("PATCH", "/vendor-alerts", {
+      status: 200,
+      ok: true,
+      headers: {},
+      data: { results: [{ id: "alert-1", status: "RESOLVED" }] },
+    });
+    registerWorkflowTools(server as never, client as never);
+    // Initial assert
+    assert.equal(client.calls, 0);
+    // Act
+    const result = parseToolEnvelope(
+      await getHandler(
+        server,
+        "workflow_vendor_alerts",
+      )({
+        mode: "execute",
+        confirm: true,
+        kind: "vendor",
+        alertIds: ["alert-1"],
+        status: "RESOLVED",
+      }),
+    );
+    // Assert
+    assert.equal(result.success, verified);
+    if (!verified)
+      assert.equal(
+        (result.error as Record<string, unknown>).code,
+        "write_unverified",
+      );
+    assert.deepEqual(
+      client.requests.map(request => request.method),
+      ["get", "patch", "get"],
+    );
+  });
+}
+
+test("vendor alert update reports unverified when the bulk result omits an alert", async () => {
+  // Arrange
+  const server = new FakeServer();
+  const client = new FakeClient();
+  const response = (status: string): VantaResponse => ({
+    status: 200,
+    ok: true,
+    headers: {},
+    data: { id: "alert-1", status },
+  });
+  client.queueResponses("GET", "/vendor-alerts/alert-1", [
+    response("OPEN"),
+    response("RESOLVED"),
+  ]);
+  client.setResponse("PATCH", "/vendor-alerts", {
+    status: 200,
+    ok: true,
+    headers: {},
+    data: { results: [] },
+  });
+  registerWorkflowTools(server as never, client as never);
+  // Initial assert
+  assert.equal(client.calls, 0);
+  // Act
+  const result = parseToolEnvelope(
+    await getHandler(
+      server,
+      "workflow_vendor_alerts",
+    )({
+      mode: "execute",
+      confirm: true,
+      kind: "vendor",
+      alertIds: ["alert-1"],
+      status: "RESOLVED",
+    }),
+  );
+  // Assert
+  assert.equal(result.success, false);
+  assert.equal(
+    (result.error as Record<string, unknown>).code,
+    "write_unverified",
+  );
+  assert.equal(
+    client.requests.filter(request => request.method === "patch").length,
+    1,
+  );
+});
+
 test("issue/event plans keep inventory cursors and filters independent", async () => {
   // Arrange
   const server = new FakeServer();

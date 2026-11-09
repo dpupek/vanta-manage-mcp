@@ -1,0 +1,5828 @@
+{
+  "baseline": "HEAD openapi snapshots before uncommitted refresh",
+  "comparison": "Current pinned OpenAPI snapshots; resolved refs, descriptions/examples excluded",
+  "operations": [
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/customer-trust/accounts",
+      "operationId": "ListCustomerTrustAccounts",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/customRevenueMetrics",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "currency": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "fieldName": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "metricId": {
+                  "type": "string"
+                },
+                "overrideAmount": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                },
+                "syncedAmount": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "metricId",
+                "displayName",
+                "fieldName",
+                "syncedAmount",
+                "overrideAmount",
+                "currency"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": [
+            "id",
+            "name",
+            "emailDomain",
+            "createdDate",
+            "updatedDate",
+            "ndaDetails",
+            "accessConfig",
+            "customFields",
+            "tagsByCategory"
+          ],
+          "after": [
+            "id",
+            "name",
+            "emailDomain",
+            "createdDate",
+            "updatedDate",
+            "ndaDetails",
+            "accessConfig",
+            "customFields",
+            "tagsByCategory",
+            "customRevenueMetrics"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "POST",
+      "path": "/customer-trust/accounts",
+      "operationId": "CreateCustomerTrustAccount",
+      "changes": [
+        {
+          "path": "requestBody/content/application/json/schema/properties/revenueOverrides",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "fieldMappingId": {
+                  "type": "string"
+                },
+                "value": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                }
+              },
+              "required": ["fieldMappingId", "value"],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/customRevenueMetrics",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "currency": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "fieldName": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "metricId": {
+                  "type": "string"
+                },
+                "overrideAmount": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                },
+                "syncedAmount": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "metricId",
+                "displayName",
+                "fieldName",
+                "syncedAmount",
+                "overrideAmount",
+                "currency"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "name",
+            "emailDomain",
+            "createdDate",
+            "updatedDate",
+            "ndaDetails",
+            "accessConfig",
+            "customFields",
+            "tagsByCategory"
+          ],
+          "after": [
+            "id",
+            "name",
+            "emailDomain",
+            "createdDate",
+            "updatedDate",
+            "ndaDetails",
+            "accessConfig",
+            "customFields",
+            "tagsByCategory",
+            "customRevenueMetrics"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/customer-trust/accounts/{accountId}",
+      "operationId": "GetCustomerTrustAccount",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/customRevenueMetrics",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "currency": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "fieldName": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "metricId": {
+                  "type": "string"
+                },
+                "overrideAmount": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                },
+                "syncedAmount": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "metricId",
+                "displayName",
+                "fieldName",
+                "syncedAmount",
+                "overrideAmount",
+                "currency"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "name",
+            "emailDomain",
+            "createdDate",
+            "updatedDate",
+            "ndaDetails",
+            "accessConfig",
+            "customFields",
+            "tagsByCategory"
+          ],
+          "after": [
+            "id",
+            "name",
+            "emailDomain",
+            "createdDate",
+            "updatedDate",
+            "ndaDetails",
+            "accessConfig",
+            "customFields",
+            "tagsByCategory",
+            "customRevenueMetrics"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "PATCH",
+      "path": "/customer-trust/accounts/{accountId}",
+      "operationId": "UpdateCustomerTrustAccount",
+      "changes": [
+        {
+          "path": "requestBody/content/application/json/schema/properties/revenueOverrides",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "fieldMappingId": {
+                  "type": "string"
+                },
+                "value": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                }
+              },
+              "required": ["fieldMappingId", "value"],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/customRevenueMetrics",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "currency": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "fieldName": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "metricId": {
+                  "type": "string"
+                },
+                "overrideAmount": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                },
+                "syncedAmount": {
+                  "format": "double",
+                  "nullable": true,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "metricId",
+                "displayName",
+                "fieldName",
+                "syncedAmount",
+                "overrideAmount",
+                "currency"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "name",
+            "emailDomain",
+            "createdDate",
+            "updatedDate",
+            "ndaDetails",
+            "accessConfig",
+            "customFields",
+            "tagsByCategory"
+          ],
+          "after": [
+            "id",
+            "name",
+            "emailDomain",
+            "createdDate",
+            "updatedDate",
+            "ndaDetails",
+            "accessConfig",
+            "customFields",
+            "tagsByCategory",
+            "customRevenueMetrics"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/discovered-vendors",
+      "operationId": "ListDiscoveredVendors",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/source/enum",
+          "before": ["OKTA", "JAMF", "GSUITE", "VENDR", "OFFICE"],
+          "after": [
+            "OKTA",
+            "JAMF",
+            "GSUITE",
+            "VENDR",
+            "OFFICE",
+            "OFFICE_GCC_HIGH",
+            "TORII"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "POST",
+      "path": "/discovered-vendors/{discoveredVendorId}/add-to-managed",
+      "operationId": "AddDiscoveredVendorToManaged",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/category/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/categoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/engagements",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                  "type": "string"
+                },
+                "websiteUrl": {
+                  "nullable": true,
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name", "status", "websiteUrl"],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/parentVendor",
+          "before": null,
+          "after": {
+            "allOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                    "type": "string"
+                  },
+                  "websiteUrl": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": ["id", "name", "status", "websiteUrl"],
+                "type": "object"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ],
+          "after": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "categoryId",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/frameworks",
+      "operationId": "ListFrameworks",
+      "changes": [
+        {
+          "path": "parameters",
+          "before": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "required": false,
+              "schema": {
+                "default": 10,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageCursor",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "after": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "required": false,
+              "schema": {
+                "default": 10,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageCursor",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "includeStatus",
+              "required": false,
+              "schema": {
+                "default": true,
+                "type": "boolean"
+              }
+            },
+            {
+              "in": "query",
+              "name": "purchasedOnly",
+              "required": false,
+              "schema": {
+                "default": true,
+                "type": "boolean"
+              }
+            },
+            {
+              "in": "query",
+              "name": "includeProgress",
+              "required": false,
+              "schema": {
+                "default": true,
+                "type": "boolean"
+              }
+            }
+          ]
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/activeVariants",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": ["id", "label"],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/isPurchased",
+          "before": null,
+          "after": {
+            "type": "boolean"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/status",
+          "before": null,
+          "after": {
+            "enum": [
+              "ACTIVE",
+              "DRAFT",
+              "SNOOZED",
+              "ARCHIVED",
+              "NEW_UPGRADE",
+              null
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": [
+            "id",
+            "displayName",
+            "shorthandName",
+            "description",
+            "numControlsCompleted",
+            "numControlsTotal",
+            "numDocumentsPassing",
+            "numDocumentsTotal",
+            "numTestsPassing",
+            "numTestsTotal"
+          ],
+          "after": [
+            "id",
+            "displayName",
+            "shorthandName",
+            "description",
+            "numControlsCompleted",
+            "numControlsTotal",
+            "numDocumentsPassing",
+            "numDocumentsTotal",
+            "numTestsPassing",
+            "numTestsTotal",
+            "isPurchased"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/frameworks/{frameworkId}",
+      "operationId": "GetFramework",
+      "changes": [
+        {
+          "path": "parameters",
+          "before": [
+            {
+              "in": "path",
+              "name": "frameworkId",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "after": [
+            {
+              "in": "path",
+              "name": "frameworkId",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "includeStatus",
+              "required": false,
+              "schema": {
+                "default": true,
+                "type": "boolean"
+              }
+            },
+            {
+              "in": "query",
+              "name": "includeRequirements",
+              "required": false,
+              "schema": {
+                "default": false,
+                "type": "boolean"
+              }
+            },
+            {
+              "in": "query",
+              "name": "requirementsScope",
+              "required": false,
+              "schema": {
+                "default": "MY_PROGRAM",
+                "enum": ["MY_PROGRAM", "CATALOG"],
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "variants",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          ]
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/activeVariants",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": ["id", "label"],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/requirements",
+          "before": null,
+          "after": {
+            "additionalProperties": false,
+            "properties": {
+              "items": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "category": {
+                      "nullable": true,
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["name", "id"],
+                      "type": "object"
+                    },
+                    "controlIds": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "parentRequirementId": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "shorthand": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "shorthand",
+                    "description",
+                    "parentRequirementId",
+                    "category",
+                    "controlIds"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "scope": {
+                "enum": ["MY_PROGRAM", "CATALOG"],
+                "type": "string"
+              },
+              "variants": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": ["scope", "variants", "items"],
+            "type": "object"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/status",
+          "before": null,
+          "after": {
+            "enum": [
+              "ACTIVE",
+              "DRAFT",
+              "SNOOZED",
+              "ARCHIVED",
+              "NEW_UPGRADE",
+              null
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/issues",
+      "operationId": "List",
+      "changes": [
+        {
+          "path": "parameters",
+          "before": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "required": false,
+              "schema": {
+                "default": 10,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageCursor",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "readableIssueIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "statusMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "severityMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "sourceMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": [
+                    "AUDIT",
+                    "AUDIT_EXTERNAL",
+                    "INCIDENT",
+                    "EXTERNAL_PARTY",
+                    "SELF_ASSESSMENT",
+                    "OTHER"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "typeMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": [
+                    "AREA_OF_CONCERN",
+                    "MAJOR_NONCONFORMITY",
+                    "MINOR_NONCONFORMITY",
+                    "OPP_FOR_IMPROVEMENT",
+                    "EXCEPTION",
+                    "PROCESS_FOR_IMPROVEMENT"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "ownerIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "templateMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["STANDARD_ISSUE", "STANDARD_POAM"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "closeReasonMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["RESOLVED", "DUPLICATE", "ACCEPTED", "OTHER"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "closedAfterDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "closedBeforeDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "includeIssuesWithoutDueDate",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "in": "query",
+              "name": "includeOnlyIssuesWithoutDueDate",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "in": "query",
+              "name": "dueAfterDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "dueBeforeDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "detectedAfterDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "detectedBeforeDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "createdAfterDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "createdBeforeDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "auditIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "controlIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "orderBy",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "dueDate",
+                  "createdDate",
+                  "detectedDate",
+                  "lastModifiedDate",
+                  "status",
+                  "severity"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "orderDirection",
+              "required": false,
+              "schema": {
+                "enum": ["asc", "desc"],
+                "type": "string"
+              }
+            }
+          ],
+          "after": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "required": false,
+              "schema": {
+                "default": 10,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageCursor",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "readableIssueIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "statusMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "severityMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "sourceMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": [
+                    "AUDIT",
+                    "AUDIT_EXTERNAL",
+                    "INCIDENT",
+                    "EXTERNAL_PARTY",
+                    "SELF_ASSESSMENT",
+                    "VULNERABILITY_SCANNER",
+                    "PENETRATION_TEST",
+                    "SECURITY_ASSESSMENT",
+                    "BUG_BOUNTY",
+                    "THREAT_INTELLIGENCE",
+                    "AUTOMATED_CONTROL_TESTING",
+                    "MANUAL_ANALYSIS",
+                    "SUPPLY_CHAIN_MONITORING",
+                    "OTHER"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "typeMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": [
+                    "AREA_OF_CONCERN",
+                    "MAJOR_NONCONFORMITY",
+                    "MINOR_NONCONFORMITY",
+                    "OPP_FOR_IMPROVEMENT",
+                    "EXCEPTION",
+                    "PROCESS_FOR_IMPROVEMENT"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "ownerIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "templateMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["STANDARD_ISSUE", "STANDARD_POAM"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "closeReasonMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["RESOLVED", "DUPLICATE", "ACCEPTED", "OTHER"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "closedAfterDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "closedBeforeDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "includeIssuesWithoutDueDate",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "in": "query",
+              "name": "includeOnlyIssuesWithoutDueDate",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "in": "query",
+              "name": "dueAfterDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "dueBeforeDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "detectedAfterDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "detectedBeforeDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "createdAfterDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "createdBeforeDate",
+              "required": false,
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "auditIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "controlIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "orderBy",
+              "required": false,
+              "schema": {
+                "enum": [
+                  "dueDate",
+                  "createdDate",
+                  "detectedDate",
+                  "lastModifiedDate",
+                  "status",
+                  "severity"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "orderDirection",
+              "required": false,
+              "schema": {
+                "enum": ["asc", "desc"],
+                "type": "string"
+              }
+            }
+          ]
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/anyOf",
+          "before": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "closedMetadata": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "closedAt": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "enum": [
+                            "RESOLVED",
+                            "DUPLICATE",
+                            "ACCEPTED",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["reason", "comment", "closedAt"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "controlDomain": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "correctiveAction": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "createdBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "createdDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "customFields": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["label", "value"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "detectedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "dueDate": {
+                  "format": "date-time",
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "lastModifiedBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "lastModifiedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "mappedControlIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedPolicyIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedRiskScenarioIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "owners": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ownerId": {
+                        "type": "string"
+                      },
+                      "ownerType": {
+                        "enum": ["USER", "TEAM"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["ownerType", "ownerId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "readableIssueId": {
+                  "type": "string"
+                },
+                "rootCause": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "severity": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "source": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "sourceType": {
+                          "enum": [
+                            "AUDIT",
+                            "AUDIT_EXTERNAL",
+                            "INCIDENT",
+                            "EXTERNAL_PARTY",
+                            "SELF_ASSESSMENT",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["sourceType"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "status": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "template": {
+                  "enum": ["STANDARD_ISSUE"],
+                  "nullable": false,
+                  "type": "string"
+                },
+                "type": {
+                  "allOf": [
+                    {
+                      "enum": [
+                        "AREA_OF_CONCERN",
+                        "MAJOR_NONCONFORMITY",
+                        "MINOR_NONCONFORMITY",
+                        "OPP_FOR_IMPROVEMENT",
+                        "EXCEPTION",
+                        "PROCESS_FOR_IMPROVEMENT"
+                      ],
+                      "type": "string"
+                    }
+                  ],
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "readableIssueId",
+                "createdDate",
+                "createdBy",
+                "lastModifiedBy",
+                "lastModifiedDate",
+                "title",
+                "description",
+                "owners",
+                "severity",
+                "status",
+                "rootCause",
+                "correctiveAction",
+                "dueDate",
+                "source",
+                "controlDomain",
+                "closedMetadata",
+                "detectedDate",
+                "mappedControlIds",
+                "mappedRiskScenarioIds",
+                "mappedPolicyIds",
+                "customFields",
+                "template",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "closedMetadata": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "closedAt": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "enum": [
+                            "RESOLVED",
+                            "DUPLICATE",
+                            "ACCEPTED",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["reason", "comment", "closedAt"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "controlDomain": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "correctiveAction": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "createdBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "createdDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "customFields": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["label", "value"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "detectedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "dueDate": {
+                  "format": "date-time",
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "lastModifiedBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "lastModifiedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "mappedControlIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedPolicyIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedRiskScenarioIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "owners": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ownerId": {
+                        "type": "string"
+                      },
+                      "ownerType": {
+                        "enum": ["USER", "TEAM"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["ownerType", "ownerId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "readableIssueId": {
+                  "type": "string"
+                },
+                "requiredResources": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "rootCause": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "severity": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "source": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "sourceType": {
+                          "enum": [
+                            "AUDIT",
+                            "AUDIT_EXTERNAL",
+                            "INCIDENT",
+                            "EXTERNAL_PARTY",
+                            "SELF_ASSESSMENT",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["sourceType"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "status": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "systemsDescription": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "template": {
+                  "enum": ["STANDARD_POAM"],
+                  "nullable": false,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "readableIssueId",
+                "createdDate",
+                "createdBy",
+                "lastModifiedBy",
+                "lastModifiedDate",
+                "title",
+                "description",
+                "owners",
+                "severity",
+                "status",
+                "rootCause",
+                "correctiveAction",
+                "dueDate",
+                "source",
+                "controlDomain",
+                "closedMetadata",
+                "detectedDate",
+                "mappedControlIds",
+                "mappedRiskScenarioIds",
+                "mappedPolicyIds",
+                "customFields",
+                "template",
+                "requiredResources",
+                "systemsDescription"
+              ],
+              "type": "object"
+            }
+          ],
+          "after": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "closedMetadata": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "closedAt": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "enum": [
+                            "RESOLVED",
+                            "DUPLICATE",
+                            "ACCEPTED",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["reason", "comment", "closedAt"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "controlDomain": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "correctiveAction": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "createdBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "createdDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "customFields": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["label", "value"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "detectedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "dueDate": {
+                  "format": "date-time",
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "lastModifiedBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "lastModifiedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "mappedControlIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedPolicyIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedRiskScenarioIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "owners": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ownerId": {
+                        "type": "string"
+                      },
+                      "ownerType": {
+                        "enum": ["USER", "TEAM"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["ownerType", "ownerId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "readableIssueId": {
+                  "type": "string"
+                },
+                "rootCause": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "severity": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "source": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "sourceType": {
+                          "enum": [
+                            "AUDIT",
+                            "AUDIT_EXTERNAL",
+                            "INCIDENT",
+                            "EXTERNAL_PARTY",
+                            "SELF_ASSESSMENT",
+                            "VULNERABILITY_SCANNER",
+                            "PENETRATION_TEST",
+                            "SECURITY_ASSESSMENT",
+                            "BUG_BOUNTY",
+                            "THREAT_INTELLIGENCE",
+                            "AUTOMATED_CONTROL_TESTING",
+                            "MANUAL_ANALYSIS",
+                            "SUPPLY_CHAIN_MONITORING",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["sourceType"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "status": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "template": {
+                  "enum": ["STANDARD_ISSUE"],
+                  "nullable": false,
+                  "type": "string"
+                },
+                "type": {
+                  "allOf": [
+                    {
+                      "enum": [
+                        "AREA_OF_CONCERN",
+                        "MAJOR_NONCONFORMITY",
+                        "MINOR_NONCONFORMITY",
+                        "OPP_FOR_IMPROVEMENT",
+                        "EXCEPTION",
+                        "PROCESS_FOR_IMPROVEMENT"
+                      ],
+                      "type": "string"
+                    }
+                  ],
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "readableIssueId",
+                "createdDate",
+                "createdBy",
+                "lastModifiedBy",
+                "lastModifiedDate",
+                "title",
+                "description",
+                "owners",
+                "severity",
+                "status",
+                "rootCause",
+                "correctiveAction",
+                "dueDate",
+                "source",
+                "controlDomain",
+                "closedMetadata",
+                "detectedDate",
+                "mappedControlIds",
+                "mappedRiskScenarioIds",
+                "mappedPolicyIds",
+                "customFields",
+                "template",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "closedMetadata": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "closedAt": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "enum": [
+                            "RESOLVED",
+                            "DUPLICATE",
+                            "ACCEPTED",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["reason", "comment", "closedAt"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "controlDomain": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "correctiveAction": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "createdBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "createdDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "customFields": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["label", "value"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "detectedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "dueDate": {
+                  "format": "date-time",
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "lastModifiedBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "lastModifiedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "mappedControlIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedPolicyIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedRiskScenarioIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "owners": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ownerId": {
+                        "type": "string"
+                      },
+                      "ownerType": {
+                        "enum": ["USER", "TEAM"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["ownerType", "ownerId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "readableIssueId": {
+                  "type": "string"
+                },
+                "requiredResources": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "rootCause": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "severity": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "source": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "sourceType": {
+                          "enum": [
+                            "AUDIT",
+                            "AUDIT_EXTERNAL",
+                            "INCIDENT",
+                            "EXTERNAL_PARTY",
+                            "SELF_ASSESSMENT",
+                            "VULNERABILITY_SCANNER",
+                            "PENETRATION_TEST",
+                            "SECURITY_ASSESSMENT",
+                            "BUG_BOUNTY",
+                            "THREAT_INTELLIGENCE",
+                            "AUTOMATED_CONTROL_TESTING",
+                            "MANUAL_ANALYSIS",
+                            "SUPPLY_CHAIN_MONITORING",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["sourceType"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "status": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "systemsDescription": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "template": {
+                  "enum": ["STANDARD_POAM"],
+                  "nullable": false,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "readableIssueId",
+                "createdDate",
+                "createdBy",
+                "lastModifiedBy",
+                "lastModifiedDate",
+                "title",
+                "description",
+                "owners",
+                "severity",
+                "status",
+                "rootCause",
+                "correctiveAction",
+                "dueDate",
+                "source",
+                "controlDomain",
+                "closedMetadata",
+                "detectedDate",
+                "mappedControlIds",
+                "mappedRiskScenarioIds",
+                "mappedPolicyIds",
+                "customFields",
+                "template",
+                "requiredResources",
+                "systemsDescription"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/issues/{issueId}",
+      "operationId": "GetIssue",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/anyOf",
+          "before": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "closedMetadata": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "closedAt": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "enum": [
+                            "RESOLVED",
+                            "DUPLICATE",
+                            "ACCEPTED",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["reason", "comment", "closedAt"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "controlDomain": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "correctiveAction": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "createdBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "createdDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "customFields": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["label", "value"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "detectedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "dueDate": {
+                  "format": "date-time",
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "lastModifiedBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "lastModifiedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "mappedControlIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedPolicyIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedRiskScenarioIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "owners": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ownerId": {
+                        "type": "string"
+                      },
+                      "ownerType": {
+                        "enum": ["USER", "TEAM"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["ownerType", "ownerId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "readableIssueId": {
+                  "type": "string"
+                },
+                "rootCause": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "severity": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "source": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "sourceType": {
+                          "enum": [
+                            "AUDIT",
+                            "AUDIT_EXTERNAL",
+                            "INCIDENT",
+                            "EXTERNAL_PARTY",
+                            "SELF_ASSESSMENT",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["sourceType"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "status": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "template": {
+                  "enum": ["STANDARD_ISSUE"],
+                  "nullable": false,
+                  "type": "string"
+                },
+                "type": {
+                  "allOf": [
+                    {
+                      "enum": [
+                        "AREA_OF_CONCERN",
+                        "MAJOR_NONCONFORMITY",
+                        "MINOR_NONCONFORMITY",
+                        "OPP_FOR_IMPROVEMENT",
+                        "EXCEPTION",
+                        "PROCESS_FOR_IMPROVEMENT"
+                      ],
+                      "type": "string"
+                    }
+                  ],
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "readableIssueId",
+                "createdDate",
+                "createdBy",
+                "lastModifiedBy",
+                "lastModifiedDate",
+                "title",
+                "description",
+                "owners",
+                "severity",
+                "status",
+                "rootCause",
+                "correctiveAction",
+                "dueDate",
+                "source",
+                "controlDomain",
+                "closedMetadata",
+                "detectedDate",
+                "mappedControlIds",
+                "mappedRiskScenarioIds",
+                "mappedPolicyIds",
+                "customFields",
+                "template",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "closedMetadata": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "closedAt": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "enum": [
+                            "RESOLVED",
+                            "DUPLICATE",
+                            "ACCEPTED",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["reason", "comment", "closedAt"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "controlDomain": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "correctiveAction": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "createdBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "createdDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "customFields": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["label", "value"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "detectedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "dueDate": {
+                  "format": "date-time",
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "lastModifiedBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "lastModifiedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "mappedControlIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedPolicyIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedRiskScenarioIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "owners": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ownerId": {
+                        "type": "string"
+                      },
+                      "ownerType": {
+                        "enum": ["USER", "TEAM"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["ownerType", "ownerId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "readableIssueId": {
+                  "type": "string"
+                },
+                "requiredResources": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "rootCause": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "severity": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "source": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "sourceType": {
+                          "enum": [
+                            "AUDIT",
+                            "AUDIT_EXTERNAL",
+                            "INCIDENT",
+                            "EXTERNAL_PARTY",
+                            "SELF_ASSESSMENT",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["sourceType"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "status": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "systemsDescription": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "template": {
+                  "enum": ["STANDARD_POAM"],
+                  "nullable": false,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "readableIssueId",
+                "createdDate",
+                "createdBy",
+                "lastModifiedBy",
+                "lastModifiedDate",
+                "title",
+                "description",
+                "owners",
+                "severity",
+                "status",
+                "rootCause",
+                "correctiveAction",
+                "dueDate",
+                "source",
+                "controlDomain",
+                "closedMetadata",
+                "detectedDate",
+                "mappedControlIds",
+                "mappedRiskScenarioIds",
+                "mappedPolicyIds",
+                "customFields",
+                "template",
+                "requiredResources",
+                "systemsDescription"
+              ],
+              "type": "object"
+            }
+          ],
+          "after": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "closedMetadata": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "closedAt": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "enum": [
+                            "RESOLVED",
+                            "DUPLICATE",
+                            "ACCEPTED",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["reason", "comment", "closedAt"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "controlDomain": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "correctiveAction": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "createdBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "createdDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "customFields": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["label", "value"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "detectedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "dueDate": {
+                  "format": "date-time",
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "lastModifiedBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "lastModifiedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "mappedControlIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedPolicyIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedRiskScenarioIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "owners": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ownerId": {
+                        "type": "string"
+                      },
+                      "ownerType": {
+                        "enum": ["USER", "TEAM"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["ownerType", "ownerId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "readableIssueId": {
+                  "type": "string"
+                },
+                "rootCause": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "severity": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "source": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "sourceType": {
+                          "enum": [
+                            "AUDIT",
+                            "AUDIT_EXTERNAL",
+                            "INCIDENT",
+                            "EXTERNAL_PARTY",
+                            "SELF_ASSESSMENT",
+                            "VULNERABILITY_SCANNER",
+                            "PENETRATION_TEST",
+                            "SECURITY_ASSESSMENT",
+                            "BUG_BOUNTY",
+                            "THREAT_INTELLIGENCE",
+                            "AUTOMATED_CONTROL_TESTING",
+                            "MANUAL_ANALYSIS",
+                            "SUPPLY_CHAIN_MONITORING",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["sourceType"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "status": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "template": {
+                  "enum": ["STANDARD_ISSUE"],
+                  "nullable": false,
+                  "type": "string"
+                },
+                "type": {
+                  "allOf": [
+                    {
+                      "enum": [
+                        "AREA_OF_CONCERN",
+                        "MAJOR_NONCONFORMITY",
+                        "MINOR_NONCONFORMITY",
+                        "OPP_FOR_IMPROVEMENT",
+                        "EXCEPTION",
+                        "PROCESS_FOR_IMPROVEMENT"
+                      ],
+                      "type": "string"
+                    }
+                  ],
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "readableIssueId",
+                "createdDate",
+                "createdBy",
+                "lastModifiedBy",
+                "lastModifiedDate",
+                "title",
+                "description",
+                "owners",
+                "severity",
+                "status",
+                "rootCause",
+                "correctiveAction",
+                "dueDate",
+                "source",
+                "controlDomain",
+                "closedMetadata",
+                "detectedDate",
+                "mappedControlIds",
+                "mappedRiskScenarioIds",
+                "mappedPolicyIds",
+                "customFields",
+                "template",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "closedMetadata": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "closedAt": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "enum": [
+                            "RESOLVED",
+                            "DUPLICATE",
+                            "ACCEPTED",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["reason", "comment", "closedAt"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "controlDomain": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "correctiveAction": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "createdBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "createdDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "customFields": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["label", "value"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "detectedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "dueDate": {
+                  "format": "date-time",
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "lastModifiedBy": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actorId": {
+                      "type": "string"
+                    },
+                    "actorType": {
+                      "enum": ["USER", "APPLICATION", "WORKFLOW_GENERATED"],
+                      "type": "string"
+                    }
+                  },
+                  "required": ["actorType", "actorId"],
+                  "type": "object"
+                },
+                "lastModifiedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "mappedControlIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedPolicyIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "mappedRiskScenarioIds": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "owners": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ownerId": {
+                        "type": "string"
+                      },
+                      "ownerType": {
+                        "enum": ["USER", "TEAM"],
+                        "type": "string"
+                      }
+                    },
+                    "required": ["ownerType", "ownerId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "readableIssueId": {
+                  "type": "string"
+                },
+                "requiredResources": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "rootCause": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "severity": {
+                  "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NO_SEVERITY"],
+                  "type": "string"
+                },
+                "source": {
+                  "allOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "sourceType": {
+                          "enum": [
+                            "AUDIT",
+                            "AUDIT_EXTERNAL",
+                            "INCIDENT",
+                            "EXTERNAL_PARTY",
+                            "SELF_ASSESSMENT",
+                            "VULNERABILITY_SCANNER",
+                            "PENETRATION_TEST",
+                            "SECURITY_ASSESSMENT",
+                            "BUG_BOUNTY",
+                            "THREAT_INTELLIGENCE",
+                            "AUTOMATED_CONTROL_TESTING",
+                            "MANUAL_ANALYSIS",
+                            "SUPPLY_CHAIN_MONITORING",
+                            "OTHER"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["sourceType"],
+                      "type": "object"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "status": {
+                  "enum": ["NOT_STARTED", "IN_PROGRESS", "CLOSED"],
+                  "type": "string"
+                },
+                "systemsDescription": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "template": {
+                  "enum": ["STANDARD_POAM"],
+                  "nullable": false,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "readableIssueId",
+                "createdDate",
+                "createdBy",
+                "lastModifiedBy",
+                "lastModifiedDate",
+                "title",
+                "description",
+                "owners",
+                "severity",
+                "status",
+                "rootCause",
+                "correctiveAction",
+                "dueDate",
+                "source",
+                "controlDomain",
+                "closedMetadata",
+                "detectedDate",
+                "mappedControlIds",
+                "mappedRiskScenarioIds",
+                "mappedPolicyIds",
+                "customFields",
+                "template",
+                "requiredResources",
+                "systemsDescription"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/knowledge-base/answer-library",
+      "operationId": "ListAnswerLibraryEntries",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/createdAt",
+          "before": null,
+          "after": {
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ],
+          "after": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "createdAt",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "POST",
+      "path": "/knowledge-base/answer-library",
+      "operationId": "CreateAnswerLibraryEntry",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/createdAt",
+          "before": null,
+          "after": {
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ],
+          "after": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "createdAt",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/knowledge-base/answer-library/{id}",
+      "operationId": "GetAnswerLibraryEntry",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/createdAt",
+          "before": null,
+          "after": {
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ],
+          "after": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "createdAt",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "PATCH",
+      "path": "/knowledge-base/answer-library/{id}",
+      "operationId": "UpdateAnswerLibraryEntryRoute",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/createdAt",
+          "before": null,
+          "after": {
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ],
+          "after": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "createdAt",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "POST",
+      "path": "/knowledge-base/answer-library/{id}/verify",
+      "operationId": "VerifyAnswerLibraryEntryRoute",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/createdAt",
+          "before": null,
+          "after": {
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ],
+          "after": [
+            "id",
+            "question",
+            "answer",
+            "expirationStatus",
+            "ownerAssignment",
+            "expirationDate",
+            "createdAt",
+            "lastUpdated",
+            "lastVerified",
+            "tags"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/policies",
+      "operationId": "ListPolicies",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/latestApprovedVersion/allOf",
+          "before": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "documents": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "language": {
+                        "allOf": [
+                          {
+                            "enum": [
+                              "CS",
+                              "CY",
+                              "DA",
+                              "DE",
+                              "EN",
+                              "ES",
+                              "FI",
+                              "FR",
+                              "HU",
+                              "IS",
+                              "IT",
+                              "JA",
+                              "KO",
+                              "NL",
+                              "NO",
+                              "NOT_SPECIFIED",
+                              "PL",
+                              "PT",
+                              "ET",
+                              "RO",
+                              "AR",
+                              "SK",
+                              "SV",
+                              "TR",
+                              "ZH"
+                            ],
+                            "type": "string"
+                          }
+                        ],
+                        "nullable": true
+                      },
+                      "slugId": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["language", "slugId", "url"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "versionId": {
+                  "type": "string"
+                }
+              },
+              "required": ["versionId", "documents"],
+              "type": "object"
+            }
+          ],
+          "after": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "documents": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "language": {
+                        "allOf": [
+                          {
+                            "enum": [
+                              "CS",
+                              "CY",
+                              "DA",
+                              "DE",
+                              "EN",
+                              "ES",
+                              "FI",
+                              "FR",
+                              "HU",
+                              "IS",
+                              "IT",
+                              "JA",
+                              "KO",
+                              "NL",
+                              "NO",
+                              "NOT_SPECIFIED",
+                              "PL",
+                              "PT",
+                              "ET",
+                              "RO",
+                              "AR",
+                              "EL",
+                              "SK",
+                              "SV",
+                              "TR",
+                              "ZH"
+                            ],
+                            "type": "string"
+                          }
+                        ],
+                        "nullable": true
+                      },
+                      "slugId": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["language", "slugId", "url"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "versionId": {
+                  "type": "string"
+                }
+              },
+              "required": ["versionId", "documents"],
+              "type": "object"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/policies/{policyId}",
+      "operationId": "GetPolicy",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/latestApprovedVersion/allOf",
+          "before": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "documents": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "language": {
+                        "allOf": [
+                          {
+                            "enum": [
+                              "CS",
+                              "CY",
+                              "DA",
+                              "DE",
+                              "EN",
+                              "ES",
+                              "FI",
+                              "FR",
+                              "HU",
+                              "IS",
+                              "IT",
+                              "JA",
+                              "KO",
+                              "NL",
+                              "NO",
+                              "NOT_SPECIFIED",
+                              "PL",
+                              "PT",
+                              "ET",
+                              "RO",
+                              "AR",
+                              "SK",
+                              "SV",
+                              "TR",
+                              "ZH"
+                            ],
+                            "type": "string"
+                          }
+                        ],
+                        "nullable": true
+                      },
+                      "slugId": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["language", "slugId", "url"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "versionId": {
+                  "type": "string"
+                }
+              },
+              "required": ["versionId", "documents"],
+              "type": "object"
+            }
+          ],
+          "after": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "documents": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "language": {
+                        "allOf": [
+                          {
+                            "enum": [
+                              "CS",
+                              "CY",
+                              "DA",
+                              "DE",
+                              "EN",
+                              "ES",
+                              "FI",
+                              "FR",
+                              "HU",
+                              "IS",
+                              "IT",
+                              "JA",
+                              "KO",
+                              "NL",
+                              "NO",
+                              "NOT_SPECIFIED",
+                              "PL",
+                              "PT",
+                              "ET",
+                              "RO",
+                              "AR",
+                              "EL",
+                              "SK",
+                              "SV",
+                              "TR",
+                              "ZH"
+                            ],
+                            "type": "string"
+                          }
+                        ],
+                        "nullable": true
+                      },
+                      "slugId": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["language", "slugId", "url"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "versionId": {
+                  "type": "string"
+                }
+              },
+              "required": ["versionId", "documents"],
+              "type": "object"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "POST",
+      "path": "/trust-centers/{slugId}/compliance-frameworks",
+      "operationId": "CreateComplianceFramework",
+      "changes": [
+        {
+          "path": "requestBody/content/application/json/schema/properties/standard/enum",
+          "before": [
+            "aiact",
+            "aiuc1",
+            "aiuc1_26q3",
+            "atc",
+            "aue8",
+            "awsFTR",
+            "bsic5",
+            "ccpa",
+            "cisv8",
+            "cjis",
+            "cmmc2",
+            "cps234",
+            "cri",
+            "dora",
+            "fedRAMPr5",
+            "fedramp",
+            "fedramp20x",
+            "fedramp20x_2026",
+            "fedramp20x_classA",
+            "gdpr",
+            "hipaa",
+            "hitruste1",
+            "iso9001",
+            "iso27001",
+            "iso27001_2022",
+            "iso27017",
+            "iso27018",
+            "iso27701",
+            "iso27701_2025",
+            "iso42001",
+            "msftSSPA",
+            "mvsp",
+            "nis2d",
+            "nist53",
+            "nist171",
+            "nist171r3",
+            "nistAiRmf",
+            "nistCSF",
+            "nistcsf2",
+            "ofdss",
+            "pciDss4",
+            "pciSaqA",
+            "pciSaqAEP",
+            "pciSaqDMerchant",
+            "pciSaqDSP",
+            "soc2",
+            "soxITGC",
+            "t23nycrr500",
+            "tisax",
+            "tisax2027",
+            "iso22301",
+            "trust",
+            "ukCyberEssentials",
+            "ukCyberEssentials33",
+            "usDataPrivacy",
+            "fedrampKSI",
+            null
+          ],
+          "after": [
+            "aiact",
+            "aiuc1",
+            "aiuc1_26q3",
+            "aiuc1_26q4",
+            "atc",
+            "aue8",
+            "awsFTR",
+            "bsic5",
+            "ccpa",
+            "cisv8",
+            "cjis",
+            "cmmc2",
+            "cps230",
+            "cps234",
+            "cri",
+            "dora",
+            "fedRAMPr5",
+            "fedramp",
+            "fedramp20x",
+            "fedramp20x_2026",
+            "fedramp20x_classA",
+            "fedramp20x_classBC",
+            "gdpr",
+            "hipaa",
+            "hitruste1",
+            "iso9001",
+            "iso27001",
+            "iso27001_2022",
+            "iso27017",
+            "iso27017_2026",
+            "iso27018",
+            "iso27701",
+            "iso27701_2025",
+            "iso42001",
+            "msftSSPA",
+            "mvsp",
+            "nis2d",
+            "nist53",
+            "nist171",
+            "nist171r3",
+            "nistAiRmf",
+            "nistCSF",
+            "nistcsf2",
+            "nydfs500_2023",
+            "ofdss",
+            "pciDss4",
+            "pciSaqA",
+            "pciSaqAEP",
+            "pciSaqDMerchant",
+            "pciSaqDSP",
+            "soc2",
+            "soxITGC",
+            "t23nycrr500",
+            "tisax",
+            "tisax2027",
+            "iso22301",
+            "trust",
+            "ukCyberEssentials",
+            "ukCyberEssentials33",
+            "usDataPrivacy",
+            "fedrampKSI",
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "PATCH",
+      "path": "/trust-centers/{slugId}/compliance-frameworks/{frameworkId}",
+      "operationId": "UpdateComplianceFramework",
+      "changes": [
+        {
+          "path": "requestBody/content/application/json/schema/properties/standard/enum",
+          "before": [
+            "aiact",
+            "aiuc1",
+            "aiuc1_26q3",
+            "atc",
+            "aue8",
+            "awsFTR",
+            "bsic5",
+            "ccpa",
+            "cisv8",
+            "cjis",
+            "cmmc2",
+            "cps234",
+            "cri",
+            "dora",
+            "fedRAMPr5",
+            "fedramp",
+            "fedramp20x",
+            "fedramp20x_2026",
+            "fedramp20x_classA",
+            "gdpr",
+            "hipaa",
+            "hitruste1",
+            "iso9001",
+            "iso27001",
+            "iso27001_2022",
+            "iso27017",
+            "iso27018",
+            "iso27701",
+            "iso27701_2025",
+            "iso42001",
+            "msftSSPA",
+            "mvsp",
+            "nis2d",
+            "nist53",
+            "nist171",
+            "nist171r3",
+            "nistAiRmf",
+            "nistCSF",
+            "nistcsf2",
+            "ofdss",
+            "pciDss4",
+            "pciSaqA",
+            "pciSaqAEP",
+            "pciSaqDMerchant",
+            "pciSaqDSP",
+            "soc2",
+            "soxITGC",
+            "t23nycrr500",
+            "tisax",
+            "tisax2027",
+            "iso22301",
+            "trust",
+            "ukCyberEssentials",
+            "ukCyberEssentials33",
+            "usDataPrivacy",
+            "fedrampKSI",
+            null
+          ],
+          "after": [
+            "aiact",
+            "aiuc1",
+            "aiuc1_26q3",
+            "aiuc1_26q4",
+            "atc",
+            "aue8",
+            "awsFTR",
+            "bsic5",
+            "ccpa",
+            "cisv8",
+            "cjis",
+            "cmmc2",
+            "cps230",
+            "cps234",
+            "cri",
+            "dora",
+            "fedRAMPr5",
+            "fedramp",
+            "fedramp20x",
+            "fedramp20x_2026",
+            "fedramp20x_classA",
+            "fedramp20x_classBC",
+            "gdpr",
+            "hipaa",
+            "hitruste1",
+            "iso9001",
+            "iso27001",
+            "iso27001_2022",
+            "iso27017",
+            "iso27017_2026",
+            "iso27018",
+            "iso27701",
+            "iso27701_2025",
+            "iso42001",
+            "msftSSPA",
+            "mvsp",
+            "nis2d",
+            "nist53",
+            "nist171",
+            "nist171r3",
+            "nistAiRmf",
+            "nistCSF",
+            "nistcsf2",
+            "nydfs500_2023",
+            "ofdss",
+            "pciDss4",
+            "pciSaqA",
+            "pciSaqAEP",
+            "pciSaqDMerchant",
+            "pciSaqDSP",
+            "soc2",
+            "soxITGC",
+            "t23nycrr500",
+            "tisax",
+            "tisax2027",
+            "iso22301",
+            "trust",
+            "ukCyberEssentials",
+            "ukCyberEssentials33",
+            "usDataPrivacy",
+            "fedrampKSI",
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "PUT",
+      "path": "/trust-centers/{slugId}/videos",
+      "operationId": "UpsertTrustCenterVideos",
+      "changes": [
+        {
+          "path": "requestBody/content/application/json/schema/properties/videos/items/properties/id",
+          "before": null,
+          "after": {
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/items/properties/id",
+          "before": null,
+          "after": {
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/items/required",
+          "before": ["url", "title"],
+          "after": ["id", "url", "title"]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/vendor-assessment-types",
+      "operationId": "ListVendorAssessmentTypes",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/audience",
+          "before": null,
+          "after": {
+            "enum": ["EXTERNAL", "INTERNAL"],
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": ["id", "name", "description", "status"],
+          "after": ["id", "name", "description", "status", "audience"]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/vendor-assessment-types/{assessmentTypeId}",
+      "operationId": "GetVendorAssessmentTypeById",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/audience",
+          "before": null,
+          "after": {
+            "enum": ["EXTERNAL", "INTERNAL"],
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": ["id", "name", "description", "status"],
+          "after": ["id", "name", "description", "status", "audience"]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/vendor-risk-attributes",
+      "operationId": "ListVendorRiskAttributes",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/vendorCategories/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/vendorCategoryIds",
+          "before": null,
+          "after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": [
+            "id",
+            "name",
+            "description",
+            "vendorCategories",
+            "enabled",
+            "riskLevel",
+            "riskSection"
+          ],
+          "after": [
+            "id",
+            "name",
+            "description",
+            "vendorCategoryIds",
+            "vendorCategories",
+            "enabled",
+            "riskLevel",
+            "riskSection"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "POST",
+      "path": "/vendors",
+      "operationId": "CreateVendor",
+      "changes": [
+        {
+          "path": "requestBody/content/application/json/schema/properties/category/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "requestBody/content/application/json/schema/properties/categoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/category/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/categoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/engagements",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                  "type": "string"
+                },
+                "websiteUrl": {
+                  "nullable": true,
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name", "status", "websiteUrl"],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/parentVendor",
+          "before": null,
+          "after": {
+            "allOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                    "type": "string"
+                  },
+                  "websiteUrl": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": ["id", "name", "status", "websiteUrl"],
+                "type": "object"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ],
+          "after": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "categoryId",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/vendors",
+      "operationId": "ListVendors",
+      "changes": [
+        {
+          "path": "parameters",
+          "before": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "required": false,
+              "schema": {
+                "default": 10,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageCursor",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "name",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "statusMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          ],
+          "after": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "required": false,
+              "schema": {
+                "default": 10,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageCursor",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "name",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "websiteUrl",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "statusMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          ]
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/category/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/categoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/engagements",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                  "type": "string"
+                },
+                "websiteUrl": {
+                  "nullable": true,
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name", "status", "websiteUrl"],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/parentVendor",
+          "before": null,
+          "after": {
+            "allOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                    "type": "string"
+                  },
+                  "websiteUrl": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": ["id", "name", "status", "websiteUrl"],
+                "type": "object"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ],
+          "after": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "categoryId",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/vendors/{vendorId}",
+      "operationId": "GetVendor",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/category/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/categoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/engagements",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                  "type": "string"
+                },
+                "websiteUrl": {
+                  "nullable": true,
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name", "status", "websiteUrl"],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/parentVendor",
+          "before": null,
+          "after": {
+            "allOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                    "type": "string"
+                  },
+                  "websiteUrl": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": ["id", "name", "status", "websiteUrl"],
+                "type": "object"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ],
+          "after": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "categoryId",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "PATCH",
+      "path": "/vendors/{vendorId}",
+      "operationId": "UpdateVendor",
+      "changes": [
+        {
+          "path": "requestBody/content/application/json/schema/properties/category/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "requestBody/content/application/json/schema/properties/categoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/category/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/categoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/engagements",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                  "type": "string"
+                },
+                "websiteUrl": {
+                  "nullable": true,
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name", "status", "websiteUrl"],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/parentVendor",
+          "before": null,
+          "after": {
+            "allOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                    "type": "string"
+                  },
+                  "websiteUrl": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": ["id", "name", "status", "websiteUrl"],
+                "type": "object"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ],
+          "after": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "categoryId",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/vendors/{vendorId}/assessments",
+      "operationId": "GetAssessmentsByVendorId",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/audience",
+          "before": null,
+          "after": {
+            "enum": ["EXTERNAL", "INTERNAL"],
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": [
+            "id",
+            "vendorId",
+            "status",
+            "completedByUserId",
+            "startDate",
+            "dueDate",
+            "overrideDueDate",
+            "completionDate",
+            "createdDate",
+            "decision",
+            "assessmentType",
+            "owner"
+          ],
+          "after": [
+            "id",
+            "vendorId",
+            "status",
+            "audience",
+            "completedByUserId",
+            "startDate",
+            "dueDate",
+            "overrideDueDate",
+            "completionDate",
+            "createdDate",
+            "decision",
+            "assessmentType",
+            "owner"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "GET",
+      "path": "/vendors/{vendorId}/assessments/{assessmentId}",
+      "operationId": "GetAssessmentById",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/audience",
+          "before": null,
+          "after": {
+            "enum": ["EXTERNAL", "INTERNAL"],
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "vendorId",
+            "status",
+            "completedByUserId",
+            "startDate",
+            "dueDate",
+            "overrideDueDate",
+            "completionDate",
+            "createdDate",
+            "decision",
+            "assessmentType",
+            "owner"
+          ],
+          "after": [
+            "id",
+            "vendorId",
+            "status",
+            "audience",
+            "completedByUserId",
+            "startDate",
+            "dueDate",
+            "overrideDueDate",
+            "completionDate",
+            "createdDate",
+            "decision",
+            "assessmentType",
+            "owner"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "manage",
+      "method": "POST",
+      "path": "/vendors/{vendorId}/set-status",
+      "operationId": "SetStatusForVendor",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/category/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/categoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/engagements",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                  "type": "string"
+                },
+                "websiteUrl": {
+                  "nullable": true,
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name", "status", "websiteUrl"],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/parentVendor",
+          "before": null,
+          "after": {
+            "allOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                    "type": "string"
+                  },
+                  "websiteUrl": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": ["id", "name", "status", "websiteUrl"],
+                "type": "object"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ],
+          "after": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "categoryId",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits",
+      "operationId": "ListAudits",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/auditView",
+          "before": null,
+          "after": {
+            "enum": ["FULL", "CONTROLLED"],
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": [
+            "id",
+            "customerOrganizationName",
+            "customerDisplayName",
+            "customerOrganizationId",
+            "auditStartDate",
+            "auditEndDate",
+            "earlyAccessStartsAt",
+            "framework",
+            "displayName",
+            "allowAuditorEmails",
+            "allowAllAuditors",
+            "deletionDate",
+            "creationDate",
+            "modificationDate",
+            "completionDate",
+            "auditFocus",
+            "irlGenerationStatus",
+            "segments"
+          ],
+          "after": [
+            "id",
+            "customerOrganizationName",
+            "customerDisplayName",
+            "customerOrganizationId",
+            "auditStartDate",
+            "auditEndDate",
+            "earlyAccessStartsAt",
+            "framework",
+            "displayName",
+            "allowAuditorEmails",
+            "allowAllAuditors",
+            "deletionDate",
+            "creationDate",
+            "modificationDate",
+            "completionDate",
+            "auditFocus",
+            "auditView",
+            "irlGenerationStatus",
+            "segments"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "POST",
+      "path": "/audits/duplicate",
+      "operationId": "Duplicate",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/auditView",
+          "before": null,
+          "after": {
+            "enum": ["FULL", "CONTROLLED"],
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "customerOrganizationName",
+            "customerDisplayName",
+            "customerOrganizationId",
+            "auditStartDate",
+            "auditEndDate",
+            "earlyAccessStartsAt",
+            "framework",
+            "displayName",
+            "allowAuditorEmails",
+            "allowAllAuditors",
+            "deletionDate",
+            "creationDate",
+            "modificationDate",
+            "completionDate",
+            "auditFocus",
+            "irlGenerationStatus",
+            "segments"
+          ],
+          "after": [
+            "id",
+            "customerOrganizationName",
+            "customerDisplayName",
+            "customerOrganizationId",
+            "auditStartDate",
+            "auditEndDate",
+            "earlyAccessStartsAt",
+            "framework",
+            "displayName",
+            "allowAuditorEmails",
+            "allowAllAuditors",
+            "deletionDate",
+            "creationDate",
+            "modificationDate",
+            "completionDate",
+            "auditFocus",
+            "auditView",
+            "irlGenerationStatus",
+            "segments"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}",
+      "operationId": "GetAudit",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/auditView",
+          "before": null,
+          "after": {
+            "enum": ["FULL", "CONTROLLED"],
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "customerOrganizationName",
+            "customerDisplayName",
+            "customerOrganizationId",
+            "auditStartDate",
+            "auditEndDate",
+            "earlyAccessStartsAt",
+            "framework",
+            "displayName",
+            "allowAuditorEmails",
+            "allowAllAuditors",
+            "deletionDate",
+            "creationDate",
+            "modificationDate",
+            "completionDate",
+            "auditFocus",
+            "irlGenerationStatus",
+            "segments"
+          ],
+          "after": [
+            "id",
+            "customerOrganizationName",
+            "customerDisplayName",
+            "customerOrganizationId",
+            "auditStartDate",
+            "auditEndDate",
+            "earlyAccessStartsAt",
+            "framework",
+            "displayName",
+            "allowAuditorEmails",
+            "allowAllAuditors",
+            "deletionDate",
+            "creationDate",
+            "modificationDate",
+            "completionDate",
+            "auditFocus",
+            "auditView",
+            "irlGenerationStatus",
+            "segments"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/assets/code-changes",
+      "operationId": "ListCodeChanges",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/segmentIds",
+          "before": null,
+          "after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/controls",
+      "operationId": "ListAuditControls",
+      "changes": [
+        {
+          "path": "parameters",
+          "before": [
+            {
+              "in": "path",
+              "name": "auditId",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageSize",
+              "required": false,
+              "schema": {
+                "default": 10,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageCursor",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "externalIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          ],
+          "after": [
+            {
+              "in": "path",
+              "name": "auditId",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageSize",
+              "required": false,
+              "schema": {
+                "default": 10,
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageCursor",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "externalIdMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "in": "query",
+              "name": "segmentIdsMatchesAny",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/information-requests/{requestId}/evidence",
+      "operationId": "ListInformationRequestEvidence",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/capturedSegmentIds",
+          "before": null,
+          "after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": [
+            "id",
+            "evidenceType",
+            "creationDate",
+            "modificationDate",
+            "evidence"
+          ],
+          "after": [
+            "id",
+            "evidenceType",
+            "creationDate",
+            "modificationDate",
+            "capturedSegmentIds",
+            "evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}",
+      "operationId": "GetInformationRequestEvidence",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/capturedSegmentIds",
+          "before": null,
+          "after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "evidenceType",
+            "creationDate",
+            "modificationDate",
+            "evidence"
+          ],
+          "after": [
+            "id",
+            "evidenceType",
+            "creationDate",
+            "modificationDate",
+            "capturedSegmentIds",
+            "evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/integrations",
+      "operationId": "ListIntegrations",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/segmentIds",
+          "before": null,
+          "after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/managed-vendors",
+      "operationId": "ListVendors",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/vendorCategory/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/segmentIds",
+          "before": null,
+          "after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/vendorCategoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/personnel/account-access/{serviceId}",
+      "operationId": "ListPersonnelAccountAccess",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/segmentIds",
+          "before": null,
+          "after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/personnel/groups",
+      "operationId": "ListPersonnelGroups",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/segmentIds",
+          "before": null,
+          "after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/personnel/people",
+      "operationId": "ListPersonnelPeople",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/segmentIds",
+          "before": null,
+          "after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "POST",
+      "path": "/audits/{auditId}/share-information-request-list",
+      "operationId": "ShareInformationRequestList",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/auditView",
+          "before": null,
+          "after": {
+            "enum": ["FULL", "CONTROLLED"],
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/required",
+          "before": [
+            "id",
+            "customerOrganizationName",
+            "customerDisplayName",
+            "customerOrganizationId",
+            "auditStartDate",
+            "auditEndDate",
+            "earlyAccessStartsAt",
+            "framework",
+            "displayName",
+            "allowAuditorEmails",
+            "allowAllAuditors",
+            "deletionDate",
+            "creationDate",
+            "modificationDate",
+            "completionDate",
+            "auditFocus",
+            "irlGenerationStatus",
+            "segments"
+          ],
+          "after": [
+            "id",
+            "customerOrganizationName",
+            "customerDisplayName",
+            "customerOrganizationId",
+            "auditStartDate",
+            "auditEndDate",
+            "earlyAccessStartsAt",
+            "framework",
+            "displayName",
+            "allowAuditorEmails",
+            "allowAllAuditors",
+            "deletionDate",
+            "creationDate",
+            "modificationDate",
+            "completionDate",
+            "auditFocus",
+            "auditView",
+            "irlGenerationStatus",
+            "segments"
+          ]
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "method": "GET",
+      "path": "/audits/{auditId}/vendors",
+      "operationId": "ListVendorsInAuditScope",
+      "changes": [
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/category/deprecated",
+          "before": null,
+          "after": true
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/categoryId",
+          "before": null,
+          "after": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/engagements",
+          "before": null,
+          "after": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                  "type": "string"
+                },
+                "websiteUrl": {
+                  "nullable": true,
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name", "status", "websiteUrl"],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/properties/parentVendor",
+          "before": null,
+          "after": {
+            "allOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": ["MANAGED", "ARCHIVED", "IN_PROCUREMENT"],
+                    "type": "string"
+                  },
+                  "websiteUrl": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": ["id", "name", "status", "websiteUrl"],
+                "type": "object"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        {
+          "path": "responses/200/content/application/json/schema/properties/results/properties/data/items/required",
+          "before": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ],
+          "after": [
+            "id",
+            "name",
+            "websiteUrl",
+            "accountManagerName",
+            "accountManagerEmail",
+            "servicesProvided",
+            "additionalNotes",
+            "securityOwnerUserId",
+            "businessOwnerUserId",
+            "contractStartDate",
+            "contractRenewalDate",
+            "contractTerminationDate",
+            "nextSecurityReviewDueDate",
+            "lastSecurityReviewCompletionDate",
+            "isVisibleToAuditors",
+            "isRiskAutoScored",
+            "riskAttributeIds",
+            "categoryId",
+            "category",
+            "authDetails",
+            "status",
+            "inherentRiskLevel",
+            "residualRiskLevel",
+            "vendorHeadquarters",
+            "contractAmount",
+            "customFields",
+            "latestDecision",
+            "linkedTaskTrackerTaskProcurementRequest"
+          ]
+        }
+      ]
+    }
+  ]
+}

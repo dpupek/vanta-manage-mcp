@@ -60,6 +60,7 @@ export interface CapabilitiesPayload {
     unsupported: typeof unsupportedToolMetadata;
   };
   pageLimits: Record<string, unknown>;
+  downloads: Record<string, unknown>;
   uploads: {
     supportedExtensions: string[];
     supportedMimeTypes: string[];
@@ -133,6 +134,20 @@ export const buildCapabilitiesPayload = (): CapabilitiesPayload => {
       defaultPageSize: 25,
       recommendedMaxPageSize: 100,
       cursorFields: ["pageCursor", "pageInfo.endCursor", "nextPageCursor"],
+    },
+    downloads: {
+      tools: ["get_uploadedfile_media", "get_trust_center_resource_media"],
+      destination:
+        "server-local directory configured by VANTA_MCP_DOWNLOAD_DIR",
+      defaultDirectory: "~/VantaMcpDownloads",
+      defaultMaxBytes: 104857600,
+      defaultTimeoutMs: 120000,
+      maxBytesEnvironment: "VANTA_MCP_DOWNLOAD_MAX_BYTES",
+      timeoutEnvironment: "VANTA_MCP_DOWNLOAD_TIMEOUT_MS",
+      requiredInput: "downloadFileName",
+      optionalHashInput: "expectedSha256",
+      overwritesExistingFiles: false,
+      followsRedirects: false,
     },
     uploads: {
       supportedExtensions,

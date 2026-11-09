@@ -18,7 +18,7 @@ test("every generated mutation requires confirmation before HTTP", async () => {
   );
   const client = new FakeClient();
   // Initial Assert
-  assert.equal(mutations.length, 169);
+  assert.equal(mutations.length, 197);
   assert.equal(client.calls.length, 0);
   // Act
   const results = await Promise.all(

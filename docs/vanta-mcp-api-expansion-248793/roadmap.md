@@ -2,6 +2,38 @@
 
 FogBugz epic: https://darwin-global.fogbugz.com/f/cases/248793/
 
+## Next delivery: download integrity and November API expansion
+
+November 9, 2026: the [implementation plan](download-integrity-and-api-refresh-plan.md) decomposes the reported binary download failures and the API recommendations into ordered iterations, workflows, CRCs, proposed child cases, decisions, and acceptance gates. [Baseline](baseline.md), [epic definition](epic-definition.md), [workflows](workflows.md), [edge cases](edge-cases.md), [CRCs](crcs.md), and [stakeholder summary](stakeholder-summary.md) provide the supporting blueprint. Earlier checkpoints below remain historical evidence.
+
+- [x] Capture source baseline and compare official contracts: 333 pinned versus 383 published operations; 50 additions, 44 existing operations with structural changes, no removals. Exact identities and source hashes: [November 9 inventory](contract-review-2026-11-09.json) (248793).
+- [ ] Phase 0: reproduce the installed connector failure and settle file delivery, limits, identity, and fixture decisions (248793).
+- [ ] Phase 1: preserve raw bytes through the active generated MCP path, persist files safely, and return SHA-256 receipts (248793).
+- [ ] Phase 2: diagnose approved-policy artifact routes and provide a version-aware fallback without treating policy IDs as document IDs (248793).
+- [ ] Phase 3: pin reviewed public contracts, expose all additions/changed inputs, preserve tool names and download handling, regenerate help (248793).
+- [ ] Phase 4: extend vendor triage with alerts, external findings, settings, categories, and engagement relationships (248793).
+- [ ] Phase 5: extend risk mappings and current issue filters/detail review (248793).
+- [ ] Phase 6: add document evaluation and framework export/lifecycle recipes (248793).
+- [ ] Phase 7: add personnel requirement-set/custom-requirement and group administration recipes (248793).
+- [ ] Phase 8: complete scoped acceptance, retain implementation-write readback, release when authorized, and verify the installed runtime (248793).
+
+The original planning revision did not change runtime behavior. Incident paths supplied by the user were unavailable locally; installed-runtime reproduction remains open. Child cases, tenant mutations, and publication have not been performed for this work.
+
+### November 9 implementation checkpoint
+
+Read-only follow-up: an existing AST PDF fetched directly and through the local generated operation matched byte-for-byte: 42,093 bytes and SHA-256 `524b82609ab1d72a315cb945454d2d0e76f6cab10cef6dee226958863fec4f3b`. The test file was removed; this establishes agreement for that retrieval, not identity with the original upload or the installed MCP. Mock tests now include redirects, 429 retry, truncated body, cancellation, 403 and write-disabled reads.
+
+The [contract migration review](contract-schema-review-2026-11-09.md) and [field-level comparison](contract-schema-review-2026-11-09.json) cover the 44 structurally changed operations. The local vendor-alert and risk-mapping workflows use confirmed writes and independent readback; vendor triage also reads alert settings and selected-vendor details. Framework export, evaluation, personnel requirements, category and engagement maintenance have documented direct-tool recipes with operator readback, not new automatic write workflows. Live mutation acceptance and installed-runtime adoption remain open.
+
+Validation for this follow-up: `npm test` passed 239 tests; lint, 383-to-383 spec parity, generated help, deterministic generated operation/manifest comparison and `git diff --check` passed. Mock stdio tests additionally exercise evaluation acceptance with unavailable results, framework export status, and personnel requirement readback. This checkpoint has not been published or installed in the connected MCP.
+
+- Download media operations now stream to a server-local file with SHA-256 and source-identity receipts. Mock stdio tests exercise XLSX, PDF, PNG, JPEG, and non-UTF-8 text; local tests cover mismatches, size limits, cancellation, interrupted transfer, and existing-file preservation. The later direct API comparison above validates one existing PDF; installed-runtime acceptance and broader coverage remain open.
+- The three public contracts were refreshed and pinned with source hashes. The generator produces 383 operations, and all 333 prior names retain their API family, method, and path. Generated help was refreshed.
+- Vendor planning has an opt-in extended context for independently paginated organization-wide alerts, categories, selected-vendor external findings, and filtered security incidents. Issue planning accepts the documented filters and an optional issue detail. Alert and risk-mapping writes have verified local workflows; the other administrative paths remain direct-tool recipes with operator readback.
+- A read-only review found that cancellation during file publication could leave a destination without a receipt. The fix waits for download cleanup, removes a destination published after cancellation, and has a deterministic race regression test.
+- After the review fix `npm test` passed 212 tests; `npm run lint` and `git diff --check` passed. The earlier refreshed-spec parity check passed 383-to-383. The connected AST MCP reported version 1.0.22 and 333 operations; the new local implementation has not been installed there. These results do not establish live tenant acceptance. No live mutations, publication, or release were performed.
+- Next slice: expand mock lifecycle and readback coverage for vendor settings/category/engagement and framework/personnel changes, including partial failures and permission denials. Retain direct-tool recipes until a verified operator need justifies additional orchestration; record live mutation acceptance separately.
+
 ## Phase 1: OpenAPI Parity Refresh
 
 - [x] Refresh public Vanta Manage, Audit, and Connectors OpenAPI specs under `openapi/`.
@@ -11,7 +43,7 @@ FogBugz epic: https://darwin-global.fogbugz.com/f/cases/248793/
 
 Notes:
 
-- Current pinned specs generate 333 operations (Manage 251, Audit 57, Connectors 25). See the October 8 capabilities iteration below.
+- The October 8 snapshot generated 333 operations (Manage 251, Audit 57, Connectors 25); the November 9 refresh generates 383 (Manage 301, Audit 57, Connectors 25). See the checkpoint above.
 - September 9, 2026 review: authoritative public downloads are available at the [Manage](https://developer.vanta.com/reference/manage-vanta.json), [Audit](https://developer.vanta.com/reference/auditor-api.json), and [Integrations](https://developer.vanta.com/reference/build-integrations.json) reference URLs. The earlier download blocker is obsolete.
 - The September 9 comparison found 322 public operations against 222 pinned. The September 10 download contains 323; this refresh adds 101 operations. Earlier validation counts below are historical checkpoints.
 
@@ -157,7 +189,8 @@ Live Audit/Connector and dedicated vendor/vulnerability/SLA acceptance remain se
 - [x] Attempt a CMMC-mapped fixture, record the API mapping rejection, and confirm no partial creation; deactivate the separate negative-test fixture and verify cleanup.
 - [x] Compare direct REST and UI edits on an existing DG CMMC control; confirm API writes have no visible effect, UI writes persist, API reads omit UI-saved values, and original content is restored.
 - [x] Compare other metadata on the same existing CMMC control: five scalar fields persist and restore, an unconfigured custom-field label is rejected, and note null-to-empty normalization is recorded.
-- [ ] Verify public-API implementation-details persistence after Vanta resolves the confirmed REST/UI discrepancy and CMMC mapping questions.
+- [x] Verify public-API implementation-details persistence after Vanta's rollout correction: October 13 PATCH and independent GET return the exact temporary string, full UI reload shows it, and API clearing plus GET/UI reload confirm the original blank value on the existing CMMC control.
+- [ ] Resolve the separate custom-control CMMC mapping question before claiming mapped-fixture coverage.
 - [x] Retest October 9 after the reported vendor fix and requested support-email review: direct PATCH on the exact existing CMMC control returns 200, GET omits the field, and full UI reload remains blank. Explicit restoration and another reload confirm the original blank value. Disposable MCP write/replacement/clear also remain unverified and fixture cleanup passes.
 - [x] Reply in the existing Vanta support thread with sanitized reproduction details and request verification of the affected workspace's public Controls API rollout; response pending.
 - [ ] Release the locally validated readback guard when publishing is authorized.

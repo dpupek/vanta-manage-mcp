@@ -4,13 +4,13 @@ Canonical reference generated from runtime metadata.
 
 ## Summary
 
-- Total tools: 355
-- Enabled tools: 355
-- Generated endpoint tools: 333
+- Total tools: 407
+- Enabled tools: 407
+- Generated endpoint tools: 383
 - Compatibility read tools: 15
-- Workflow tools: 7
-- Mutating tools: 175
-- Generated manage tools: 251
+- Workflow tools: 9
+- Mutating tools: 205
+- Generated manage tools: 301
 - Generated audit tools: 57
 - Generated connector tools: 25
 
@@ -68,6 +68,31 @@ Canonical reference generated from runtime metadata.
 3. Execute with explicit actions and `confirm=true`.
 4. Validate vendor status/findings and review document linkage.
 
+### workflow_vendor_alerts
+
+1. Plan with `kind` vendor or incident, selected `alertIds`, and target `status`.
+2. Execute the reviewed update with `mode=execute` and `confirm=true`.
+3. Inspect each outcome; `write_unverified` means the accepted update must be inspected before retrying.
+
+### workflow_risk_mappings
+
+1. Plan with `riskScenarioId`, `kind` (accounts, customAssets, integrations, issues), `change` (add or remove), and `items`.
+2. Accounts use objects with serviceId, accountId, and optional subunitId; other kinds use string IDs.
+3. Execute with `confirm=true`. Complete pre- and post-inventories verify every item and preserve unrelated mappings.
+
+### Evidence evaluation and framework exports
+
+1. Read the draft and request `evaluate_document` with `confirm=true`; sensitive documents and disabled AI features are not eligible.
+2. Read `get_document_draft_evaluation` with bounded polling. A 404 can mean pending or unavailable; it does not establish job status or compliance.
+3. Request `create_framework_controls_export` with `body.frameworkId` and `confirm=true`; read `get_framework_controls_export` until COMPLETED, FAILED, or your timeout.
+4. A completed export returns a temporary presigned URL; do not send Vanta credentials to that URL or assume it is a media endpoint.
+
+### Personnel requirement sets
+
+1. Read `get_group_task_requirement_set`, `list_task_requirement_sets`, and `list_custom_requirements` before changing requirements.
+2. Review affected scope and use the relevant create or update tool with `confirm=true`; re-read `get_task_requirement_set` and group state.
+3. Requirement updates replace each supplied requirement; omitted requirements remain unchanged. Review the complete desired value before writing.
+
 ### workflow_people_assets_vuln_triage
 
 1. Read people/assets/vulnerabilities (`people`, `list_vulnerable_assets`, `vulnerabilities`).
@@ -97,10 +122,14 @@ Canonical reference generated from runtime metadata.
 |---|---|---|---|---|---|
 | `accept_information_request_evidence` | audit | POST | `/audits/{auditId}/information-requests/{requestId}/accept-evidence` | yes | yes |
 | `acknowledge_sla_miss_vulnerability_remediations` | manage | POST | `/vulnerability-remediations/acknowledge-sla-miss` | yes | yes |
+| `add_account_mappings` | manage | POST | `/risk-scenarios/{riskScenarioId}/mappings/accounts` | yes | yes |
 | `add_control_from_library` | manage | POST | `/controls/add-from-library` | yes | yes |
 | `add_control_to_trust_center` | manage | POST | `/trust-centers/{slugId}/controls` | yes | yes |
+| `add_custom_asset_mappings` | manage | POST | `/risk-scenarios/{riskScenarioId}/mappings/custom-assets` | yes | yes |
 | `add_discovered_vendor_to_managed` | manage | POST | `/discovered-vendors/{discoveredVendorId}/add-to-managed` | yes | yes |
 | `add_document_to_control` | manage | POST | `/controls/{controlId}/add-document-to-control` | yes | yes |
+| `add_integration_mappings` | manage | POST | `/risk-scenarios/{riskScenarioId}/mappings/integrations` | yes | yes |
+| `add_issue_mappings` | manage | POST | `/risk-scenarios/{riskScenarioId}/mappings/issues` | yes | yes |
 | `add_people_to_group` | manage | POST | `/groups/{groupId}/add-people` | yes | yes |
 | `add_person_to_group` | manage | POST | `/groups/{groupId}/people` | yes | yes |
 | `add_tag_category_product_context` | manage | POST | `/customer-trust/tag-categories/{tagCategoryId}/product-contexts` | yes | yes |
@@ -153,15 +182,18 @@ Canonical reference generated from runtime metadata.
 | `create_compliance_framework` | manage | POST | `/trust-centers/{slugId}/compliance-frameworks` | yes | yes |
 | `create_custom_control` | manage | POST | `/controls` | yes | yes |
 | `create_custom_evidence_request` | audit | POST | `/audits/{auditId}/evidence/custom-evidence-requests` | yes | yes |
+| `create_custom_requirement` | manage | POST | `/task-requirement-sets/custom-requirements` | yes | yes |
 | `create_customer_trust_account` | manage | POST | `/customer-trust/accounts` | yes | yes |
 | `create_deletion_request` | manage | POST | `/customer-trust/deletion-requests` | yes | yes |
 | `create_document` | manage | POST | `/documents` | yes | yes |
 | `create_document_resource` | manage | POST | `/knowledge-base/resources/documents` | yes | yes |
 | `create_file_questionnaire` | manage | POST | `/customer-trust/questionnaires/file` | yes | yes |
+| `create_framework_controls_export` | manage | POST | `/frameworks/exports` | yes | yes |
 | `create_group` | manage | POST | `/groups` | yes | yes |
 | `create_information_request` | audit | POST | `/audits/{auditId}/information-requests` | yes | yes |
 | `create_link_for_document` | manage | POST | `/documents/{documentId}/links` | yes | yes |
 | `create_risk_scenario` | manage | POST | `/risk-scenarios` | yes | yes |
+| `create_task_requirement_set` | manage | POST | `/task-requirement-sets` | yes | yes |
 | `create_trust_center_faq` | manage | POST | `/trust-centers/{slugId}/faqs` | yes | yes |
 | `create_trust_center_resource` | manage | POST | `/trust-centers/{slugId}/resources` | yes | yes |
 | `create_trust_center_subprocessor` | manage | POST | `/trust-centers/{slugId}/subprocessors` | yes | yes |
@@ -169,6 +201,7 @@ Canonical reference generated from runtime metadata.
 | `create_trust_center_subscriber_group` | manage | POST | `/trust-centers/{slugId}/subscriber-groups` | yes | yes |
 | `create_trust_center_update` | manage | POST | `/trust-centers/{slugId}/updates` | yes | yes |
 | `create_vendor` | manage | POST | `/vendors` | yes | yes |
+| `create_vendor_category` | manage | POST | `/vendor-categories` | yes | yes |
 | `create_vendor_finding` | manage | POST | `/vendors/{vendorId}/findings` | yes | yes |
 | `create_webpage_resource` | manage | POST | `/knowledge-base/resources/webpages` | yes | yes |
 | `create_website_questionnaire` | manage | POST | `/customer-trust/questionnaires/website` | yes | yes |
@@ -181,11 +214,13 @@ Canonical reference generated from runtime metadata.
 | `delete_compliance_framework` | manage | DELETE | `/trust-centers/{slugId}/compliance-frameworks/{frameworkId}` | yes | yes |
 | `delete_contract` | manage | DELETE | `/contracts/{contractId}` | yes | yes |
 | `delete_control` | manage | DELETE | `/controls/{controlId}` | yes | yes |
+| `delete_custom_framework` | manage | DELETE | `/frameworks/{frameworkId}` | yes | yes |
 | `delete_customer_trust_account` | manage | DELETE | `/customer-trust/accounts/{accountId}` | yes | yes |
 | `delete_document` | manage | DELETE | `/documents/{documentId}` | yes | yes |
 | `delete_document_forcontrol` | manage | DELETE | `/controls/{controlId}/documents/{documentId}` | yes | yes |
 | `delete_file_for_document` | manage | DELETE | `/documents/{documentId}/uploads/{uploadedFileId}` | yes | yes |
 | `delete_finding_by_id` | manage | DELETE | `/vendors/{vendorId}/findings/{findingId}` | yes | yes |
+| `delete_group` | manage | DELETE | `/groups/{groupId}` | yes | yes |
 | `delete_information_request` | audit | DELETE | `/audits/{auditId}/information-requests/{requestId}` | yes | yes |
 | `delete_knowledge_base_resource` | manage | DELETE | `/knowledge-base/resources/{id}` | yes | yes |
 | `delete_link_for_document` | manage | DELETE | `/documents/{documentId}/links/{linkId}` | yes | yes |
@@ -203,8 +238,10 @@ Canonical reference generated from runtime metadata.
 | `delete_trust_center_subscriber` | manage | DELETE | `/trust-centers/{slugId}/subscribers/{subscriberId}` | yes | yes |
 | `delete_trust_center_subscriber_group` | manage | DELETE | `/trust-centers/{slugId}/subscriber-groups/{subscriberGroupId}` | yes | yes |
 | `delete_trust_center_update` | manage | DELETE | `/trust-centers/{slugId}/updates/{updateId}` | yes | yes |
+| `delete_vendor_category` | manage | DELETE | `/vendor-categories/{categoryId}` | yes | yes |
 | `deny_trust_center_access_request` | manage | POST | `/trust-centers/{slugId}/access-requests/{accessRequestId}/deny` | yes | yes |
 | `duplicate_audit` | audit | POST | `/audits/duplicate` | yes | yes |
+| `evaluate_document` | manage | POST | `/documents/{documentId}/evaluate` | yes | yes |
 | `flag_information_request_evidence` | audit | POST | `/audits/{auditId}/information-requests/{requestId}/flag-evidence` | yes | yes |
 | `get_answer_library_entry` | manage | GET | `/knowledge-base/answer-library/{id}` | no | yes |
 | `get_assessment_by_id` | manage | GET | `/vendors/{vendorId}/assessments/{assessmentId}` | no | yes |
@@ -220,10 +257,13 @@ Canonical reference generated from runtime metadata.
 | `get_control` | manage | GET | `/controls/{controlId}` | no | yes |
 | `get_customer_trust_account` | manage | GET | `/customer-trust/accounts/{accountId}` | no | yes |
 | `get_document` | manage | GET | `/documents/{documentId}` | no | yes |
+| `get_document_draft_evaluation` | manage | GET | `/documents/{documentId}/evaluation` | no | yes |
 | `get_framework` | manage | GET | `/frameworks/{frameworkId}` | no | yes |
 | `get_framework_codes` | audit | GET | `/audits/{auditId}/framework-codes` | no | yes |
+| `get_framework_controls_export` | manage | GET | `/frameworks/exports/{exportId}` | no | yes |
 | `get_group` | manage | GET | `/groups/{groupId}` | no | yes |
 | `get_group_members` | manage | GET | `/groups/{groupId}/people` | no | yes |
+| `get_group_task_requirement_set` | manage | GET | `/groups/{groupId}/task-requirement-set` | no | yes |
 | `get_information_request` | audit | GET | `/audits/{auditId}/information-requests/{requestId}` | no | yes |
 | `get_information_request_evidence` | audit | GET | `/audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}` | no | yes |
 | `get_information_request_test_snapshot_evidence_detail` | audit | GET | `/audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}/test-snapshot` | no | yes |
@@ -247,6 +287,7 @@ Canonical reference generated from runtime metadata.
 | `get_security_reviews_by_vendor_id` | manage | GET | `/vendors/{vendorId}/security-reviews` | no | yes |
 | `get_settings` | manage | GET | `/personnel-notification-settings` | no | yes |
 | `get_tags_for_category` | manage | GET | `/customer-trust/tag-categories/{tagCategoryId}` | no | yes |
+| `get_task_requirement_set` | manage | GET | `/task-requirement-sets/{requirementSetId}` | no | yes |
 | `get_test` | manage | GET | `/tests/{testId}` | no | yes |
 | `get_test_entities` | manage | GET | `/tests/{testId}/entities` | no | yes |
 | `get_trust_center` | manage | GET | `/trust-centers/{slugId}` | no | yes |
@@ -265,7 +306,12 @@ Canonical reference generated from runtime metadata.
 | `get_uploadedfile_media` | manage | GET | `/documents/{documentId}/uploads/{uploadedFileId}/media` | no | yes |
 | `get_user` | manage | GET | `/users/{userId}` | no | yes |
 | `get_vendor` | manage | GET | `/vendors/{vendorId}` | no | yes |
+| `get_vendor_alert` | manage | GET | `/vendor-alerts/{alertId}` | no | yes |
+| `get_vendor_alert_settings` | manage | GET | `/vendor-alert-settings` | no | yes |
 | `get_vendor_assessment_type_by_id` | manage | GET | `/vendor-assessment-types/{assessmentTypeId}` | no | yes |
+| `get_vendor_category_by_id` | manage | GET | `/vendor-categories/{categoryId}` | no | yes |
+| `get_vendor_external_finding` | manage | GET | `/vendors/{vendorId}/external-findings/{findingId}` | no | yes |
+| `get_vendor_security_incident_alert` | manage | GET | `/vendor-security-incident-alerts/{alertId}` | no | yes |
 | `get_vulnerability` | manage | GET | `/vulnerabilities/{vulnerabilityId}` | no | yes |
 | `get_vulnerable_asset` | manage | GET | `/vulnerable-assets/{vulnerableAssetId}` | no | yes |
 | `get_vulnerable_assets` | audit | GET | `/audits/{auditId}/vulnerable-assets` | no | yes |
@@ -273,6 +319,7 @@ Canonical reference generated from runtime metadata.
 | `initiate_export` | manage | POST | `/customer-trust/questionnaires/exports` | yes | yes |
 | `link_controls_to_risk_scenario` | manage | POST | `/risk-scenarios/{riskScenarioId}/controls` | yes | yes |
 | `list_account_access_services` | audit | GET | `/audits/{auditId}/personnel/account-access/services` | no | yes |
+| `list_account_mappings` | manage | GET | `/risk-scenarios/{riskScenarioId}/mappings/accounts` | no | yes |
 | `list_answer_library_entries` | manage | GET | `/knowledge-base/answer-library` | no | yes |
 | `list_assignable_users` | manage | GET | `/customer-trust/questionnaires/assignable-users` | no | yes |
 | `list_audit_comments` | audit | GET | `/audits/{auditId}/comments` | no | yes |
@@ -294,12 +341,16 @@ Canonical reference generated from runtime metadata.
 | `list_controls` | manage | GET | `/controls` | no | yes |
 | `list_controls_for_document` | manage | GET | `/documents/{documentId}/controls` | no | yes |
 | `list_controls_for_framework` | manage | GET | `/frameworks/{frameworkId}/controls` | no | yes |
+| `list_custom_asset_mappings` | manage | GET | `/risk-scenarios/{riskScenarioId}/mappings/custom-assets` | no | yes |
+| `list_custom_assets` | manage | GET | `/custom-assets` | no | yes |
+| `list_custom_requirements` | manage | GET | `/task-requirement-sets/custom-requirements` | no | yes |
 | `list_customer_trust_accounts` | manage | GET | `/customer-trust/accounts` | no | yes |
 | `list_deactivated_controls` | manage | GET | `/controls/deactivated-controls` | no | yes |
 | `list_discovered_vendor_accounts` | manage | GET | `/discovered-vendors/{discoveredVendorId}/accounts` | no | yes |
 | `list_discovered_vendors` | manage | GET | `/discovered-vendors` | no | yes |
 | `list_documents` | manage | GET | `/documents` | no | yes |
 | `list_documents_for_control` | manage | GET | `/controls/{controlId}/documents` | no | yes |
+| `list_enterprise_risk_mappings` | manage | GET | `/risk-scenarios/{riskScenarioId}/mappings/enterprise-risk` | no | yes |
 | `list_event_logs` | manage | GET | `/event-logs` | no | yes |
 | `list_files_for_document` | manage | GET | `/documents/{documentId}/uploads` | no | yes |
 | `list_frameworks` | manage | GET | `/frameworks` | no | yes |
@@ -308,7 +359,9 @@ Canonical reference generated from runtime metadata.
 | `list_information_request_evidence` | audit | GET | `/audits/{auditId}/information-requests/{requestId}/evidence` | no | yes |
 | `list_information_requests` | audit | GET | `/audits/{auditId}/information-requests` | no | yes |
 | `list_information_requests_for_control` | audit | GET | `/audits/{auditId}/controls/{controlId}/information-requests` | no | yes |
+| `list_integration_mappings` | manage | GET | `/risk-scenarios/{riskScenarioId}/mappings/integrations` | no | yes |
 | `list_integrations` | audit | GET | `/audits/{auditId}/integrations` | no | yes |
+| `list_issue_mappings` | manage | GET | `/risk-scenarios/{riskScenarioId}/mappings/issues` | no | yes |
 | `list_issues` | manage | GET | `/issues` | no | yes |
 | `list_knowledge_base_resources` | manage | GET | `/knowledge-base/resources` | no | yes |
 | `list_library_controls` | manage | GET | `/controls/controls-library` | no | yes |
@@ -331,6 +384,7 @@ Canonical reference generated from runtime metadata.
 | `list_risk_scenario_controls` | manage | GET | `/risk-scenarios/{riskScenarioId}/controls` | no | yes |
 | `list_risk_snapshots` | audit | GET | `/audits/{auditId}/risks/snapshots` | no | yes |
 | `list_tag_categories` | manage | GET | `/customer-trust/tag-categories` | no | yes |
+| `list_task_requirement_sets` | manage | GET | `/task-requirement-sets` | no | yes |
 | `list_tests` | manage | GET | `/tests` | no | yes |
 | `list_tests_for_control` | manage | GET | `/controls/{controlId}/tests` | no | yes |
 | `list_trust_center_access_requests` | manage | GET | `/trust-centers/{slugId}/access-requests` | no | yes |
@@ -346,13 +400,18 @@ Canonical reference generated from runtime metadata.
 | `list_trust_center_subscriber_groups` | manage | GET | `/trust-centers/{slugId}/subscriber-groups` | no | yes |
 | `list_trust_center_subscribers` | manage | GET | `/trust-centers/{slugId}/subscribers` | no | yes |
 | `list_trust_center_updates` | manage | GET | `/trust-centers/{slugId}/updates` | no | yes |
+| `list_trust_center_videos` | manage | GET | `/trust-centers/{slugId}/videos` | no | yes |
 | `list_trust_center_viewers` | manage | GET | `/trust-centers/{slugId}/viewers` | no | yes |
 | `list_users` | manage | GET | `/users` | no | yes |
+| `list_vendor_alerts` | manage | GET | `/vendor-alerts` | no | yes |
 | `list_vendor_assessment_types` | manage | GET | `/vendor-assessment-types` | no | yes |
+| `list_vendor_categories` | manage | GET | `/vendor-categories` | no | yes |
 | `list_vendor_documents` | manage | GET | `/vendors/{vendorId}/documents` | no | yes |
+| `list_vendor_external_findings` | manage | GET | `/vendors/{vendorId}/external-findings` | no | yes |
 | `list_vendor_finding_mappings` | manage | GET | `/risk-scenarios/{riskScenarioId}/mappings/vendor-findings` | no | yes |
 | `list_vendor_findings` | manage | GET | `/vendors/{vendorId}/findings` | no | yes |
 | `list_vendor_risk_attributes` | manage | GET | `/vendor-risk-attributes` | no | yes |
+| `list_vendor_security_incident_alerts` | manage | GET | `/vendor-security-incident-alerts` | no | yes |
 | `list_vendors` | manage | GET | `/vendors` | no | yes |
 | `list_vendors_in_audit_scope` | audit | GET | `/audits/{auditId}/vendors` | no | yes |
 | `list_vulnerabilities` | manage | GET | `/vulnerabilities` | no | yes |
@@ -362,8 +421,14 @@ Canonical reference generated from runtime metadata.
 | `mark_as_not_people` | manage | POST | `/people/mark-as-not-people` | yes | yes |
 | `mark_as_people` | manage | POST | `/people/mark-as-people` | yes | yes |
 | `offboard_people` | manage | POST | `/people/offboard` | yes | yes |
+| `reactivate_framework` | manage | POST | `/frameworks/{frameworkId}/reactivate` | yes | yes |
 | `reactivate_test_entity` | manage | POST | `/tests/{testId}/entities/{entityId}/reactivate` | yes | yes |
 | `reactivate_vulnerabilities` | manage | POST | `/vulnerabilities/reactivate` | yes | yes |
+| `remove_account_mappings` | manage | DELETE | `/risk-scenarios/{riskScenarioId}/mappings/accounts` | yes | yes |
+| `remove_custom_asset_mappings` | manage | DELETE | `/risk-scenarios/{riskScenarioId}/mappings/custom-assets` | yes | yes |
+| `remove_engagement` | manage | DELETE | `/vendors/{parentVendorId}/engagement-relationship/{engagementVendorId}` | yes | yes |
+| `remove_integration_mappings` | manage | DELETE | `/risk-scenarios/{riskScenarioId}/mappings/integrations` | yes | yes |
+| `remove_issue_mappings` | manage | DELETE | `/risk-scenarios/{riskScenarioId}/mappings/issues` | yes | yes |
 | `remove_people_from_group` | manage | POST | `/groups/{groupId}/remove-people` | yes | yes |
 | `remove_person_from_group` | manage | DELETE | `/groups/{groupId}/people/{personId}` | yes | yes |
 | `remove_tag_category_product_context` | manage | DELETE | `/customer-trust/tag-categories/{tagCategoryId}/product-contexts/{productContextId}` | yes | yes |
@@ -373,11 +438,14 @@ Canonical reference generated from runtime metadata.
 | `send_notifications_to_all_subscribers` | manage | POST | `/trust-centers/{slugId}/updates/{updateId}/notify-all-subscribers` | yes | yes |
 | `send_trust_center_update_notifications` | manage | POST | `/trust-centers/{slugId}/updates/{updateId}/notify-specific-subscribers` | yes | yes |
 | `send_trust_center_viewer_invite_reminder` | manage | POST | `/trust-centers/{slugId}/viewers/{viewerId}/send-invite-reminder` | yes | yes |
+| `set_engagement` | manage | PUT | `/vendors/{parentVendorId}/engagement-relationship/{engagementVendorId}` | yes | yes |
+| `set_framework_variant` | manage | PUT | `/frameworks/{frameworkId}/variants` | yes | yes |
 | `set_leave_for_person` | manage | POST | `/people/{personId}/set-leave` | yes | yes |
 | `set_owner_for_control` | manage | POST | `/controls/{controlId}/set-owner` | yes | yes |
 | `set_owner_for_document` | manage | POST | `/documents/{documentId}/set-owner` | yes | yes |
 | `set_status_for_vendor` | manage | POST | `/vendors/{vendorId}/set-status` | yes | yes |
 | `share_information_request_list` | audit | POST | `/audits/{auditId}/share-information-request-list` | yes | yes |
+| `snooze_framework` | manage | POST | `/frameworks/{frameworkId}/snooze` | yes | yes |
 | `submit_document_collection` | manage | POST | `/documents/{documentId}/submit` | yes | yes |
 | `submit_risk_for_approval` | manage | POST | `/risk-scenarios/{riskScenarioId}/submit-for-approval` | yes | yes |
 | `update_answer_library_entry_route` | manage | PATCH | `/knowledge-base/answer-library/{id}` | yes | yes |
@@ -386,6 +454,7 @@ Canonical reference generated from runtime metadata.
 | `update_comment_for_information_request` | audit | PATCH | `/audits/{auditId}/information-requests/{requestId}/comments/{commentId}` | yes | yes |
 | `update_compliance_framework` | manage | PATCH | `/trust-centers/{slugId}/compliance-frameworks/{frameworkId}` | yes | yes |
 | `update_control_metadata` | manage | PATCH | `/controls/{controlId}` | yes | yes |
+| `update_custom_requirement` | manage | PATCH | `/task-requirement-sets/custom-requirements/{customRequirementId}` | yes | yes |
 | `update_customer_trust_account` | manage | PATCH | `/customer-trust/accounts/{accountId}` | yes | yes |
 | `update_document_resource` | manage | PATCH | `/knowledge-base/resources/documents/{id}` | yes | yes |
 | `update_group` | manage | PATCH | `/groups/{groupId}` | yes | yes |
@@ -399,6 +468,8 @@ Canonical reference generated from runtime metadata.
 | `update_risk_scenario` | manage | PATCH | `/risk-scenarios/{riskScenarioId}` | yes | yes |
 | `update_risk_scenario_control` | manage | PATCH | `/risk-scenarios/{riskScenarioId}/controls/{controlId}` | yes | yes |
 | `update_settings` | manage | PATCH | `/personnel-notification-settings` | yes | yes |
+| `update_task_requirement_set_details` | manage | PATCH | `/task-requirement-sets/{requirementSetId}/details` | yes | yes |
+| `update_task_requirement_set_requirements` | manage | PATCH | `/task-requirement-sets/{requirementSetId}/requirements` | yes | yes |
 | `update_trust_center` | manage | PATCH | `/trust-centers/{slugId}` | yes | yes |
 | `update_trust_center_control_category` | manage | PATCH | `/trust-centers/{slugId}/control-categories/{categoryId}` | yes | yes |
 | `update_trust_center_controls_in_category` | manage | PATCH | `/trust-centers/{slugId}/control-categories/{categoryId}/controls` | yes | yes |
@@ -411,7 +482,11 @@ Canonical reference generated from runtime metadata.
 | `update_trust_center_update` | manage | PATCH | `/trust-centers/{slugId}/updates/{updateId}` | yes | yes |
 | `update_trust_center_viewer` | manage | PATCH | `/trust-centers/{slugId}/viewers/{viewerId}` | yes | yes |
 | `update_vendor` | manage | PATCH | `/vendors/{vendorId}` | yes | yes |
+| `update_vendor_alert_settings` | manage | PATCH | `/vendor-alert-settings` | yes | yes |
+| `update_vendor_alerts` | manage | PATCH | `/vendor-alerts` | yes | yes |
+| `update_vendor_category` | manage | PATCH | `/vendor-categories/{categoryId}` | yes | yes |
 | `update_vendor_finding` | manage | PATCH | `/vendors/{vendorId}/findings/{findingId}` | yes | yes |
+| `update_vendor_security_incident_alerts` | manage | PATCH | `/vendor-security-incident-alerts` | yes | yes |
 | `update_webpage_resource` | manage | PATCH | `/knowledge-base/resources/webpages/{id}` | yes | yes |
 | `upload_compliance_framework_badge` | manage | POST | `/trust-centers/{slugId}/compliance-frameworks/{frameworkId}/badge` | yes | yes |
 | `upload_contract` | manage | POST | `/contracts` | yes | yes |
@@ -458,5 +533,7 @@ Canonical reference generated from runtime metadata.
 | `workflow_issue_event_triage` | plan_only | yes |
 | `workflow_people_assets_vuln_triage` | plan_execute_confirmed | yes |
 | `workflow_resource_owner_assignment` | plan_execute_confirmed | yes |
+| `workflow_risk_mappings` | plan_execute_confirmed | yes |
 | `workflow_triage_failing_controls` | plan_execute_confirmed | yes |
+| `workflow_vendor_alerts` | plan_execute_confirmed | yes |
 | `workflow_vendor_triage` | plan_execute_confirmed | yes |

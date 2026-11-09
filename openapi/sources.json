@@ -4,21 +4,21 @@
       "source": "manage",
       "file": "manage-v1.json",
       "url": "https://developer.vanta.com/reference/manage-vanta.json",
-      "retrievedAt": "2026-10-08T16:23:44.7989872Z",
-      "sha256": "9c66cc68f8d4bff7f3ca34e0eb9bb322b4b2846f0f686ed411fb6fcc9e6d66a2"
+      "retrievedAt": "2026-11-09T14:56:41.947Z",
+      "sha256": "b521bc2d6766d961c9d62b88dc4e70a62d5d3ef34ad818ee0b4dd63375668a72"
     },
     {
       "source": "audit",
       "file": "audit-v1.json",
       "url": "https://developer.vanta.com/reference/auditor-api.json",
-      "retrievedAt": "2026-10-08T16:23:45.3042647Z",
-      "sha256": "e343f91d1e0e645ca9234c6e8c02cf52bc0cfa3aa69f468f611fa578d3a1e99b"
+      "retrievedAt": "2026-11-09T14:56:42.753Z",
+      "sha256": "d50918178f565afe4a27a75f6b24c8e43eec154445e25a2181db7e45859013ab"
     },
     {
       "source": "connectors",
       "file": "connectors-v1.json",
       "url": "https://developer.vanta.com/reference/build-integrations.json",
-      "retrievedAt": "2026-10-08T16:23:45.6869978Z",
+      "retrievedAt": "2026-11-09T14:56:43.486Z",
       "sha256": "983eb37aa3f7efd7de47d76f7eb9100fac145b910bcaeeb09bb3030a12a4f2e5"
     }
   ]

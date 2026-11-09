@@ -50,6 +50,7 @@ export interface VantaRequest {
   headers?: Record<string, string>;
   formData?: FormData;
   signal?: AbortSignal;
+  download?: (response: Response, signal: AbortSignal) => Promise<unknown>;
 }
 
 export interface VantaResponse {
@@ -109,10 +110,23 @@ export class VantaApiClient {
   public constructor(private readonly options: VantaClientOptions = {}) {}
 
   public async request(input: VantaRequest): Promise<VantaResponse> {
+    const downloadTimeout = Number(
+      process.env.VANTA_MCP_DOWNLOAD_TIMEOUT_MS ?? 120000,
+    );
+    if (
+      input.download &&
+      (!Number.isFinite(downloadTimeout) ||
+        downloadTimeout <= 0 ||
+        downloadTimeout > 3600000)
+    ) {
+      throw new Error("Invalid VANTA_MCP_DOWNLOAD_TIMEOUT_MS.");
+    }
     return withDeadline(
-      this.options.timeoutMs ?? configuredRequestTimeout(),
+      this.options.timeoutMs ??
+        (input.download ? downloadTimeout : configuredRequestTimeout()),
       input.signal ?? currentRequestSignal(),
       signal => this.requestWithinDeadline(input, signal),
+      Boolean(input.download),
     );
   }
 
@@ -149,7 +163,13 @@ export class VantaApiClient {
       let response: Response;
       try {
         response = await abortable(signal, () =>
-          send(url, { method, headers, body, signal }),
+          send(url, {
+            method,
+            headers,
+            body,
+            signal,
+            ...(input.download ? { redirect: "error" as const } : {}),
+          }),
         );
       } catch (error) {
         signal.throwIfAborted();
@@ -204,7 +224,10 @@ export class VantaApiClient {
         status: response.status,
         ok: response.ok,
         headers: headersOut,
-        data: await abortable(signal, () => parseResponsePayload(response)),
+        data:
+          input.download && response.ok
+            ? await input.download(response, signal)
+            : await abortable(signal, () => parseResponsePayload(response)),
       };
     }
     throw new Error("Request retry policy exhausted without a response.");

@@ -39,6 +39,7 @@ export const withDeadline = async <T>(
   timeoutMs: number,
   parent: AbortSignal | undefined,
   run: (signal: AbortSignal) => Promise<T>,
+  waitForCleanup = false,
 ): Promise<T> => {
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0)
     throw new Error("Request timeout must be positive and finite.");
@@ -54,7 +55,9 @@ export const withDeadline = async <T>(
     );
   }, timeoutMs);
   try {
-    return await abortable(controller.signal, () => run(controller.signal));
+    return await (waitForCleanup
+      ? run(controller.signal)
+      : abortable(controller.signal, () => run(controller.signal)));
   } finally {
     clearTimeout(timer);
     parent?.removeEventListener("abort", onAbort);

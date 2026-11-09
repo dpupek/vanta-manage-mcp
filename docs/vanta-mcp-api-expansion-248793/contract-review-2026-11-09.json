@@ -1,0 +1,471 @@
+{
+  "reviewedAt": "2026-11-09T14:41:20.860Z",
+  "purpose": "Planning comparison only; published contracts are not pinned by this report.",
+  "families": [
+    {
+      "family": "manage",
+      "url": "https://developer.vanta.com/reference/manage-vanta.json",
+      "retrievedAt": "2026-11-09T14:41:21.838Z",
+      "pinnedSha256": "9c66cc68f8d4bff7f3ca34e0eb9bb322b4b2846f0f686ed411fb6fcc9e6d66a2",
+      "publishedSha256": "b521bc2d6766d961c9d62b88dc4e70a62d5d3ef34ad818ee0b4dd63375668a72",
+      "pinnedOperations": 251,
+      "publishedOperations": 301,
+      "added": [
+        {
+          "identity": "GET /custom-assets",
+          "operationId": "ListCustomAssets",
+          "summary": "List custom assets"
+        },
+        {
+          "identity": "POST /documents/{documentId}/evaluate",
+          "operationId": "EvaluateDocument",
+          "summary": "Evaluate document evidence"
+        },
+        {
+          "identity": "GET /documents/{documentId}/evaluation",
+          "operationId": "GetDocumentDraftEvaluation",
+          "summary": "Get document evaluation"
+        },
+        {
+          "identity": "POST /frameworks/exports",
+          "operationId": "CreateFrameworkControlsExport",
+          "summary": "Create framework controls export"
+        },
+        {
+          "identity": "GET /frameworks/exports/{exportId}",
+          "operationId": "GetFrameworkControlsExport",
+          "summary": "Get framework controls export status"
+        },
+        {
+          "identity": "DELETE /frameworks/{frameworkId}",
+          "operationId": "DeleteCustomFramework",
+          "summary": "Delete a custom framework"
+        },
+        {
+          "identity": "POST /frameworks/{frameworkId}/reactivate",
+          "operationId": "ReactivateFramework",
+          "summary": "Reactivate a snoozed framework"
+        },
+        {
+          "identity": "POST /frameworks/{frameworkId}/snooze",
+          "operationId": "SnoozeFramework",
+          "summary": "Snooze a framework"
+        },
+        {
+          "identity": "PUT /frameworks/{frameworkId}/variants",
+          "operationId": "SetFrameworkVariant",
+          "summary": "Set framework control sets"
+        },
+        {
+          "identity": "DELETE /groups/{groupId}",
+          "operationId": "DeleteGroup",
+          "summary": "Delete group"
+        },
+        {
+          "identity": "GET /groups/{groupId}/task-requirement-set",
+          "operationId": "GetGroupTaskRequirementSet",
+          "summary": "Get group task requirement set"
+        },
+        {
+          "identity": "GET /risk-scenarios/{riskScenarioId}/mappings/accounts",
+          "operationId": "ListAccountMappings",
+          "summary": "List accounts mapped to a risk scenario"
+        },
+        {
+          "identity": "POST /risk-scenarios/{riskScenarioId}/mappings/accounts",
+          "operationId": "AddAccountMappings",
+          "summary": "Bulk add account mappings"
+        },
+        {
+          "identity": "DELETE /risk-scenarios/{riskScenarioId}/mappings/accounts",
+          "operationId": "RemoveAccountMappings",
+          "summary": "Bulk remove account mappings"
+        },
+        {
+          "identity": "GET /risk-scenarios/{riskScenarioId}/mappings/custom-assets",
+          "operationId": "ListCustomAssetMappings",
+          "summary": "List custom assets mapped to a risk scenario"
+        },
+        {
+          "identity": "POST /risk-scenarios/{riskScenarioId}/mappings/custom-assets",
+          "operationId": "AddCustomAssetMappings",
+          "summary": "Bulk add custom asset mappings"
+        },
+        {
+          "identity": "DELETE /risk-scenarios/{riskScenarioId}/mappings/custom-assets",
+          "operationId": "RemoveCustomAssetMappings",
+          "summary": "Bulk remove custom asset mappings"
+        },
+        {
+          "identity": "GET /risk-scenarios/{riskScenarioId}/mappings/enterprise-risk",
+          "operationId": "ListEnterpriseRiskMappings",
+          "summary": "List the enterprise risks mapped to a risk scenario"
+        },
+        {
+          "identity": "GET /risk-scenarios/{riskScenarioId}/mappings/integrations",
+          "operationId": "ListIntegrationMappings",
+          "summary": "List integrations mapped to a risk scenario"
+        },
+        {
+          "identity": "POST /risk-scenarios/{riskScenarioId}/mappings/integrations",
+          "operationId": "AddIntegrationMappings",
+          "summary": "Bulk add integration mappings"
+        },
+        {
+          "identity": "DELETE /risk-scenarios/{riskScenarioId}/mappings/integrations",
+          "operationId": "RemoveIntegrationMappings",
+          "summary": "Bulk remove integration mappings"
+        },
+        {
+          "identity": "GET /risk-scenarios/{riskScenarioId}/mappings/issues",
+          "operationId": "ListIssueMappings",
+          "summary": "List issues mapped to a risk scenario"
+        },
+        {
+          "identity": "POST /risk-scenarios/{riskScenarioId}/mappings/issues",
+          "operationId": "AddIssueMappings",
+          "summary": "Bulk add issue mappings"
+        },
+        {
+          "identity": "DELETE /risk-scenarios/{riskScenarioId}/mappings/issues",
+          "operationId": "RemoveIssueMappings",
+          "summary": "Bulk remove issue mappings"
+        },
+        {
+          "identity": "GET /task-requirement-sets",
+          "operationId": "ListTaskRequirementSets",
+          "summary": "List task requirement sets"
+        },
+        {
+          "identity": "POST /task-requirement-sets",
+          "operationId": "CreateTaskRequirementSet",
+          "summary": "Create task requirement set"
+        },
+        {
+          "identity": "GET /task-requirement-sets/custom-requirements",
+          "operationId": "ListCustomRequirements",
+          "summary": "List custom requirements"
+        },
+        {
+          "identity": "POST /task-requirement-sets/custom-requirements",
+          "operationId": "CreateCustomRequirement",
+          "summary": "Create custom requirement"
+        },
+        {
+          "identity": "PATCH /task-requirement-sets/custom-requirements/{customRequirementId}",
+          "operationId": "UpdateCustomRequirement",
+          "summary": "Update custom requirement"
+        },
+        {
+          "identity": "GET /task-requirement-sets/{requirementSetId}",
+          "operationId": "GetTaskRequirementSet",
+          "summary": "Get task requirement set by ID"
+        },
+        {
+          "identity": "PATCH /task-requirement-sets/{requirementSetId}/details",
+          "operationId": "UpdateTaskRequirementSetDetails",
+          "summary": "Update task requirement set details"
+        },
+        {
+          "identity": "PATCH /task-requirement-sets/{requirementSetId}/requirements",
+          "operationId": "UpdateTaskRequirementSetRequirements",
+          "summary": "Update task requirement set requirements"
+        },
+        {
+          "identity": "GET /trust-centers/{slugId}/videos",
+          "operationId": "ListTrustCenterVideos",
+          "summary": "List Trust Center videos"
+        },
+        {
+          "identity": "GET /vendor-alert-settings",
+          "operationId": "GetVendorAlertSettings",
+          "summary": "Get vendor alert settings"
+        },
+        {
+          "identity": "PATCH /vendor-alert-settings",
+          "operationId": "UpdateVendorAlertSettings",
+          "summary": "Update vendor alert settings"
+        },
+        {
+          "identity": "PATCH /vendor-alerts",
+          "operationId": "UpdateVendorAlerts",
+          "summary": "Update vendor alerts"
+        },
+        {
+          "identity": "GET /vendor-alerts",
+          "operationId": "ListVendorAlerts",
+          "summary": "List vendor alerts"
+        },
+        {
+          "identity": "GET /vendor-alerts/{alertId}",
+          "operationId": "GetVendorAlert",
+          "summary": "Get vendor alert"
+        },
+        {
+          "identity": "GET /vendor-categories",
+          "operationId": "ListVendorCategories",
+          "summary": "List vendor categories"
+        },
+        {
+          "identity": "POST /vendor-categories",
+          "operationId": "CreateVendorCategory",
+          "summary": "Create vendor category"
+        },
+        {
+          "identity": "GET /vendor-categories/{categoryId}",
+          "operationId": "GetVendorCategoryById",
+          "summary": "Get vendor category by ID"
+        },
+        {
+          "identity": "PATCH /vendor-categories/{categoryId}",
+          "operationId": "UpdateVendorCategory",
+          "summary": "Update vendor category"
+        },
+        {
+          "identity": "DELETE /vendor-categories/{categoryId}",
+          "operationId": "DeleteVendorCategory",
+          "summary": "Delete vendor category"
+        },
+        {
+          "identity": "GET /vendor-security-incident-alerts",
+          "operationId": "ListVendorSecurityIncidentAlerts",
+          "summary": "List vendor security incident alerts"
+        },
+        {
+          "identity": "PATCH /vendor-security-incident-alerts",
+          "operationId": "UpdateVendorSecurityIncidentAlerts",
+          "summary": "Update vendor security incident alerts"
+        },
+        {
+          "identity": "GET /vendor-security-incident-alerts/{alertId}",
+          "operationId": "GetVendorSecurityIncidentAlert",
+          "summary": "Get vendor security incident alert by ID"
+        },
+        {
+          "identity": "PUT /vendors/{parentVendorId}/engagement-relationship/{engagementVendorId}",
+          "operationId": "SetEngagement",
+          "summary": "Set vendor engagement"
+        },
+        {
+          "identity": "DELETE /vendors/{parentVendorId}/engagement-relationship/{engagementVendorId}",
+          "operationId": "RemoveEngagement",
+          "summary": "Remove vendor engagement"
+        },
+        {
+          "identity": "GET /vendors/{vendorId}/external-findings",
+          "operationId": "ListVendorExternalFindings",
+          "summary": "List vendor external findings"
+        },
+        {
+          "identity": "GET /vendors/{vendorId}/external-findings/{findingId}",
+          "operationId": "GetVendorExternalFinding",
+          "summary": "Get vendor external finding"
+        }
+      ],
+      "removed": [],
+      "changedContracts": [
+        {
+          "identity": "GET /customer-trust/accounts",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "POST /customer-trust/accounts",
+          "areas": ["requestBody", "responses"]
+        },
+        {
+          "identity": "GET /customer-trust/accounts/{accountId}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "PATCH /customer-trust/accounts/{accountId}",
+          "areas": ["requestBody", "responses"]
+        },
+        {
+          "identity": "GET /discovered-vendors",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "POST /discovered-vendors/{discoveredVendorId}/add-to-managed",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /frameworks",
+          "areas": ["parameters", "responses"]
+        },
+        {
+          "identity": "GET /frameworks/{frameworkId}",
+          "areas": ["parameters", "responses"]
+        },
+        {
+          "identity": "GET /issues",
+          "areas": ["parameters", "responses"]
+        },
+        {
+          "identity": "GET /issues/{issueId}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /knowledge-base/answer-library",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "POST /knowledge-base/answer-library",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /knowledge-base/answer-library/{id}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "PATCH /knowledge-base/answer-library/{id}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "POST /knowledge-base/answer-library/{id}/verify",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /policies",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /policies/{policyId}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "POST /trust-centers/{slugId}/compliance-frameworks",
+          "areas": ["requestBody"]
+        },
+        {
+          "identity": "PATCH /trust-centers/{slugId}/compliance-frameworks/{frameworkId}",
+          "areas": ["requestBody"]
+        },
+        {
+          "identity": "PUT /trust-centers/{slugId}/videos",
+          "areas": ["requestBody", "responses"]
+        },
+        {
+          "identity": "GET /vendor-assessment-types",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /vendor-assessment-types/{assessmentTypeId}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /vendor-risk-attributes",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "POST /vendors",
+          "areas": ["requestBody", "responses"]
+        },
+        {
+          "identity": "GET /vendors",
+          "areas": ["parameters", "responses"]
+        },
+        {
+          "identity": "GET /vendors/{vendorId}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "PATCH /vendors/{vendorId}",
+          "areas": ["requestBody", "responses"]
+        },
+        {
+          "identity": "GET /vendors/{vendorId}/assessments",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /vendors/{vendorId}/assessments/{assessmentId}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "POST /vendors/{vendorId}/set-status",
+          "areas": ["responses"]
+        }
+      ]
+    },
+    {
+      "family": "audit",
+      "url": "https://developer.vanta.com/reference/auditor-api.json",
+      "retrievedAt": "2026-11-09T14:41:22.284Z",
+      "pinnedSha256": "e343f91d1e0e645ca9234c6e8c02cf52bc0cfa3aa69f468f611fa578d3a1e99b",
+      "publishedSha256": "d50918178f565afe4a27a75f6b24c8e43eec154445e25a2181db7e45859013ab",
+      "pinnedOperations": 57,
+      "publishedOperations": 57,
+      "added": [],
+      "removed": [],
+      "changedContracts": [
+        {
+          "identity": "GET /audits",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "POST /audits/duplicate",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/assets/code-changes",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/controls",
+          "areas": ["parameters"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/information-requests/{requestId}/evidence",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/information-requests/{requestId}/evidence/{evidenceId}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/integrations",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/managed-vendors",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/personnel/account-access/{serviceId}",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/personnel/groups",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/personnel/people",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "POST /audits/{auditId}/share-information-request-list",
+          "areas": ["responses"]
+        },
+        {
+          "identity": "GET /audits/{auditId}/vendors",
+          "areas": ["responses"]
+        }
+      ]
+    },
+    {
+      "family": "connectors",
+      "url": "https://developer.vanta.com/reference/build-integrations.json",
+      "retrievedAt": "2026-11-09T14:41:22.855Z",
+      "pinnedSha256": "983eb37aa3f7efd7de47d76f7eb9100fac145b910bcaeeb09bb3030a12a4f2e5",
+      "publishedSha256": "983eb37aa3f7efd7de47d76f7eb9100fac145b910bcaeeb09bb3030a12a4f2e5",
+      "pinnedOperations": 25,
+      "publishedOperations": 25,
+      "added": [],
+      "removed": [],
+      "changedContracts": []
+    }
+  ]
+}

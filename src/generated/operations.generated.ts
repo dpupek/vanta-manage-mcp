@@ -173,7 +173,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             {
               "type": "string"
             }
-          ]
+          ],
+          "description": "The framework's id, such as `soc2` or the id of a custom framework. The `FrameworkId` enum values are deprecated aliases that are still accepted."
         },
         "sectionId": {
           "type": "string"
@@ -187,6 +188,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "additionalProperties": false
     },
     "FrameworkId": {
+      "title": "FrameworkId",
       "enum": [
         "AU_E_8",
         "AWS_FTR",
@@ -371,6 +373,13 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           },
           "type": "array"
         },
+        "revenueOverrides": {
+          "items": {
+            "$ref": "#/components/schemas/CustomerTrustAccountRevenueOverrideInput"
+          },
+          "type": "array",
+          "description": "Manual revenue overrides for configured currency fields. Omitted fields are unchanged."
+        },
         "tagsByCategory": {
           "items": {
             "$ref": "#/components/schemas/TagsByCategoryInput"
@@ -458,6 +467,26 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "object",
       "additionalProperties": false
     },
+    "CustomerTrustAccountRevenueOverrideInput": {
+      "properties": {
+        "fieldMappingId": {
+          "type": "string",
+          "description": "ID of the configured custom currency field"
+        },
+        "value": {
+          "type": "number",
+          "format": "double",
+          "nullable": true,
+          "description": "Non-negative amount in the configured default currency. Null removes the override."
+        }
+      },
+      "required": [
+        "fieldMappingId",
+        "value"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "EditCustomerTrustAccountInput": {
       "properties": {
         "name": {
@@ -474,6 +503,13 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
           },
           "type": "array",
           "description": "Updated custom field values for the account"
+        },
+        "revenueOverrides": {
+          "items": {
+            "$ref": "#/components/schemas/CustomerTrustAccountRevenueOverrideInput"
+          },
+          "type": "array",
+          "description": "Manual revenue overrides for configured currency fields. Omitted fields are unchanged."
         },
         "tagsByCategory": {
           "items": {
@@ -992,6 +1028,54 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "object",
       "additionalProperties": false
     },
+    "CreateFrameworkControlsExportInput": {
+      "properties": {
+        "frameworkId": {
+          "type": "string",
+          "description": "ID of an enabled Vanta or custom framework, for example soc2.",
+          "minLength": 1
+        },
+        "includeEvidenceStatus": {
+          "type": "boolean",
+          "description": "Include tests and documents with their PASS/FAIL outcomes. Defaults to false."
+        }
+      },
+      "required": [
+        "frameworkId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SnoozeFrameworkInput": {
+      "properties": {
+        "snoozedUntilDate": {
+          "type": "string",
+          "description": "Date the framework becomes active again at 00:00 UTC, in YYYY-MM-DD format. Must be tomorrow or later.",
+          "example": "2026-12-01",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "snoozedUntilDate"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SetFrameworkVariantInput": {
+      "properties": {
+        "variantIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "variantIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "UpdateResourceRequest": {
       "properties": {
         "id": {
@@ -1036,15 +1120,23 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ]
     },
     "SourceType": {
-      "type": "string",
       "enum": [
         "AUDIT",
         "AUDIT_EXTERNAL",
         "INCIDENT",
         "EXTERNAL_PARTY",
         "SELF_ASSESSMENT",
+        "VULNERABILITY_SCANNER",
+        "PENETRATION_TEST",
+        "SECURITY_ASSESSMENT",
+        "BUG_BOUNTY",
+        "THREAT_INTELLIGENCE",
+        "AUTOMATED_CONTROL_TESTING",
+        "MANUAL_ANALYSIS",
+        "SUPPLY_CHAIN_MONITORING",
         "OTHER"
-      ]
+      ],
+      "type": "string"
     },
     "StandardIssueType": {
       "type": "string",
@@ -1514,6 +1606,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "string"
     },
     "CIA": {
+      "title": "CIA",
       "type": "string",
       "enum": [
         "Confidentiality",
@@ -1522,6 +1615,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ]
     },
     "UNCATEGORIZED": {
+      "title": "UNCATEGORIZED",
       "type": "string",
       "enum": [
         "Uncategorized"
@@ -1529,6 +1623,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "nullable": false
     },
     "Treatment": {
+      "title": "Treatment",
       "type": "string",
       "enum": [
         "Mitigate",
@@ -1538,6 +1633,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ]
     },
     "NO_TREATMENT_TYPE": {
+      "title": "NO_TREATMENT_TYPE",
       "type": "string",
       "enum": [
         "No treatment type"
@@ -1646,7 +1742,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "$ref": "#/components/schemas/CustomAttribute"
           },
           "type": "array",
-          "description": "The list of custom attributes.\nYou can reference existing custom attributes in the Risk Management settings and/or create new ones.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
+          "description": "The list of custom attributes.\nYou can reference existing custom attributes in the Risk Management settings and/or create new ones.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields\n\nIf the organization doesn't have custom fields, a non-empty list is\nrejected and an empty list is ignored."
         },
         "type": {
           "$ref": "#/components/schemas/RiskScenarioType",
@@ -1761,7 +1857,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "$ref": "#/components/schemas/CustomAttribute"
           },
           "type": "array",
-          "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
+          "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields\n\nIf the organization doesn't have custom fields, a non-empty list is\nrejected and an empty list is ignored."
         },
         "type": {
           "$ref": "#/components/schemas/RiskScenarioType",
@@ -1813,6 +1909,166 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "object",
       "additionalProperties": false
     },
+    "AddRiskScenarioAccountMappingsInput": {
+      "properties": {
+        "accountsToLink": {
+          "items": {
+            "$ref": "#/components/schemas/RiskScenarioAccountMapping"
+          },
+          "type": "array",
+          "description": "Accounts to link. Repeated account selections in this request are deduplicated.",
+          "minItems": 1,
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "accountsToLink"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RiskScenarioAccountMapping": {
+      "properties": {
+        "serviceId": {
+          "type": "string",
+          "description": "The integration's service identifier, returned as integrationId by GET /v1/integrations."
+        },
+        "accountId": {
+          "type": "string",
+          "description": "The Vanta connection ID, returned as connections[].connectionId by GET /v1/integrations."
+        },
+        "subunitId": {
+          "type": "string",
+          "description": "The provider's subunit identifier for an organization connection, such as an AWS account ID.\nOmit for standalone connections."
+        }
+      },
+      "required": [
+        "serviceId",
+        "accountId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RemoveRiskScenarioAccountMappingsInput": {
+      "properties": {
+        "accountsToUnlink": {
+          "items": {
+            "$ref": "#/components/schemas/RiskScenarioAccountMapping"
+          },
+          "type": "array",
+          "description": "Accounts to unlink. Repeated account selections in this request are deduplicated.",
+          "minItems": 1,
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "accountsToUnlink"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddRiskScenarioCustomAssetMappingsInput": {
+      "properties": {
+        "customAssetIdsToLink": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Custom asset IDs to link. Repeated IDs in this request are deduplicated.",
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "customAssetIdsToLink"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RemoveRiskScenarioCustomAssetMappingsInput": {
+      "properties": {
+        "customAssetIdsToUnlink": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Custom asset IDs to unlink. Repeated IDs in this request are deduplicated.",
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "customAssetIdsToUnlink"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddRiskScenarioIntegrationMappingsInput": {
+      "properties": {
+        "integrationIdsToAdd": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Integration service IDs to link. Repeated IDs in this request are deduplicated.",
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "integrationIdsToAdd"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RemoveRiskScenarioIntegrationMappingsInput": {
+      "properties": {
+        "integrationIdsToRemove": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Integration service IDs to unlink. Repeated IDs in this request are deduplicated.",
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "integrationIdsToRemove"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AddRiskScenarioIssueMappingsInput": {
+      "properties": {
+        "issueIdsToLink": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Issue IDs to link. Repeated IDs in this request are deduplicated.",
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "issueIdsToLink"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RemoveRiskScenarioIssueMappingsInput": {
+      "properties": {
+        "issueIdsToUnlink": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Issue IDs to unlink. Repeated IDs in this request are deduplicated.",
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "issueIdsToUnlink"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "AddRiskScenarioVendorFindingMappingsInput": {
       "properties": {
         "vendorFindingIdsToLink": {
@@ -1852,6 +2108,752 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "comment": {
           "type": "string",
           "description": "Optional comment to include with the approval request."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CreateTaskRequirementSetInput": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the set."
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "Description of the set. Omit for none."
+        },
+        "isReusable": {
+          "type": "boolean",
+          "description": "Whether groups other than the one that owns this set may also apply it."
+        },
+        "onboarding": {
+          "$ref": "#/components/schemas/OnboardingRequirementsInput",
+          "description": "Onboarding requirements to apply. Omitted requirements default to not required."
+        },
+        "offboarding": {
+          "$ref": "#/components/schemas/OffboardingRequirementsInput",
+          "description": "Offboarding requirements to apply. Omitted requirements default to not required."
+        },
+        "groupId": {
+          "type": "string",
+          "description": "Group to assign the new set to. Replaces the group's current set; if that set was private to the group, it is deleted."
+        }
+      },
+      "required": [
+        "name",
+        "isReusable",
+        "groupId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "OnboardingRequirementsInput": {
+      "properties": {
+        "policyAcceptance": {
+          "$ref": "#/components/schemas/PolicyAcceptanceRequirement"
+        },
+        "backgroundCheck": {
+          "$ref": "#/components/schemas/BackgroundCheckRequirement"
+        },
+        "securityTraining": {
+          "$ref": "#/components/schemas/SecurityTrainingRequirementInput"
+        },
+        "deviceMonitoring": {
+          "$ref": "#/components/schemas/DeviceMonitoringRequirement"
+        },
+        "custom": {
+          "$ref": "#/components/schemas/CustomRequirements"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "PolicyAcceptanceRequirement": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/RequirementNotApplied"
+        },
+        {
+          "$ref": "#/components/schemas/AllPoliciesRequired"
+        },
+        {
+          "$ref": "#/components/schemas/SelectedPoliciesRequired"
+        }
+      ]
+    },
+    "RequirementNotApplied": {
+      "title": "RequirementNotApplied",
+      "description": "A requirement the set does not apply to the personnel it covers.",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "enum": [
+            false
+          ],
+          "nullable": false
+        }
+      },
+      "required": [
+        "required"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AllPoliciesRequired": {
+      "title": "AllPoliciesRequired",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "nullable": false
+        },
+        "acceptAll": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "nullable": false
+        }
+      },
+      "required": [
+        "required",
+        "acceptAll"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SelectedPoliciesRequired": {
+      "title": "SelectedPoliciesRequired",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "nullable": false
+        },
+        "acceptAll": {
+          "type": "boolean",
+          "enum": [
+            false
+          ],
+          "nullable": false
+        },
+        "policyTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Policy types personnel must accept."
+        }
+      },
+      "required": [
+        "required",
+        "acceptAll",
+        "policyTypes"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "BackgroundCheckRequirement": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/RequirementNotApplied"
+        },
+        {
+          "$ref": "#/components/schemas/BackgroundCheckRequired"
+        }
+      ]
+    },
+    "BackgroundCheckRequired": {
+      "title": "BackgroundCheckRequired",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "nullable": false
+        },
+        "cutoffDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "Personnel hired after this date require a check. Null requires a check for everyone in scope."
+        }
+      },
+      "required": [
+        "required",
+        "cutoffDate"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SecurityTrainingRequirementInput": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/RequirementNotApplied"
+        },
+        {
+          "$ref": "#/components/schemas/SecurityTrainingRequiredInput"
+        }
+      ],
+      "description": "Security training is written as the trainings to require and read back as the\ncategories and requirement records the server resolved them into."
+    },
+    "SecurityTrainingRequiredInput": {
+      "title": "SecurityTrainingRequiredInput",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "nullable": false
+        },
+        "trainings": {
+          "items": {
+            "$ref": "#/components/schemas/SecurityTrainingInput"
+          },
+          "type": "array",
+          "description": "Replaces the set's trainings wholesale. At most one per category."
+        }
+      },
+      "required": [
+        "required",
+        "trainings"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SecurityTrainingInput": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/VantaSecurityTrainingInput"
+        },
+        {
+          "$ref": "#/components/schemas/CustomSecurityTrainingInput"
+        },
+        {
+          "$ref": "#/components/schemas/IntegrationSecurityTrainingInput"
+        }
+      ]
+    },
+    "VantaSecurityTrainingInput": {
+      "title": "VantaSecurityTrainingInput",
+      "description": "A training supplied by Vanta.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "VANTA"
+          ],
+          "nullable": false
+        },
+        "category": {
+          "$ref": "#/components/schemas/SecurityTrainingCategory"
+        },
+        "instructions": {
+          "type": "string",
+          "nullable": true,
+          "description": "Completion instructions shown to personnel. Null uses Vanta's own."
+        },
+        "url": {
+          "type": "number",
+          "enum": [
+            null
+          ],
+          "nullable": true
+        }
+      },
+      "required": [
+        "type",
+        "category",
+        "instructions",
+        "url"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SecurityTrainingCategory": {
+      "type": "string",
+      "enum": [
+        "aiRisk",
+        "businessContinuity",
+        "c5",
+        "ccpa",
+        "gdpr",
+        "general",
+        "hipaa",
+        "insiderThreat",
+        "pci",
+        "secureCode",
+        "socialEngineering"
+      ]
+    },
+    "CustomSecurityTrainingInput": {
+      "title": "CustomSecurityTrainingInput",
+      "description": "A training the organization hosts itself.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "CUSTOM"
+          ],
+          "nullable": false
+        },
+        "category": {
+          "$ref": "#/components/schemas/SecurityTrainingCategory"
+        },
+        "instructions": {
+          "type": "string",
+          "nullable": true,
+          "description": "Completion instructions shown to personnel."
+        },
+        "url": {
+          "type": "string",
+          "nullable": true,
+          "description": "Where personnel complete the training."
+        }
+      },
+      "required": [
+        "type",
+        "category",
+        "instructions",
+        "url"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "IntegrationSecurityTrainingInput": {
+      "title": "IntegrationSecurityTrainingInput",
+      "description": "A training completed in a connected integration",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "INTEGRATION"
+          ],
+          "nullable": false
+        },
+        "category": {
+          "$ref": "#/components/schemas/SecurityTrainingCategory"
+        },
+        "instructions": {
+          "type": "number",
+          "enum": [
+            null
+          ],
+          "nullable": true
+        },
+        "url": {
+          "type": "number",
+          "enum": [
+            null
+          ],
+          "nullable": true
+        }
+      },
+      "required": [
+        "type",
+        "category",
+        "instructions",
+        "url"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "DeviceMonitoringRequirement": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/RequirementNotApplied"
+        },
+        {
+          "$ref": "#/components/schemas/DeviceMonitoringRequired"
+        }
+      ]
+    },
+    "DeviceMonitoringRequired": {
+      "title": "DeviceMonitoringRequired",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "nullable": false
+        },
+        "preferredPasswordManagerId": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/PasswordManager"
+            }
+          ],
+          "nullable": true
+        },
+        "installPrompt": {
+          "$ref": "#/components/schemas/DeviceMonitoringInstallPrompt"
+        }
+      },
+      "required": [
+        "required",
+        "preferredPasswordManagerId",
+        "installPrompt"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "PasswordManager": {
+      "type": "string",
+      "enum": [
+        "BITWARDEN",
+        "DASHLANE",
+        "ENPASS",
+        "KEEPER",
+        "LASTPASS",
+        "NORDPASS",
+        "ONEPASSWORD",
+        "PROTON",
+        "ROBOFORM",
+        "SAFEINCLOUD",
+        "TRENDMICRO"
+      ]
+    },
+    "DeviceMonitoringInstallPrompt": {
+      "type": "string",
+      "enum": [
+        "INSTALL_VANTA_AGENT",
+        "NONE"
+      ]
+    },
+    "CustomRequirements": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/RequirementNotApplied"
+        },
+        {
+          "$ref": "#/components/schemas/CustomRequirementsRequired"
+        }
+      ]
+    },
+    "CustomRequirementsRequired": {
+      "title": "CustomRequirementsRequired",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "nullable": false
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/components/schemas/CustomRequirementAssignment"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "required",
+        "requirements"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomRequirementAssignment": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "effectiveDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "Applies to personnel whose employment start date is after this. Null applies to everyone."
+        }
+      },
+      "required": [
+        "id",
+        "effectiveDate"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "OffboardingRequirementsInput": {
+      "properties": {
+        "accountDeactivation": {
+          "$ref": "#/components/schemas/AccountDeactivationRequirement"
+        },
+        "custom": {
+          "$ref": "#/components/schemas/CustomRequirements"
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AccountDeactivationRequirement": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/RequirementNotApplied"
+        },
+        {
+          "$ref": "#/components/schemas/AccountDeactivationRequired"
+        }
+      ]
+    },
+    "AccountDeactivationRequired": {
+      "title": "AccountDeactivationRequired",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "nullable": false
+        },
+        "accounts": {
+          "$ref": "#/components/schemas/AccountSelection"
+        }
+      },
+      "required": [
+        "required",
+        "accounts"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "AccountSelection": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/DeactivateAllAccounts"
+        },
+        {
+          "$ref": "#/components/schemas/DeactivateSelectedAccounts"
+        }
+      ]
+    },
+    "DeactivateAllAccounts": {
+      "title": "DeactivateAllAccounts",
+      "properties": {
+        "deactivateAll": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "nullable": false
+        }
+      },
+      "required": [
+        "deactivateAll"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "DeactivateSelectedAccounts": {
+      "title": "DeactivateSelectedAccounts",
+      "properties": {
+        "deactivateAll": {
+          "type": "boolean",
+          "enum": [
+            false
+          ],
+          "nullable": false
+        },
+        "accountIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "deactivateAll",
+        "accountIds"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomRequirementType": {
+      "type": "string",
+      "enum": [
+        "ONBOARDING",
+        "OFFBOARDING"
+      ]
+    },
+    "CreateCustomRequirementInput": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/CreateCustomOffboardingRequirementInput"
+        },
+        {
+          "$ref": "#/components/schemas/CreateCustomOnboardingRequirementInput"
+        }
+      ]
+    },
+    "CreateCustomOffboardingRequirementInput": {
+      "title": "CreateCustomOffboardingRequirementInput",
+      "properties": {
+        "requirementType": {
+          "type": "string",
+          "enum": [
+            "OFFBOARDING"
+          ],
+          "nullable": false
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the requirement."
+        },
+        "instructions": {
+          "type": "string",
+          "nullable": true,
+          "description": "Instructions for completing the requirement. Omit for none."
+        }
+      },
+      "required": [
+        "requirementType",
+        "title"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CreateCustomOnboardingRequirementInput": {
+      "title": "CreateCustomOnboardingRequirementInput",
+      "properties": {
+        "requirementType": {
+          "type": "string",
+          "enum": [
+            "ONBOARDING"
+          ],
+          "nullable": false
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the requirement."
+        },
+        "instructions": {
+          "type": "string",
+          "nullable": true,
+          "description": "Instructions for completing the requirement. Omit for none."
+        },
+        "ownerType": {
+          "$ref": "#/components/schemas/CustomRequirementOwnerType",
+          "description": "Who completes the requirement."
+        },
+        "textInputLabel": {
+          "type": "string",
+          "nullable": true,
+          "description": "Label for the requirement's text input. Omit for none."
+        },
+        "fileInputLabel": {
+          "type": "string",
+          "nullable": true,
+          "description": "Label for the requirement's file input. Omit for none."
+        }
+      },
+      "required": [
+        "requirementType",
+        "title",
+        "ownerType"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "CustomRequirementOwnerType": {
+      "type": "string",
+      "enum": [
+        "ADMIN",
+        "EMPLOYEE"
+      ]
+    },
+    "UpdateCustomRequirementInput": {
+      "anyOf": [
+        {
+          "$ref": "#/components/schemas/UpdateCustomOffboardingRequirementInput"
+        },
+        {
+          "$ref": "#/components/schemas/UpdateCustomOnboardingRequirementInput"
+        }
+      ]
+    },
+    "UpdateCustomOffboardingRequirementInput": {
+      "title": "UpdateCustomOffboardingRequirementInput",
+      "properties": {
+        "requirementType": {
+          "type": "string",
+          "enum": [
+            "OFFBOARDING"
+          ],
+          "nullable": false
+        },
+        "title": {
+          "type": "string",
+          "description": "New display title. Omit to preserve."
+        },
+        "instructions": {
+          "type": "string",
+          "nullable": true,
+          "description": "New instructions. Omit to preserve, null to clear."
+        }
+      },
+      "required": [
+        "requirementType"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateCustomOnboardingRequirementInput": {
+      "title": "UpdateCustomOnboardingRequirementInput",
+      "properties": {
+        "requirementType": {
+          "type": "string",
+          "enum": [
+            "ONBOARDING"
+          ],
+          "nullable": false
+        },
+        "title": {
+          "type": "string",
+          "description": "New display title. Omit to preserve."
+        },
+        "instructions": {
+          "type": "string",
+          "nullable": true,
+          "description": "New instructions. Omit to preserve, null to clear."
+        },
+        "ownerType": {
+          "$ref": "#/components/schemas/CustomRequirementOwnerType",
+          "description": "Who completes the requirement. Omit to preserve."
+        },
+        "textInputLabel": {
+          "type": "string",
+          "nullable": true,
+          "description": "New label for the requirement's text input. Omit to preserve, null to clear."
+        },
+        "fileInputLabel": {
+          "type": "string",
+          "nullable": true,
+          "description": "New label for the requirement's file input. Omit to preserve, null to clear."
+        }
+      },
+      "required": [
+        "requirementType"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "TaskRequirementsInput": {
+      "properties": {
+        "onboarding": {
+          "$ref": "#/components/schemas/OnboardingRequirementsInput",
+          "description": "Onboarding requirements to replace. Omit a requirement to leave it unchanged."
+        },
+        "offboarding": {
+          "$ref": "#/components/schemas/OffboardingRequirementsInput",
+          "description": "Offboarding requirements to replace. Omit a requirement to leave it unchanged."
         }
       },
       "type": "object",
@@ -1991,12 +2993,14 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       ]
     },
     "BannerSetting.GRADIENT": {
+      "title": "BannerSetting.GRADIENT",
       "enum": [
         "GRADIENT"
       ],
       "type": "string"
     },
     "BannerSetting.MINIMAL": {
+      "title": "BannerSetting.MINIMAL",
       "enum": [
         "MINIMAL"
       ],
@@ -2081,6 +3085,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "aiact",
             "aiuc1",
             "aiuc1_26q3",
+            "aiuc1_26q4",
             "atc",
             "aue8",
             "awsFTR",
@@ -2089,6 +3094,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "cisv8",
             "cjis",
             "cmmc2",
+            "cps230",
             "cps234",
             "cri",
             "dora",
@@ -2097,6 +3103,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "fedramp20x",
             "fedramp20x_2026",
             "fedramp20x_classA",
+            "fedramp20x_classBC",
             "gdpr",
             "hipaa",
             "hitruste1",
@@ -2104,6 +3111,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "iso27001",
             "iso27001_2022",
             "iso27017",
+            "iso27017_2026",
             "iso27018",
             "iso27701",
             "iso27701_2025",
@@ -2117,6 +3125,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "nistAiRmf",
             "nistCSF",
             "nistcsf2",
+            "nydfs500_2023",
             "ofdss",
             "pciDss4",
             "pciSaqA",
@@ -2162,6 +3171,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "aiact",
             "aiuc1",
             "aiuc1_26q3",
+            "aiuc1_26q4",
             "atc",
             "aue8",
             "awsFTR",
@@ -2170,6 +3180,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "cisv8",
             "cjis",
             "cmmc2",
+            "cps230",
             "cps234",
             "cri",
             "dora",
@@ -2178,6 +3189,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "fedramp20x",
             "fedramp20x_2026",
             "fedramp20x_classA",
+            "fedramp20x_classBC",
             "gdpr",
             "hipaa",
             "hitruste1",
@@ -2185,6 +3197,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "iso27001",
             "iso27001_2022",
             "iso27017",
+            "iso27017_2026",
             "iso27018",
             "iso27701",
             "iso27701_2025",
@@ -2198,6 +3211,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             "nistAiRmf",
             "nistCSF",
             "nistcsf2",
+            "nydfs500_2023",
             "ofdss",
             "pciDss4",
             "pciSaqA",
@@ -2884,6 +3898,10 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
     },
     "SetTrustCenterVideoItem": {
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of an existing video on this Trust Center, to keep that video. Omit to add a new video. An ID that matches no existing video returns 404."
+        },
         "url": {
           "type": "string",
           "description": "Full video URL (e.g. \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" or \"https://vimeo.com/123456\"). Supported platforms: YouTube, Vimeo."
@@ -2985,6 +4003,134 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "type": "object",
       "additionalProperties": false
     },
+    "UpdateVendorAlertSettingsInput": {
+      "properties": {
+        "changes": {
+          "items": {
+            "$ref": "#/components/schemas/VendorAlertSettingsChange"
+          },
+          "type": "array",
+          "description": "Partial updates, with each category appearing at most once. Omitted fields remain unchanged."
+        }
+      },
+      "required": [
+        "changes"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VendorAlertSettingsChange": {
+      "properties": {
+        "category": {
+          "$ref": "#/components/schemas/VendorAlertSettingsCategoryName"
+        },
+        "isEnabled": {
+          "type": "boolean"
+        },
+        "riskLevelSetting": {
+          "$ref": "#/components/schemas/VendorAlertRiskLevelSetting"
+        },
+        "severitySetting": {
+          "$ref": "#/components/schemas/VendorAlertSeveritySetting"
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VendorAlertSettingsCategoryName": {
+      "type": "string",
+      "enum": [
+        "Application security",
+        "Exposed application user interfaces",
+        "Exposed services",
+        "Exposed & leaked sensitive information",
+        "End of life & outdated applications",
+        "Sensitive interfaces exposure",
+        "Threat intelligence",
+        "Trust",
+        "Vulnerabilities",
+        "Vulnerable misconfigurations",
+        "Security incidents"
+      ]
+    },
+    "VendorAlertRiskLevelSetting": {
+      "type": "string",
+      "enum": [
+        "ANY",
+        "LOW_MEDIUM_HIGH_CRITICAL",
+        "MEDIUM_HIGH_CRITICAL",
+        "HIGH_CRITICAL",
+        "CRITICAL"
+      ]
+    },
+    "VendorAlertSeveritySetting": {
+      "type": "string",
+      "enum": [
+        "ANY",
+        "MEDIUM_HIGH_CRITICAL",
+        "HIGH_CRITICAL",
+        "CRITICAL"
+      ]
+    },
+    "UpdateVendorAlertsInput": {
+      "properties": {
+        "alertIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "IDs of the vendor alerts to update. Each alert must belong to your organization.\nRepeated IDs are ignored; the supplied status applies to every unique ID.",
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "ESCALATED",
+            "RESOLVED",
+            "NOT_RELEVANT"
+          ],
+          "description": "Target status for every supplied alert. AUTO_RESOLVED is system-controlled."
+        }
+      },
+      "required": [
+        "alertIds",
+        "status"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VendorAlertStatus": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "ESCALATED",
+        "RESOLVED",
+        "NOT_RELEVANT",
+        "AUTO_RESOLVED"
+      ]
+    },
+    "VendorAlertSeverity": {
+      "type": "string",
+      "enum": [
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
+    },
+    "VendorAlertType": {
+      "type": "string",
+      "enum": [
+        "GENERAL",
+        "CVE",
+        "LEAKED_CREDENTIALS"
+      ]
+    },
     "VendorAssessmentTypeLifecycleStatus": {
       "description": "The lifecycle status of a vendor assessment type:\n- ACTIVE: The assessment type is available for use.\n- ARCHIVED: The assessment type has been archived and is kept for historical reference.",
       "enum": [
@@ -2992,6 +4138,105 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         "ARCHIVED"
       ],
       "type": "string"
+    },
+    "CreateVendorCategoryInput": {
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Display label, unique ignoring case.",
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "Description of the category.",
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "UpdateVendorCategoryInput": {
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "New display label. Omit to keep the current label.",
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "nullable": true,
+          "description": "New description. Pass null to clear it, or omit to keep it.",
+          "maxLength": 500
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "DeleteVendorCategoryInput": {
+      "properties": {
+        "replacementCategoryId": {
+          "type": "string",
+          "nullable": true,
+          "description": "Category to move vendors to, or null to leave them uncategorized."
+        }
+      },
+      "required": [
+        "replacementCategoryId"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "VendorSecurityIncidentAlertResolutionState": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "RESOLVED"
+      ]
+    },
+    "VendorSecurityIncidentAlertStatus": {
+      "type": "string",
+      "enum": [
+        "POTENTIAL",
+        "CONFIRMED",
+        "SUSPECTED"
+      ]
+    },
+    "VendorSecurityIncidentAlertImpactSeverity": {
+      "type": "string",
+      "enum": [
+        "UNSPECIFIED",
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
+    },
+    "UpdateVendorSecurityIncidentAlertsInput": {
+      "properties": {
+        "alertIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "IDs of the security incident alerts to update. Use each alert’s ID, not the ID of the incident it reports. Every alert must belong to your organization.",
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "resolutionState": {
+          "$ref": "#/components/schemas/VendorSecurityIncidentAlertResolutionState",
+          "description": "Target resolution state for every supplied alert. Use OPEN to reopen."
+        }
+      },
+      "required": [
+        "alertIds",
+        "resolutionState"
+      ],
+      "type": "object",
+      "additionalProperties": false
     },
     "CreateVendorInput": {
       "properties": {
@@ -3084,7 +4329,13 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         },
         "category": {
           "type": "string",
-          "description": "The vendor's category."
+          "description": "The vendor's category. Cannot be combined with `categoryId`.",
+          "deprecated": true
+        },
+        "categoryId": {
+          "type": "string",
+          "nullable": true,
+          "description": "The ID of the vendor's category. Pass null for no category, or omit to let Vanta pick one. Cannot be combined with `category`."
         },
         "inherentRiskLevel": {
           "$ref": "#/components/schemas/VendorRiskLevel",
@@ -3599,7 +4850,13 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
         },
         "category": {
           "type": "string",
-          "description": "The vendor's category."
+          "description": "The vendor's category. Cannot be combined with `categoryId`.",
+          "deprecated": true
+        },
+        "categoryId": {
+          "type": "string",
+          "nullable": true,
+          "description": "The ID of the vendor's category. Pass null to clear it, or omit to keep it. Cannot be combined with `category`."
         },
         "inherentRiskLevel": {
           "allOf": [
@@ -4007,7 +5264,8 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
             {
               "type": "string"
             }
-          ]
+          ],
+          "description": "The framework's id, such as `soc2` or the id of a custom framework. The `FrameworkId` enum values are deprecated aliases that are still accepted."
         },
         "sectionId": {
           "type": "string"
@@ -4021,6 +5279,7 @@ export const generatedSchemaDefinitions: Record<ApiSource, Record<string, Record
       "additionalProperties": false
     },
     "FrameworkId": {
+      "title": "FrameworkId",
       "enum": [
         "AU_E_8",
         "AWS_FTR",
@@ -5626,6 +6885,36 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "list_custom_assets",
+    "source": "manage",
+    "method": "get",
+    "path": "/custom-assets",
+    "operationId": "ListCustomAssets",
+    "summary": "List custom assets",
+    "description": "List custom assets",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "list_customer_trust_accounts",
     "source": "manage",
     "method": "get",
@@ -5741,6 +7030,19 @@ export const generatedOperations: GeneratedOperation[] = [
               "$ref": "#/components/schemas/CustomField"
             },
             "type": "array"
+          }
+        },
+        {
+          "name": "revenueOverrides",
+          "required": false,
+          "description": "Manual revenue overrides for configured currency fields. Omitted fields are unchanged.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerTrustAccountRevenueOverrideInput"
+            },
+            "type": "array",
+            "description": "Manual revenue overrides for configured currency fields. Omitted fields are unchanged."
           }
         },
         {
@@ -5860,6 +7162,19 @@ export const generatedOperations: GeneratedOperation[] = [
             },
             "type": "array",
             "description": "Updated custom field values for the account"
+          }
+        },
+        {
+          "name": "revenueOverrides",
+          "required": false,
+          "description": "Manual revenue overrides for configured currency fields. Omitted fields are unchanged.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerTrustAccountRevenueOverrideInput"
+            },
+            "type": "array",
+            "description": "Manual revenue overrides for configured currency fields. Omitted fields are unchanged."
           }
         },
         {
@@ -7320,6 +8635,48 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "evaluate_document",
+    "source": "manage",
+    "method": "post",
+    "path": "/documents/{documentId}/evaluate",
+    "operationId": "EvaluateDocument",
+    "summary": "Evaluate document evidence",
+    "description": "Evaluate document evidence",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "documentId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "get_document_draft_evaluation",
+    "source": "manage",
+    "method": "get",
+    "path": "/documents/{documentId}/evaluation",
+    "operationId": "GetDocumentDraftEvaluation",
+    "summary": "Get document evaluation",
+    "description": "Get document evaluation",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "documentId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "list_links_for_document",
     "source": "manage",
     "method": "get",
@@ -7771,6 +9128,126 @@ export const generatedOperations: GeneratedOperation[] = [
         "schema": {
           "$ref": "#/components/schemas/PageCursor"
         }
+      },
+      {
+        "name": "includeStatus",
+        "in": "query",
+        "required": false,
+        "description": "Whether to include lifecycle status. Defaults to true.",
+        "kind": "boolean",
+        "schema": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "purchasedOnly",
+        "in": "query",
+        "required": false,
+        "description": "Whether to return only frameworks in your program. Defaults to true.",
+        "kind": "boolean",
+        "schema": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "includeProgress",
+        "in": "query",
+        "required": false,
+        "description": "Whether to look up progress counts for purchased frameworks. Defaults to true. Counts are -1 when this is false and for unpurchased frameworks.",
+        "kind": "boolean",
+        "schema": {
+          "default": true,
+          "type": "boolean"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "create_framework_controls_export",
+    "source": "manage",
+    "method": "post",
+    "path": "/frameworks/exports",
+    "operationId": "CreateFrameworkControlsExport",
+    "summary": "Create framework controls export",
+    "description": "Create framework controls export",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateFrameworkControlsExportInput",
+        "description": "Framework ID and optional evidence-row setting."
+      },
+      "fields": [
+        {
+          "name": "frameworkId",
+          "required": true,
+          "description": "ID of an enabled Vanta or custom framework, for example soc2.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "ID of an enabled Vanta or custom framework, for example soc2.",
+            "minLength": 1
+          }
+        },
+        {
+          "name": "includeEvidenceStatus",
+          "required": false,
+          "description": "Include tests and documents with their PASS/FAIL outcomes. Defaults to false.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Include tests and documents with their PASS/FAIL outcomes. Defaults to false."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "get_framework_controls_export",
+    "source": "manage",
+    "method": "get",
+    "path": "/frameworks/exports/{exportId}",
+    "operationId": "GetFrameworkControlsExport",
+    "summary": "Get framework controls export status",
+    "description": "Get framework controls export status",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "exportId",
+        "in": "path",
+        "required": true,
+        "description": "Export UUID returned by createFrameworkControlsExport.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "delete_custom_framework",
+    "source": "manage",
+    "method": "delete",
+    "path": "/frameworks/{frameworkId}",
+    "operationId": "DeleteCustomFramework",
+    "summary": "Delete a custom framework",
+    "description": "Delete a custom framework",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "frameworkId",
+        "in": "path",
+        "required": true,
+        "description": "ID of the custom framework to delete.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -7792,6 +9269,61 @@ export const generatedOperations: GeneratedOperation[] = [
         "schema": {
           "type": "string"
         }
+      },
+      {
+        "name": "includeStatus",
+        "in": "query",
+        "required": false,
+        "description": "Whether to include lifecycle status. Defaults to true.",
+        "kind": "boolean",
+        "schema": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "includeRequirements",
+        "in": "query",
+        "required": false,
+        "description": "Whether to include the flat requirements list. Defaults to false.",
+        "kind": "boolean",
+        "schema": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "requirementsScope",
+        "in": "query",
+        "required": false,
+        "description": "Used with includeRequirements. MY_PROGRAM (default) returns requirements as mapped in your program; CATALOG returns the framework's published requirements. Custom frameworks always use MY_PROGRAM. Both require the framework to be in your program.",
+        "kind": "string",
+        "schema": {
+          "default": "MY_PROGRAM",
+          "type": "string",
+          "enum": [
+            "MY_PROGRAM",
+            "CATALOG"
+          ]
+        },
+        "enumValues": [
+          "MY_PROGRAM",
+          "CATALOG"
+        ]
+      },
+      {
+        "name": "variants",
+        "in": "query",
+        "required": false,
+        "description": "Catalog variant IDs to resolve CATALOG requirements against. Defaults to the framework's published defaults. Ignored for MY_PROGRAM, which uses your program's variants.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
       }
     ]
   },
@@ -7833,6 +9365,115 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       }
     ]
+  },
+  {
+    "toolName": "reactivate_framework",
+    "source": "manage",
+    "method": "post",
+    "path": "/frameworks/{frameworkId}/reactivate",
+    "operationId": "ReactivateFramework",
+    "summary": "Reactivate a snoozed framework",
+    "description": "Reactivate a snoozed framework",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "frameworkId",
+        "in": "path",
+        "required": true,
+        "description": "ID of the framework to reactivate, for example soc2.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "snooze_framework",
+    "source": "manage",
+    "method": "post",
+    "path": "/frameworks/{frameworkId}/snooze",
+    "operationId": "SnoozeFramework",
+    "summary": "Snooze a framework",
+    "description": "Snooze a framework",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "frameworkId",
+        "in": "path",
+        "required": true,
+        "description": "ID of the framework to snooze, for example soc2.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/SnoozeFrameworkInput",
+        "description": "Date the framework becomes active again."
+      },
+      "fields": [
+        {
+          "name": "snoozedUntilDate",
+          "required": true,
+          "description": "Date the framework becomes active again at 00:00 UTC, in YYYY-MM-DD format. Must be tomorrow or later.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Date the framework becomes active again at 00:00 UTC, in YYYY-MM-DD format. Must be tomorrow or later.",
+            "example": "2026-12-01",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "set_framework_variant",
+    "source": "manage",
+    "method": "put",
+    "path": "/frameworks/{frameworkId}/variants",
+    "operationId": "SetFrameworkVariant",
+    "summary": "Set framework control sets",
+    "description": "Set framework control sets",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "frameworkId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/SetFrameworkVariantInput"
+      },
+      "fields": [
+        {
+          "name": "variantIds",
+          "required": true,
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        }
+      ]
+    }
   },
   {
     "toolName": "create_group",
@@ -8118,6 +9759,27 @@ export const generatedOperations: GeneratedOperation[] = [
     }
   },
   {
+    "toolName": "delete_group",
+    "source": "manage",
+    "method": "delete",
+    "path": "/groups/{groupId}",
+    "operationId": "DeleteGroup",
+    "summary": "Delete group",
+    "description": "Delete group",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "groupId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "get_group",
     "source": "manage",
     "method": "get",
@@ -8390,6 +10052,27 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       ]
     }
+  },
+  {
+    "toolName": "get_group_task_requirement_set",
+    "source": "manage",
+    "method": "get",
+    "path": "/groups/{groupId}/task-requirement-set",
+    "operationId": "GetGroupTaskRequirementSet",
+    "summary": "Get group task requirement set",
+    "description": "Get group task requirement set",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "groupId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
   },
   {
     "toolName": "list_connected_integrations",
@@ -10485,7 +12168,7 @@ export const generatedOperations: GeneratedOperation[] = [
         "name": "frameworkIdMatchesAny",
         "in": "query",
         "required": false,
-        "description": "Filter people in scope for any of the given framework IDs.",
+        "description": "Filter people in scope for any of the given framework IDs. Framework IDs are built-in framework identifiers or custom framework ObjectIds. Blank IDs match nothing.",
         "kind": "array",
         "schema": {
           "type": "array",
@@ -11497,14 +13180,14 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "customFields",
           "required": false,
-          "description": "The list of custom attributes.\nYou can reference existing custom attributes in the Risk Management settings and/or create new ones.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields",
+          "description": "The list of custom attributes.\nYou can reference existing custom attributes in the Risk Management settings and/or create new ones.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields\n\nIf the organization doesn't have custom fields, a non-empty list is\nrejected and an empty list is ignored.",
           "kind": "array",
           "schema": {
             "items": {
               "$ref": "#/components/schemas/CustomAttribute"
             },
             "type": "array",
-            "description": "The list of custom attributes.\nYou can reference existing custom attributes in the Risk Management settings and/or create new ones.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
+            "description": "The list of custom attributes.\nYou can reference existing custom attributes in the Risk Management settings and/or create new ones.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields\n\nIf the organization doesn't have custom fields, a non-empty list is\nrejected and an empty list is ignored."
           }
         },
         {
@@ -11723,14 +13406,14 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "customFields",
           "required": false,
-          "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields",
+          "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields\n\nIf the organization doesn't have custom fields, a non-empty list is\nrejected and an empty list is ignored.",
           "kind": "array",
           "schema": {
             "items": {
               "$ref": "#/components/schemas/CustomAttribute"
             },
             "type": "array",
-            "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields"
+            "description": "The list of custom fields.\nYou can reference custom fields in the Risk Management settings and/or create new one.\nThe format is:\n- {label: \"field-name\", value: \"string-representation\"} for text, date, number and currency fields\n- {label: \"field-name\", value: [\"option1\", \"option2\"]} for picklist fields\n\nIf the organization doesn't have custom fields, a non-empty list is\nrejected and an empty list is ignored."
           }
         },
         {
@@ -11946,6 +13629,545 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "list_account_mappings",
+    "source": "manage",
+    "method": "get",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/accounts",
+    "operationId": "ListAccountMappings",
+    "summary": "List accounts mapped to a risk scenario",
+    "description": "List accounts mapped to a risk scenario",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "add_account_mappings",
+    "source": "manage",
+    "method": "post",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/accounts",
+    "operationId": "AddAccountMappings",
+    "summary": "Bulk add account mappings",
+    "description": "Bulk add account mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddRiskScenarioAccountMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "accountsToLink",
+          "required": true,
+          "description": "Accounts to link. Repeated account selections in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/RiskScenarioAccountMapping"
+            },
+            "type": "array",
+            "description": "Accounts to link. Repeated account selections in this request are deduplicated.",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "remove_account_mappings",
+    "source": "manage",
+    "method": "delete",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/accounts",
+    "operationId": "RemoveAccountMappings",
+    "summary": "Bulk remove account mappings",
+    "description": "Bulk remove account mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/RemoveRiskScenarioAccountMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "accountsToUnlink",
+          "required": true,
+          "description": "Accounts to unlink. Repeated account selections in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/RiskScenarioAccountMapping"
+            },
+            "type": "array",
+            "description": "Accounts to unlink. Repeated account selections in this request are deduplicated.",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_custom_asset_mappings",
+    "source": "manage",
+    "method": "get",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/custom-assets",
+    "operationId": "ListCustomAssetMappings",
+    "summary": "List custom assets mapped to a risk scenario",
+    "description": "List custom assets mapped to a risk scenario",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "add_custom_asset_mappings",
+    "source": "manage",
+    "method": "post",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/custom-assets",
+    "operationId": "AddCustomAssetMappings",
+    "summary": "Bulk add custom asset mappings",
+    "description": "Bulk add custom asset mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddRiskScenarioCustomAssetMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "customAssetIdsToLink",
+          "required": true,
+          "description": "Custom asset IDs to link. Repeated IDs in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Custom asset IDs to link. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "remove_custom_asset_mappings",
+    "source": "manage",
+    "method": "delete",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/custom-assets",
+    "operationId": "RemoveCustomAssetMappings",
+    "summary": "Bulk remove custom asset mappings",
+    "description": "Bulk remove custom asset mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/RemoveRiskScenarioCustomAssetMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "customAssetIdsToUnlink",
+          "required": true,
+          "description": "Custom asset IDs to unlink. Repeated IDs in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Custom asset IDs to unlink. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_enterprise_risk_mappings",
+    "source": "manage",
+    "method": "get",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/enterprise-risk",
+    "operationId": "ListEnterpriseRiskMappings",
+    "summary": "List the enterprise risks mapped to a risk scenario",
+    "description": "List the enterprise risks mapped to a risk scenario",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_integration_mappings",
+    "source": "manage",
+    "method": "get",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/integrations",
+    "operationId": "ListIntegrationMappings",
+    "summary": "List integrations mapped to a risk scenario",
+    "description": "List integrations mapped to a risk scenario",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "add_integration_mappings",
+    "source": "manage",
+    "method": "post",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/integrations",
+    "operationId": "AddIntegrationMappings",
+    "summary": "Bulk add integration mappings",
+    "description": "Bulk add integration mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddRiskScenarioIntegrationMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "integrationIdsToAdd",
+          "required": true,
+          "description": "Integration service IDs to link. Repeated IDs in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Integration service IDs to link. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "remove_integration_mappings",
+    "source": "manage",
+    "method": "delete",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/integrations",
+    "operationId": "RemoveIntegrationMappings",
+    "summary": "Bulk remove integration mappings",
+    "description": "Bulk remove integration mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/RemoveRiskScenarioIntegrationMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "integrationIdsToRemove",
+          "required": true,
+          "description": "Integration service IDs to unlink. Repeated IDs in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Integration service IDs to unlink. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_issue_mappings",
+    "source": "manage",
+    "method": "get",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/issues",
+    "operationId": "ListIssueMappings",
+    "summary": "List issues mapped to a risk scenario",
+    "description": "List issues mapped to a risk scenario",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "add_issue_mappings",
+    "source": "manage",
+    "method": "post",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/issues",
+    "operationId": "AddIssueMappings",
+    "summary": "Bulk add issue mappings",
+    "description": "Bulk add issue mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/AddRiskScenarioIssueMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "issueIdsToLink",
+          "required": true,
+          "description": "Issue IDs to link. Repeated IDs in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Issue IDs to link. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "remove_issue_mappings",
+    "source": "manage",
+    "method": "delete",
+    "path": "/risk-scenarios/{riskScenarioId}/mappings/issues",
+    "operationId": "RemoveIssueMappings",
+    "summary": "Bulk remove issue mappings",
+    "description": "Bulk remove issue mappings",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "riskScenarioId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/RemoveRiskScenarioIssueMappingsInput"
+      },
+      "fields": [
+        {
+          "name": "issueIdsToUnlink",
+          "required": true,
+          "description": "Issue IDs to unlink. Repeated IDs in this request are deduplicated.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "Issue IDs to unlink. Repeated IDs in this request are deduplicated.",
+            "maxItems": 100
+          }
+        }
+      ]
+    }
+  },
+  {
     "toolName": "list_vendor_finding_mappings",
     "source": "manage",
     "method": "get",
@@ -12110,6 +14332,351 @@ export const generatedOperations: GeneratedOperation[] = [
           "schema": {
             "type": "string",
             "description": "Optional comment to include with the approval request."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_task_requirement_sets",
+    "source": "manage",
+    "method": "get",
+    "path": "/task-requirement-sets",
+    "operationId": "ListTaskRequirementSets",
+    "summary": "List task requirement sets",
+    "description": "List task requirement sets",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "reusable",
+        "in": "query",
+        "required": false,
+        "description": "Filter sets by reusable status. If omitted, returns both reusable and non-reusable sets.",
+        "kind": "boolean",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "create_task_requirement_set",
+    "source": "manage",
+    "method": "post",
+    "path": "/task-requirement-sets",
+    "operationId": "CreateTaskRequirementSet",
+    "summary": "Create task requirement set",
+    "description": "Create task requirement set",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateTaskRequirementSetInput"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "required": true,
+          "description": "Display name for the set.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Display name for the set."
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "Description of the set. Omit for none.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Description of the set. Omit for none."
+          }
+        },
+        {
+          "name": "isReusable",
+          "required": true,
+          "description": "Whether groups other than the one that owns this set may also apply it.",
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether groups other than the one that owns this set may also apply it."
+          }
+        },
+        {
+          "name": "onboarding",
+          "required": false,
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/OnboardingRequirementsInput",
+            "description": "Onboarding requirements to apply. Omitted requirements default to not required."
+          }
+        },
+        {
+          "name": "offboarding",
+          "required": false,
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/OffboardingRequirementsInput",
+            "description": "Offboarding requirements to apply. Omitted requirements default to not required."
+          }
+        },
+        {
+          "name": "groupId",
+          "required": true,
+          "description": "Group to assign the new set to. Replaces the group's current set; if that set was private to the group, it is deleted.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Group to assign the new set to. Replaces the group's current set; if that set was private to the group, it is deleted."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_custom_requirements",
+    "source": "manage",
+    "method": "get",
+    "path": "/task-requirement-sets/custom-requirements",
+    "operationId": "ListCustomRequirements",
+    "summary": "List custom requirements",
+    "description": "List custom requirements",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "requirementType",
+        "in": "query",
+        "required": false,
+        "description": "Filter requirements by type. If omitted, returns both onboarding and offboarding requirements.",
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/CustomRequirementType"
+        },
+        "enumValues": [
+          "ONBOARDING",
+          "OFFBOARDING"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "create_custom_requirement",
+    "source": "manage",
+    "method": "post",
+    "path": "/task-requirement-sets/custom-requirements",
+    "operationId": "CreateCustomRequirement",
+    "summary": "Create custom requirement",
+    "description": "Create custom requirement",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "raw",
+      "schema": {
+        "$ref": "#/components/schemas/CreateCustomRequirementInput"
+      },
+      "fields": []
+    }
+  },
+  {
+    "toolName": "update_custom_requirement",
+    "source": "manage",
+    "method": "patch",
+    "path": "/task-requirement-sets/custom-requirements/{customRequirementId}",
+    "operationId": "UpdateCustomRequirement",
+    "summary": "Update custom requirement",
+    "description": "Update custom requirement",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "customRequirementId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "raw",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateCustomRequirementInput"
+      },
+      "fields": []
+    }
+  },
+  {
+    "toolName": "get_task_requirement_set",
+    "source": "manage",
+    "method": "get",
+    "path": "/task-requirement-sets/{requirementSetId}",
+    "operationId": "GetTaskRequirementSet",
+    "summary": "Get task requirement set by ID",
+    "description": "Get task requirement set by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "requirementSetId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "update_task_requirement_set_details",
+    "source": "manage",
+    "method": "patch",
+    "path": "/task-requirement-sets/{requirementSetId}/details",
+    "operationId": "UpdateTaskRequirementSetDetails",
+    "summary": "Update task requirement set details",
+    "description": "Update task requirement set details",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "requirementSetId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "New description. Omit to preserve."
+          },
+          "name": {
+            "type": "string",
+            "description": "New name. Omit to preserve."
+          }
+        },
+        "type": "object"
+      },
+      "fields": [
+        {
+          "name": "description",
+          "required": false,
+          "description": "New description. Omit to preserve.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "New description. Omit to preserve."
+          }
+        },
+        {
+          "name": "name",
+          "required": false,
+          "description": "New name. Omit to preserve.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "New name. Omit to preserve."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "update_task_requirement_set_requirements",
+    "source": "manage",
+    "method": "patch",
+    "path": "/task-requirement-sets/{requirementSetId}/requirements",
+    "operationId": "UpdateTaskRequirementSetRequirements",
+    "summary": "Update task requirement set requirements",
+    "description": "Update task requirement set requirements",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "requirementSetId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/TaskRequirementsInput"
+      },
+      "fields": [
+        {
+          "name": "onboarding",
+          "required": false,
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/OnboardingRequirementsInput",
+            "description": "Onboarding requirements to replace. Omit a requirement to leave it unchanged."
+          }
+        },
+        {
+          "name": "offboarding",
+          "required": false,
+          "kind": "object",
+          "schema": {
+            "$ref": "#/components/schemas/OffboardingRequirementsInput",
+            "description": "Offboarding requirements to replace. Omit a requirement to leave it unchanged."
           }
         }
       ]
@@ -13047,6 +15614,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "aiact",
               "aiuc1",
               "aiuc1_26q3",
+              "aiuc1_26q4",
               "atc",
               "aue8",
               "awsFTR",
@@ -13055,6 +15623,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "cisv8",
               "cjis",
               "cmmc2",
+              "cps230",
               "cps234",
               "cri",
               "dora",
@@ -13063,6 +15632,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "fedramp20x",
               "fedramp20x_2026",
               "fedramp20x_classA",
+              "fedramp20x_classBC",
               "gdpr",
               "hipaa",
               "hitruste1",
@@ -13070,6 +15640,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "iso27001",
               "iso27001_2022",
               "iso27017",
+              "iso27017_2026",
               "iso27018",
               "iso27701",
               "iso27701_2025",
@@ -13083,6 +15654,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "nistAiRmf",
               "nistCSF",
               "nistcsf2",
+              "nydfs500_2023",
               "ofdss",
               "pciDss4",
               "pciSaqA",
@@ -13177,6 +15749,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "aiact",
               "aiuc1",
               "aiuc1_26q3",
+              "aiuc1_26q4",
               "atc",
               "aue8",
               "awsFTR",
@@ -13185,6 +15758,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "cisv8",
               "cjis",
               "cmmc2",
+              "cps230",
               "cps234",
               "cri",
               "dora",
@@ -13193,6 +15767,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "fedramp20x",
               "fedramp20x_2026",
               "fedramp20x_classA",
+              "fedramp20x_classBC",
               "gdpr",
               "hipaa",
               "hitruste1",
@@ -13200,6 +15775,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "iso27001",
               "iso27001_2022",
               "iso27017",
+              "iso27017_2026",
               "iso27018",
               "iso27701",
               "iso27701_2025",
@@ -13213,6 +15789,7 @@ export const generatedOperations: GeneratedOperation[] = [
               "nistAiRmf",
               "nistCSF",
               "nistcsf2",
+              "nydfs500_2023",
               "ofdss",
               "pciDss4",
               "pciSaqA",
@@ -16027,6 +18604,27 @@ export const generatedOperations: GeneratedOperation[] = [
     }
   },
   {
+    "toolName": "list_trust_center_videos",
+    "source": "manage",
+    "method": "get",
+    "path": "/trust-centers/{slugId}/videos",
+    "operationId": "ListTrustCenterVideos",
+    "summary": "List Trust Center videos",
+    "description": "List Trust Center videos",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "slugId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "upsert_trust_center_videos",
     "source": "manage",
     "method": "put",
@@ -16472,6 +19070,282 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "get_vendor_alert_settings",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendor-alert-settings",
+    "operationId": "GetVendorAlertSettings",
+    "summary": "Get vendor alert settings",
+    "description": "Get vendor alert settings",
+    "isMutation": false,
+    "parameters": []
+  },
+  {
+    "toolName": "update_vendor_alert_settings",
+    "source": "manage",
+    "method": "patch",
+    "path": "/vendor-alert-settings",
+    "operationId": "UpdateVendorAlertSettings",
+    "summary": "Update vendor alert settings",
+    "description": "Update vendor alert settings",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateVendorAlertSettingsInput"
+      },
+      "fields": [
+        {
+          "name": "changes",
+          "required": true,
+          "description": "Partial updates, with each category appearing at most once. Omitted fields remain unchanged.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/VendorAlertSettingsChange"
+            },
+            "type": "array",
+            "description": "Partial updates, with each category appearing at most once. Omitted fields remain unchanged."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "update_vendor_alerts",
+    "source": "manage",
+    "method": "patch",
+    "path": "/vendor-alerts",
+    "operationId": "UpdateVendorAlerts",
+    "summary": "Update vendor alerts",
+    "description": "Update vendor alerts",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateVendorAlertsInput"
+      },
+      "fields": [
+        {
+          "name": "alertIds",
+          "required": true,
+          "description": "IDs of the vendor alerts to update. Each alert must belong to your organization.\nRepeated IDs are ignored; the supplied status applies to every unique ID.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the vendor alerts to update. Each alert must belong to your organization.\nRepeated IDs are ignored; the supplied status applies to every unique ID.",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        {
+          "name": "status",
+          "required": true,
+          "description": "Target status for every supplied alert. AUTO_RESOLVED is system-controlled.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "ESCALATED",
+              "RESOLVED",
+              "NOT_RELEVANT"
+            ],
+            "description": "Target status for every supplied alert. AUTO_RESOLVED is system-controlled."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "list_vendor_alerts",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendor-alerts",
+    "operationId": "ListVendorAlerts",
+    "summary": "List vendor alerts",
+    "description": "List vendor alerts",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Search alert titles and vendor names.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "statusMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to alerts matching any of the provided statuses.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/VendorAlertStatus"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "severityMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to alerts matching any of the provided severities.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/VendorAlertSeverity"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "categoryMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to alerts matching any of the provided security categories.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "typeMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to alerts matching any of the provided types.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/VendorAlertType"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "vendorRiskLevelMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter to alerts whose vendors match any of the provided inherent risk levels.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW",
+              "UNSCORED"
+            ]
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "orderBy",
+        "in": "query",
+        "required": false,
+        "description": "Field to sort results by. Defaults to severity.",
+        "kind": "string",
+        "schema": {
+          "default": "severity",
+          "type": "string",
+          "enum": [
+            "severity",
+            "status",
+            "creationDate"
+          ]
+        },
+        "enumValues": [
+          "severity",
+          "status",
+          "creationDate"
+        ]
+      },
+      {
+        "name": "orderDirection",
+        "in": "query",
+        "required": false,
+        "description": "Direction to sort results in. Defaults to descending.",
+        "kind": "string",
+        "schema": {
+          "default": "desc",
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        "enumValues": [
+          "asc",
+          "desc"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "get_vendor_alert",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendor-alerts/{alertId}",
+    "operationId": "GetVendorAlert",
+    "summary": "Get vendor alert",
+    "description": "Get vendor alert",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "alertId",
+        "in": "path",
+        "required": true,
+        "description": "Unique identifier of the vendor alert to retrieve.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
     "toolName": "list_vendor_assessment_types",
     "source": "manage",
     "method": "get",
@@ -16537,6 +19411,197 @@ export const generatedOperations: GeneratedOperation[] = [
     ]
   },
   {
+    "toolName": "list_vendor_categories",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendor-categories",
+    "operationId": "ListVendorCategories",
+    "summary": "List vendor categories",
+    "description": "List vendor categories",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "create_vendor_category",
+    "source": "manage",
+    "method": "post",
+    "path": "/vendor-categories",
+    "operationId": "CreateVendorCategory",
+    "summary": "Create vendor category",
+    "description": "Create vendor category",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/CreateVendorCategoryInput"
+      },
+      "fields": [
+        {
+          "name": "label",
+          "required": true,
+          "description": "Display label, unique ignoring case.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "Display label, unique ignoring case.",
+            "maxLength": 100
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "Description of the category.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Description of the category.",
+            "maxLength": 500
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "get_vendor_category_by_id",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendor-categories/{categoryId}",
+    "operationId": "GetVendorCategoryById",
+    "summary": "Get vendor category by ID",
+    "description": "Get vendor category by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "categoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "update_vendor_category",
+    "source": "manage",
+    "method": "patch",
+    "path": "/vendor-categories/{categoryId}",
+    "operationId": "UpdateVendorCategory",
+    "summary": "Update vendor category",
+    "description": "Update vendor category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "categoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateVendorCategoryInput"
+      },
+      "fields": [
+        {
+          "name": "label",
+          "required": false,
+          "description": "New display label. Omit to keep the current label.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "description": "New display label. Omit to keep the current label.",
+            "maxLength": 100
+          }
+        },
+        {
+          "name": "description",
+          "required": false,
+          "description": "New description. Pass null to clear it, or omit to keep it.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "New description. Pass null to clear it, or omit to keep it.",
+            "maxLength": 500
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "delete_vendor_category",
+    "source": "manage",
+    "method": "delete",
+    "path": "/vendor-categories/{categoryId}",
+    "operationId": "DeleteVendorCategory",
+    "summary": "Delete vendor category",
+    "description": "Delete vendor category",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "categoryId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/DeleteVendorCategoryInput"
+      },
+      "fields": [
+        {
+          "name": "replacementCategoryId",
+          "required": true,
+          "description": "Category to move vendors to, or null to leave them uncategorized.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "Category to move vendors to, or null to leave them uncategorized."
+          }
+        }
+      ]
+    }
+  },
+  {
     "toolName": "list_vendor_risk_attributes",
     "source": "manage",
     "method": "get",
@@ -16562,6 +19627,230 @@ export const generatedOperations: GeneratedOperation[] = [
         "kind": "string",
         "schema": {
           "$ref": "#/components/schemas/PageCursor"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "list_vendor_security_incident_alerts",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendor-security-incident-alerts",
+    "operationId": "ListVendorSecurityIncidentAlerts",
+    "summary": "List vendor security incident alerts",
+    "description": "List vendor security incident alerts",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Case-insensitive search on alert title and affected vendor name.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "vendorIdMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Organization vendor IDs.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 20
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "resolutionStateMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter by resolution state. Returns alerts matching any of the specified states.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/VendorSecurityIncidentAlertResolutionState"
+          },
+          "minItems": 1
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "confirmationStatusMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter by incident confirmation status. Returns alerts matching any of the specified statuses.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/VendorSecurityIncidentAlertStatus"
+          },
+          "minItems": 1
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "impactSeverityMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Filter by overall impact severity. Returns alerts matching any of the specified severities.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/VendorSecurityIncidentAlertImpactSeverity"
+          },
+          "minItems": 1
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "dataLeakSeverityMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Matches a DATA_LEAK consequence's severity, independently of overall impact.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/VendorSecurityIncidentAlertImpactSeverity"
+          },
+          "minItems": 1
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "sort",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "default": "creationDate",
+          "type": "string",
+          "enum": [
+            "creationDate",
+            "impactSeverity",
+            "resolutionState",
+            "confirmationStatus"
+          ]
+        },
+        "enumValues": [
+          "creationDate",
+          "impactSeverity",
+          "resolutionState",
+          "confirmationStatus"
+        ]
+      },
+      {
+        "name": "direction",
+        "in": "query",
+        "required": false,
+        "description": "Ascending means oldest first, highest impact first (CRITICAL to LOW to UNSPECIFIED),\nOPEN before RESOLVED, or CONFIRMED before SUSPECTED before POTENTIAL.\nDescending reverses each order.",
+        "kind": "string",
+        "schema": {
+          "default": "desc",
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        "enumValues": [
+          "asc",
+          "desc"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "update_vendor_security_incident_alerts",
+    "source": "manage",
+    "method": "patch",
+    "path": "/vendor-security-incident-alerts",
+    "operationId": "UpdateVendorSecurityIncidentAlerts",
+    "summary": "Update vendor security incident alerts",
+    "description": "Update vendor security incident alerts",
+    "isMutation": true,
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "contentType": "application/json",
+      "kind": "json",
+      "schema": {
+        "$ref": "#/components/schemas/UpdateVendorSecurityIncidentAlertsInput"
+      },
+      "fields": [
+        {
+          "name": "alertIds",
+          "required": true,
+          "description": "IDs of the security incident alerts to update. Use each alert’s ID, not the ID of the incident it reports. Every alert must belong to your organization.",
+          "kind": "array",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "IDs of the security incident alerts to update. Use each alert’s ID, not the ID of the incident it reports. Every alert must belong to your organization.",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        {
+          "name": "resolutionState",
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "#/components/schemas/VendorSecurityIncidentAlertResolutionState",
+            "description": "Target resolution state for every supplied alert. Use OPEN to reopen."
+          }
+        }
+      ]
+    }
+  },
+  {
+    "toolName": "get_vendor_security_incident_alert",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendor-security-incident-alerts/{alertId}",
+    "operationId": "GetVendorSecurityIncidentAlert",
+    "summary": "Get vendor security incident alert by ID",
+    "description": "Get vendor security incident alert by ID",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "alertId",
+        "in": "path",
+        "required": true,
+        "description": "The organization's alert ID, not the canonical incident ID.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
         }
       }
     ]
@@ -16758,11 +20047,23 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "category",
           "required": false,
-          "description": "The vendor's category.",
+          "description": "The vendor's category. Cannot be combined with `categoryId`.",
           "kind": "string",
           "schema": {
             "type": "string",
-            "description": "The vendor's category."
+            "description": "The vendor's category. Cannot be combined with `categoryId`.",
+            "deprecated": true
+          }
+        },
+        {
+          "name": "categoryId",
+          "required": false,
+          "description": "The ID of the vendor's category. Pass null for no category, or omit to let Vanta pick one. Cannot be combined with `category`.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The ID of the vendor's category. Pass null for no category, or omit to let Vanta pick one. Cannot be combined with `category`."
           }
         },
         {
@@ -16868,6 +20169,16 @@ export const generatedOperations: GeneratedOperation[] = [
         }
       },
       {
+        "name": "websiteUrl",
+        "in": "query",
+        "required": false,
+        "description": "Filter vendors by website URL using canonical vendor matching.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
         "name": "statusMatchesAny",
         "in": "query",
         "required": false,
@@ -16880,6 +20191,66 @@ export const generatedOperations: GeneratedOperation[] = [
           }
         },
         "itemKind": "string"
+      }
+    ]
+  },
+  {
+    "toolName": "set_engagement",
+    "source": "manage",
+    "method": "put",
+    "path": "/vendors/{parentVendorId}/engagement-relationship/{engagementVendorId}",
+    "operationId": "SetEngagement",
+    "summary": "Set vendor engagement",
+    "description": "Set vendor engagement",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "parentVendorId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "engagementVendorId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
+  },
+  {
+    "toolName": "remove_engagement",
+    "source": "manage",
+    "method": "delete",
+    "path": "/vendors/{parentVendorId}/engagement-relationship/{engagementVendorId}",
+    "operationId": "RemoveEngagement",
+    "summary": "Remove vendor engagement",
+    "description": "Remove vendor engagement",
+    "isMutation": true,
+    "parameters": [
+      {
+        "name": "parentVendorId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "engagementVendorId",
+        "in": "path",
+        "required": true,
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
       }
     ]
   },
@@ -17141,11 +20512,23 @@ export const generatedOperations: GeneratedOperation[] = [
         {
           "name": "category",
           "required": false,
-          "description": "The vendor's category.",
+          "description": "The vendor's category. Cannot be combined with `categoryId`.",
           "kind": "string",
           "schema": {
             "type": "string",
-            "description": "The vendor's category."
+            "description": "The vendor's category. Cannot be combined with `categoryId`.",
+            "deprecated": true
+          }
+        },
+        {
+          "name": "categoryId",
+          "required": false,
+          "description": "The ID of the vendor's category. Pass null to clear it, or omit to keep it. Cannot be combined with `category`.",
+          "kind": "string",
+          "schema": {
+            "type": "string",
+            "nullable": true,
+            "description": "The ID of the vendor's category. Pass null to clear it, or omit to keep it. Cannot be combined with `category`."
           }
         },
         {
@@ -17471,6 +20854,215 @@ export const generatedOperations: GeneratedOperation[] = [
         ]
       }
     }
+  },
+  {
+    "toolName": "list_vendor_external_findings",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendors/{vendorId}/external-findings",
+    "operationId": "ListVendorExternalFindings",
+    "summary": "List vendor external findings",
+    "description": "List vendor external findings",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "vendorId",
+        "in": "path",
+        "required": true,
+        "description": "Unique identifier of the vendor.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "kind": "integer",
+        "schema": {
+          "$ref": "#/components/schemas/PageSize"
+        }
+      },
+      {
+        "name": "pageCursor",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "$ref": "#/components/schemas/PageCursor"
+        }
+      },
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Search finding titles and descriptions.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "severityMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Match any specified severity. Omitted: all except INFO.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW",
+              "INFO"
+            ]
+          },
+          "minItems": 1
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "statusMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Match any specified status. Omitted: both statuses.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "RESOLVED"
+            ]
+          },
+          "minItems": 1
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "categoryMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Match any specified monitoring category, exactly and case-sensitively. Omitted: all categories.",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Application security",
+              "Exposed application user interfaces",
+              "Exposed services",
+              "Exposed & leaked sensitive information",
+              "End of life & outdated applications",
+              "Sensitive interfaces exposure",
+              "Threat intelligence",
+              "Trust",
+              "Vulnerabilities",
+              "Vulnerable misconfigurations"
+            ]
+          },
+          "minItems": 1
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "firstSeenStartDate",
+        "in": "query",
+        "required": false,
+        "description": "Inclusive ISO 8601 first-seen lower bound. Supply both date bounds with start no later than end.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "firstSeenEndDate",
+        "in": "query",
+        "required": false,
+        "description": "Inclusive ISO 8601 first-seen upper bound. Supply both date bounds with start no later than end.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "sort",
+        "in": "query",
+        "required": false,
+        "kind": "string",
+        "schema": {
+          "default": "firstSeenDate",
+          "type": "string",
+          "enum": [
+            "firstSeenDate",
+            "severity",
+            "title"
+          ]
+        },
+        "enumValues": [
+          "firstSeenDate",
+          "severity",
+          "title"
+        ]
+      },
+      {
+        "name": "direction",
+        "in": "query",
+        "required": false,
+        "description": "Ascending means oldest first, highest severity first (CRITICAL to INFO), or title A to Z.\nDescending reverses each order, matching security incident alerts' severity convention.",
+        "kind": "string",
+        "schema": {
+          "default": "desc",
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        "enumValues": [
+          "asc",
+          "desc"
+        ]
+      }
+    ]
+  },
+  {
+    "toolName": "get_vendor_external_finding",
+    "source": "manage",
+    "method": "get",
+    "path": "/vendors/{vendorId}/external-findings/{findingId}",
+    "operationId": "GetVendorExternalFinding",
+    "summary": "Get vendor external finding",
+    "description": "Get vendor external finding",
+    "isMutation": false,
+    "parameters": [
+      {
+        "name": "vendorId",
+        "in": "path",
+        "required": true,
+        "description": "Unique identifier of the vendor.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "findingId",
+        "in": "path",
+        "required": true,
+        "description": "Unique identifier of the external finding.",
+        "kind": "string",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ]
   },
   {
     "toolName": "list_vendor_findings",
@@ -18989,6 +22581,20 @@ export const generatedOperations: GeneratedOperation[] = [
         "in": "query",
         "required": false,
         "description": "Filter controls whose externalId matches any of the provided values (exact, case-sensitive match).",
+        "kind": "array",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "itemKind": "string"
+      },
+      {
+        "name": "segmentIdsMatchesAny",
+        "in": "query",
+        "required": false,
+        "description": "Return only controls whose `inScopeSegmentIds` include at least one of\nthese segment IDs from the audit's `segments[].id` (exact,\ncase-sensitive). IDs that aren't segments on this audit match nothing.\nRepeat the parameter for several IDs, and send the same filters with\nevery `pageCursor`.",
         "kind": "array",
         "schema": {
           "type": "array",
@@ -26238,8 +29844,8 @@ export const generatedOperations: GeneratedOperation[] = [
 ];
 export const generatedStats = {
   "manage": {
-    "operations": 251,
-    "mutations": 137
+    "operations": 301,
+    "mutations": 165
   },
   "audit": {
     "operations": 57,

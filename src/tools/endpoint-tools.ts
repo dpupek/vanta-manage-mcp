@@ -11,6 +11,7 @@ import { prepareUploadFileInput } from "../uploads/file-validation.js";
 import { appendUploadFile } from "../uploads/multipart.js";
 import { cleanupMarkdownConversionArtifacts } from "../uploads/markdown-conversion.js";
 import { withRequestSignal } from "../client/request-context.js";
+import { isDownloadOperation, saveDownload } from "../downloads/download.js";
 
 const encodePath = (template: string, args: Record<string, unknown>): string =>
   template.replace(/\{([^}]+)\}/g, (_match: string, key: string) => {
@@ -370,6 +371,22 @@ export async function invokeGeneratedOperation(
     return toToolResult(documentIdValidation);
   }
 
+  const vendorBody = readObject(rawArgs.body);
+  if (
+    (toolName === "create_vendor" || toolName === "update_vendor") &&
+    vendorBody &&
+    "category" in vendorBody &&
+    "categoryId" in vendorBody
+  ) {
+    return toToolResult(
+      errorEnvelope(
+        "validation_error",
+        "The Vanta API does not allow category and categoryId together.",
+        "Use categoryId and omit the deprecated category field.",
+      ),
+    );
+  }
+
   const deactivateTestEntityValidation = validateDeactivateTestEntityArgs(
     toolName,
     rawArgs,
@@ -454,6 +471,24 @@ export async function invokeGeneratedOperation(
       query,
       body,
       formData,
+      ...(isDownloadOperation(operation)
+        ? {
+            download: (response: Response, signal: AbortSignal) =>
+              saveDownload(response, signal, {
+                fileName: String(rawArgs.downloadFileName),
+                expectedSha256:
+                  typeof rawArgs.expectedSha256 === "string"
+                    ? rawArgs.expectedSha256
+                    : undefined,
+                operation: toolName,
+                identifiers: Object.fromEntries(
+                  operation.parameters
+                    .filter(p => p.in === "path")
+                    .map(p => [p.name, rawArgs[p.name]]),
+                ),
+              }),
+          }
+        : {}),
     });
 
     if (!response.ok) {
