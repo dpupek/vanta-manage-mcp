@@ -2,6 +2,10 @@
 
 ## 2026-11-09 — Case 248793 download and API expansion
 
+Release checkpoint: [v1.0.23](https://github.com/dpupek/vanta-manage-mcp/releases/tag/v1.0.23) was published from commit `4ee913dc2911da30fe426c368c91e083db60267a`, with migration notes. The release workflow passed lint, tests, build, parity, and help generation. A fresh Git-based `npx` process reported the expected version, commit, and 383 operations; its AST PDF download matched the direct API response at 42,093 bytes and SHA-256 `524b82609ab1d72a315cb945454d2d0e76f6cab10cef6dee226958863fec4f3b`.
+
+Next: restart or reconnect the desktop MCP host and verify both tenant connectors, then complete the remaining installed-client and live acceptance checks with appropriate permissions and dedicated fixtures. The running AST and DG connectors still reported v1.0.22 at the release checkpoint. Dan will handle the drafted snooze support request later.
+
 Snooze follow-up: accepted writes now report status and snooze-end-date verification separately, including the requested date and write-response date. Once independent status matches, an omitted end date returns `write_unverified` without redundant reads; stale status remains bounded to three attempts. `npm test` passed 281 tests; no live framework mutation was performed. A [Vanta support request](../../docs/vanta-mcp-api-expansion-248793/vanta-snooze-support-draft.md) is drafted but not sent.
 
 Administrative endpoint verification: existing vendor settings, category/assignment, engagement, framework variants/status and personnel requirement-set update tools now independently read back requested state after accepted writes. Category deletion requires two complete pre-delete vendor inventories and verifies the captured vendors; concurrent changes cannot be ruled out. Up to three readbacks are attempted, with no write replay; missing framework snooze dates produce `write_unverified`. DG disposable fixture runs verified category creation/update/assignment/deletion and engagement attach/removal; every temporary vendor and category was confirmed absent, including cleanup after an initial stopped preflight. `npm test` passed 278 tests, lint and 383-operation parity passed. See [evidence](../../docs/vanta-mcp-api-expansion-248793/administrative-write-verification.md). Live global settings, personnel and framework mutations and release remain outside the approved scope.
@@ -14,7 +18,7 @@ Follow-up: the local generated download operation matched an authorized direct A
 - Refreshed the three public API contracts to 383 generated operations, retaining all 333 prior tool identities. Added partial extended vendor and issue planning context; remaining workflow phases are open.
 - Fixed the review finding in which cancellation during publication could leave an unreceipted file. Cancellation waits for cleanup; a deterministic regression exercises that race.
 - Validation: after the review fix, `npm test` passed 212 tests; the later follow-up above passed 239 tests, lint, 383-to-383 parity, and diff checks. One read-only live PDF comparison passed; installed-runtime acceptance remains open.
-- The connected AST MCP was observed at v1.0.22 with 333 operations; this work has not been released or installed. Preserve the control implementation-write guard and its October 13 evidence.
+- At the earlier local checkpoint, the connected AST MCP was observed at v1.0.22 with 333 operations, before release. Preserve the control implementation-write guard and its October 13 evidence.
 - Next: review the remaining direct-tool and workflow safety gaps and select dedicated fixtures for separately authorized live lifecycle acceptance. Release and installed-runtime verification remain separate. See the [epic roadmap](../../docs/vanta-mcp-api-expansion-248793/roadmap.md).
 
 ## 2026-10-09 — Case 248793 implementation-details verification

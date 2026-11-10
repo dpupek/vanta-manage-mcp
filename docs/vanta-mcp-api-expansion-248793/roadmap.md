@@ -6,6 +6,13 @@ FogBugz epic: https://darwin-global.fogbugz.com/f/cases/248793/
 
 November 9, 2026: the [implementation plan](download-integrity-and-api-refresh-plan.md) decomposes the reported binary download failures and the API recommendations into ordered iterations, workflows, CRCs, proposed child cases, decisions, and acceptance gates. [Baseline](baseline.md), [epic definition](epic-definition.md), [workflows](workflows.md), [edge cases](edge-cases.md), [CRCs](crcs.md), and [stakeholder summary](stakeholder-summary.md) provide the supporting blueprint. Earlier checkpoints below remain historical evidence.
 
+### November 9 release checkpoint
+
+- [x] Publish [v1.0.23](https://github.com/dpupek/vanta-manage-mcp/releases/tag/v1.0.23) from commit `4ee913dc2911da30fe426c368c91e083db60267a`; the main release workflow passed lint, tests, build, parity, and help generation and moved `stable` to that commit.
+- [x] Start a fresh Git-based `npx` process from `stable`: capabilities reported v1.0.23, the expected commit, and 383 operations. An AST read-only PDF download matched direct API bytes: 42,093 bytes, SHA-256 `524b82609ab1d72a315cb945454d2d0e76f6cab10cef6dee226958863fec4f3b`.
+- [ ] Restart or reconnect the desktop MCP host and verify both configured tenant connectors report v1.0.23 and the expected commit. Existing AST and DG connections still reported v1.0.22 at this checkpoint; both configurations already select `stable`.
+- [ ] Complete remaining live acceptance where permissions and dedicated fixtures allow. The snooze support request remains a draft for Dan to send later.
+
 ### Administrative endpoint verification slice
 
 Snooze follow-up: field-level verification now distinguishes independently verified status from the requested, write-response and independently observed end date. When status matches but the date is absent, the tool returns `write_unverified` immediately rather than repeating reads solely for the absent field; stale status still receives bounded readback attempts. [Vanta support request](vanta-snooze-support-draft.md) is prepared but not sent. The current local suite passed 281 tests; no live framework mutation was performed.

@@ -212,8 +212,11 @@ Local follow-up: requirement-set detail and requirement update tools independent
 
 ### Release and installed runtime
 
-- [ ] 8.4 Prepare release notes with download output migration, host-local paths, identity semantics, input migrations, and known live gaps. Release/push when authorized; record immutable version/SHA (248793).
+- [x] 8.4 Prepare release notes with download output migration, host-local paths, identity semantics, input migrations, and known live gaps. Published [v1.0.23](https://github.com/dpupek/vanta-manage-mcp/releases/tag/v1.0.23) from `4ee913dc2911da30fe426c368c91e083db60267a` (248793).
 - [ ] 8.5 Update/restart installed MCP; inspect capabilities version/SHA; smoke-download PDF/XLSX/image and compare saved hashes; check documented compatibility aliases and help from the installed runtime (248793).
+
+Release checkpoint: the GitHub release workflow passed lint, tests, build, parity, and help generation. A fresh `npx` process using `stable` reported v1.0.23, the release commit, and 383 operations; its read-only AST PDF download matched the direct API response at 42,093 bytes and SHA-256 `524b82609ab1d72a315cb945454d2d0e76f6cab10cef6dee226958863fec4f3b`. The already-running AST and DG connectors still reported v1.0.22 and need reconnection and installed-client verification. PDF verification does not establish original upload identity or XLSX/image acceptance.
+
 - [ ] 8.6 Update the epic roadmap and handoff with delivered work, receipts, remaining permission/vendor blockers, owner, and next action. Close only the criteria actually demonstrated (248793).
 
 ### Decisions needed
@@ -223,7 +226,7 @@ Local follow-up: requirement-set detail and requirement update tools independent
 
 ### Validation
 
-Required final checks: `npm test`, `npm run lint`, `npm run verify:spec-parity`, help generation/validation, deterministic generation, scoped formatting and diff checks; live tests only with appropriate fixture/permission gates. Exit gate: release identity and installed byte-integrity receipts, with remaining limitations explicitly reported. **Not run**.
+Required final checks: `npm test`, `npm run lint`, `npm run verify:spec-parity`, help generation/validation, deterministic generation, scoped formatting and diff checks; live tests only with appropriate fixture/permission gates. Local and release-pipeline checks passed as recorded in the roadmap. The exit gate remains open for installed-client verification and remaining acceptance limits.
 
 ## Decisions and questions log
 
