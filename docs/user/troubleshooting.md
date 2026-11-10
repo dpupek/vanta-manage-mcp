@@ -114,7 +114,7 @@ Fix:
   - `VANTA_MCP_LOG_LEVEL=all` for full trace metadata
 - Return to `minimal` after troubleshooting.
 
-# Downloading document and Trust Center files
+## Downloading document and Trust Center files
 
 The generated `get_uploadedfile_media` and `get_trust_center_resource_media` tools require `downloadFileName`, a file name without a directory. The server writes the file to `VANTA_MCP_DOWNLOAD_DIR`, or `~/VantaMcpDownloads` by default, and returns the server-local path, SHA-256, byte count, MIME type, and identity status. Set `VANTA_MCP_DOWNLOAD_MAX_BYTES` to change the default 100 MiB limit, or `VANTA_MCP_DOWNLOAD_TIMEOUT_MS` to change the default 120-second deadline. Existing files are not overwritten. Redirects are rejected.
 
